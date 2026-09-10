@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportAnaliz Pro — Spor Karşılaşması Analiz ve Tahmin Platformu</title>
+    <meta name="description" content="Spor karşılaşmalarını istatistiksel olarak analiz edin. Poisson modeli, oran karşılaştırması, risk değerlendirmesi ve value bet tespiti.">
+    <meta property="og:title" content="SportAnaliz Pro">
+    <meta property="og:description" content="Profesyonel spor karşılaşması analiz ve tahmin platformu">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Mobile PWA & App Meta -->
+    <meta name="theme-color" content="#0a0b14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SportAnaliz">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%230b0d1b'/><text x='50%25' y='60%25' font-size='100' text-anchor='middle' dominant-baseline='middle'>⚡</text></svg>">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Sport<span class="accent">Analiz</span> Pro</span>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+            <p class="loading-text">Veriler yükleniyor...</p>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div id="app" class="app hidden">
+        <!-- ===== HEADER ===== -->
+        <header class="header" id="main-header">
+            <div class="header-inner">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="btn-mobile-menu" title="Menüyü Aç" aria-label="Menüyü Aç">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                    <div class="logo" id="logo-home">
+                        <span class="logo-icon">⚡</span>
+                        <span class="logo-text">Sport<span class="accent">Analiz</span> Pro</span>
+                    </div>
+                </div>
+
+                <nav class="header-nav" id="main-nav">
+                    <button class="nav-btn active" data-view="dashboard" id="nav-dashboard">
+                        <span class="nav-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-btn" data-view="analysis" id="nav-analysis">
+                        <span class="nav-icon">📊</span>
+                        <span>Analiz</span>
+                    </button>
+                    <button class="nav-btn" data-view="coupons" id="nav-coupons">
+                        <span class="nav-icon">🤖</span>
+                        <span>Benim İçin Bahis Yap</span>
+                    </button>
+                    <button class="nav-btn" data-view="all-stats" id="nav-all-stats">
+                        <span class="nav-icon">📈</span>
+                        <span>Tüm Maçlar & Bahis Karnesi</span>
+                    </button>
+                    <button class="nav-btn" data-view="manual" id="nav-manual">
+                        <span class="nav-icon">✏️</span>
+                        <span>Manuel Giriş</span>
+                    </button>
+                    <button class="nav-btn" data-view="history" id="nav-history">
+                        <span class="nav-icon">📋</span>
+                        <span>Geçmiş</span>
+                    </button>
+                </nav>
+
+                <div class="header-right">
+                    <button class="btn btn-outline btn-sm" id="btn-open-mail-modal" title="Günün Kuponlarını E-Posta ile Gönder / Günlük Bültene Abone Ol" style="display:inline-flex;align-items:center;gap:6px;border-color:rgba(56,189,248,0.4);color:#38bdf8;">
+                        <span>📧</span>
+                        <span class="mail-btn-text">Mail At</span>
+                    </button>
+                    <button class="icon-btn" id="btn-settings" title="Ayarlar">⚙️</button>
+                    <div class="auth-area" id="auth-area">
+                        <button class="btn btn-primary btn-sm" id="btn-login">Giriş Yap</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== MOBILE SLIDE-OUT DRAWER MENU ===== -->
+        <div class="mobile-drawer-overlay" id="mobile-drawer-overlay"></div>
+        <aside class="mobile-drawer" id="mobile-drawer">
+            <div class="mobile-drawer-header">
+                <div class="logo">
+                    <span class="logo-icon">⚡</span>
+                    <span class="logo-text">Sport<span class="accent">Analiz</span> Pro</span>
+                </div>
+                <button class="mobile-drawer-close" id="btn-close-drawer" aria-label="Kapat">✕</button>
+            </div>
+
+            <div class="mobile-drawer-body">
+                <div class="mobile-drawer-user" id="mobile-drawer-auth">
+                    <button class="btn btn-primary btn-sm btn-block" id="btn-mobile-login">Giriş Yap / Kayıt Ol</button>
+                </div>
+
+                <div class="mobile-drawer-menu">
+                    <span class="m-drawer-section-title">ANA MENÜ</span>
+                    <button class="m-drawer-item active" data-view="dashboard">
+                        <span class="m-drawer-icon">🏠</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Günün Bülteni</span>
+                            <span class="m-drawer-sub">Canlı maçlar ve oranlar</span>
+                        </div>
+                    </button>
+                    <button class="m-drawer-item" data-view="coupons">
+                        <span class="m-drawer-icon">🤖</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Benim İçin Bahis Yap</span>
+                            <span class="m-drawer-sub">4 Hazır Kupon & Saatlik</span>
+                        </div>
+                    </button>
+                    <button class="m-drawer-item" data-view="analysis">
+                        <span class="m-drawer-icon">📊</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Güven %65+ Analiz</span>
+                            <span class="m-drawer-sub">En yüksek ihtimalli maçlar</span>
+                        </div>
+                    </button>
+                    <button class="m-drawer-item" data-view="all-stats">
+                        <span class="m-drawer-icon">📈</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Tüm Maçlar & Bahis Karnesi</span>
+                            <span class="m-drawer-sub">Tutan ve yatan maçlar</span>
+                        </div>
+                    </button>
+                    <button class="m-drawer-item" data-view="manual">
+                        <span class="m-drawer-icon">✏️</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Manuel Analiz Girişi</span>
+                            <span class="m-drawer-sub">Kendi maçını test et</span>
+                        </div>
+                    </button>
+                    <button class="m-drawer-item" data-view="history">
+                        <span class="m-drawer-icon">📋</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Geçmiş Kuponlar</span>
+                            <span class="m-drawer-sub">Dünün sonuçları & arşiv</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="mobile-drawer-footer">
+                    <button class="btn btn-outline btn-block btn-sm" id="btn-mobile-mail-modal" style="border-color:rgba(56,189,248,0.4);color:#38bdf8;margin-bottom:8px;">
+                        📧 Kuponları E-Posta ile Gönder
+                    </button>
+                    <button class="btn btn-ghost btn-block btn-sm" id="btn-mobile-settings">
+                        ⚙️ Sistem Ayarları
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===== MOBILE HORIZONTAL TOP QUICK BAR ===== -->
+        <div class="mobile-top-pills-bar" id="mobile-top-pills">
+            <div class="mobile-top-pills-scroll">
+                <button class="m-pill-btn active" data-view="dashboard">🏠 Bülten</button>
+                <button class="m-pill-btn" data-view="coupons">🤖 Kuponlar</button>
+                <button class="m-pill-btn" data-view="analysis">📊 %65+ Analiz</button>
+                <button class="m-pill-btn" data-view="all-stats">📈 Bahis Karnesi</button>
+                <button class="m-pill-btn" data-view="manual">✏️ Manuel</button>
+                <button class="m-pill-btn" data-view="history">📋 Geçmiş</button>
+            </div>
+        </div>
+
+        <!-- ===== DISCLAIMER BANNER ===== -->
+        <div class="disclaimer-banner" id="disclaimer-banner">
+            <div class="disclaimer-inner">
+                <span class="disclaimer-icon">⚠️</span>
+                <p>Bu platform <strong>yalnızca istatistiksel analiz</strong> amaçlıdır. Hiçbir sonuç "kesin kazanır" veya "%100 garanti" olarak değerlendirilmemelidir. Tüm tahminler olasılık bazlıdır ve risk içerir.</p>
+                <button class="disclaimer-close" id="btn-close-disclaimer">✕</button>
+            </div>
+        </div>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="main-content" id="main-content">
+            <!-- Dashboard View -->
+            <section class="view active" id="view-dashboard">
+                <!-- Sport Filter: Sadece Futbol -->
+                <div class="sport-tabs" id="sport-tabs" style="display:none;">
+                    <button class="sport-tab active" data-sport="football" id="tab-football">
+                        <span class="sport-emoji">⚽</span> Futbol
+                    </button>
+                </div>
+
+                <!-- Search & Filter Bar -->
+                <div class="filter-bar" id="filter-bar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" placeholder="Takım veya lig ara..." autocomplete="off">
+                    </div>
+                    <div class="filter-actions">
+                        <select id="filter-league" class="filter-select">
+                            <option value="">Tüm Ligler</option>
+                        </select>
+                        <select id="filter-date" class="filter-select">
+                            <option value="all" selected>Tüm Maçlar</option>
+                            <option value="today">Bugün</option>
+                            <option value="yesterday">⏪ Dünün Maçları (Bitenler)</option>
+                            <option value="tomorrow">Yarın</option>
+                            <option value="week">Bu Hafta</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" id="btn-quick-high-conf">
+                            ⭐ Güven %65+
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btn-quick-coupons" style="background: linear-gradient(135deg, #10B981, #00F0FF); color: #000; font-weight: 700;">
+                            🤖 Günün 4 Kuponu
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btn-quick-yesterday-coupons" style="background: linear-gradient(135deg, #4F46E5, #06B6D4); color: #fff; font-weight: 700; border: 1px solid rgba(255,255,255,0.2);" title="Dünün sonuçlanmış kuponları ve kazanma durumu">
+                            ⏪ Dünün Kuponları
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btn-quick-ucl-coupon" style="background: linear-gradient(135deg, #1E40AF, #3B82F6); color: #fff; font-weight: 700; border: 1px solid rgba(255,255,255,0.2);">
+                            🏆 Şampiyonlar Ligi Kuponu
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btn-quick-tracker" style="background: linear-gradient(135deg, #7C3AED, #EC4899); color: #fff; font-weight: 700; border: 1px solid rgba(255,255,255,0.2);" title="Kupon ve maç takibi, gün sonu kazanma yüzdeleri">
+                            📊 Gün Sonu Takip & Kazanma %
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btn-quick-all-stats" style="background: linear-gradient(135deg, #F59E0B, #EF4444); color: #fff; font-weight: 700; border: 1px solid rgba(255,255,255,0.2);" title="Günün tüm maçlarının sonuçları ve bütün bahis analizlerinin doğruluk karnesi">
+                            📈 Tüm Maçlar & Bahis Karnesi
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="btn-refresh-data">
+                            🔄 Yenile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Summary Cards -->
+                <div class="stats-summary" id="stats-summary">
+                    <div class="stat-card" id="stat-total-matches">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Toplam Maç</div>
+                    </div>
+                    <div class="stat-card accent-cyan" id="stat-value-bets">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Value Bet</div>
+                    </div>
+                    <div class="stat-card accent-green" id="stat-high-conf" style="cursor:pointer;" title="Tıkla: Güven %65+ Analiz Ekranına Git">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Güven %65+ (Analiz)</div>
+                    </div>
+                    <div class="stat-card accent-amber" id="stat-data-source">
+                        <div class="stat-value">—</div>
+                        <div class="stat-label">Veri Kaynağı</div>
+                    </div>
+                </div>
+
+                <!-- Match List -->
+                <div class="matches-container" id="matches-container">
+                    <div class="matches-header">
+                        <h2>Günün Maçları</h2>
+                        <span class="match-count" id="match-count">0 maç</span>
+                    </div>
+                    <div class="matches-list" id="matches-list">
+                        <!-- Match cards rendered here by JS -->
+                        <div class="empty-state" id="empty-matches">
+                            <span class="empty-icon">📭</span>
+                            <h3>Maç bulunamadı</h3>
+                            <p>Veri kaynağından maç çekilemedi veya filtrelere uygun maç yok.</p>
+                            <button class="btn btn-primary" id="btn-try-manual">Manuel Giriş Yap</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analysis View -->
+            <section class="view" id="view-analysis">
+                <div class="analysis-container" id="analysis-container">
+                    <div class="empty-state">
+                        <span class="empty-icon">📊</span>
+                        <h3>Analiz için bir maç seçin</h3>
+                        <p>Dashboard'dan bir maça tıklayın veya manuel veri girin.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Coupons View (Benim İçin Bahis Yap) -->
+            <section class="view" id="view-coupons">
+                <div class="coupons-container" id="coupons-container">
+                    <div class="empty-state" style="padding:60px 20px;">
+                        <span class="empty-icon">🤖</span>
+                        <h3>Günün 4 Kuponu Hazırlanıyor...</h3>
+                        <p>Yapay zeka 4 platformu tarayarak en garantör maçları seçiyor.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- All Matches & All Bets Accuracy View -->
+            <section class="view" id="view-all-stats">
+                <div class="all-stats-container" id="all-stats-container">
+                    <!-- Rendered dynamically by AllMatchesTrackerPanel -->
+                </div>
+            </section>
+
+            <!-- Manual Input View -->
+            <section class="view" id="view-manual">
+                <div class="manual-container" id="manual-container">
+                    <div class="section-header">
+                        <h2>Manuel Veri Girişi</h2>
+                        <p>Analiz yapmak istediğiniz maçın verilerini girin</p>
+                    </div>
+
+                    <form id="manual-form" class="manual-form">
+                        <input type="hidden" name="sport_type" value="football">
+
+                        <!-- Match Info -->
+                        <div class="form-section">
+                            <h3 class="form-section-title">Maç Bilgisi</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="home_team">Ev Sahibi</label>
+                                    <input type="text" id="home_team" placeholder="ör. Galatasaray" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="away_team">Deplasman</label>
+                                    <input type="text" id="away_team" placeholder="ör. Fenerbahçe" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="league">Lig / Turnuva</label>
+                                    <input type="text" id="league" placeholder="ör. Süper Lig">
+                                </div>
+                                <div class="form-group">
+                                    <label for="match_date">Maç Tarihi</label>
+                                    <input type="datetime-local" id="match_date">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Football Stats (dynamic) -->
+                        <div class="form-section" id="football-stats-section">
+                            <h3 class="form-section-title">İstatistikler</h3>
+
+                            <!-- Home Team Stats -->
+                            <div class="team-stats-block">
+                                <h4 class="team-stats-title" id="home-stats-title">Ev Sahibi İstatistikleri</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="home_goals_scored_avg">Attığı Gol Ort.</label>
+                                        <input type="number" id="home_goals_scored_avg" step="0.01" placeholder="1.85">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_goals_conceded_avg">Yediği Gol Ort.</label>
+                                        <input type="number" id="home_goals_conceded_avg" step="0.01" placeholder="0.95">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_home_goals_avg">İç Saha Gol Ort.</label>
+                                        <input type="number" id="home_home_goals_avg" step="0.01" placeholder="2.10">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_home_conceded_avg">İç Saha Yenilen Ort.</label>
+                                        <input type="number" id="home_home_conceded_avg" step="0.01" placeholder="0.75">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_last5_wins">Son 5 Galibiyet</label>
+                                        <input type="number" id="home_last5_wins" min="0" max="5" placeholder="3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_last5_draws">Son 5 Beraberlik</label>
+                                        <input type="number" id="home_last5_draws" min="0" max="5" placeholder="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_last5_losses">Son 5 Mağlubiyet</label>
+                                        <input type="number" id="home_last5_losses" min="0" max="5" placeholder="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_league_position">Lig Sırası</label>
+                                        <input type="number" id="home_league_position" min="1" placeholder="3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_first_half_goals">İY Gol Ort.</label>
+                                        <input type="number" id="home_first_half_goals" step="0.01" placeholder="0.85">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="home_second_half_goals">İY2 Gol Ort.</label>
+                                        <input type="number" id="home_second_half_goals" step="0.01" placeholder="1.00">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Away Team Stats -->
+                            <div class="team-stats-block">
+                                <h4 class="team-stats-title" id="away-stats-title">Deplasman İstatistikleri</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="away_goals_scored_avg">Attığı Gol Ort.</label>
+                                        <input type="number" id="away_goals_scored_avg" step="0.01" placeholder="1.50">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_goals_conceded_avg">Yediği Gol Ort.</label>
+                                        <input type="number" id="away_goals_conceded_avg" step="0.01" placeholder="1.20">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_away_goals_avg">Deplasman Gol Ort.</label>
+                                        <input type="number" id="away_away_goals_avg" step="0.01" placeholder="1.30">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_away_conceded_avg">Deplasman Yenilen Ort.</label>
+                                        <input type="number" id="away_away_conceded_avg" step="0.01" placeholder="1.50">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_last5_wins">Son 5 Galibiyet</label>
+                                        <input type="number" id="away_last5_wins" min="0" max="5" placeholder="2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_last5_draws">Son 5 Beraberlik</label>
+                                        <input type="number" id="away_last5_draws" min="0" max="5" placeholder="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_last5_losses">Son 5 Mağlubiyet</label>
+                                        <input type="number" id="away_last5_losses" min="0" max="5" placeholder="2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_league_position">Lig Sırası</label>
+                                        <input type="number" id="away_league_position" min="1" placeholder="7">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_first_half_goals">İY Gol Ort.</label>
+                                        <input type="number" id="away_first_half_goals" step="0.01" placeholder="0.65">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="away_second_half_goals">İY2 Gol Ort.</label>
+                                        <input type="number" id="away_second_half_goals" step="0.01" placeholder="0.85">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- H2H -->
+                            <div class="team-stats-block">
+                                <h4 class="team-stats-title">H2H (Karşılıklı Sonuçlar)</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="h2h_home_wins">Ev Sahibi Galibiyetleri</label>
+                                        <input type="number" id="h2h_home_wins" min="0" placeholder="3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="h2h_draws">Beraberlikler</label>
+                                        <input type="number" id="h2h_draws" min="0" placeholder="2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="h2h_away_wins">Deplasman Galibiyetleri</label>
+                                        <input type="number" id="h2h_away_wins" min="0" placeholder="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="h2h_total_goals_avg">H2H Gol Ort.</label>
+                                        <input type="number" id="h2h_total_goals_avg" step="0.01" placeholder="2.80">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Odds -->
+                            <div class="team-stats-block">
+                                <h4 class="team-stats-title">Piyasa Oranları</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="odds_home">MS 1 Oranı</label>
+                                        <input type="number" id="odds_home" step="0.01" placeholder="1.65">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="odds_draw">MS X Oranı</label>
+                                        <input type="number" id="odds_draw" step="0.01" placeholder="3.80">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="odds_away">MS 2 Oranı</label>
+                                        <input type="number" id="odds_away" step="0.01" placeholder="5.20">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="odds_over25">Üst 2.5 Oranı</label>
+                                        <input type="number" id="odds_over25" step="0.01" placeholder="1.85">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="odds_under25">Alt 2.5 Oranı</label>
+                                        <input type="number" id="odds_under25" step="0.01" placeholder="1.95">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="odds_btts_yes">KG Var Oranı</label>
+                                        <input type="number" id="odds_btts_yes" step="0.01" placeholder="1.75">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-ghost" id="btn-clear-form">Temizle</button>
+                            <button type="button" class="btn btn-primary btn-lg" id="btn-analyze">
+                                <span>📊</span> Analiz Et
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- History View -->
+            <section class="view" id="view-history">
+                <div class="history-container" id="history-container">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <h2>Analiz Geçmişi & AI Gün Sonu Doğruluk Karnesi</h2>
+                            <p>Veritabanında ve Supabase Cloud üzerinde saklanan maç tahminleri, gerçek maç sonuçları ve AI doğruluk karnesi</p>
+                        </div>
+                        <a href="https://supabase.com/dashboard/project/jcblvrwcckpuxrrpzcsx/editor" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;padding:8px 16px;border-radius:8px;">
+                            ☁️ Supabase Cloud Tablosunda Gör ↗
+                        </a>
+                    </div>
+
+                    <!-- History Stats -->
+                    <div class="history-stats" id="history-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="hist-total">0</div>
+                            <div class="stat-label">Toplam Analiz</div>
+                        </div>
+                        <div class="stat-card accent-green">
+                            <div class="stat-value" id="hist-correct">0</div>
+                            <div class="stat-label">Doğru Tahmin</div>
+                        </div>
+                        <div class="stat-card accent-cyan">
+                            <div class="stat-value" id="hist-rate">—</div>
+                            <div class="stat-label">AI İsabet Oranı</div>
+                        </div>
+                        <div class="stat-card accent-amber">
+                            <div class="stat-value" id="hist-value">0</div>
+                            <div class="stat-label">Value Bet</div>
+                        </div>
+                    </div>
+
+                    <!-- History Filtre Sekmeleri & Aksiyon Butonları -->
+                    <div class="history-toolbar">
+                        <div class="history-filter-tabs" id="history-filter-tabs">
+                            <button class="hist-filter-btn" data-hist-filter="yesterday">⏪ Dünün Maçları (09.09.2026)</button>
+                            <button class="hist-filter-btn active" data-hist-filter="all">🌐 Tüm Zamanlar</button>
+                            <button class="hist-filter-btn" data-hist-filter="today">📅 Bugünkü Maçlar</button>
+                            <button class="hist-filter-btn" data-hist-filter="correct">✅ Sadece Tutanlar</button>
+                            <button class="hist-filter-btn" data-hist-filter="incorrect">❌ Sadece Yatanlar</button>
+                            <button class="hist-filter-btn" data-hist-filter="value">💎 Value Betler</button>
+                        </div>
+                        <div class="history-action-btns">
+                            <button class="btn btn-primary btn-sm" id="btn-hist-simulate" title="Günün maçlarını Poisson modeline göre sonuçlandır">
+                                ⚡ Gün Sonu Skorlarını Simüle Et
+                            </button>
+                            <button class="btn btn-ghost btn-sm" id="btn-hist-sync" title="Skorları ve veritabanını eşitle">
+                                🔄 Skorları Eşitle
+                            </button>
+                            <button class="btn btn-ghost btn-sm" id="btn-hist-open-scores" title="Maç skorlarını elle gir">
+                                ✏️ Skor Düzenle
+                            </button>
+                            <button class="btn btn-ghost btn-sm" id="btn-hist-clear" style="color:var(--accent-red);" title="Geçmişi temizle">
+                                🗑️ Temizle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="history-list" id="history-list">
+                        <div class="empty-state">
+                            <span class="empty-icon">📋</span>
+                            <h3>Henüz analiz kaydı yok</h3>
+                            <p>Bir maç analiz ettiğinizde geçmişe otomatik kaydedilecektir.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="footer" id="main-footer">
+            <div class="footer-inner">
+                <p>SportAnaliz Pro © 2026 — Tüm tahminler olasılık bazlıdır. Yatırım tavsiyesi değildir.</p>
+                <div class="footer-links">
+                    <span>Veri: Nesine • Bilyoner • API-Football</span>
+                </div>
+            </div>
+        </footer>
+
+        <!-- ===== MOBILE BOTTOM NAVIGATION BAR ===== -->
+        <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+            <button class="m-nav-btn active" data-view="dashboard" id="m-nav-dashboard">
+                <span class="m-nav-icon">🏠</span>
+                <span class="m-nav-label">Bülten</span>
+            </button>
+            <button class="m-nav-btn" data-view="coupons" id="m-nav-coupons">
+                <span class="m-nav-icon">🤖</span>
+                <span class="m-nav-label">Kuponlar</span>
+            </button>
+            <button class="m-nav-btn" data-view="analysis" id="m-nav-analysis">
+                <span class="m-nav-icon">📊</span>
+                <span class="m-nav-label">Analiz</span>
+            </button>
+            <button class="m-nav-btn" data-view="all-stats" id="m-nav-all-stats">
+                <span class="m-nav-icon">📈</span>
+                <span class="m-nav-label">Karne</span>
+            </button>
+            <button class="m-nav-btn" data-view="history" id="m-nav-history">
+                <span class="m-nav-icon">📋</span>
+                <span class="m-nav-label">Geçmiş</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="modal-auth">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="auth-modal-title">Giriş Yap</h3>
+                <button class="modal-close" data-close="modal-auth">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-auth-tab="login" id="auth-tab-login">Giriş</button>
+                    <button class="auth-tab" data-auth-tab="register" id="auth-tab-register">Kayıt Ol</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">E-posta</label>
+                        <input type="email" id="login-email" placeholder="ornek@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Şifre</label>
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Giriş Yap</button>
+                    <div class="auth-error" id="login-error"></div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label for="register-name">Ad Soyad</label>
+                        <input type="text" id="register-name" placeholder="Ad Soyad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">E-posta</label>
+                        <input type="email" id="register-email" placeholder="ornek@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Şifre</label>
+                        <input type="password" id="register-password" placeholder="En az 6 karakter" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Kayıt Ol</button>
+                    <div class="auth-error" id="register-error"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3>⚙️ Ayarlar</h3>
+                <button class="modal-close" data-close="modal-settings">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Supabase Bağlantısı</h4>
+                    <div class="form-group">
+                        <label for="setting-supabase-url">Supabase URL</label>
+                        <input type="url" id="setting-supabase-url" value="https://jcblvrwcckpuxrrpzcsx.supabase.co" placeholder="https://xxxx.supabase.co">
+                    </div>
+                    <div class="form-group">
+                        <label for="setting-supabase-key">Supabase Publishable Key</label>
+                        <input type="text" id="setting-supabase-key" value="sb_publishable_THUOZv7vHWU1s_gLnT4ysA_Ylv-HN68" placeholder="sb_publishable_...">
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btn-save-supabase">Bağlan</button>
+                    <div class="connection-status" id="supabase-status">
+                        <span class="status-dot offline"></span> Bağlı değil
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>API Anahtarları (Opsiyonel)</h4>
+                    <div class="form-group">
+                        <label for="setting-api-football">API-Football Key</label>
+                        <input type="text" id="setting-api-football" placeholder="API anahtarınız">
+                    </div>
+                    <div class="form-group">
+                        <label for="setting-odds-api">The Odds API Key</label>
+                        <input type="text" id="setting-odds-api" placeholder="API anahtarınız">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Tercihler</h4>
+                    <div class="form-group">
+                        <label for="setting-odds-format">Oran Formatı</label>
+                        <select id="setting-odds-format" class="filter-select">
+                            <option value="decimal">Decimal (1.85)</option>
+                            <option value="fractional">Fractional (17/20)</option>
+                        </select>
+                    </div>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="setting-auto-save" checked>
+                        <span>Analizleri otomatik kaydet</span>
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="setting-risk-warnings" checked>
+                        <span>Risk uyarılarını göster</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="btn-save-settings">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Detail Modal -->
+    <div class="modal-overlay" id="modal-analysis-detail">
+        <div class="modal modal-xl">
+            <div class="modal-header">
+                <h3 id="analysis-detail-title">Maç Analizi</h3>
+                <button class="modal-close" data-close="modal-analysis-detail">✕</button>
+            </div>
+            <div class="modal-body" id="analysis-detail-body">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== EMAIL COUPONS MODAL ===== -->
+    <div class="modal-overlay" id="modal-email-coupons">
+        <div class="modal modal-lg" style="max-width:580px;">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1.5rem;">📧</span>
+                    <div>
+                        <h3 style="margin:0;font-size:1.15rem;">Kuponları E-Posta ile Al</h3>
+                        <p style="margin:2px 0 0;font-size:0.78rem;color:var(--text-secondary);">Günün garantör kuponları doğrudan gelen kutunuza gelsin</p>
+                    </div>
+                </div>
+                <button class="modal-close" data-close="modal-email-coupons">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Info Banner -->
+                <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:0.85rem;color:#cbd5e1;line-height:1.5;">
+                    <strong style="color:#38bdf8;">📅 Bugünün Bülteni (10.09.2026):</strong>
+                    Kasa Katlama, Editör, Gol Yağmuru, Değer Kuponları, Şampiyonlar Ligi ve Önümüzdeki 3 Saat kuponları özet oranlar, güven yüzdeleri ve resmi Maçkolik linkleriyle e-postanıza gönderilir.
+                </div>
+
+                <form id="form-send-coupons" onsubmit="return false;">
+                    <div class="form-group" style="margin-bottom:14px;">
+                        <label for="input-email-target" style="display:block;margin-bottom:6px;font-weight:600;font-size:0.88rem;">
+                            📬 Alıcı E-Posta Adresi:
+                        </label>
+                        <input type="email" id="input-email-target" class="form-control" placeholder="ornek@gmail.com" required style="width:100%;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;color:#fff;font-size:0.95rem;">
+                    </div>
+
+                    <!-- Abone Ol Checkbox -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px 14px;margin-bottom:18px;">
+                        <label class="toggle-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;">
+                            <input type="checkbox" id="check-subscribe-daily" checked style="width:18px;height:18px;accent-color:var(--accent-green);cursor:pointer;">
+                            <div>
+                                <strong style="color:#ffffff;font-size:0.9rem;">🔔 Her Sabah Otomatik Mail Gönder (Abone Ol)</strong>
+                                <p style="margin:2px 0 0;font-size:0.78rem;color:var(--text-muted);">Her sabah saat 10:00'da bülten analiz edilir ve günün kuponları e-postanıza düşer.</p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Gelişmiş SMTP Ayarları Accordion -->
+                    <details style="background:rgba(255,255,255,0.02);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;margin-bottom:18px;">
+                        <summary style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);font-weight:600;user-select:none;">
+                            ⚙️ Özel SMTP / Gmail Gönderici Ayarları (İsteğe Bağlı)
+                        </summary>
+                        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                            <p style="margin:0;font-size:0.78rem;color:var(--text-muted);">
+                                Boş bırakırsanız sistem anında test sunucusu (Ethereal) üzerinden gönderir ve tek tıkla açabileceğiniz web önizleme linki sunar. Kendi Gmail hesabınızdan göndermek isterseniz Gmail ve Uygulama Şifrenizi girebilirsiniz.
+                            </p>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div>
+                                    <label style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:4px;display:block;">Gönderici Gmail / SMTP E-posta</label>
+                                    <input type="email" id="smtp-email" placeholder="ornek@gmail.com" style="width:100%;padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:#fff;font-size:0.82rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:4px;display:block;">Uygulama Şifresi (App Password)</label>
+                                    <input type="password" id="smtp-pass" placeholder="xxxx xxxx xxxx xxxx" style="width:100%;padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:#fff;font-size:0.82rem;">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Mail Durum ve Önizleme Kutusu -->
+                    <div id="mail-status-box" style="display:none;margin-bottom:16px;padding:12px 14px;border-radius:8px;font-size:0.85rem;"></div>
+
+                    <!-- Aksiyon Butonları -->
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button type="button" class="btn btn-ghost" data-close="modal-email-coupons">Vazgeç</button>
+                        <button type="submit" class="btn btn-primary" id="btn-submit-send-mail" style="display:inline-flex;align-items:center;gap:8px;">
+                            <span>🚀 Şimdi Gönder</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST NOTIFICATIONS ===== -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ===== JS MODULES ===== -->
+    <script src="js/utils/statistics.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/config/supabase.js"></script>
+    <script src="js/services/authService.js"></script>
+    <script src="js/services/dbService.js"></script>
+    <script src="js/services/nesineService.js"></script>
+    <script src="js/services/bilyonerService.js"></script>
+    <script src="js/services/iddaaService.js"></script>
+    <script src="js/services/misliService.js"></script>
+    <script src="js/services/dataManager.js"></script>
+    <script src="js/services/liveScoreService.js"></script>
+    <script src="js/analysis/poissonModel.js"></script>
+    <script src="js/analysis/footballAnalysis.js"></script>
+    <script src="js/analysis/riskEngine.js"></script>
+    <script src="js/analysis/editorEngine.js"></script>
+    <script src="js/components/matchCard.js"></script>
+    <script src="js/components/analysisPanel.js"></script>
+    <script src="js/components/oddsComparison.js"></script>
+    <script src="js/components/scoreDistribution.js"></script>
+    <script src="js/analysis/couponEngine.js"></script>
+    <script src="js/analysis/matchTracker.js"></script>
+    <script src="js/components/couponPanel.js"></script>
+    <script src="js/components/allMatchesTrackerPanel.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
