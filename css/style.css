@@ -5223,6 +5223,223 @@ body:not(:has(#disclaimer-banner)) .main-content {
     color: #ffffff !important;
 }
 
+.c-date-pill.all-time {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(236, 72, 153, 0.25));
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+}
+
+.hero-all-time {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(30, 27, 75, 0.85), rgba(15, 23, 42, 0.95)) !important;
+    border-color: rgba(0, 240, 255, 0.3) !important;
+}
+
+.hero-all-time .coupons-hero-badge {
+    background: linear-gradient(135deg, #F59E0B, #EC4899, #00F0FF) !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+}
+
+/* 09 Eylül'den Bugüne Kümülatif Hızlı Bilgi Şeridi */
+.cumulative-summary-ribbon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.cumulative-summary-ribbon .csr-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cumulative-summary-ribbon .csr-icon {
+    font-size: 1.5rem;
+}
+
+.cumulative-summary-ribbon .csr-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.cumulative-summary-ribbon .csr-stats-text {
+    font-size: 0.92rem;
+    color: #ffffff;
+}
+
+.cumulative-summary-ribbon .btn-jump-all-time {
+    background: rgba(0, 240, 255, 0.1);
+    border-color: rgba(0, 240, 255, 0.4);
+    color: #00F0FF;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 6px 14px;
+    transition: all 0.2s;
+}
+
+.cumulative-summary-ribbon .btn-jump-all-time:hover {
+    background: #00F0FF;
+    color: #000;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+}
+
+/* Kümülatif Gün Gün Kupon Tablosu */
+.cumulative-table-card {
+    margin-top: 24px;
+    padding: 18px 20px;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+}
+
+.cum-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.cum-table-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.cum-table-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+}
+
+.cum-table-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.cumulative-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    text-align: left;
+}
+
+.cumulative-table th {
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cumulative-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    vertical-align: middle;
+}
+
+.cumulative-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.cumulative-table tfoot tr {
+    background: rgba(0, 240, 255, 0.05);
+    border-top: 2px solid rgba(0, 240, 255, 0.3);
+}
+
+.cumulative-table tfoot td {
+    padding: 14px;
+    font-size: 0.95rem;
+}
+
+.cum-date-cell {
+    color: #ffffff;
+    font-size: 0.92rem;
+}
+
+.cum-pill-count {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+/* Tüm Zamanlar Gün Gün Kupon Bölümleri */
+.all-time-days-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 24px;
+}
+
+.all-time-day-section {
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.all-time-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+}
+
+.all-time-day-header .day-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.all-time-day-header .day-icon {
+    font-size: 1.8rem;
+}
+
+.all-time-day-header .day-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+}
+
+.all-time-day-header .day-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.all-time-day-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 @media (max-width: 800px) {
     .coupon-date-selector-bar {
         flex-direction: column;

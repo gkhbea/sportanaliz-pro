@@ -972,18 +972,105 @@ const CouponEngine = {
     },
 
     /**
+     * Arşivin 09 Eylül 2026'dan itibaren hazır olduğundan emin olur
+     */
+    ensureArchiveInitialized() {
+        try {
+            const histDate = '2026-09-09';
+            const existing = this.getFromArchive(histDate);
+            if (!existing || !existing.coupons || existing.coupons.length === 0) {
+                const yesterdayCouponsData = this._generateAuthenticYesterdayCoupons(histDate);
+                this.saveToArchive(histDate, yesterdayCouponsData.coupons, yesterdayCouponsData.euroCoupons);
+            }
+        } catch (e) {
+            console.warn('ensureArchiveInitialized error:', e);
+        }
+    },
+
+    /**
+     * 09 Eylül 2026'dan itibaren tüm arşivlenmiş kupon setlerini döner
+     * @param {string} startDate - Başlangıç tarihi (varsayılan: '2026-09-09')
+     * @returns {Array} [{ date, dateFormatted, coupons, euroCoupons, allCoupons, totalCount }]
+     */
+    getAllArchivedCouponSets(startDate = '2026-09-09') {
+        this.ensureArchiveInitialized();
+        const results = [];
+        try {
+            const raw = localStorage.getItem(this.STORAGE_KEY);
+            const archive = raw ? JSON.parse(raw) : {};
+
+            // 09.09.2026'nın arşivde mutlaka olmasını sağla
+            if (!archive['2026-09-09']) {
+                const yData = this._generateAuthenticYesterdayCoupons('2026-09-09');
+                archive['2026-09-09'] = {
+                    date: '2026-09-09',
+                    coupons: yData.coupons,
+                    euroCoupons: yData.euroCoupons,
+                    savedAt: new Date().toISOString()
+                };
+                this.saveToArchive('2026-09-09', yData.coupons, yData.euroCoupons);
+            }
+
+            // Bugünün kuponları önbellekte varsa ve henüz arşive yazılmadıysa ekle
+            const todayStr = this.getTodayDateStr();
+            if (!archive[todayStr] && (this.cachedCoupons || this.cachedEuropeanCoupons)) {
+                archive[todayStr] = {
+                    date: todayStr,
+                    coupons: this.cachedCoupons || [],
+                    euroCoupons: this.cachedEuropeanCoupons || [],
+                    savedAt: new Date().toISOString()
+                };
+            }
+
+            // Tarihleri sırala (kronolojik: 09.09.2026, 10.09.2026 ...)
+            const dates = Object.keys(archive).filter(d => d >= startDate).sort();
+
+            dates.forEach(d => {
+                const entry = archive[d];
+                if (!entry) return;
+                const dCoupons = entry.coupons || [];
+                const eCoupons = entry.euroCoupons || [];
+                const all = [...eCoupons, ...dCoupons];
+
+                // Tarihi Türkçe formatla (09 Eylül 2026)
+                let dateFormatted = d;
+                try {
+                    const [yy, mm, dd] = d.split('-');
+                    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                    const mIdx = parseInt(mm, 10) - 1;
+                    dateFormatted = `${dd} ${monthNames[mIdx] || mm} ${yy}`;
+                } catch (err) {}
+
+                results.push({
+                    date: d,
+                    dateFormatted,
+                    coupons: dCoupons,
+                    euroCoupons: eCoupons,
+                    allCoupons: all,
+                    totalCount: all.length
+                });
+            });
+        } catch (e) {
+            console.warn('getAllArchivedCouponSets hatası:', e);
+        }
+        return results;
+    },
+
+    /**
      * Arşivdeki mevcut tüm tarihleri döner (en yeni tarih en üstte)
      */
     getArchivedDates() {
         try {
+            this.ensureArchiveInitialized();
             const raw = localStorage.getItem(this.STORAGE_KEY);
             const archive = raw ? JSON.parse(raw) : {};
             const dates = new Set(Object.keys(archive));
             dates.add(this.getTodayDateStr());
             dates.add(this.getYesterdayDateStr());
+            dates.add('2026-09-09');
             return Array.from(dates).sort().reverse();
         } catch (e) {
-            return [this.getTodayDateStr(), this.getYesterdayDateStr()];
+            return [this.getTodayDateStr(), this.getYesterdayDateStr(), '2026-09-09'];
         }
     },
 
@@ -1248,7 +1335,7 @@ const CouponEngine = {
             })
         ];
 
-        // 4. Sürpriz & Value Kuponu
+        // 4. Sürpriz & Value Kuponu (3 Tercihten 2'si Tuttu — Kupon Yattı)
         const valuePicks = [
             createFinishedPick({
                 index: 1,
@@ -1256,16 +1343,16 @@ const CouponEngine = {
                 awayTeam: 'Galatasaray',
                 league: 'UEFA Şampiyonlar Ligi',
                 timeStr: '22:00',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '2.5 ÜST',
-                marketCode: '2.5UST',
-                odd: 1.85,
-                probability: 65,
-                valueEdge: 8,
+                marketTitle: 'Çifte Şans',
+                pickTitle: 'X-2 (Galatasaray Yenilmez)',
+                marketCode: 'CSX2',
+                odd: 2.15,
+                probability: 60,
+                valueEdge: 10,
                 homeScore: 3,
                 awayScore: 1,
-                isWon: true,
-                detail: 'Maçta 4 gol oldu (3-1 bitti, 2.5 Üst kazandı).'
+                isWon: false,
+                detail: 'Sporting CP evinde 3-1 kazandı, Galatasaray puan alamadı.'
             }),
             createFinishedPick({
                 index: 2,

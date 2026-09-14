@@ -13,7 +13,113 @@ const CouponPanel = {
      */
     render(coupons = [], euroCoupons = [], activeFilter = 'all', activeDate = 'today', hourlyCoupon = null) {
         const euroList = Array.isArray(euroCoupons) ? euroCoupons : (euroCoupons ? [euroCoupons] : []);
+        const isAllTime = (activeDate === 'all_time' || activeDate === 'all-time');
         const isYesterday = (activeDate === 'yesterday' || activeDate === '2026-09-09');
+
+        // Kümülatif istatistikleri MatchTracker üzerinden 09 Eylül'den başlayarak hesapla
+        const cumulativeStats = window.MatchTracker ? window.MatchTracker.calculateCumulativeCouponStats('2026-09-09') : null;
+
+        if (isAllTime) {
+            // Tüm Zamanlar (09 Eylül'den Bugüne Kümülatif Görünüm)
+            return `
+                <div class="coupons-view-container animate-fade-in">
+                    <!-- ======================================================== -->
+                    <!-- TARİH SEÇİCİ & KUPON ARŞİVİ BARI (BUGÜN / DÜN / TÜMÜ) -->
+                    <!-- ======================================================== -->
+                    <div class="coupon-date-selector-bar">
+                        <div class="c-date-tabs">
+                            <button class="c-date-tab" data-target-date="today">
+                                <span class="c-date-tab-icon">📅</span>
+                                <div class="c-date-tab-text">
+                                    <span class="c-date-tab-title">Bugünün Kuponları</span>
+                                    <span class="c-date-tab-sub">10 Eylül 2026</span>
+                                </div>
+                                <span class="c-date-pill live">⚡ CANLI & AKTİF</span>
+                            </button>
+                            <button class="c-date-tab" data-target-date="yesterday">
+                                <span class="c-date-tab-icon">⏪</span>
+                                <div class="c-date-tab-text">
+                                    <span class="c-date-tab-title">Dünün Kuponları</span>
+                                    <span class="c-date-tab-sub">09 Eylül 2026</span>
+                                </div>
+                                <span class="c-date-pill done">🏁 SONUÇLANDI</span>
+                            </button>
+                            <button class="c-date-tab active" data-target-date="all_time">
+                                <span class="c-date-tab-icon">🌟</span>
+                                <div class="c-date-tab-text">
+                                    <span class="c-date-tab-title">09 Eylül'den İtibaren</span>
+                                    <span class="c-date-tab-sub">Tüm Tutan & Yatan Kuponlar</span>
+                                </div>
+                                <span class="c-date-pill all-time">🏆 TÜM ZAMANLAR</span>
+                            </button>
+                        </div>
+                        <div class="c-archive-wrap">
+                            <span class="c-archive-label">📂 İstatistik & Arşiv:</span>
+                            <select id="coupon-archive-select" class="c-archive-select">
+                                <option value="all_time" selected>🌟 09 Eylül'den Bugüne (Tüm Zamanlar Kümülatif)</option>
+                                <option value="today">10.09.2026 (Bugün - Canlı Bülten)</option>
+                                <option value="yesterday">09.09.2026 (Dün - Şampiyonlar Ligi)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Üst Hero Banner -->
+                    <div class="coupons-hero hero-all-time">
+                        <div class="coupons-hero-top">
+                            <div class="coupons-hero-title-group">
+                                <span class="coupons-hero-badge">🌟 09 EYLÜL'DEN BUGÜNE TÜM ZAMANLAR · 📊 RESMİ KUPON & MAÇ İSTATİSTİK KARNESİ</span>
+                                <h2 class="coupons-hero-title">09 Eylül'den Bugüne Bütün Kuponlar — Tutan & Yatan İstatistikleri</h2>
+                                <p class="coupons-hero-desc">
+                                    9 Eylül 2026 tarihinden itibaren sistemin ürettiği bütün kuponların resmi sonuçları, tutan (✅) ve yatan (❌) kupon sayıları, maç isabet yüzdeleri ve kasa getirisi. 
+                                    <strong>UEFA Şampiyonlar Ligi</strong>, <strong>Avrupa Ligi</strong>, <strong>Konferans Ligi</strong> ve günlük 4 AI kuponunun (Kasa Katlama, Editör, Gol, Value) kümülatif başarısı.
+                                </p>
+                            </div>
+                            <div class="coupons-hero-actions">
+                                <button class="btn btn-primary" id="btn-switch-today" title="Bugünün canlı bülten kuponlarına geç">
+                                    📅 Bugünün Canlı Kuponlarına Git
+                                </button>
+                                <button class="btn btn-outline" id="btn-switch-yesterday" title="09 Eylül dünün kuponlarına git">
+                                    ⏪ 09 Eylül Arşivine Git
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ======================================================== -->
+                        <!-- KÜMÜLATİF KUPON & MAÇ TAKİP MASASI (09 EYLÜL'DEN BUGÜNE) -->
+                        <!-- ======================================================== -->
+                        ${this.renderCumulativeDashboard(cumulativeStats)}
+                    </div>
+
+                    <!-- Tarih Bazlı Kupon Listeleri (09 Eylül'den İtibaren Gün Gün Gruplanmış) -->
+                    <div class="all-time-days-container">
+                        ${(cumulativeStats?.dayByDay || []).map(day => `
+                            <div class="all-time-day-section" id="day-section-${day.date}">
+                                <div class="all-time-day-header">
+                                    <div class="day-header-left">
+                                        <span class="day-icon">📅</span>
+                                        <div>
+                                            <h3 class="day-title">${day.dateFormatted} Kuponları</h3>
+                                            <span class="day-sub">${day.totalCoupons} Kupon Arşivlendi · ${day.isFinished ? '🏁 Resmi Sonuçlandı' : '⚡ Canlı / Aktif'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="day-header-chips">
+                                        <span class="pill-chip won">✅ ${day.wonCoupons} Tutan Kupon</span>
+                                        <span class="pill-chip lost">❌ ${day.lostCoupons} Yatan Kupon</span>
+                                        <span class="pill-chip rate">🏆 %${day.couponWinRate} Başarı</span>
+                                        <span class="pill-chip roi" style="color:${day.netProfit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}; border-color:${day.netProfit >= 0 ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'};">
+                                            ${day.netProfit >= 0 ? '+' : ''}${day.netProfit.toLocaleString('tr-TR')} TL Kasa Getirisi
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="coupons-grid">
+                                    ${day.coupons.map((coupon, idx) => this.renderCouponCard(coupon, idx)).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
         if ((!coupons || coupons.length === 0) && euroList.length === 0 && !hourlyCoupon) {
             return `
@@ -56,11 +162,11 @@ const CouponPanel = {
         return `
             <div class="coupons-view-container animate-fade-in">
                 <!-- ======================================================== -->
-                <!-- TARİH SEÇİCİ & KUPON ARŞİVİ BARI (BUGÜN / DÜN GEÇİŞİ) -->
+                <!-- TARİH SEÇİCİ & KUPON ARŞİVİ BARI (BUGÜN / DÜN / TÜMÜ) -->
                 <!-- ======================================================== -->
                 <div class="coupon-date-selector-bar">
                     <div class="c-date-tabs">
-                        <button class="c-date-tab ${!isYesterday ? 'active' : ''}" data-target-date="today">
+                        <button class="c-date-tab ${(!isYesterday && !isAllTime) ? 'active' : ''}" data-target-date="today">
                             <span class="c-date-tab-icon">📅</span>
                             <div class="c-date-tab-text">
                                 <span class="c-date-tab-title">Bugünün Kuponları</span>
@@ -76,12 +182,21 @@ const CouponPanel = {
                             </div>
                             <span class="c-date-pill done">🏁 SONUÇLANDI</span>
                         </button>
+                        <button class="c-date-tab ${isAllTime ? 'active' : ''}" data-target-date="all_time">
+                            <span class="c-date-tab-icon">🌟</span>
+                            <div class="c-date-tab-text">
+                                <span class="c-date-tab-title">09 Eylül'den İtibaren</span>
+                                <span class="c-date-tab-sub">Tüm Tutan & Yatan Kuponlar</span>
+                            </div>
+                            <span class="c-date-pill all-time">🏆 TÜM ZAMANLAR</span>
+                        </button>
                     </div>
                     <div class="c-archive-wrap">
-                        <span class="c-archive-label">📂 Arşivden Seç:</span>
+                        <span class="c-archive-label">📂 İstatistik & Arşiv:</span>
                         <select id="coupon-archive-select" class="c-archive-select">
-                            <option value="today" ${!isYesterday ? 'selected' : ''}>10.09.2026 (Bugün - Canlı Bülten)</option>
+                            <option value="today" ${(!isYesterday && !isAllTime) ? 'selected' : ''}>10.09.2026 (Bugün - Canlı Bülten)</option>
                             <option value="yesterday" ${isYesterday ? 'selected' : ''}>09.09.2026 (Dün - Şampiyonlar Ligi)</option>
+                            <option value="all_time" ${isAllTime ? 'selected' : ''}>🌟 09 Eylül'den Bugüne (Tüm Zamanlar Kümülatif)</option>
                         </select>
                     </div>
                 </div>
@@ -112,6 +227,9 @@ const CouponPanel = {
                             </button>
                         </div>
                     </div>
+
+                    <!-- 09 Eylül'den Bugüne Kümülatif Hızlı Bilgi Şeridi -->
+                    ${this.renderCumulativeSummaryRibbon(cumulativeStats)}
 
                     <!-- Kupon Özeti Şeridi -->
                     <div class="coupons-summary-ribbon">
@@ -180,6 +298,221 @@ const CouponPanel = {
                 <!-- Kuponlar Izgarası -->
                 <div class="coupons-grid">
                     ${displayedCoupons.map((coupon, idx) => this.renderCouponCard(coupon, idx)).join('')}
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * 09 Eylül'den Bugüne Kümülatif Hızlı Bilgi Şeridi (Hero altında her zaman görünür)
+     */
+    renderCumulativeSummaryRibbon(stats = null) {
+        const s = stats || (window.MatchTracker ? window.MatchTracker.calculateCumulativeCouponStats('2026-09-09') : null);
+        if (!s) return '';
+
+        const isPositive = s.netProfit >= 0;
+        const profitSign = isPositive ? '+' : '';
+        const profitColor = isPositive ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        return `
+            <div class="cumulative-summary-ribbon" id="cumulative-summary-ribbon">
+                <div class="csr-content">
+                    <span class="csr-icon">🌟</span>
+                    <div class="csr-text">
+                        <strong>09 Eylül'den Bugüne Kümülatif İstatistik:</strong>
+                        <span class="csr-stats-text">
+                            <strong style="color:var(--accent-green);">✅ ${s.wonCoupons} TUTAN KUPON</strong> · 
+                            <strong style="color:var(--accent-red);">❌ ${s.lostCoupons} YATAN KUPON</strong> 
+                            (<strong style="color:var(--accent-cyan);">%${s.couponWinRate} Kupon Başarısı</strong>) · 
+                            <strong>${s.wonBets}/${s.totalBets} Tutan Maç</strong> (%${s.winRate}) · 
+                            Net Kasa Kârı: <strong style="color:${profitColor};">${profitSign}${s.netProfit.toLocaleString('tr-TR')} TL</strong> (ROI: %${s.roi})
+                        </span>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-xs btn-jump-all-time" id="btn-jump-all-time" title="09 Eylül'den günümüze tüm kupon ve maç istatistiklerini incele">
+                    📊 Tüm Zamanlar İstatistik Karnesini Gör ➔
+                </button>
+            </div>
+        `;
+    },
+
+    /**
+     * 09 Eylül'den Bugüne Kümülatif Kupon & Maç Takip Masası (Win Rate Gauge, Tablo ve İstatistikler)
+     */
+    renderCumulativeDashboard(stats) {
+        if (!stats) return '';
+
+        const isPositiveProfit = stats.netProfit >= 0;
+        const profitSign = isPositiveProfit ? '+' : '';
+        const profitColor = isPositiveProfit ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        return `
+            <div class="tracker-dashboard-card cumulative-dashboard-card" id="tracker-dashboard">
+                <div class="tracker-top-header">
+                    <div class="tracker-header-left">
+                        <span class="tracker-badge-pill" style="background:linear-gradient(135deg,rgba(0,240,255,0.2),rgba(124,58,237,0.25));color:#00F0FF;border-color:rgba(0,240,255,0.4);">
+                            🌟 09 EYLÜL'DEN BUGÜNE TÜM ZAMANLAR KÜMÜLATİF KARNE
+                        </span>
+                        <h3 class="tracker-title">Tutan & Yatan Kuponların Kümülatif İstatistik Panosu</h3>
+                    </div>
+                    <div class="tracker-header-right">
+                        <span class="tracker-mode-status mode-simulated">
+                            📅 Başlangıç: 09 Eylül 2026 (${stats.totalDays} Günlük Arşiv)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 4 Temel Kümülatif Gösterge Kartı -->
+                <div class="tracker-metrics-grid">
+                    <!-- 1. KÜMÜLATİF KUPON BAŞARI ORANI (ANA GÖSTERGE) -->
+                    <div class="tracker-metric-card primary-gauge">
+                        <div class="gauge-circle-container">
+                            <div class="gauge-number" style="color:${stats.couponWinRate >= 60 ? 'var(--accent-green)' : (stats.couponWinRate >= 45 ? 'var(--accent-amber)' : 'var(--accent-cyan)')};">
+                                %${stats.couponWinRate}
+                            </div>
+                            <span class="gauge-sub">KUPON BAŞARISI</span>
+                        </div>
+                        <div class="gauge-details">
+                            <div class="gauge-title">Toplam Tutan / Yatan Kupon</div>
+                            <div class="gauge-pills">
+                                <span class="pill-chip won" title="Kazanan Kuponlar">✅ ${stats.wonCoupons} Kupon Tuttu</span>
+                                <span class="pill-chip lost" title="Kaybeden Kuponlar">❌ ${stats.lostCoupons} Kupon Yattı</span>
+                                ${stats.liveCoupons + stats.pendingCoupons > 0 ? `<span class="pill-chip live">⏳ ${stats.liveCoupons + stats.pendingCoupons} Devam Eden</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. MAÇ VE BAHİS TERCİHİ İSABETİ -->
+                    <div class="tracker-metric-card">
+                        <div class="metric-top">
+                            <span class="metric-icon">⚽</span>
+                            <span class="metric-badge">%${stats.winRate} Maç İsabeti</span>
+                        </div>
+                        <div class="metric-large-val" style="color:var(--accent-cyan);">
+                            ${stats.wonBets} / ${stats.decidedBets}
+                        </div>
+                        <div class="metric-label">Tutan Maç Tercihi</div>
+                        <div class="metric-progress-wrap">
+                            <div class="metric-progress-bar" style="width: ${Math.min(100, stats.winRate || 0)}%; background: var(--accent-cyan);"></div>
+                        </div>
+                        <span class="metric-footer-text">
+                            ${stats.lostBets} Kaybeden Tercih · Toplam ${stats.totalBets} Bahis Analizi
+                        </span>
+                    </div>
+
+                    <!-- 3. TOPLAM KASA KÂRI & ROI -->
+                    <div class="tracker-metric-card">
+                        <div class="metric-top">
+                            <span class="metric-icon">💰</span>
+                            <span class="metric-badge" style="color:${profitColor}; border-color:${profitColor}44;">
+                                ROI: ${profitSign}%${stats.roi}
+                            </span>
+                        </div>
+                        <div class="metric-large-val" style="color:${profitColor};">
+                            ${profitSign}${stats.netProfit.toLocaleString('tr-TR')} TL
+                        </div>
+                        <div class="metric-label">Kümülatif Net Kasa Getirisi</div>
+                        <div class="metric-meta-row">
+                            <span>Toplam Yatırılan: <strong>${stats.totalStake.toLocaleString('tr-TR')} TL</strong></span>
+                            <span>Toplam Dönen: <strong>${stats.totalReturn.toLocaleString('tr-TR')} TL</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- 4. ARŞİV DÖKÜMÜ & ORTALAMA -->
+                    <div class="tracker-metric-card breakdown-card">
+                        <div class="metric-top">
+                            <span class="metric-icon">📈</span>
+                            <span class="metric-badge">Tarihsel Özet</span>
+                        </div>
+                        <div class="tracker-category-list">
+                            <div class="tracker-cat-item">
+                                <span class="cat-name">📅 Kayıtlı Gün:</span>
+                                <span class="cat-stat"><strong>${stats.totalDays} Gün</strong> (09 Eylül+)</span>
+                            </div>
+                            <div class="tracker-cat-item">
+                                <span class="cat-name">📑 Toplam Kupon:</span>
+                                <span class="cat-stat"><strong>${stats.totalCoupons} Kupon</strong></span>
+                            </div>
+                            <div class="tracker-cat-item">
+                                <span class="cat-name">🎯 Kupon Kazanma:</span>
+                                <span class="cat-stat"><span class="pill-chip won"><strong>%${stats.couponWinRate}</strong></span></span>
+                            </div>
+                            <div class="tracker-cat-item">
+                                <span class="cat-name">⚽ Maç Başarısı:</span>
+                                <span class="cat-stat"><span class="pill-chip info"><strong>%${stats.winRate}</strong></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- TARİH BAZLI KUPON & MAÇ BAŞARI ÇİZELGESİ (TABLO) -->
+                <!-- ======================================================== -->
+                <div class="cumulative-table-card">
+                    <div class="cum-table-header">
+                        <div class="cum-table-header-left">
+                            <span class="cum-table-badge">📋 TARİH BAZLI KUPON DETAYLARI</span>
+                            <h4 class="cum-table-title">09 Eylül'den Bugüne Günlük Kupon Karnesi</h4>
+                        </div>
+                        <div class="cum-table-header-right">
+                            <span class="cum-table-info">Her günün Tutan / Yatan kupon sayıları ve kasa getirisi</span>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="cumulative-table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Toplam Kupon</th>
+                                    <th>Tutan (✅)</th>
+                                    <th>Yatan (❌)</th>
+                                    <th>Kupon Başarısı</th>
+                                    <th>Tutan Maç</th>
+                                    <th>Maç Başarısı</th>
+                                    <th>Kasa Getirisi</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${stats.dayByDay.map(d => `
+                                    <tr>
+                                        <td>
+                                            <strong class="cum-date-cell">📅 ${d.dateFormatted}</strong>
+                                        </td>
+                                        <td><span class="cum-pill-count">${d.totalCoupons} Kupon</span></td>
+                                        <td><span class="pill-chip won">✅ ${d.wonCoupons}</span></td>
+                                        <td><span class="pill-chip lost">❌ ${d.lostCoupons}</span></td>
+                                        <td><strong style="color:var(--accent-cyan); font-size:1.05rem;">%${d.couponWinRate}</strong></td>
+                                        <td><strong>${d.wonBets}</strong> / ${d.totalBets}</td>
+                                        <td>%${d.winRate}</td>
+                                        <td style="font-weight:800; color:${d.netProfit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">
+                                            ${d.netProfit >= 0 ? '+' : ''}${d.netProfit.toLocaleString('tr-TR')} TL
+                                        </td>
+                                        <td>
+                                            <span class="c-date-pill ${d.isFinished ? 'done' : 'live'}">
+                                                ${d.isFinished ? '🏁 Sonuçlandı' : '⚡ Canlı / Aktif'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr class="cum-total-row">
+                                    <td><strong>🏆 GENEL TOPLAM</strong></td>
+                                    <td><strong>${stats.totalCoupons} Kupon</strong></td>
+                                    <td><strong style="color:var(--accent-green);">✅ ${stats.wonCoupons} Kupon</strong></td>
+                                    <td><strong style="color:var(--accent-red);">❌ ${stats.lostCoupons} Kupon</strong></td>
+                                    <td><strong style="color:var(--accent-cyan); font-size:1.15rem;">%${stats.couponWinRate}</strong></td>
+                                    <td><strong>${stats.wonBets} / ${stats.totalBets}</strong></td>
+                                    <td><strong>%${stats.winRate}</strong></td>
+                                    <td style="font-size:1.15rem; color:${stats.netProfit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">
+                                        <strong>${stats.netProfit >= 0 ? '+' : ''}${stats.netProfit.toLocaleString('tr-TR')} TL</strong>
+                                    </td>
+                                    <td><span class="c-date-pill all-time">⭐ 09 EYLÜL+</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -551,6 +884,16 @@ const CouponPanel = {
         // 0.2 Bugünün Kuponlarına Git Butonu
         container.querySelector('#btn-switch-today')?.addEventListener('click', () => {
             app.loadDailyCoupons(false, app.activeCouponFilter || 'all', 'today');
+        });
+
+        // 0.21 Dünün Kuponlarına Git Butonu
+        container.querySelector('#btn-switch-yesterday')?.addEventListener('click', () => {
+            app.loadDailyCoupons(false, app.activeCouponFilter || 'all', 'yesterday');
+        });
+
+        // 0.22 Tüm Zamanlar Kümülatif İstatistik Karnesine Hızlı Geçiş Butonu
+        container.querySelector('#btn-jump-all-time')?.addEventListener('click', () => {
+            app.loadDailyCoupons(false, 'all', 'all_time');
         });
 
         // 0.3 Kategori / Filtre Sekmeleri

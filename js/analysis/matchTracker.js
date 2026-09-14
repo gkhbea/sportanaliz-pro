@@ -689,6 +689,122 @@ const MatchTracker = {
     },
 
     /**
+     * 09 Eylül 2026'dan itibaren TÜM GÜNLERİN kuponlarını ve maçlarını kümülatif olarak analiz eder.
+     * Tutan, yatan kupon sayılarını, % Win Rate, net kâr ve gün gün dökümü kalıcı istatistik olarak döner.
+     * @param {string} startDate - Başlangıç tarihi ('2026-09-09')
+     * @returns {Object} Kümülatif istatistik karnesi
+     */
+    calculateCumulativeCouponStats(startDate = '2026-09-09') {
+        const couponSets = (window.CouponEngine && typeof CouponEngine.getAllArchivedCouponSets === 'function')
+            ? CouponEngine.getAllArchivedCouponSets(startDate)
+            : [];
+
+        let totalCoupons = 0;
+        let wonCoupons = 0;
+        let lostCoupons = 0;
+        let liveCoupons = 0;
+        let pendingCoupons = 0;
+
+        let totalBets = 0;
+        let wonBets = 0;
+        let lostBets = 0;
+        let liveBets = 0;
+        let pendingBets = 0;
+
+        let totalStake = 0;
+        let totalReturn = 0;
+
+        const dayByDay = [];
+        const allEvaluatedCoupons = [];
+
+        couponSets.forEach(set => {
+            const dayStats = this.calculateEndOfDayStats(set.allCoupons);
+            totalCoupons += dayStats.totalCoupons;
+            wonCoupons += dayStats.wonCoupons;
+            lostCoupons += dayStats.lostCoupons;
+            liveCoupons += dayStats.liveCoupons;
+            pendingCoupons += dayStats.pendingCoupons;
+
+            totalBets += dayStats.totalBets;
+            wonBets += dayStats.wonBets;
+            lostBets += dayStats.lostBets;
+            liveBets += dayStats.liveBets;
+            pendingBets += dayStats.pendingBets;
+
+            totalStake += dayStats.totalStake;
+            totalReturn += dayStats.totalReturn;
+
+            allEvaluatedCoupons.push(...dayStats.evaluatedCoupons);
+
+            dayByDay.push({
+                date: set.date,
+                dateFormatted: set.dateFormatted,
+                coupons: set.allCoupons,
+                totalCoupons: dayStats.totalCoupons,
+                wonCoupons: dayStats.wonCoupons,
+                lostCoupons: dayStats.lostCoupons,
+                liveCoupons: dayStats.liveCoupons,
+                pendingCoupons: dayStats.pendingCoupons,
+                couponWinRate: dayStats.couponWinRate,
+                totalBets: dayStats.totalBets,
+                wonBets: dayStats.wonBets,
+                lostBets: dayStats.lostBets,
+                winRate: dayStats.winRate,
+                totalStake: dayStats.totalStake,
+                totalReturn: dayStats.totalReturn,
+                netProfit: dayStats.netProfit,
+                roi: dayStats.roi,
+                isFinished: (dayStats.liveCoupons === 0 && dayStats.pendingCoupons === 0 && dayStats.decidedCoupons > 0)
+            });
+        });
+
+        const decidedCoupons = wonCoupons + lostCoupons;
+        const couponWinRate = decidedCoupons > 0 ? Math.round((wonCoupons / decidedCoupons) * 1000) / 10 : 0;
+
+        const decidedBets = wonBets + lostBets;
+        const winRate = decidedBets > 0 ? Math.round((wonBets / decidedBets) * 1000) / 10 : 0;
+
+        const netProfit = +(totalReturn - totalStake).toFixed(2);
+        const roi = totalStake > 0 ? Math.round((netProfit / totalStake) * 1000) / 10 : 0;
+
+        const result = {
+            startDate,
+            startDateFormatted: '09 Eylül 2026',
+            totalDays: dayByDay.length,
+            totalCoupons,
+            wonCoupons,
+            lostCoupons,
+            liveCoupons,
+            pendingCoupons,
+            decidedCoupons,
+            couponWinRate,
+            totalBets,
+            wonBets,
+            lostBets,
+            liveBets,
+            pendingBets,
+            decidedBets,
+            winRate,
+            totalStake,
+            totalReturn: Math.round(totalReturn * 100) / 100,
+            netProfit,
+            roi,
+            dayByDay,
+            allEvaluatedCoupons,
+            calculatedAt: new Date().toISOString()
+        };
+
+        // Kalıcı depolama
+        try {
+            localStorage.setItem('sportanaliz_cumulative_coupons_v1', JSON.stringify(result));
+        } catch (e) {
+            console.warn('cumulative storage save error:', e);
+        }
+
+        return result;
+    },
+
+    /**
      * GÜN SONU SKORLARINI SİMÜLE ET (Tüm maçları gerçekçi Poisson / İstatistik modeliyle sonuçlandırır)
      * Kullanıcı maçların bittiği varsayımında gün sonundaki net kazanma yüzdesini görmek istediğinde çalışır.
      * @param {Array} allCoupons - Kuponlar

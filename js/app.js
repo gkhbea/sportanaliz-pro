@@ -1065,6 +1065,7 @@ const App = {
             this.selectedCouponDate = targetDate;
         }
         const activeDate = this.selectedCouponDate || 'today';
+        const isAllTime = (activeDate === 'all_time' || activeDate === 'all-time');
         const isYesterday = (activeDate === 'yesterday' || activeDate === '2026-09-09');
 
         if (!window.CouponEngine || !window.CouponPanel) {
@@ -1072,7 +1073,22 @@ const App = {
             return;
         }
 
-        // DÜNÜN KUPONLARI: Arşivden yükle (Bugünün bültenini bekletmeden anında sun)
+        // TÜM ZAMANLAR (09 EYLÜL'DEN BAŞLAYARAK KÜMÜLATİF)
+        if (isAllTime) {
+            CouponEngine.ensureArchiveInitialized();
+
+            // Eğer bugünün kuponları henüz üretilmediyse ve bülten varsa üret
+            if (!CouponEngine.cachedCoupons && this.matches && this.matches.length > 0) {
+                CouponEngine.generateDailyCoupons(this.matches, false);
+                CouponEngine.generateEuropeanCoupons(this.matches, false);
+            }
+
+            container.innerHTML = CouponPanel.render([], [], currentFilter, 'all_time');
+            CouponPanel.bindEvents(this, [], [], 'all_time');
+            return;
+        }
+
+        // DÜNÜN KUPONLARI: Arşivden yükle (09.09.2026)
         if (isYesterday) {
             const yData = CouponEngine.getYesterdayCoupons();
             const coupons = yData.coupons || [];
