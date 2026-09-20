@@ -36,8 +36,19 @@ const AnalysisPanel = {
         // 2. ⏱️ İlk Yarı (İY) Detaylı Analizi
         html += this.renderFirstHalfAnalysis(analysisResult, editorAnalysis);
         
-        // 3. 🎙️ Nesine & Bilyoner Yorumcu Değerlendirmesi
+        // 3. 🎙️ Nesine, Misli & Bilyoner Yorumcu Değerlendirmesi
         html += this.renderCommentatorInsights(editorAnalysis, match);
+
+        // 4. 📊 Gelişmiş Taktiksel İstatistik, xG ve Momentum Analizi (Oransız)
+        if (window.SofascoreService) {
+            const sofaAnalytics = SofascoreService.getMatchAnalytics(match || analysisResult);
+            html += SofascoreService.renderSofascoreCard(sofaAnalytics);
+        }
+
+        // 5. 👥 İlk 11 Kadro & 10 Maç Oyuncu Reyting Analizi
+        if (window.SquadRatingEngine) {
+            html += this.renderSquadRatingSection(match || analysisResult);
+        }
 
         html += this.renderScoreDistribution(analysisResult);
         html += this.renderOverUnder(analysisResult);
@@ -560,6 +571,78 @@ const AnalysisPanel = {
                     </div>
                 </div>
             </div>
+        `;
+    },
+
+    /**
+     * 👥 İlk 11 Kadro & 10 Maç Oyuncu Reyting Analizi Kartı
+     */
+    renderSquadRatingSection(match) {
+        if (!window.SquadRatingEngine) return '';
+        const squadData = SquadRatingEngine.generateSquadAnalysis(match);
+        if (!squadData) return '';
+
+        const h = squadData.homeSquad;
+        const a = squadData.awaySquad;
+        const duels = squadData.duels;
+        const syn = squadData.synthesis;
+
+        return `
+        <div class="analysis-card full-width" style="background:linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(2,6,23,0.95) 100%);border:1px solid rgba(56,189,248,0.35);border-radius:14px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,0.35);">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:1.1rem;background:linear-gradient(135deg, #0284c7, #38bdf8);color:#fff;padding:3px 8px;border-radius:6px;font-weight:900;">11'LER</span>
+                    <span style="font-size:0.95rem;font-weight:800;color:#f8fafc;">İlk 11 Kadro &amp; 10 Maç Oyuncu Reyting Analizi</span>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="if(window.SquadAnalysisModal) SquadAnalysisModal.open(${JSON.stringify(match).replace(/"/g, '&quot;')})" style="background:linear-gradient(135deg, #0284c7, #06b6d4);border:none;font-weight:800;font-size:0.78rem;display:inline-flex;align-items:center;gap:6px;">
+                    <span>👥 10 Maçlık Detaylı Kadro Modalı ↗</span>
+                </button>
+            </div>
+
+            <!-- Harmanlanmış Kadro & Bahis Açıklaması -->
+            <div style="background:rgba(56,189,248,0.08);border-left:4px solid #38bdf8;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:16px;">
+                <div style="font-size:0.75rem;font-weight:800;color:#38bdf8;margin-bottom:4px;text-transform:uppercase;">
+                    🧠 Harmanlanmış Kadro &amp; Taktik Bahis Görüşü (%${syn.confidenceRating} Güven)
+                </div>
+                <div style="font-size:0.85rem;color:#e2e8f0;line-height:1.5;">
+                    ${syn.tacticalAnalysis}
+                </div>
+                <div style="margin-top:8px;font-size:0.85rem;font-weight:800;color:#38bdf8;">
+                    🎯 Önerilen Tercih: <span style="color:#ffffff;">${syn.recommendedBet}</span> 
+                    <span style="font-size:0.75rem;color:#94a3b8;font-weight:400;">(${syn.betReasoning})</span>
+                </div>
+            </div>
+
+            <!-- Mevkisel Düello Karşılaştırma Izgarası -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;">
+                <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;">
+                    <div style="font-size:0.72rem;color:#94a3b8;font-weight:700;">⚔️ Hücum vs Savunma Düellosu</div>
+                    <div style="font-size:0.92rem;font-weight:800;color:#38bdf8;margin-top:2px;">
+                        Ev Hücum: ${duels.homeAttackVsAwayDefense.homeFwdAvg} vs Dep Savunma: ${duels.homeAttackVsAwayDefense.awayDefAvg}
+                    </div>
+                    <div style="font-size:0.72rem;color:#cbd5e1;margin-top:2px;">${duels.homeAttackVsAwayDefense.verdict}</div>
+                </div>
+
+                <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;">
+                    <div style="font-size:0.72rem;color:#94a3b8;font-weight:700;">🔄 Orta Saha Hakimiyeti</div>
+                    <div style="font-size:0.92rem;font-weight:800;color:#34d399;margin-top:2px;">
+                        %${duels.midfieldBattle.homeControlPercent} vs %${duels.midfieldBattle.awayControlPercent}
+                    </div>
+                    <div style="font-size:0.72rem;color:#cbd5e1;margin-top:2px;">${duels.midfieldBattle.verdict}</div>
+                </div>
+
+                <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;">
+                    <div style="font-size:0.72rem;color:#94a3b8;font-weight:700;">⭐ Kilit Oyuncular (Son 10 Maç)</div>
+                    <div style="font-size:0.85rem;font-weight:800;color:#f8fafc;margin-top:2px;">
+                        ${syn.homeKeyStar.name} <span style="color:#38bdf8;">(${syn.homeKeyStar.avgRating})</span> vs 
+                        ${syn.awayKeyStar.name} <span style="color:#a78bfa;">(${syn.awayKeyStar.avgRating})</span>
+                    </div>
+                    <div style="font-size:0.72rem;color:#94a3b8;margin-top:2px;">
+                        ${syn.homeKeyStar.trendIcon} ${syn.homeKeyStar.trendText} &amp; ${syn.awayKeyStar.trendIcon} ${syn.awayKeyStar.trendText}
+                    </div>
+                </div>
+            </div>
+        </div>
         `;
     },
 

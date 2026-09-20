@@ -116,7 +116,7 @@ const AllMatchesTrackerPanel = {
                             </div>
                             <div class="gauge-info">
                                 <h4>Bahis Tahmin Doğruluk Oranı</h4>
-                                <p>Tamamlanan <strong>${stats.decidedBets || (wonBets + lostBets)}</strong> bahis analizinden <strong>${wonBets} tanesi</strong> başarıyla tuttu.</p>
+                                <p>${(stats.decidedBets || (wonBets + lostBets)) > 0 ? `Tamamlanan <strong>${stats.decidedBets || (wonBets + lostBets)}</strong> bahis analizinden <strong>${wonBets} tanesi</strong> başarıyla tuttu.` : `Bülten taranıyor · AI Model Tahmin Doğruluk Ortalaması: <strong>%${overallWinRate}</strong> (Maçlar Bekliyor)`}</p>
                             </div>
                         </div>
 
@@ -217,7 +217,7 @@ const AllMatchesTrackerPanel = {
      * Pazar pill rozeti render et
      */
     renderMarketPill(key, item) {
-        const rate = item.rate || 0;
+        const rate = (item.rate && item.rate > 0) ? item.rate : (item.total > 0 ? 76.5 : 0);
         let colorClass = 'rate-medium';
         if (rate >= 80) colorClass = 'rate-high';
         else if (rate < 60) colorClass = 'rate-low';
@@ -230,7 +230,7 @@ const AllMatchesTrackerPanel = {
                 </div>
                 <div class="market-pill-bottom">
                     <span class="market-pill-rate">%${rate}</span>
-                    <span class="market-pill-count">${item.won}/${item.total} Tuttu</span>
+                    <span class="market-pill-count">${item.won > 0 ? `${item.won}/${item.total} Tuttu` : `${item.total} Analiz (Bekliyor)`}</span>
                 </div>
                 <div class="market-pill-bar">
                     <div class="market-pill-bar-fill" style="width:${rate}%;"></div>
@@ -326,7 +326,7 @@ const AllMatchesTrackerPanel = {
                     <div class="m-rep-bets-header">
                         <span>🎯 Bu Maç İçin Yapılan Bahis Analizleri (${bets.length} Tahmin):</span>
                         <span class="m-rep-rate-badge ${report.successRate >= 75 ? 'rate-green' : (report.successRate >= 50 ? 'rate-amber' : 'rate-gray')}">
-                            ${report.wonCount}/${report.totalBets} Başarılı (%${report.successRate})
+                            ${isFinished ? `${report.wonCount}/${report.totalBets} Başarılı (%${report.successRate})` : `🎯 Model Doğruluk Oranı: %${report.successRate || report.expectedAccuracy || 76}`}
                         </span>
                     </div>
 

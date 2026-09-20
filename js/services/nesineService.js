@@ -4,8 +4,12 @@
  */
 const NesineService = {
     get BASE_URL() {
-        if (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001'))) {
-            return 'http://localhost:3001/api/proxy/nesine';
+        if (typeof window !== 'undefined') {
+            const custom = window.ENV_API_URL || (typeof Helpers !== 'undefined' && Helpers.storage ? Helpers.storage.get('sa_api_base_url') : null);
+            if (custom) return `${custom.replace(/\/$/, '')}/api/proxy/nesine`;
+            if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001')) {
+                return 'http://localhost:3001/api/proxy/nesine';
+            }
         }
         return '/api/proxy/nesine';
     },
@@ -95,19 +99,21 @@ const NesineService = {
 
             if (Array.isArray(rawEvents)) {
                 rawEvents.forEach(event => {
-                    // Sadece gerçek maçları al (ev ve deplasman takımları olan, şampiyonluk bahisleri vb. hariç)
-                    if (!event.HN || !event.AN) return;
+                    // Sadece resmi İddaa kodu ve takımları olan gerçek bülten maçlarını al
+                    if (!event.HN || !event.AN || !event.C) return;
 
                     // Spor tipine göre filtrele
                     if (sportType && sportType !== 'all') {
                         if (event.TYPE !== targetTypeCode) return;
                     }
 
-                    const matchCode = String(event.C || event.EV);
+                    const matchCode = String(event.C);
                     const matchChoices = editorChoicesByMatch.get(matchCode) || [];
 
                     const parsed = this.parseEvent(event, sportType, leagueMap, matchChoices);
-                    if (parsed) events.push(parsed);
+                    if (parsed && (parsed.odds?.home || parsed.odds?.over25 || parsed.odds?.under25)) {
+                        events.push(parsed);
+                    }
                 });
             }
         } catch (err) {
@@ -121,7 +127,7 @@ const NesineService = {
      * Tek event'i normalize et
      */
     parseEvent(event, sportType, leagueMap = new Map(), editorChoices = []) {
-        if (!event) return null;
+        if (!event || !event.C) return null;
 
         try {
             // Lig adı: leagueMap'ten veya event alanlarından
@@ -148,7 +154,9 @@ const NesineService = {
             const odds = this.parseOdds(event, sportType);
 
             return {
-                id: 'nesine_' + (event.C || event.EV || event.Id || Helpers.uuid()),
+                id: 'nesine_' + event.C,
+                iddaaCode: String(event.C),
+                code: String(event.C),
                 source: 'nesine',
                 sportType,
                 homeTeam: event.HN || event.HomeTeam || '—',
@@ -180,10 +188,22 @@ const NesineService = {
             home: null,
             draw: null,
             away: null,
+            cs1X: null,
+            cs12: null,
+            csX2: null,
+            over15: null,
+            under15: null,
             over25: null,
             under25: null,
+            over35: null,
+            under35: null,
             bttsYes: null,
-            bttsNo: null
+            bttsNo: null,
+            firstHalfHome: null,
+            firstHalfDraw: null,
+            firstHalfAway: null,
+            firstHalfUnder15: null,
+            firstHalfOver15: null
         };
 
         try {
@@ -207,37 +227,47 @@ const NesineService = {
                         });
                     }
 
-                    // MTID 142 (Basketbol Maç Kazananı - Beraberliksiz)
-                    // MTID 182 (Tenis Maç Kazananı)
-                    if ((mtid === 142 || mtid === 182) && Array.isArray(oca)) {
+                    // MTID 3: Çifte Şans (1-X, 1-2, X-2)
+                    if (mtid === 3 && Array.isArray(oca)) {
                         oca.forEach(o => {
                             const val = parseFloat(o.O || o.Odds || 0);
                             if (val > 1) {
-                                if (o.N === 1) odds.home = val;
-                                else if (o.N === 2) odds.away = val;
+                                if (o.N === 1) odds.cs1X = val;
+                                else if (o.N === 2) odds.cs12 = val;
+                                else if (o.N === 3) odds.csX2 = val;
                             }
                         });
                     }
 
-                    // MTID 147 (Basketbol 1X2 normal süre)
-                    if (mtid === 147 && !odds.home && Array.isArray(oca)) {
+                    // MTID 11: 1.5 Alt / Üst (SOV 1.5)
+                    if ((mtid === 11 || (mtid === 12 && (sov === 1.5 || sov === '1.5'))) && Array.isArray(oca)) {
                         oca.forEach(o => {
                             const val = parseFloat(o.O || o.Odds || 0);
                             if (val > 1) {
-                                if (o.N === 1) odds.home = val;
-                                else if (o.N === 2) odds.draw = val;
-                                else if (o.N === 3) odds.away = val;
+                                if (o.N === 1) odds.under15 = val;
+                                else if (o.N === 2) odds.over15 = val;
                             }
                         });
                     }
 
                     // MTID 12: 2.5 Alt / Üst (SOV === 2.5)
-                    if (mtid === 12 && (sov === 2.5 || sov === '2.5') && Array.isArray(oca)) {
+                    if (mtid === 12 && (sov === 2.5 || sov === '2.5' || !sov) && Array.isArray(oca)) {
                         oca.forEach(o => {
                             const val = parseFloat(o.O || o.Odds || 0);
                             if (val > 1) {
                                 if (o.N === 1) odds.under25 = val; // Nesine'de N:1 Alt
                                 else if (o.N === 2) odds.over25 = val;  // N:2 Üst
+                            }
+                        });
+                    }
+
+                    // MTID 13: 3.5 Alt / Üst (SOV 3.5)
+                    if ((mtid === 13 || (mtid === 12 && (sov === 3.5 || sov === '3.5'))) && Array.isArray(oca)) {
+                        oca.forEach(o => {
+                            const val = parseFloat(o.O || o.Odds || 0);
+                            if (val > 1) {
+                                if (o.N === 1) odds.under35 = val;
+                                else if (o.N === 2) odds.over35 = val;
                             }
                         });
                     }
@@ -252,7 +282,53 @@ const NesineService = {
                             }
                         });
                     }
+
+                    // MTID 7: İlk Yarı Sonucu (1X2)
+                    if (mtid === 7 && Array.isArray(oca)) {
+                        oca.forEach(o => {
+                            const val = parseFloat(o.O || o.Odds || 0);
+                            if (val > 1) {
+                                if (o.N === 1) odds.firstHalfHome = val;
+                                else if (o.N === 2) odds.firstHalfDraw = val;
+                                else if (o.N === 3) odds.firstHalfAway = val;
+                            }
+                        });
+                    }
+
+                    // MTID 14: İlk Yarı 1.5 Alt / Üst
+                    if (mtid === 14 && Array.isArray(oca)) {
+                        oca.forEach(o => {
+                            const val = parseFloat(o.O || o.Odds || 0);
+                            if (val > 1) {
+                                if (o.N === 1) odds.firstHalfUnder15 = val;
+                                else if (o.N === 2) odds.firstHalfOver15 = val;
+                            }
+                        });
+                    }
+
+                    // MTID 142 (Basketbol Maç Kazananı - Beraberliksiz)
+                    // MTID 182 (Tenis Maç Kazananı)
+                    if ((mtid === 142 || mtid === 182) && Array.isArray(oca)) {
+                        oca.forEach(o => {
+                            const val = parseFloat(o.O || o.Odds || 0);
+                            if (val > 1) {
+                                if (o.N === 1) odds.home = val;
+                                else if (o.N === 2) odds.away = val;
+                            }
+                        });
+                    }
                 });
+            }
+
+            // Çifte Şans fallback (Eğer bültende MTID 3 açılmamışsa 1X2 üzerinden türet)
+            if (!odds.cs1X && odds.home && odds.draw) {
+                odds.cs1X = +(1 / (1 / odds.home + 1 / odds.draw)).toFixed(2);
+            }
+            if (!odds.csX2 && odds.away && odds.draw) {
+                odds.csX2 = +(1 / (1 / odds.away + 1 / odds.draw)).toFixed(2);
+            }
+            if (!odds.cs12 && odds.home && odds.away) {
+                odds.cs12 = +(1 / (1 / odds.home + 1 / odds.away)).toFixed(2);
             }
 
             // Düz yapı fallback

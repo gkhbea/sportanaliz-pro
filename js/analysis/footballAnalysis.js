@@ -28,13 +28,16 @@ const FootballAnalysis = {
         // Poisson modeli
         const poisson = PoissonModel.calculate(expectedGoals.home, expectedGoals.away);
 
-        // Form analizi
-        const homeForm = Statistics.calculateFormScore(
-            home.last5_wins || 0, home.last5_draws || 0, home.last5_losses || 0
-        );
-        const awayForm = Statistics.calculateFormScore(
-            away.last5_wins || 0, away.last5_draws || 0, away.last5_losses || 0
-        );
+        // Form analizi (Son 8 Maç)
+        const homeWins = (home.last8_wins !== undefined) ? home.last8_wins : (home.last5_wins || 0);
+        const homeDraws = (home.last8_draws !== undefined) ? home.last8_draws : (home.last5_draws || 0);
+        const homeLosses = (home.last8_losses !== undefined) ? home.last8_losses : (home.last5_losses || 0);
+        const homeForm = Statistics.calculateFormScore(homeWins, homeDraws, homeLosses);
+
+        const awayWins = (away.last8_wins !== undefined) ? away.last8_wins : (away.last5_wins || 0);
+        const awayDraws = (away.last8_draws !== undefined) ? away.last8_draws : (away.last5_draws || 0);
+        const awayLosses = (away.last8_losses !== undefined) ? away.last8_losses : (away.last5_losses || 0);
+        const awayForm = Statistics.calculateFormScore(awayWins, awayDraws, awayLosses);
 
         // H2H analizi
         const h2hAnalysis = this.analyzeH2H(h2h);
@@ -192,12 +195,12 @@ const FootballAnalysis = {
     buildFactors(home, away, homeForm, awayForm, homeStr, awayStr, h2h, odds) {
         const factors = [];
 
-        // Form
-        if (homeForm > 70) factors.push({ icon: '🔥', text: `Ev sahibi güçlü formda (${homeForm}/100)`, impact: 'positive' });
-        else if (homeForm < 35) factors.push({ icon: '📉', text: `Ev sahibi kötü formda (${homeForm}/100)`, impact: 'negative' });
+        // Form (Son 8 Maç)
+        if (homeForm > 70) factors.push({ icon: '🔥', text: `Ev sahibi son 8 maçta güçlü formda (${homeForm}/100)`, impact: 'positive' });
+        else if (homeForm < 35) factors.push({ icon: '📉', text: `Ev sahibi son 8 maçta düşük formda (${homeForm}/100)`, impact: 'negative' });
 
-        if (awayForm > 70) factors.push({ icon: '🔥', text: `Deplasman güçlü formda (${awayForm}/100)`, impact: 'negative' });
-        else if (awayForm < 35) factors.push({ icon: '📉', text: `Deplasman kötü formda (${awayForm}/100)`, impact: 'positive' });
+        if (awayForm > 70) factors.push({ icon: '🔥', text: `Deplasman son 8 maçta güçlü formda (${awayForm}/100)`, impact: 'negative' });
+        else if (awayForm < 35) factors.push({ icon: '📉', text: `Deplasman son 8 maçta düşük formda (${awayForm}/100)`, impact: 'positive' });
 
         // Güç
         if (homeStr.attack > 1.5) factors.push({ icon: '⚔️', text: `Ev sahibi yüksek hücum gücü (${homeStr.attack}x)`, impact: 'positive' });

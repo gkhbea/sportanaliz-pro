@@ -10,10 +10,19 @@ const MatchCard = {
         const awayAbbr = Helpers.teamAbbreviation(match.awayTeam);
         const time = match.matchDate ? Helpers.formatTime(match.matchDate) : '—';
         const league = match.league || '';
-        const odds = match.odds || {};
+        const odds = match.commonOdds || match.odds || {};
+        const iddaaCode = match.iddaaCode || match.code || (match.rawData && match.rawData.eventCode) || '';
 
-        // Basit quick-analysis & Yorumcu rozetleri
+        // Basit quick-analysis & Yorumcu rozetleri & İddaa Kodu
         let badges = '';
+        if (iddaaCode) {
+            badges += `<span class="badge badge-iddaa-code" style="background:rgba(234,179,8,0.2);border:1px solid rgba(234,179,8,0.55);color:#facc15;font-weight:900;letter-spacing:0.5px;" title="Resmi İddaa Maç Kodu">🏷️ Kod: ${iddaaCode}</span> `;
+        }
+        badges += '<span class="badge badge-ai-bubble" data-ai-trigger="true" title="Yapay Zeka Analiz Baloncuğunu görmek için üzerine gelin veya dokunun">🤖 AI Analiz</span> ';
+        badges += `<span class="badge badge-squad-trigger" onclick="event.stopPropagation();if(window.SquadAnalysisModal) SquadAnalysisModal.open(window.app?.matches?.[${index}] || window.app?.liveMatches?.[${index}]);" style="background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.4);color:#38bdf8;cursor:pointer;" title="İlk 11 Kadro ve 10 Maç Oyuncu Reyting Analizini Aç">👥 11'ler &amp; Reyting</span> `;
+        if (match.isCommonBulletin) {
+            badges += '<span class="badge badge-common-bulletin" style="background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.4);color:#34d399;" title="Bu maç Nesine, Bilyoner, İddaa ve Misli bültenlerinde ortaktır">🤝 Ortak Bülten</span> ';
+        }
         if (match.editorChoices && match.editorChoices.length > 0) {
             badges += `<span class="badge" style="background:rgba(124,58,237,0.18);border-color:rgba(124,58,237,0.4);color:#c084fc;">🎙️ ${match.editorChoices.length} Yorumcu</span> `;
         }
@@ -22,12 +31,17 @@ const MatchCard = {
             if (margin < 8) badges += '<span class="badge badge-value">💎 Düşük Margin</span>';
         }
 
-        // Biten maç skoru rozeti
+        // Canlı / Biten maç skoru rozeti (Başlamamış maçlara asla MS / BİTTİ verilmez)
         let scoreHtml = '';
         if (match.liveScore && (match.liveScore.isFinished || match.liveScore.minute === 'MS' || match.status === 'FINISHED')) {
             const h = typeof match.liveScore.home === 'number' ? match.liveScore.home : 0;
             const a = typeof match.liveScore.away === 'number' ? match.liveScore.away : 0;
             scoreHtml = `<div class="match-finished-pill" style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.4);color:#4ade80;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;">🏁 BİTTİ (MS: ${h} - ${a})</div>`;
+        } else if (match.liveScore && (match.liveScore.isLive || match.status === 'LIVE')) {
+            const h = typeof match.liveScore.home === 'number' ? match.liveScore.home : 0;
+            const a = typeof match.liveScore.away === 'number' ? match.liveScore.away : 0;
+            const min = match.liveScore.minute || 'Canlı';
+            scoreHtml = `<div class="match-live-pill" style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.4);color:#f87171;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;animation:pulse 2s infinite;">🔴 CANLI ${min} (${h} - ${a})</div>`;
         }
 
         return `
@@ -55,19 +69,33 @@ const MatchCard = {
                 </div>
 
                 <div class="match-odds">
-                    ${this.renderOddsBtn('1', odds.home)}
-                    ${match.sportType === 'football' ? this.renderOddsBtn('X', odds.draw) : ''}
-                    ${this.renderOddsBtn('2', odds.away)}
+                    ${this.renderOddsBtn('MS 1', odds.home, match)}
+                    ${match.sportType === 'football' ? this.renderOddsBtn('MS X', odds.draw, match) : ''}
+                    ${this.renderOddsBtn('MS 2', odds.away, match)}
                 </div>
             </div>
         `;
     },
 
-    renderOddsBtn(label, value) {
+    renderOddsBtn(label, value, match) {
+        if (!value) {
+            return `
+                <div class="odds-btn" style="opacity:0.4;">
+                    <div class="odds-label">${label}</div>
+                    <div class="odds-value">—</div>
+                </div>
+            `;
+        }
+
+        const safeHome = (match && match.homeTeam ? match.homeTeam.replace(/'/g, "\\'") : 'Ev Sahibi');
+        const safeAway = (match && match.awayTeam ? match.awayTeam.replace(/'/g, "\\'") : 'Deplasman');
+        const safeLeague = (match && match.league ? match.league.replace(/'/g, "\\'") : 'Futbol');
+        const matchId = match ? (match.id || `${safeHome}-${safeAway}`) : 'm_' + Math.random();
+
         return `
-            <div class="odds-btn">
+            <div class="odds-btn" onclick="event.stopPropagation(); if(window.VirtualCouponManager){ window.VirtualCouponManager.addToSlip({ matchId: '${matchId}', homeTeam: '${safeHome}', awayTeam: '${safeAway}', league: '${safeLeague}', betType: '${label}', odds: ${value} }); if(window.Helpers) Helpers.showToast('🎮 ${safeHome} vs ${safeAway} (${label}: ${value.toFixed(2)}) Sanal Kupona Eklendi!', 'success'); }" title="🎮 Tıkla: Sanal Kupona Ekle">
                 <div class="odds-label">${label}</div>
-                <div class="odds-value">${value ? value.toFixed(2) : '—'}</div>
+                <div class="odds-value">${value.toFixed(2)}</div>
             </div>
         `;
     },

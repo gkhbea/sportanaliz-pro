@@ -28,8 +28,9 @@ const EditorEngine = {
         const topPick = candidates.length > 0 ? candidates[0] : null;
 
         // 4. Alternatif güvenli (yüksek olasılıklı) tercih
-        const safeCandidates = candidates.filter(c => c.probability >= 65 && c !== topPick);
-        const safePick = safeCandidates.length > 0 ? safeCandidates[0] : (candidates[1] || null);
+        // KULLANICI KURALI: 1.5 Üst maçlarda çok olmuyor! 1-0/0-0 riski nedeniyle safePick olarak 1.5 Üst verilmez!
+        const safeCandidates = candidates.filter(c => c.probability >= 65 && c !== topPick && c.marketCode !== '1.5UST');
+        const safePick = safeCandidates.length > 0 ? safeCandidates[0] : (candidates.find(c => c !== topPick && c.marketCode !== '1.5UST') || candidates[1] || null);
 
         // 5. İlk Yarı (İY) Detaylı Senaryosu
         const firstHalfScenario = this._buildFirstHalfScenario(analysis, firstHalf, odds);
@@ -279,15 +280,33 @@ const EditorEngine = {
             addCandidate('CSX2', 'Çifte Şans X-2', `${analysis.awayTeam} Yenilmez`, csx2Prob, Math.max(1.12, csx2Odd), 'guvenli');
         }
 
+        // Toplam beklenen gol (xG) ve oran göstergeleri
+        const totalXg = (analysis.expectedGoals?.home || 1.1) + (analysis.expectedGoals?.away || 0.9);
+        const isMarketUnder = odds.under25 && odds.over25 && (odds.under25 <= odds.over25);
+        const isHighScoringMatch = totalXg >= 2.55 && (ou[2.5]?.over >= 58) && !isMarketUnder;
+
         // Alt / Üst 2.5
         if (ou[2.5]) {
             addCandidate('2.5UST', '2.5 Gol Üst', '2.5 ÜST', ou[2.5].over, odds.over25, 'gol');
             addCandidate('2.5ALT', '2.5 Gol Alt', '2.5 ALT', ou[2.5].under, odds.under25, 'gol');
         }
 
-        // Alt / Üst 1.5
+        // Alt / Üst 3.5 (Özellikle 0-0, 1-0, 0-1, 1-1, 2-0 gibi maçlarda son derece güvenli)
+        if (ou[3.5]) {
+            addCandidate('3.5ALT', '3.5 Gol Alt', '3.5 ALT', ou[3.5].under, odds.under35 || (odds.under25 ? +(odds.under25 * 0.72).toFixed(2) : 1.25), 'guvenli');
+        }
+
+        // Alt / Üst 1.5 — KULLANICI KURALI: "1.5 üstü çok olmuyor maçlar bunlara dikkat et"
+        // 0-0, 1-0, 0-1 gibi kısır sonuçlara karşı koruma:
+        // Yalnızca her iki takımın da belirgin golcü olduğu, toplam xG >= 2.55 ve 2.5 Üst ihtimali %58+ olan gerçek gollü maçlarda değerlendir!
         if (ou[1.5]) {
-            addCandidate('1.5UST', '1.5 Gol Üst', '1.5 ÜST', ou[1.5].over, odds.over15 || (odds.over25 ? +(odds.over25 * 0.75).toFixed(2) : 1.28), 'gol');
+            if (isHighScoringMatch) {
+                addCandidate('1.5UST', '1.5 Gol Üst', '1.5 ÜST', ou[1.5].over, odds.over15 || (odds.over25 ? +(odds.over25 * 0.75).toFixed(2) : 1.25), 'gol');
+            } else {
+                if (ou[1.5].under >= 28) {
+                    addCandidate('1.5ALT', '1.5 Gol Alt', '1.5 ALT', ou[1.5].under, odds.under15 || 2.75, 'surpriz');
+                }
+            }
         }
 
         // Karşılıklı Gol

@@ -28,83 +28,7 @@ const DataManager = {
             results.errors.push('Nesine: ' + nesineRes.reason?.message);
         }
 
-        // Dünün maçlarını ve sonuçlanmış maçlarını da bültene ekle
-        try {
-            const yesterdayDateStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-            const seenKeys = new Set(results.matches.map(m => `${(m.homeTeam||'').toLowerCase()}_${(m.awayTeam||'').toLowerCase()}`));
 
-            // 1. CouponEngine kupon arşivindeki dünün maçları
-            const yCouponsData = (typeof window !== 'undefined' && window.CouponEngine) ? window.CouponEngine.getYesterdayCoupons() : null;
-            if (yCouponsData && Array.isArray(yCouponsData.coupons)) {
-                const allPicks = [];
-                yCouponsData.coupons.forEach(c => allPicks.push(...(c.matches || [])));
-                if (yCouponsData.euroCoupons) {
-                    yCouponsData.euroCoupons.forEach(c => allPicks.push(...(c.matches || [])));
-                }
-
-                allPicks.forEach(p => {
-                    const normH = (p.homeTeam || '').toLowerCase();
-                    const normA = (p.awayTeam || '').toLowerCase();
-                    const k = `${normH}_${normA}`;
-                    if (!seenKeys.has(k)) {
-                        seenKeys.add(k);
-                        const mObj = p.match || {};
-                        results.matches.push({
-                            id: mObj.id || `hist_${normH}_${normA}`,
-                            source: 'Mackolik (Bitti)',
-                            sportType: 'football',
-                            homeTeam: p.homeTeam,
-                            awayTeam: p.awayTeam,
-                            league: p.league || 'UEFA Şampiyonlar Ligi',
-                            matchDate: `${yesterdayDateStr}T${p.timeStr || '22:00'}:00`,
-                            dateStr: p.dateStr || '09.09.2026',
-                            timeStr: p.timeStr || '22:00',
-                            odds: { home: Number(p.odd) || 1.35, draw: 3.30, away: 4.50 },
-                            liveScore: p.scoreData ? {
-                                home: p.scoreData.homeScore,
-                                away: p.scoreData.awayScore,
-                                isFinished: true,
-                                minute: 'MS'
-                            } : { home: 0, away: 0, isFinished: true, minute: 'MS' }
-                        });
-                    }
-                });
-            }
-
-            // 2. DbService analiz geçmişindeki tamamlanmış dünün maçları
-            if (typeof window !== 'undefined' && window.DbService) {
-                const hist = (window.DbService._getFromLocal && window.DbService._getFromLocal('analysis_history')) || [];
-                hist.forEach(h => {
-                    const normH = (h.homeTeam || h.home_team || '').toLowerCase();
-                    const normA = (h.awayTeam || h.away_team || '').toLowerCase();
-                    if (!normH || !normA) return;
-                    const k = `${normH}_${normA}`;
-                    if (!seenKeys.has(k)) {
-                        seenKeys.add(k);
-                        results.matches.push({
-                            id: h.matchId || `hist_${normH}_${normA}`,
-                            source: 'Mackolik (Bitti)',
-                            sportType: h.sportType || 'football',
-                            homeTeam: h.homeTeam || h.home_team,
-                            awayTeam: h.awayTeam || h.away_team,
-                            league: h.league || 'UEFA Şampiyonlar Ligi',
-                            matchDate: h.matchDate || `${yesterdayDateStr}T22:00:00`,
-                            dateStr: '09.09.2026',
-                            timeStr: '22:00',
-                            odds: { home: Number(h.odd) || 1.60, draw: 3.40, away: 4.20 },
-                            liveScore: {
-                                home: typeof h.homeScore === 'number' ? h.homeScore : 0,
-                                away: typeof h.awayScore === 'number' ? h.awayScore : 0,
-                                isFinished: true,
-                                minute: h.minute || 'MS'
-                            }
-                        });
-                    }
-                });
-            }
-        } catch (e) {
-            console.warn('Geçmiş maçlar bültene eklenirken uyarı:', e);
-        }
 
         // 4 Kaynaklı platform entegrasyonu (Nesine + Bilyoner + İddaa + Misli)
         results.sources = ['Nesine.com', 'Bilyoner.com', 'İddaa.com', 'Misli.com'];
@@ -112,8 +36,28 @@ const DataManager = {
         // Mükerrer maçları birleştir ve 4 platformun oranlarını zenginleştir
         results.matches = this._deduplicateAndEnrich(results.matches);
 
-        // Tarihe göre sırala (en yakın maç en üstte)
+        // SADECE Resmi İddaa Kodu olan ve oranları açılmış maçları filtrele
+        results.matches = results.matches.filter(m => (m.iddaaCode || m.code) && (m.odds?.home || m.odds?.over25 || m.odds?.under25));
+
+        // Tarih ve lig önemine göre akıllı sırala (Bugünün kaliteli maçları en üstte)
+        const now = new Date();
+        const todayStr = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+        const todayIso = now.toISOString().slice(0, 10);
+
         results.matches.sort((a, b) => {
+            const isTodayA = (a.dateStr === todayStr || (a.matchDate && a.matchDate.startsWith(todayIso)) || a.isToday);
+            const isTodayB = (b.dateStr === todayStr || (b.matchDate && b.matchDate.startsWith(todayIso)) || b.isToday);
+
+            // 1. Bugünün maçları önce
+            if (isTodayA && !isTodayB) return -1;
+            if (!isTodayA && isTodayB) return 1;
+
+            // 2. Lig önem sırası
+            const prioA = this.getLeaguePriority(a.league);
+            const prioB = this.getLeaguePriority(b.league);
+            if (prioA !== prioB) return prioB - prioA;
+
+            // 3. Saat sırası
             const da = a.matchDate ? new Date(a.matchDate).getTime() : 0;
             const db = b.matchDate ? new Date(b.matchDate).getTime() : 0;
             return da - db;
@@ -124,7 +68,29 @@ const DataManager = {
     },
 
     /**
-     * Mükerrer maçları birleştir & 4 Platformlu (Nesine, Bilyoner, İddaa, Misli) Oran Karşılaştırması ekle
+     * Lig önem sırası (Popüler ve kaliteli ligleri üst sıralara yerleştirir)
+     */
+    getLeaguePriority(leagueName) {
+        const l = (leagueName || '').toLowerCase();
+        if (l.includes('şampiyonlar') || l.includes('champions')) return 100;
+        if (l.includes('avrupa ligi') || l.includes('europa') || l.includes('konferans') || l.includes('conference')) return 95;
+        if (l.includes('süper lig') || l.includes('super lig') || l.includes('turkey super')) return 90;
+        if (l.includes('premier') || l.includes('ingiltere')) return 88;
+        if (l.includes('la liga') || l.includes('ispanya') || l.includes('laliga')) return 86;
+        if (l.includes('serie a') || l.includes('italya')) return 84;
+        if (l.includes('bundesliga') || l.includes('almanya')) return 82;
+        if (l.includes('ligue 1') || l.includes('fransa')) return 80;
+        if (l.includes('rusya premier') || l.includes('russia')) return 78;
+        if (l.includes('eredivisie') || l.includes('hollanda')) return 76;
+        if (l.includes('primeira') || l.includes('portekiz')) return 74;
+        if (l.includes('mısır premier') || l.includes('egypt')) return 72;
+        if (l.includes('güney afrika') || l.includes('south africa')) return 71;
+        if (l.includes('1. lig') || l.includes('championship')) return 70;
+        return 30;
+    },
+
+    /**
+     * Mükerrer maçları birleştir & 4 Platformlu (Nesine, Bilyoner, İddaa, Misli) Oran Karşılaştırması ve Ortak Oranları ekle
      */
     _deduplicateAndEnrich(matches) {
         const seen = new Map();
@@ -141,7 +107,7 @@ const DataManager = {
                 existing.allOdds.push({ source: match.source, odds: { ...match.odds } });
 
                 // Eksik oranları tamamla
-                ['home', 'draw', 'away', 'over25', 'under25', 'bttsYes', 'bttsNo'].forEach(prop => {
+                ['home', 'draw', 'away', 'cs1X', 'cs12', 'csX2', 'over15', 'under15', 'over25', 'under25', 'over35', 'under35', 'bttsYes', 'bttsNo', 'firstHalfHome', 'firstHalfDraw', 'firstHalfAway'].forEach(prop => {
                     if (!existing.odds[prop] && match.odds[prop]) {
                         existing.odds[prop] = match.odds[prop];
                     }
@@ -153,7 +119,7 @@ const DataManager = {
 
         const output = Array.from(seen.values());
 
-        // Her maç için 4 platformun oranlarını hazırla
+        // Her maç için 4 platformun oranlarını hazırla ve hepsinde ortak olan ortak oranları hesapla
         output.forEach(match => {
             const baseOdds = match.odds || {};
             
@@ -180,6 +146,28 @@ const DataManager = {
                     odds: window.MisliService ? MisliService.calculateMisliOdds(baseOdds) : { ...baseOdds }
                 }
             ];
+
+            // 4 Platform Ortak Oranlarını (Konsensüs) Hesapla
+            const common = {};
+            const props = ['home', 'draw', 'away', 'cs1X', 'cs12', 'csX2', 'over15', 'under15', 'over25', 'under25', 'over35', 'under35', 'bttsYes', 'bttsNo', 'firstHalfHome', 'firstHalfDraw', 'firstHalfAway'];
+            
+            props.forEach(p => {
+                const vals = match.allOdds
+                    .map(item => item.odds ? item.odds[p] : null)
+                    .filter(v => typeof v === 'number' && !isNaN(v) && v > 1);
+                
+                if (vals.length > 0) {
+                    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+                    common[p] = Math.round(avg * 100) / 100;
+                } else if (baseOdds[p]) {
+                    common[p] = baseOdds[p];
+                }
+            });
+
+            match.commonOdds = common;
+            // Ortak bülten bayrağı (Tüm platformlarda ortak bülten maçı)
+            match.isCommonBulletin = true;
+            match.commonPlatformsCount = 4;
         });
 
         return output;
@@ -213,7 +201,24 @@ const DataManager = {
 
         // Lig filtresi
         if (league) {
-            filtered = filtered.filter(m => m.league === league);
+            if (league === 'TURKEY_ALL' || league === '🇹🇷 Türkiye (Tüm Ligler)') {
+                filtered = filtered.filter(m => {
+                    const l = (m.league || '').toLowerCase();
+                    return l.includes('türkiye') || l.includes('turkey') || l.includes('süper lig') || l.includes('trendyol') || l.includes('1. lig') || l.includes('ziraat');
+                });
+            } else if (league.includes('Süper Lig')) {
+                filtered = filtered.filter(m => {
+                    const l = (m.league || '').toLowerCase();
+                    return l.includes('süper lig') || l.includes('super lig') || l.includes('trendyol süper');
+                });
+            } else if (league.includes('1. Lig')) {
+                filtered = filtered.filter(m => {
+                    const l = (m.league || '').toLowerCase();
+                    return l.includes('1. lig') || l.includes('1.lig') || l.includes('trendyol 1');
+                });
+            } else {
+                filtered = filtered.filter(m => m.league === league);
+            }
         }
 
         // Tarih filtresi
@@ -239,12 +244,12 @@ const DataManager = {
 
                 switch (dateFilter) {
                     case 'yesterday': {
-                        const isYesterdayDate = dStr.includes('09.09.2026') || mDateStr.includes(yesterdayStr) || mDateStr.includes('2026-09-09');
+                        const isYesterdayDate = mDateStr.includes(yesterdayStr) || dStr.includes('09.09.2026') || dStr.includes('13.09.2026');
                         const isYesterdayTime = md && !isNaN(md.getTime()) && (md >= yesterdayStart && md < todayStart);
                         return isYesterdayDate || isYesterdayTime;
                     }
                     case 'today': {
-                        const isTodayDate = dStr.includes('10.09.2026') || mDateStr.includes(todayStr) || mDateStr.includes('2026-09-10');
+                        const isTodayDate = mDateStr.includes(todayStr) || dStr.includes('14.09.2026') || dStr.includes('10.09.2026');
                         const isTodayTime = md && !isNaN(md.getTime()) && (md >= todayStart && md < tomorrowStart);
                         return isTodayDate || isTodayTime;
                     }
@@ -262,14 +267,47 @@ const DataManager = {
     },
 
     /**
-     * Mevcut liglerin listesini çıkar
+     * Mevcut liglerin listesini çıkar (Türkiye ligleri en başta)
      */
     getLeagues(matches) {
         const leagues = new Set();
+        let hasTurkey = false;
+        let hasSuperLig = false;
+        let has1Lig = false;
+
         matches.forEach(m => {
-            if (m.league && m.league.trim()) leagues.add(m.league.trim());
+            if (m.league && m.league.trim()) {
+                const l = m.league.trim();
+                leagues.add(l);
+                const lLower = l.toLowerCase();
+                if (lLower.includes('türkiye') || lLower.includes('turkey') || lLower.includes('süper lig') || lLower.includes('trendyol')) {
+                    hasTurkey = true;
+                }
+                if (lLower.includes('süper lig') || lLower.includes('trendyol süper')) {
+                    hasSuperLig = true;
+                }
+                if (lLower.includes('1. lig') || lLower.includes('trendyol 1')) {
+                    has1Lig = true;
+                }
+            }
         });
-        return Array.from(leagues).sort((a, b) => a.localeCompare(b, 'tr'));
+
+        const sorted = Array.from(leagues).sort((a, b) => a.localeCompare(b, 'tr'));
+        const priorityLeagues = [];
+
+        priorityLeagues.push('🇹🇷 Türkiye (Tüm Ligler)');
+        if (hasSuperLig || hasTurkey) priorityLeagues.push('🇹🇷 Türkiye - Trendyol Süper Lig');
+        if (has1Lig || hasTurkey) priorityLeagues.push('🇹🇷 Türkiye - 1. Lig');
+
+        // Priority'de olmayan diğer ligleri ekle
+        const finalLeagues = [...priorityLeagues];
+        sorted.forEach(l => {
+            if (!finalLeagues.includes(l)) {
+                finalLeagues.push(l);
+            }
+        });
+
+        return finalLeagues;
     },
 
     /**

@@ -4,8 +4,12 @@
  */
 const BilyonerService = {
     get BASE_URL() {
-        if (typeof window !== 'undefined' && (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001'))) {
-            return 'http://localhost:3001/api/proxy/bilyoner';
+        if (typeof window !== 'undefined') {
+            const custom = window.ENV_API_URL || (typeof Helpers !== 'undefined' && Helpers.storage ? Helpers.storage.get('sa_api_base_url') : null);
+            if (custom) return `${custom.replace(/\/$/, '')}/api/proxy/bilyoner`;
+            if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001')) {
+                return 'http://localhost:3001/api/proxy/bilyoner';
+            }
         }
         return '/api/proxy/bilyoner';
     },

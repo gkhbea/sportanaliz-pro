@@ -388,6 +388,160 @@ const DbService = {
     /**
      * Geçmişi temizle
      */
+    /**
+     * Günlük ve sanal kuponları Supabase (daily_coupons) tablosuna kaydeder/günceller.
+     * @param {Array} coupons - Kupon nesneleri dizisi
+     */
+    async saveDailyCoupons(coupons = []) {
+        if (!Array.isArray(coupons) || coupons.length === 0) return false;
+
+        const client = (typeof SupabaseConfig !== 'undefined' && SupabaseConfig.getClient) ? SupabaseConfig.getClient() : null;
+        if (!client) return false;
+
+        try {
+            const rows = coupons.map(c => ({
+                id: c.id,
+                archive_date: c.archiveDate || c.date || (c.createdAt ? c.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10)),
+                title: c.name || c.title || 'Kupon',
+                badge: c.badge || '',
+                description: c.description || '',
+                type: c.type || c.badgeType || 'standard',
+                total_odd: parseFloat(c.totalOdds || c.totalOdd || c.combinedOdd || 1.0),
+                stake: parseFloat(c.stake || 0),
+                potential_return: parseFloat(c.potentialReturn || 0),
+                status: c.status || 'pending',
+                matches: c.matches || c.selections || [],
+                is_archived: c.isArchived !== false,
+                auto_played: c.autoPlayed !== false,
+                updated_at: new Date().toISOString()
+            }));
+
+            // 20'şerli paketler halinde upsert et
+            for (let i = 0; i < rows.length; i += 20) {
+                const chunk = rows.slice(i, i + 20);
+                const { error } = await client.from('daily_coupons').upsert(chunk, { onConflict: 'id' });
+                if (error) {
+                    console.warn('Supabase saveDailyCoupons uyarısı:', error.message);
+                }
+            }
+            console.log('✅ Supabase daily_coupons tablosuna ' + rows.length + ' kupon başarıyla senkronize edildi.');
+            return true;
+        } catch (err) {
+            console.warn('Supabase daily_coupons senkronizasyon hatası:', err ? err.message : err);
+            return false;
+        }
+    },
+
+    /**
+     * Belirli bir tarihe veya tüm geçmişe ait kuponları Supabase'den getirir
+     * @param {string|null} dateStr - 'YYYY-MM-DD' veya null (tümü)
+     */
+    async getDailyCoupons(dateStr = null) {
+        const client = (typeof SupabaseConfig !== 'undefined' && SupabaseConfig.getClient) ? SupabaseConfig.getClient() : null;
+        if (!client) return [];
+
+        try {
+            let query = client.from('daily_coupons').select('*').order('created_at', { ascending: false });
+            if (dateStr) {
+                query = query.eq('archive_date', dateStr);
+            }
+            const { data, error } = await query;
+            if (error) throw error;
+            if (!data || data.length === 0) return [];
+
+            return data.map(row => ({
+                id: row.id,
+                name: row.title,
+                title: row.title,
+                archiveDate: row.archive_date,
+                dateStr: row.archive_date,
+                createdAt: row.created_at,
+                stake: parseFloat(row.stake || 0),
+                totalOdds: parseFloat(row.total_odd || 1.0),
+                potentialReturn: parseFloat(row.potential_return || 0),
+                status: row.status || 'pending',
+                payout: row.status === 'won' ? parseFloat(row.potential_return || 0) : 0,
+                netProfit: row.status === 'won' ? (parseFloat(row.potential_return || 0) - parseFloat(row.stake || 0)) : -parseFloat(row.stake || 0),
+                autoPlayed: row.auto_played,
+                isArchived: row.is_archived,
+                badge: row.badge,
+                badgeType: row.type,
+                matches: row.matches || []
+            }));
+        } catch (err) {
+            console.warn('Supabase getDailyCoupons hatası:', err ? err.message : err);
+            return [];
+        }
+    },
+
+    /**
+     * Sanal Kasa durumunu Supabase'e kaydeder
+     * @param {Object} walletData 
+     */
+    async saveWallet(walletData) {
+        if (!walletData) return false;
+        const client = (typeof SupabaseConfig !== 'undefined' && SupabaseConfig.getClient) ? SupabaseConfig.getClient() : null;
+        if (!client) return false;
+
+        try {
+            const payload = {
+                id: 'default_wallet',
+                current_balance: parseFloat(walletData.currentBalance || 1000),
+                initial_balance: parseFloat(walletData.initialBalance || 1000),
+                total_staked: parseFloat(walletData.totalStaked || 0),
+                total_won: parseFloat(walletData.totalWon || 0),
+                total_profit: parseFloat(walletData.totalProfit || 0),
+                win_count: parseInt(walletData.winCount || 0, 10),
+                loss_count: parseInt(walletData.lossCount || 0, 10),
+                pending_count: parseInt(walletData.pendingCount || 0, 10),
+                history: walletData.history || [],
+                updated_at: new Date().toISOString()
+            };
+            const { error } = await client.from('virtual_wallet').upsert(payload, { onConflict: 'id' });
+            if (error) {
+                console.warn('Supabase saveWallet uyarısı:', error.message);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            console.warn('Supabase saveWallet hatası:', err ? err.message : err);
+            return false;
+        }
+    },
+
+    /**
+     * Sanal Kasa durumunu Supabase'den getirir
+     */
+    async getWallet() {
+        const client = (typeof SupabaseConfig !== 'undefined' && SupabaseConfig.getClient) ? SupabaseConfig.getClient() : null;
+        if (!client) return null;
+
+        try {
+            const { data, error } = await client.from('virtual_wallet')
+                .select('*')
+                .eq('id', 'default_wallet')
+                .maybeSingle();
+
+            if (error || !data) return null;
+
+            return {
+                initialBalance: parseFloat(data.initial_balance || 1000),
+                currentBalance: parseFloat(data.current_balance || 1000),
+                totalStaked: parseFloat(data.total_staked || 0),
+                totalWon: parseFloat(data.total_won || 0),
+                totalProfit: parseFloat(data.total_profit || 0),
+                winCount: parseInt(data.win_count || 0, 10),
+                lossCount: parseInt(data.loss_count || 0, 10),
+                pendingCount: parseInt(data.pending_count || 0, 10),
+                history: data.history || [],
+                updatedAt: data.updated_at
+            };
+        } catch (err) {
+            console.warn('Supabase getWallet hatası:', err ? err.message : err);
+            return null;
+        }
+    },
+
     clearHistory() {
         Helpers.storage.set('analysis_history', []);
     },

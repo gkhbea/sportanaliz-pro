@@ -2,10 +2,54 @@
   "name": "spor-analiz-platformu",
   "version": "1.0.0",
   "description": "Spor Karşılaşması Analiz ve Tahmin Platformu",
-  "main": "proxy-server.js",
+  "main": "main.js",
   "scripts": {
     "start": "node proxy-server.js",
-    "dev": "node proxy-server.js"
+    "dev": "node proxy-server.js",
+    "electron:dev": "electron .",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable",
+    "dist:all": "electron-builder -w"
+  },
+  "build": {
+    "appId": "com.sportanaliz.pro",
+    "productName": "SportAnaliz Pro",
+    "copyright": "Copyright © 2026 SportAnaliz",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!scratch/**",
+      "!.git/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SportAnaliz Pro",
+      "uninstallDisplayName": "SportAnaliz Pro",
+      "runAfterFinish": true
+    }
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -13,5 +57,10 @@
     "localtunnel": "^2.0.2",
     "node-fetch": "^2.7.0",
     "nodemailer": "^10.0.3"
+  },
+  "devDependencies": {
+    "electron": "^44.4.1",
+    "electron-builder": "^26.15.3"
   }
 }
+

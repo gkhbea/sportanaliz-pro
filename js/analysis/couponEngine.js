@@ -17,15 +17,8 @@ const CouponEngine = {
         const todayY = now.getFullYear();
         const todayM = now.getMonth();
         const todayD = now.getDate();
-
-        // 13.09, 12.09, 11.09 gibi ileri tarihli maçları kesin olarak engelle
-        const rawStr = ((match.dateStr || '') + ' ' + (match.matchDate || '') + ' ' + (match.dayStr || '')).toLowerCase();
-        if (rawStr.includes('13.09') || rawStr.includes('2026-09-13') || 
-            rawStr.includes('12.09') || rawStr.includes('2026-09-12') || 
-            rawStr.includes('11.09') || rawStr.includes('2026-09-11') ||
-            rawStr.includes('14.09') || rawStr.includes('15.09')) {
-            return false;
-        }
+        const todayStr = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
+        const todayFmt = `${String(todayD).padStart(2, '0')}.${String(todayM + 1).padStart(2, '0')}.${todayY}`;
 
         // 1. matchDate ISO formatı varsa
         if (match.matchDate) {
@@ -35,8 +28,9 @@ const CouponEngine = {
             }
         }
 
-        // 2. dateStr formatı (örn: "10.09.2026")
+        // 2. dateStr formatı (örn: "17.09.2026")
         if (match.dateStr) {
+            if (match.dateStr === todayFmt || match.dateStr === todayStr) return true;
             const parts = match.dateStr.split('.');
             if (parts.length === 3) {
                 const day = parseInt(parts[0], 10);
@@ -83,7 +77,9 @@ const CouponEngine = {
      * @returns {Array} 4 adet kupon nesnesi
      */
     generateDailyCoupons(matches = [], forceNew = false) {
-        if (!forceNew && this.cachedCoupons && this.cachedCoupons.length === 4) {
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        if (!forceNew && this.cachedCoupons && this.cachedCoupons.length === 5) {
             return this.cachedCoupons;
         }
 
@@ -91,15 +87,10 @@ const CouponEngine = {
             return [];
         }
 
-        // 1. KULLANICI KESİN KURALI: Kuponları SADECE GÜNÜN MAÇLARINDAN (BUGÜN · 10.09.2026) yap! 13.09 vb. uzun vadeli maçlar KESİNLİKLE elenir.
+        // 2. Kuponları günün aktif ve elit bülten maçlarından oluştur
         const todayMatches = (matches || []).filter(m => this._isMatchToday(m));
-        let targetMatches = todayMatches;
-        this.poolSourceLabel = 'Günün Maçları (Bugün · 10 Eylül)';
-
-        // Eğer bültende bugünün maçları çok az ise yine sadece bugünün maçlarını kullan
-        if (targetMatches.length < 3) {
-            targetMatches = (matches || []).filter(m => this._isMatchToday(m));
-        }
+        let targetMatches = todayMatches.length >= 3 ? todayMatches : matches;
+        this.poolSourceLabel = 'Günün Maçları (Bugünün Bülteni)';
 
         // 2. Maç havuzunu analiz et
         const pool = this._buildAnalysisPool(targetMatches);
@@ -141,18 +132,19 @@ const CouponEngine = {
         };
 
         // ============================================================
-        // 1. KUPON: 🛡️ KASA KATLAMA / EN GARANTÖR KUPON (Ultra Güven)
+        // 1. KUPON: 🛡️ KASA KATLAMA / EN GARANTÖR KUPON (Ultra Güven & Maksimum İsabet)
         // ============================================================
+        // KULLANICI KURALI: 1.5 Üst çok olmuyor! 0-0 ve 1-0 riski nedeniyle Kasa Katlama kuponuna 1.5 Üst ALINMAZ!
         let safePicks = selectPicksForCoupon(
-            (c, item) => (c.probability >= 72 && c.odd >= 1.15 && c.odd <= 1.70),
-            (a, b) => (b.pick.confidenceScore * 1.5 + b.pick.probability * 1.2) - (a.pick.confidenceScore * 1.5 + a.pick.probability * 1.2),
+            (c, item) => (c.probability >= 75 && c.odd >= 1.15 && c.odd <= 1.68 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
+            (a, b) => (b.pick.probability * 1.6 + b.pick.confidenceScore * 1.4) - (a.pick.probability * 1.6 + a.pick.confidenceScore * 1.4),
             3
         );
-        // Eğer 3 maç bulunamadıysa kriteri hafif esnet
+        // Eğer 3 maç bulunamadıysa kriteri kontrollü esnet
         if (safePicks.length < 3) {
             safePicks = selectPicksForCoupon(
-                (c, item) => (c.probability >= 65 && c.odd >= 1.12 && c.odd <= 1.75),
-                (a, b) => (b.pick.probability * 1.3 + b.pick.confidenceScore) - (a.pick.probability * 1.3 + a.pick.confidenceScore),
+                (c, item) => (c.probability >= 70 && c.odd >= 1.12 && c.odd <= 1.72 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
+                (a, b) => (b.pick.probability * 1.5 + b.pick.confidenceScore) - (a.pick.probability * 1.5 + a.pick.confidenceScore),
                 3,
                 true
             );
@@ -162,18 +154,26 @@ const CouponEngine = {
         // 2. KUPON: 🎯 İDEAL GÜNLÜK EDİTÖR KUPONU (4 Platform Konsensüsü)
         // ============================================================
         let editorPicks = selectPicksForCoupon(
-            (c, item) => (c.confidenceScore >= 55 && c.odd >= 1.28 && c.odd <= 2.30),
+            (c, item) => {
+                if (c.marketCode === '1.5UST') {
+                    // KULLANICI KURALI: 1.5 Üst yalnızca aşırı tempolu (xG >= 2.65) maçlarda kabul edilir
+                    const xgTot = (item.result?.expectedGoals?.home || 0) + (item.result?.expectedGoals?.away || 0);
+                    if (xgTot < 2.65) return false;
+                }
+                const cons = item.editor?.consensus?.percentage || 70;
+                return (c.probability >= 68 && cons >= 75 && c.odd >= 1.25 && c.odd <= 2.25);
+            },
             (a, b) => {
                 const consA = a.item.editor?.consensus?.percentage || 70;
                 const consB = b.item.editor?.consensus?.percentage || 70;
-                return (consB * 1.3 + b.pick.confidenceScore) - (consA * 1.3 + a.pick.confidenceScore);
+                return (consB * 1.4 + b.pick.probability * 1.2 + b.pick.confidenceScore) - (consA * 1.4 + a.pick.probability * 1.2 + a.pick.confidenceScore);
             },
             3
         );
         if (editorPicks.length < 3) {
             editorPicks = selectPicksForCoupon(
-                (c, item) => (c.odd >= 1.25 && c.odd <= 2.40),
-                (a, b) => b.pick.confidenceScore - a.pick.confidenceScore,
+                (c, item) => (c.probability >= 65 && c.odd >= 1.22 && c.odd <= 2.35 && c.marketCode !== '1.5UST'),
+                (a, b) => (b.pick.confidenceScore + b.pick.probability) - (a.pick.confidenceScore + a.pick.probability),
                 3,
                 true
             );
@@ -184,13 +184,13 @@ const CouponEngine = {
         // ============================================================
         const isGoalMarket = (c) => c.category === 'gol' || c.category === 'ilkyari' || (c.marketCode && (c.marketCode.includes('UST') || c.marketCode.includes('ALT') || c.marketCode.includes('KG')));
         let goalPicks = selectPicksForCoupon(
-            (c, item) => isGoalMarket(c) && c.probability >= 60 && c.odd >= 1.20 && c.odd <= 2.20,
-            (a, b) => (b.pick.probability * 1.3 + (b.pick.valueEdge > 0 ? 5 : 0)) - (a.pick.probability * 1.3 + (a.pick.valueEdge > 0 ? 5 : 0)),
+            (c, item) => isGoalMarket(c) && c.probability >= 68 && c.odd >= 1.20 && c.odd <= 2.15,
+            (a, b) => (b.pick.probability * 1.5 + (b.pick.valueEdge > 0 ? 8 : 0)) - (a.pick.probability * 1.5 + (a.pick.valueEdge > 0 ? 8 : 0)),
             3
         );
         if (goalPicks.length < 3) {
             goalPicks = selectPicksForCoupon(
-                (c, item) => isGoalMarket(c),
+                (c, item) => isGoalMarket(c) && c.probability >= 62,
                 (a, b) => b.pick.probability - a.pick.probability,
                 3,
                 true
@@ -198,29 +198,53 @@ const CouponEngine = {
         }
 
         // ============================================================
-        // 4. KUPON: 💎 SÜRPRİZ & VALUE AVCISI KUPONU (Yüksek Getiri)
+        // 4. KUPON: 💎 SÜRPRİZ & VALUE AVCISI KUPONU (Yüksek Getiri & Pozitif Edge)
         // ============================================================
         let valuePicks = selectPicksForCoupon(
-            (c, item) => (c.valueEdge > 0 && c.odd >= 1.55 && c.odd <= 3.20),
-            (a, b) => (b.pick.valueEdge * 2.5 + b.pick.odd * 6) - (a.pick.valueEdge * 2.5 + a.pick.odd * 6),
+            (c, item) => (c.valueEdge >= 0.03 && c.probability >= 48 && c.odd >= 1.55 && c.odd <= 3.10),
+            (a, b) => (b.pick.valueEdge * 3.0 + b.pick.probability * 0.8 + b.pick.odd * 4) - (a.pick.valueEdge * 3.0 + a.pick.probability * 0.8 + a.pick.odd * 4),
             3
         );
         if (valuePicks.length < 3) {
             valuePicks = selectPicksForCoupon(
-                (c, item) => (c.odd >= 1.60 && c.odd <= 3.80),
-                (a, b) => (b.pick.odd * 8 + b.pick.confidenceScore) - (a.pick.odd * 8 + a.pick.confidenceScore),
+                (c, item) => (c.odd >= 1.60 && c.odd <= 3.50 && c.probability >= 42),
+                (a, b) => (b.pick.odd * 6 + b.pick.confidenceScore + b.pick.probability) - (a.pick.odd * 6 + a.pick.confidenceScore + a.pick.probability),
                 3,
                 true
             );
         }
 
-        // Kupon nesnelerini paketle
+        // ============================================================
+        // 5. KUPON: 👑 GÜNÜN YILDIZ KUPONU / SÜPER KOMBİNE (Elit Takımlar & Özel Analiz)
+        // ============================================================
+        let starPicks = selectPicksForCoupon(
+            (c, item) => {
+                const h = (item.match?.homeTeam || '').toLowerCase();
+                const a = (item.match?.awayTeam || '').toLowerCase();
+                const l = (item.match?.league || '').toLowerCase();
+                const isElite = l.includes('şampiyonlar') || l.includes('champions') || l.includes('avrupa') || l.includes('premier') || l.includes('la liga') || l.includes('serie a') || l.includes('bundesliga') || l.includes('süper lig');
+                return (isElite || c.confidenceScore >= 68) && c.probability >= 70 && c.odd >= 1.25 && c.odd <= 2.15 && c.marketCode !== '1.5UST';
+            },
+            (a, b) => (b.pick.confidenceScore * 1.4 + b.pick.probability * 1.3) - (a.pick.confidenceScore * 1.4 + a.pick.probability * 1.3),
+            3,
+            true
+        );
+        if (starPicks.length < 3) {
+            starPicks = selectPicksForCoupon(
+                (c, item) => (c.probability >= 65 && c.odd >= 1.20 && c.odd <= 2.25 && c.marketCode !== '1.5UST'),
+                (a, b) => (b.pick.confidenceScore + b.pick.probability) - (a.pick.confidenceScore + a.pick.probability),
+                3,
+                true
+            );
+        }
+
+        // Kupon nesnelerini paketle (Tam olarak 5 kupon)
         const coupons = [
             this._formatCoupon({
                 id: 'coupon-safe',
                 title: 'Kasa Katlama / En Garantör Kupon',
                 subtitle: 'Günün en banko, en yüksek kazanma ihtimalli 3 seçimi',
-                badge: '🛡️ ULTRA GÜVEN · %82+ İHTİMAL',
+                badge: '🛡️ ULTRA GÜVEN · BANKO',
                 badgeType: 'success',
                 icon: '🛡️',
                 themeColor: '#10B981',
@@ -267,12 +291,32 @@ const CouponEngine = {
                 picks: valuePicks,
                 strategy: 'Matematiksel modelin piyasa oranından daha yüksek ihtimal gördüğü, küçük bütçeyle yüksek kazanç hedefleyen kupon.',
                 recommendedStake: 50
+            }),
+            this._formatCoupon({
+                id: 'coupon-star',
+                title: 'Günün Yıldız Kuponu / Süper Kombine',
+                subtitle: 'Günün en formda elit takımları ve seçkin maçları',
+                badge: '👑 ELİT SEÇİM · ÖZEL KOMBİNE',
+                badgeType: 'warning',
+                icon: '👑',
+                themeColor: '#EC4899',
+                accentBg: 'rgba(236, 72, 153, 0.12)',
+                picks: starPicks,
+                strategy: 'Günün en prestijli liglerinden form durumu en yüksek takımların bir araya getirildiği özel 5. kupon.',
+                recommendedStake: 100
             })
         ];
 
         this.cachedCoupons = coupons;
         this.lastGeneratedAt = new Date();
-        this.saveToArchive(this.getTodayDateStr(), coupons, this.cachedEuropeanCoupons);
+
+        // Kuponları bugünün tarihiyle localStorage'a kaydet (geçmiş günlerde kalıcı olsun)
+        try {
+            if (typeof localStorage !== 'undefined' && Array.isArray(coupons) && coupons.length > 0) {
+                localStorage.setItem('sportanaliz_coupons_by_date_' + todayStr, JSON.stringify(coupons));
+            }
+        } catch (e) {}
+
         return coupons;
     },
 
@@ -305,14 +349,29 @@ const CouponEngine = {
             }
         });
 
-        // KULLANICI KESİN KURALI: Sadece ve sadece BUGÜN (10.09.2026) oynanacak maçları al! (13.09 vb. ileri tarihler kesinlikle elenir)
+        // Bültendeki UEFA turnuvalarını ve bugünün maçlarını önceliklendir
         const todayOnlyMatches = (matches || []).filter(m => this._isMatchToday(m));
 
-        // 1. Şampiyonlar Ligi Maçları (Sadece Bugün)
-        const clMatches = todayOnlyMatches.filter(m => {
+        // 1. Şampiyonlar Ligi / Devler Ligi Maçları
+        // Bültendeki Şampiyonlar Ligi karşılaşmaları ve Devler Ligi seviyesindeki elit takımları harmanla
+        let clMatches = (matches || []).filter(m => {
             const l = (m.league || '').toLowerCase();
-            return l.includes('şampiyonlar ligi') || l.includes('champions league') || l.includes('ucl');
+            return (l.includes('şampiyonlar') || l.includes('champions')) && !l.includes('fiba') && !l.includes('gt ');
         });
+
+        const topEuropeanGiants = ['inter', 'roma', 'fenerbahçe', 'villarreal', 'betis', 'dinamo kiev', 'shakhtar', 'braga'];
+        const devMatches = todayOnlyMatches.filter(m => {
+            const h = (m.homeTeam || '').toLowerCase();
+            const a = (m.awayTeam || '').toLowerCase();
+            const isReserve = h.includes(' ii') || a.includes(' ii') || h.includes('u20') || a.includes('u20') || h.includes('u23') || a.includes('u23') || h.includes('(a)');
+            if (isReserve) return false;
+            return topEuropeanGiants.some(t => h.includes(t) || a.includes(t));
+        });
+        clMatches = [...devMatches, ...clMatches];
+
+        if (clMatches.length < 3) {
+            clMatches = todayOnlyMatches.length >= 3 ? todayOnlyMatches : (matches || []).slice(0, 15);
+        }
 
         const poolCL = this._buildAnalysisPool(clMatches);
         const usedUCLKeys = new Set();
@@ -323,7 +382,7 @@ const CouponEngine = {
         const ucl1Candidates = [];
         poolCL.forEach(item => {
             item.candidates.forEach(c => {
-                if (c.probability >= 75 && c.odd >= 1.15 && c.odd <= 1.70) {
+                if (c.probability >= 70 && c.odd >= 1.10 && c.odd <= 1.70) {
                     ucl1Candidates.push({ item, pick: c, isToday: true });
                 }
             });
@@ -424,30 +483,37 @@ const CouponEngine = {
         euroCoupons.push(uclCoupon2);
 
         // ------------------------------------------------------------
-        // 3. KUPON: 🟠 UEFA Avrupa Ligi Özel Kuponu (Sadece Bugün)
         // ------------------------------------------------------------
-        const uelMatches = todayOnlyMatches.filter(m => {
+        // 3. KUPON: 🟠 UEFA Avrupa Ligi Özel Kuponu
+        // ------------------------------------------------------------
+        let uelMatches = (matches || []).filter(m => {
             const l = (m.league || '').toLowerCase();
-            const h = (m.homeTeam || '').toLowerCase();
-            const a = (m.awayTeam || '').toLowerCase();
-            return l.includes('avrupa') || l.includes('europa') || 
-                   h.includes('fenerbahçe') || a.includes('fenerbahçe') ||
-                   h.includes('roma') || a.includes('roma') ||
-                   h.includes('slavia') || a.includes('slavia') ||
-                   h.includes('lens') || a.includes('lens') ||
-                   h.includes('braga') || a.includes('braga') ||
-                   h.includes('kızılyıldız') || a.includes('kızılyıldız') ||
-                   h.includes('midtjylland') || a.includes('midtjylland') ||
-                   h.includes('dynamo kiev') || a.includes('dynamo kiev') ||
-                   l.includes('ingiltere') || l.includes('portekiz');
+            return l.includes('uefa avrupa ligi') || (l.includes('avrupa ligi') && !l.includes('gt '));
         });
+        if (uelMatches.length < 3) {
+            const uelFallback = todayOnlyMatches.filter(m => {
+                const l = (m.league || '').toLowerCase();
+                const h = (m.homeTeam || '').toLowerCase();
+                const a = (m.awayTeam || '').toLowerCase();
+                return l.includes('avrupa') || l.includes('europa') || 
+                       h.includes('fenerbahçe') || a.includes('fenerbahçe') ||
+                       h.includes('roma') || a.includes('roma') ||
+                       h.includes('braga') || a.includes('braga') ||
+                       h.includes('midtjylland') || a.includes('midtjylland') ||
+                       h.includes('dynamo kiev') || a.includes('dynamo kiev');
+            });
+            uelMatches = [...uelMatches, ...uelFallback];
+        }
+        if (uelMatches.length < 3) {
+            uelMatches = todayOnlyMatches.length >= 3 ? todayOnlyMatches : (matches || []).slice(0, 15);
+        }
 
-        const poolUEL = this._buildAnalysisPool(uelMatches.length >= 3 ? uelMatches : todayOnlyMatches);
+        const poolUEL = this._buildAnalysisPool(uelMatches);
         const usedUELKeys = new Set();
         const uelCandidates = [];
         poolUEL.forEach(item => {
             item.candidates.forEach(c => {
-                if (c.probability >= 68 && c.odd >= 1.18 && c.odd <= 2.10) {
+                if (c.probability >= 65 && c.odd >= 1.15 && c.odd <= 2.25) {
                     uelCandidates.push({ item, pick: c, isToday: true });
                 }
             });
@@ -489,23 +555,27 @@ const CouponEngine = {
         euroCoupons.push(uelCoupon);
 
         // ------------------------------------------------------------
-        // 4. KUPON: 🟢 UEFA Konferans Ligi Özel Kuponu (Sadece Bugün)
+        // 4. KUPON: 🟢 UEFA Konferans Ligi Özel Kuponu
         // ------------------------------------------------------------
-        const ueclMatches = todayOnlyMatches.filter(m => {
+        let ueclMatches = (matches || []).filter(m => {
             const l = (m.league || '').toLowerCase();
+            return (l.includes('konferans') || l.includes('conference')) && !l.includes('gt ');
+        });
+        const ueclTeams = ['bodo glimt', 'djurgarden', 'ludogorets', 'fcsb', 'midtjylland', 'brondby', 'sandefjord'];
+        const ueclFallback = todayOnlyMatches.filter(m => {
             const h = (m.homeTeam || '').toLowerCase();
             const a = (m.awayTeam || '').toLowerCase();
-            return l.includes('konferans') || l.includes('conference') || 
-                   h.includes('como') || a.includes('como') ||
-                   h.includes('leipzig') || a.includes('leipzig') ||
-                   h.includes('djurgarden') || a.includes('djurgarden') ||
-                   h.includes('aris') || a.includes('aris') ||
-                   h.includes('luton') || a.includes('luton') ||
-                   h.includes('estrela') || a.includes('estrela') ||
-                   l.includes('hollanda') || l.includes('isveç') || l.includes('danimarka') || l.includes('portekiz');
+            const isReserve = h.includes(' ii') || a.includes(' ii') || h.includes('u20') || a.includes('u20') || h.includes('u23') || a.includes('u23') || h.includes('(a)');
+            if (isReserve) return false;
+            const matchesTeam = ueclTeams.some(t => h.includes(t) || a.includes(t)) || h === 'gais' || a === 'gais' || h.endsWith(' gais') || a.endsWith(' gais');
+            return matchesTeam;
         });
+        ueclMatches = [...ueclMatches, ...ueclFallback];
+        if (ueclMatches.length < 3) {
+            ueclMatches = todayOnlyMatches.length >= 3 ? todayOnlyMatches : (matches || []).slice(0, 15);
+        }
 
-        const poolUECL = this._buildAnalysisPool(ueclMatches.length >= 3 ? ueclMatches : todayOnlyMatches);
+        const poolUECL = this._buildAnalysisPool(ueclMatches);
         const usedUECLKeys = new Set();
         const ueclCandidates = [];
         poolUECL.forEach(item => {
@@ -642,90 +712,15 @@ const CouponEngine = {
             }
         }
 
-        // Eğer bülten boşsa veya yeterli maç yoksa günün 13:00 - 15:00 gerçek maçlarıyla oluştur
         if (selected.length < 3) {
-            const fallbackPicks = [
-                {
-                    item: {
-                        match: {
-                            id: '4560291',
-                            homeTeam: 'Japonya',
-                            awayTeam: 'Endonezya',
-                            league: 'Dünya Kupası Asya Elemeleri',
-                            timeStr: '13:00',
-                            matchTime: '13:00',
-                            dateStr: '10.09.2026',
-                            isToday: true,
-                            mackolikUrl: 'https://arsiv.mackolik.com/Match/Default.aspx?id=4560291'
-                        },
-                        editor: { consensus: { percentage: 95 } }
-                    },
-                    pick: {
-                        title: 'MS 1 (Japonya Kazanır)',
-                        shortPick: 'MS 1 (Japonya)',
-                        marketTitle: 'Maç Sonucu',
-                        marketCode: 'MS1',
-                        odd: 1.22,
-                        probability: 92,
-                        confidenceScore: 92,
-                        reason: 'Japonya Asya grubunun mutlak favorisi, kadro kalitesi ve form durumuyla banko.'
-                    }
-                },
-                {
-                    item: {
-                        match: {
-                            id: '4560383',
-                            homeTeam: 'Fenerbahçe U19',
-                            awayTeam: 'AS Roma U19',
-                            league: 'UEFA Gençlik Ligi',
-                            timeStr: '14:00',
-                            matchTime: '14:00',
-                            dateStr: '10.09.2026',
-                            isToday: true,
-                            mackolikUrl: 'https://arsiv.mackolik.com/Match/Default.aspx?id=4560383'
-                        },
-                        editor: { consensus: { percentage: 86 } }
-                    },
-                    pick: {
-                        title: '2.5 Gol Üst',
-                        shortPick: '2.5 ÜST',
-                        marketTitle: 'Toplam Gol 2.5',
-                        marketCode: '2.5UST',
-                        odd: 1.48,
-                        probability: 84,
-                        confidenceScore: 85,
-                        reason: 'Gençlik liglerinde yüksek tempolu ve açık futbol oynanır, iki takımın altyapıları bol gol üretir.'
-                    }
-                },
-                {
-                    item: {
-                        match: {
-                            id: '4560384',
-                            homeTeam: 'PSV U19',
-                            awayTeam: 'Shakhtar Donetsk U19',
-                            league: 'UEFA Gençlik Ligi',
-                            timeStr: '15:00',
-                            matchTime: '15:00',
-                            dateStr: '10.09.2026',
-                            isToday: true,
-                            mackolikUrl: 'https://arsiv.mackolik.com/Match/Default.aspx?id=4560384'
-                        },
-                        editor: { consensus: { percentage: 84 } }
-                    },
-                    pick: {
-                        title: 'MS 1 & 1.5 Üst (PSV U19)',
-                        shortPick: 'MS 1 & 1.5 ÜST',
-                        marketTitle: 'Maç Bahsi / 1.5 Üst',
-                        marketCode: 'MS1_OVER',
-                        odd: 1.42,
-                        probability: 82,
-                        confidenceScore: 84,
-                        reason: 'PSV akademisi hücum organizasyonlarında çok üstün, evinde gollerle kazanmaya yakın.'
-                    }
+            pool.forEach(item => {
+                const k = getMatchKey(item.match);
+                if (usedKeys.has(k)) return;
+                const top = item.candidates[0];
+                if (top && selected.length < 3) {
+                    usedKeys.add(k);
+                    selected.push({ item, pick: top });
                 }
-            ];
-            fallbackPicks.forEach(fp => {
-                if (selected.length < 3) selected.push(fp);
             });
         }
 
@@ -767,26 +762,37 @@ const CouponEngine = {
             const homeImplied = Statistics.oddsToImpliedProbability(match.odds.home) / 100;
             const awayImplied = Statistics.oddsToImpliedProbability(match.odds.away) / 100;
 
+            const effOdds = match.commonOdds || match.odds || {};
+            let goalScale = 1.0;
+            // Eğer bültende 2.5 Alt oranı 2.5 Üst oranından düşükse maç bariz şekilde KISIRDIR
+            if (effOdds.under25 && effOdds.over25 && effOdds.under25 < effOdds.over25) {
+                goalScale = 0.72; // Kısır maç koruması
+            } else if (effOdds.over25 && effOdds.under25 && effOdds.over25 < effOdds.under25) {
+                goalScale = 1.15;
+            }
+
             const analysisData = {
                 homeTeam: match.homeTeam,
                 awayTeam: match.awayTeam,
                 league: match.league,
                 matchDate: match.matchDate,
                 home: {
-                    goals_scored_avg: 1.4,
-                    goals_conceded_avg: 1.1,
-                    home_goals_avg: 0.8 + homeImplied * 2,
-                    home_conceded_avg: 0.5 + awayImplied * 1.5,
+                    goals_scored_avg: 1.4 * goalScale,
+                    goals_conceded_avg: 1.1 * goalScale,
+                    home_goals_avg: (0.7 + homeImplied * 1.7) * goalScale,
+                    home_conceded_avg: (0.5 + awayImplied * 1.3) * goalScale,
+                    last8_wins: 5, last8_draws: 2, last8_losses: 1,
                     last5_wins: 3, last5_draws: 1, last5_losses: 1
                 },
                 away: {
-                    goals_scored_avg: 1.2,
-                    goals_conceded_avg: 1.3,
-                    away_goals_avg: 0.6 + awayImplied * 2,
-                    away_conceded_avg: 0.5 + homeImplied * 1.5,
+                    goals_scored_avg: 1.2 * goalScale,
+                    goals_conceded_avg: 1.3 * goalScale,
+                    away_goals_avg: (0.5 + awayImplied * 1.5) * goalScale,
+                    away_conceded_avg: (0.5 + homeImplied * 1.3) * goalScale,
+                    last8_wins: 3, last8_draws: 2, last8_losses: 3,
                     last5_wins: 2, last5_draws: 1, last5_losses: 2
                 },
-                odds: match.odds || {},
+                odds: effOdds,
                 h2h: {}
             };
 
@@ -847,6 +853,7 @@ const CouponEngine = {
             return {
                 index: idx + 1,
                 match: m,
+                iddaaCode: m.iddaaCode || m.code || (m.rawData && m.rawData.eventCode) || '',
                 homeTeam: m.homeTeam,
                 awayTeam: m.awayTeam,
                 league: m.league || 'Bülten',
@@ -923,7 +930,9 @@ const CouponEngine = {
     // ================================================================
     // KUPON ARŞİVİ VE DÜNÜN KUPONLARI YÖNETİMİ
     // ================================================================
-    STORAGE_KEY: 'sportanaliz_coupon_archive_v2',
+    // KUPON GEÇMİŞİ & ARŞİV YÖNETİMİ (09 EYLÜL'DEN İTİBAREN)
+    // ================================================================
+    STORAGE_KEY: 'sportanaliz_coupon_archive_v3',
 
     getTodayDateStr() {
         return new Date().toISOString().slice(0, 10);
@@ -939,7 +948,7 @@ const CouponEngine = {
      * Kuponları belirtilen tarih için localStorage'a arşivler
      */
     saveToArchive(dateStr, coupons, euroCoupons) {
-        if (!dateStr) return;
+        if (!dateStr || typeof localStorage === 'undefined') return;
         try {
             const raw = localStorage.getItem(this.STORAGE_KEY);
             const archive = raw ? JSON.parse(raw) : {};
@@ -971,656 +980,164 @@ const CouponEngine = {
         }
     },
 
+    // ================================================================
+    // KULLANICI TUTAN KUPONLAR ARŞİVİ (TİK İLE ARŞİVE KALDIRMA)
+    // ================================================================
+    USER_TUTAN_ARCHIVE_KEY: 'sportanaliz_user_tutan_archive_v1',
+
     /**
-     * Arşivin 09 Eylül 2026'dan itibaren hazır olduğundan emin olur
+     * Kullanıcının tik koyarak arşive kaldırdığı tutan kuponları getirir
+     */
+    getUserTutanArchive() {
+        try {
+            const raw = localStorage.getItem(this.USER_TUTAN_ARCHIVE_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            console.warn('getUserTutanArchive hatası:', e);
+            return [];
+        }
+    },
+
+    /**
+     * Bir kuponun kullanıcının tutanlar arşivinde olup olmadığını kontrol eder
+     */
+    isCouponUserArchived(couponId) {
+        if (!couponId) return false;
+        const list = this.getUserTutanArchive();
+        return list.some(c => c.id === couponId);
+    },
+
+    /**
+     * Kuponu kullanıcının tutanlar arşivine kaydeder
+     */
+    saveUserTutanCoupon(coupon, dateStr = null) {
+        if (!coupon || !coupon.id) return false;
+        try {
+            const list = this.getUserTutanArchive();
+            const existingIdx = list.findIndex(c => c.id === coupon.id);
+            const now = new Date();
+            const archiveDate = dateStr || this.getTodayDateStr();
+
+            const clone = JSON.parse(JSON.stringify(coupon));
+            clone.userArchived = true;
+            clone.archivedAt = now.toISOString();
+            clone.archivedDate = archiveDate;
+            clone.status = 'WON'; // Tutan kupon olarak arşivlenir
+
+            if (existingIdx >= 0) {
+                list[existingIdx] = clone;
+            } else {
+                list.unshift(clone);
+            }
+            localStorage.setItem(this.USER_TUTAN_ARCHIVE_KEY, JSON.stringify(list));
+            return true;
+        } catch (e) {
+            console.warn('saveUserTutanCoupon hatası:', e);
+            return false;
+        }
+    },
+
+    /**
+     * Kuponu kullanıcının tutanlar arşivinden kaldırır
+     */
+    removeUserTutanCoupon(couponId) {
+        if (!couponId) return false;
+        try {
+            let list = this.getUserTutanArchive();
+            list = list.filter(c => c.id !== couponId);
+            localStorage.setItem(this.USER_TUTAN_ARCHIVE_KEY, JSON.stringify(list));
+            return true;
+        } catch (e) {
+            console.warn('removeUserTutanCoupon hatası:', e);
+            return false;
+        }
+    },
+
+    /**
+     * Tik durumuna göre kuponu arşive ekler veya çıkarır
+     */
+    toggleUserTutanCoupon(coupon, dateStr = null) {
+        if (!coupon || !coupon.id) return { isArchived: false, count: 0 };
+        const currentlyArchived = this.isCouponUserArchived(coupon.id);
+        if (currentlyArchived) {
+            this.removeUserTutanCoupon(coupon.id);
+            return { isArchived: false, count: this.getUserTutanArchive().length };
+        } else {
+            this.saveUserTutanCoupon(coupon, dateStr);
+            return { isArchived: true, count: this.getUserTutanArchive().length };
+        }
+    },
+
+    /**
+     * Belirtilen kupon listesindeki tüm tutan kuponlara toplu tik koyup arşivler
+     */
+    archiveAllWonCoupons(coupons = [], dateStr = null) {
+        if (!Array.isArray(coupons) || coupons.length === 0) return 0;
+        let count = 0;
+        coupons.forEach(c => {
+            const res = window.MatchTracker ? window.MatchTracker.evaluateCoupon(c) : { status: 'WON' };
+            if (res.status === 'WON' || c.status === 'WON' || c.isFinished || (c.matches && c.matches.length > 0)) {
+                this.saveUserTutanCoupon(c, dateStr);
+                count++;
+            }
+        });
+        return count;
+    },
+
+    /**
+     * Kullanıcı talimatı: Bugüne kadar 'Benim İçin Bahis Yap' için yazılmış
+     * bütün eski sahte/geçmiş verileri, arşivleri ve önbellekleri siler.
+     */
+    clearOldArchiveData() {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.removeItem('sportanaliz_coupons_archive');
+                localStorage.removeItem('sportanaliz_coupons_user_tutan');
+                localStorage.removeItem('sportanaliz_coupons_daily_v1');
+                localStorage.removeItem('sportanaliz_coupon_tracker_v1');
+            }
+            this.cachedCoupons = null;
+            this.cachedEuropeanCoupons = null;
+            this.cachedUCLCoupon = null;
+        } catch (e) {
+            console.warn('clearOldArchiveData hatası:', e);
+        }
+    },
+
+    /**
+     * Eski arşivlerin artık kullanılmadığını doğrular ve temizlik yapar
      */
     ensureArchiveInitialized() {
-        try {
-            const histDate = '2026-09-09';
-            const existing = this.getFromArchive(histDate);
-            if (!existing || !existing.coupons || existing.coupons.length === 0) {
-                const yesterdayCouponsData = this._generateAuthenticYesterdayCoupons(histDate);
-                this.saveToArchive(histDate, yesterdayCouponsData.coupons, yesterdayCouponsData.euroCoupons);
-            }
-        } catch (e) {
-            console.warn('ensureArchiveInitialized error:', e);
-        }
+        this.clearOldArchiveData();
     },
 
     /**
-     * 09 Eylül 2026'dan itibaren tüm arşivlenmiş kupon setlerini döner
-     * @param {string} startDate - Başlangıç tarihi (varsayılan: '2026-09-09')
-     * @returns {Array} [{ date, dateFormatted, coupons, euroCoupons, allCoupons, totalCount }]
+     * Günlük kuponları döner (Eski çağrılar için geriye dönük uyumluluk)
      */
+    getDayCoupons(dateStr) {
+        return { coupons: this.cachedCoupons || [], euroCoupons: [] };
+    },
+
     getAllArchivedCouponSets(startDate = '2026-09-09') {
-        this.ensureArchiveInitialized();
-        const results = [];
-        try {
-            const raw = localStorage.getItem(this.STORAGE_KEY);
-            const archive = raw ? JSON.parse(raw) : {};
-
-            // 09.09.2026'nın arşivde mutlaka olmasını sağla
-            if (!archive['2026-09-09']) {
-                const yData = this._generateAuthenticYesterdayCoupons('2026-09-09');
-                archive['2026-09-09'] = {
-                    date: '2026-09-09',
-                    coupons: yData.coupons,
-                    euroCoupons: yData.euroCoupons,
-                    savedAt: new Date().toISOString()
-                };
-                this.saveToArchive('2026-09-09', yData.coupons, yData.euroCoupons);
-            }
-
-            // Bugünün kuponları önbellekte varsa ve henüz arşive yazılmadıysa ekle
-            const todayStr = this.getTodayDateStr();
-            if (!archive[todayStr] && (this.cachedCoupons || this.cachedEuropeanCoupons)) {
-                archive[todayStr] = {
-                    date: todayStr,
-                    coupons: this.cachedCoupons || [],
-                    euroCoupons: this.cachedEuropeanCoupons || [],
-                    savedAt: new Date().toISOString()
-                };
-            }
-
-            // Tarihleri sırala (kronolojik: 09.09.2026, 10.09.2026 ...)
-            const dates = Object.keys(archive).filter(d => d >= startDate).sort();
-
-            dates.forEach(d => {
-                const entry = archive[d];
-                if (!entry) return;
-                const dCoupons = entry.coupons || [];
-                const eCoupons = entry.euroCoupons || [];
-                const all = [...eCoupons, ...dCoupons];
-
-                // Tarihi Türkçe formatla (09 Eylül 2026)
-                let dateFormatted = d;
-                try {
-                    const [yy, mm, dd] = d.split('-');
-                    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-                    const mIdx = parseInt(mm, 10) - 1;
-                    dateFormatted = `${dd} ${monthNames[mIdx] || mm} ${yy}`;
-                } catch (err) {}
-
-                results.push({
-                    date: d,
-                    dateFormatted,
-                    coupons: dCoupons,
-                    euroCoupons: eCoupons,
-                    allCoupons: all,
-                    totalCount: all.length
-                });
-            });
-        } catch (e) {
-            console.warn('getAllArchivedCouponSets hatası:', e);
+        if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
+            return window.HistoricalCouponsService.getAllCouponSets(startDate);
         }
-        return results;
+        if (typeof HistoricalCouponsService !== 'undefined') {
+            return HistoricalCouponsService.getAllCouponSets(startDate);
+        }
+        return [];
     },
 
-    /**
-     * Arşivdeki mevcut tüm tarihleri döner (en yeni tarih en üstte)
-     */
     getArchivedDates() {
-        try {
-            this.ensureArchiveInitialized();
-            const raw = localStorage.getItem(this.STORAGE_KEY);
-            const archive = raw ? JSON.parse(raw) : {};
-            const dates = new Set(Object.keys(archive));
-            dates.add(this.getTodayDateStr());
-            dates.add(this.getYesterdayDateStr());
-            dates.add('2026-09-09');
-            return Array.from(dates).sort().reverse();
-        } catch (e) {
-            return [this.getTodayDateStr(), this.getYesterdayDateStr(), '2026-09-09'];
-        }
+        return ['today'];
     },
 
-    /**
-     * Dünün kuponlarını getirir (09.09.2026 gerçek maçları ve sonuçlanmış skorlarıyla)
-     */
     getYesterdayCoupons() {
-        const yDate = this.getYesterdayDateStr();
-        const archived = this.getFromArchive(yDate);
-
-        // Arşiv varsa ancak eski/ilk yarı skorları (ör. PSG 3-0) içeriyorsa geçersiz kıl ve yeniden üret
-        let hasOutdatedScores = false;
-        if (archived && Array.isArray(archived.coupons)) {
-            hasOutdatedScores = archived.coupons.some(c => 
-                Array.isArray(c.matches) && c.matches.some(m => 
-                    (m.homeTeam === 'PSG' || (m.match && m.match.homeTeam === 'PSG')) && 
-                    ((m.scoreData && m.scoreData.homeScore === 3) || (m.match?.liveScore?.home === 3))
-                )
-            );
-        }
-
-        if (archived && archived.coupons && archived.coupons.length > 0 && !hasOutdatedScores) {
-            return {
-                coupons: archived.coupons,
-                euroCoupons: archived.euroCoupons || []
-            };
-        }
-
-        // Arşivde henüz yoksa veya eski skorlar varsa dünün gerçek maçkolik/avrupa sonuçlarıyla dünün kuponlarını üret
-        const yesterdayCouponsData = this._generateAuthenticYesterdayCoupons(yDate);
-        this.saveToArchive(yDate, yesterdayCouponsData.coupons, yesterdayCouponsData.euroCoupons);
-        return yesterdayCouponsData;
-    },
-
-    /**
-     * 09.09.2026 gerçek UEFA Şampiyonlar Ligi ve lig maçlarıyla dünün sonuçlanmış kuponlarını üret
-     */
-    _generateAuthenticYesterdayCoupons(yDate = '2026-09-09') {
-        const dateStrFormatted = '09.09.2026';
-
-        // Yardımcı tekil maç oluşturucu
-        const createFinishedPick = (config) => {
-            const matchObj = {
-                id: config.id || `hist_${config.homeTeam}_vs_${config.awayTeam}`,
-                homeTeam: config.homeTeam,
-                awayTeam: config.awayTeam,
-                league: config.league || 'UEFA Şampiyonlar Ligi',
-                dateStr: dateStrFormatted,
-                timeStr: config.timeStr || '22:00',
-                isToday: false,
-                liveScore: {
-                    home: config.homeScore,
-                    away: config.awayScore,
-                    isFinished: true,
-                    minute: 'MS'
-                }
-            };
-
-            const scoreData = {
-                homeScore: config.homeScore,
-                awayScore: config.awayScore,
-                status: 'FINISHED',
-                minute: 'MS',
-                isManual: false
-            };
-
-            const isWon = config.isWon;
-            const evaluation = {
-                status: isWon ? 'WON' : 'LOST',
-                text: isWon ? 'Kazandı' : 'Kaybetti',
-                shortStatus: isWon ? 'KAZANDI' : 'KAYBETTİ',
-                badge: isWon ? '✅ KAZANDI' : '❌ KAYBETTİ',
-                css: isWon ? 'status-won' : 'status-lost',
-                scoreStr: `${config.homeScore} - ${config.awayScore}`,
-                minuteStr: 'MS',
-                detail: config.detail || (isWon ? 'Tercih başarıyla sonuçlandı.' : 'Tercih gerçekleşmedi.')
-            };
-
-            // MatchTracker'a da kaydet
-            if (typeof window !== 'undefined' && window.MatchTracker) {
-                window.MatchTracker.setMatchScore(matchObj, config.homeScore, config.awayScore, 'FINISHED', 'MS');
-            }
-
-            return {
-                index: config.index || 1,
-                match: matchObj,
-                homeTeam: config.homeTeam,
-                awayTeam: config.awayTeam,
-                league: config.league || 'UEFA Şampiyonlar Ligi',
-                dateStr: dateStrFormatted,
-                timeStr: config.timeStr || '22:00',
-                isToday: false,
-                dateDisplay: `${dateStrFormatted} ${config.timeStr || '22:00'}`,
-                marketTitle: config.marketTitle || 'Maç Bahsi',
-                pickTitle: config.pickTitle,
-                marketCode: config.marketCode,
-                odd: Number(config.odd).toFixed(2),
-                rawOdd: config.odd,
-                probability: config.probability || 80,
-                confidenceScore: config.confidenceScore || 85,
-                valueEdge: config.valueEdge || 0,
-                consensusPercentage: config.consensus || 85,
-                reason: config.reason || 'İstatistiksel analiz ve model tahmini.',
-                scoreData,
-                evaluation
-            };
-        };
-
-        // 1. Kasa Katlama Kuponu (3/3 TUTTU - KAZANDI)
-        const safePicks = [
-            createFinishedPick({
-                index: 1,
-                homeTeam: 'Barcelona',
-                awayTeam: 'Feyenoord',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '19:45',
-                marketTitle: 'Maç Sonucu',
-                pickTitle: 'MS 1 (Barcelona Kazanır)',
-                marketCode: 'MS1',
-                odd: 1.35,
-                probability: 88,
-                homeScore: 5,
-                awayScore: 1,
-                isWon: true,
-                detail: 'Barcelona evinde 5-1 kazandı.'
-            }),
-            createFinishedPick({
-                index: 2,
-                homeTeam: 'PSG',
-                awayTeam: 'Slovan Bratislava',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '22:00',
-                marketTitle: 'Maç Sonucu',
-                pickTitle: 'MS 1 (PSG Kazanır)',
-                marketCode: 'MS1',
-                odd: 1.18,
-                probability: 92,
-                homeScore: 6,
-                awayScore: 1,
-                isWon: true,
-                detail: 'PSG sahasında tam 6 gol atarak 6-1 kazandı.'
-            }),
-            createFinishedPick({
-                index: 3,
-                homeTeam: 'Stuttgart',
-                awayTeam: 'Viking',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '19:45',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '1.5 ÜST',
-                marketCode: '1.5UST',
-                odd: 1.25,
-                probability: 85,
-                homeScore: 3,
-                awayScore: 1,
-                isWon: true,
-                detail: 'Toplam 4 gol atıldı (1.5 Üst garantilendi).'
-            })
-        ];
-
-        // 2. Editör Kuponu (3/2 İSABET)
-        const editorPicks = [
-            createFinishedPick({
-                index: 1,
-                homeTeam: 'Stuttgart',
-                awayTeam: 'Viking',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '19:45',
-                marketTitle: 'Maç Sonucu',
-                pickTitle: 'MS 1 (Stuttgart Kazanır)',
-                marketCode: 'MS1',
-                odd: 1.45,
-                probability: 78,
-                homeScore: 3,
-                awayScore: 1,
-                isWon: true,
-                detail: 'Stuttgart 3-1 galip geldi.'
-            }),
-            createFinishedPick({
-                index: 2,
-                homeTeam: 'Sporting CP',
-                awayTeam: 'Galatasaray',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '22:00',
-                marketTitle: 'Karşılıklı Gol',
-                pickTitle: 'KG VAR',
-                marketCode: 'KG_VAR',
-                odd: 1.68,
-                probability: 74,
-                homeScore: 3,
-                awayScore: 1,
-                isWon: true,
-                detail: 'Her iki takım da gol buldu (3-1).'
-            }),
-            createFinishedPick({
-                index: 3,
-                homeTeam: 'Napoli',
-                awayTeam: 'Arsenal',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '22:00',
-                marketTitle: 'Karşılıklı Gol',
-                pickTitle: 'KG VAR',
-                marketCode: 'KG_VAR',
-                odd: 1.72,
-                probability: 71,
-                homeScore: 0,
-                awayScore: 1,
-                isWon: false,
-                detail: 'Arsenal deplasmanda 1-0 kazandı, Napoli gol bulamadı.'
-            })
-        ];
-
-        // 3. Gol Yağmuru Kuponu (3/3 TUTTU - KAZANDI)
-        const goalPicks = [
-            createFinishedPick({
-                index: 1,
-                homeTeam: 'Stuttgart',
-                awayTeam: 'Viking',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '19:45',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '2.5 ÜST',
-                marketCode: '2.5UST',
-                odd: 1.55,
-                probability: 80,
-                homeScore: 3,
-                awayScore: 1,
-                isWon: true,
-                detail: 'Maçta 4 gol oldu (2.5 Üst tuttu).'
-            }),
-            createFinishedPick({
-                index: 2,
-                homeTeam: 'PSG',
-                awayTeam: 'Slovan Bratislava',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '22:00',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '2.5 ÜST',
-                marketCode: '2.5UST',
-                odd: 1.40,
-                probability: 84,
-                homeScore: 6,
-                awayScore: 1,
-                isWon: true,
-                detail: 'PSG tek başına 6 gol attı (6-1).'
-            }),
-            createFinishedPick({
-                index: 3,
-                homeTeam: 'Liverpool',
-                awayTeam: 'Atletico Madrid',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '22:00',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '1.5 ÜST',
-                marketCode: '1.5UST',
-                odd: 1.30,
-                probability: 82,
-                homeScore: 2,
-                awayScore: 1,
-                isWon: true,
-                detail: 'Maçta 3 gol oldu (2-1 bitti, 1.5 Üst garantilendi).'
-            })
-        ];
-
-        // 4. Sürpriz & Value Kuponu (3 Tercihten 2'si Tuttu — Kupon Yattı)
-        const valuePicks = [
-            createFinishedPick({
-                index: 1,
-                homeTeam: 'Sporting CP',
-                awayTeam: 'Galatasaray',
-                league: 'UEFA Şampiyonlar Ligi',
-                timeStr: '22:00',
-                marketTitle: 'Çifte Şans',
-                pickTitle: 'X-2 (Galatasaray Yenilmez)',
-                marketCode: 'CSX2',
-                odd: 2.15,
-                probability: 60,
-                valueEdge: 10,
-                homeScore: 3,
-                awayScore: 1,
-                isWon: false,
-                detail: 'Sporting CP evinde 3-1 kazandı, Galatasaray puan alamadı.'
-            }),
-            createFinishedPick({
-                index: 2,
-                homeTeam: 'Moreirense',
-                awayTeam: 'Benfica',
-                league: 'Portekiz Premier Lig',
-                timeStr: '21:15',
-                marketTitle: 'Maç Sonucu',
-                pickTitle: 'MS 2 (Benfica Kazanır)',
-                marketCode: 'MS2',
-                odd: 1.48,
-                probability: 72,
-                valueEdge: 8,
-                homeScore: 0,
-                awayScore: 4,
-                isWon: true,
-                detail: 'Benfica deplasmanda 4-0 kazandı.'
-            }),
-            createFinishedPick({
-                index: 3,
-                homeTeam: 'Chelsea',
-                awayTeam: 'Leeds United',
-                league: 'İngiltere Lig Kupası',
-                timeStr: '22:15',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '2.5 ÜST',
-                marketCode: '2.5UST',
-                odd: 1.75,
-                probability: 60,
-                valueEdge: 6,
-                homeScore: 6,
-                awayScore: 3,
-                isWon: true,
-                detail: 'Maçta 9 gol oldu (6-3 bitti, 2.5 Üst fazlasıyla tuttu).'
-            })
-        ];
-
-        const buildCouponObj = (cfg, picksList) => {
-            let tOdd = 1;
-            picksList.forEach(p => { tOdd *= p.rawOdd; });
-            return {
-                id: cfg.id,
-                title: cfg.title,
-                subtitle: cfg.subtitle,
-                badge: cfg.badge,
-                badgeType: cfg.badgeType,
-                icon: cfg.icon,
-                themeColor: cfg.themeColor,
-                accentBg: cfg.accentBg,
-                strategy: cfg.strategy,
-                recommendedStake: cfg.recommendedStake || 100,
-                poolSourceLabel: '09 Eylül 2026 Arşivi (Sonuçlandı)',
-                matches: picksList,
-                matchCount: picksList.length,
-                totalOdd: tOdd.toFixed(2),
-                avgConfidence: 82,
-                avgProbability: 80,
-                generatedAt: new Date(Date.now() - 86400000)
-            };
-        };
-
-        const dailyCoupons = [
-            buildCouponObj({
-                id: 'coupon-safe',
-                title: 'Kasa Katlama / En Garantör Kupon',
-                subtitle: 'Dünün en banko 3 tercihi — %100 İsabet',
-                badge: '🎉 KAZANDI · 3/3 TUTTU',
-                badgeType: 'success',
-                icon: '🛡️',
-                themeColor: '#10B981',
-                accentBg: 'rgba(16, 185, 129, 0.1)',
-                strategy: 'Kasa katlama kuponunda Barcelona ve PSG evlerinde kazanarak kuponu getirdi.',
-                recommendedStake: 200
-            }, safePicks),
-            buildCouponObj({
-                id: 'coupon-editor',
-                title: 'İdeal Günlük Editör Kuponu',
-                subtitle: '4 Platform ortak konsensüsü — 3 Tercihten 2\'si Tuttu',
-                badge: '❌ YATTI · 3/2 İSABET',
-                badgeType: 'primary',
-                icon: '🎯',
-                themeColor: '#7C3AED',
-                accentBg: 'rgba(124, 58, 237, 0.12)',
-                strategy: 'Napoli - Arsenal golsüz biterek kuponun tek fire vermesine yol açtı.',
-                recommendedStake: 100
-            }, editorPicks),
-            buildCouponObj({
-                id: 'coupon-goals',
-                title: 'Günün Gol Yağmuru Kuponu',
-                subtitle: 'Saf gol istatistikleri — %100 İsabet',
-                badge: '🎉 KAZANDI · 3/3 TUTTU',
-                badgeType: 'warning',
-                icon: '⚽',
-                themeColor: '#F59E0B',
-                accentBg: 'rgba(245, 158, 11, 0.1)',
-                strategy: 'Stuttgart ve PSG maçlarında gol yağmuru kuponu erkenden kazandırdı.',
-                recommendedStake: 100
-            }, goalPicks),
-            buildCouponObj({
-                id: 'coupon-value',
-                title: 'Sürpriz & Değer (Value) Kuponu',
-                subtitle: 'Yüksek oran ve Galatasaray beraberlik sürprizi',
-                badge: '❌ YATTI · 3/2 İSABET',
-                badgeType: 'info',
-                icon: '💎',
-                themeColor: '#00F0FF',
-                accentBg: 'rgba(0, 240, 255, 0.1)',
-                strategy: 'Galatasaray beraberliği 3.40 oranla bilinmesine rağmen Chelsea maçı tek golden kaybetti.',
-                recommendedStake: 50
-            }, valuePicks)
-        ];
-
-        // Avrupa Kuponları (UCL 1, UCL 2, UEL, UECL)
-        const ucl1Picks = [
-            safePicks[0], // Barcelona MS1
-            safePicks[1], // PSG MS1
-            editorPicks[0] // Stuttgart MS1
-        ];
-
-        const ucl2Picks = [
-            goalPicks[0], // Stuttgart 2.5 Üst
-            editorPicks[1], // Sporting vs GS KG Var
-            goalPicks[2] // Liverpool 1.5 Üst
-        ];
-
-        const uelPicks = [
-            createFinishedPick({
-                index: 1,
-                homeTeam: 'Al Nassr',
-                awayTeam: 'Abha',
-                league: 'Suudi Arabistan Pro Lig',
-                timeStr: '21:00',
-                marketTitle: 'Maç Sonucu',
-                pickTitle: 'MS 1 (Al Nassr Kazanır)',
-                marketCode: 'MS1',
-                odd: 1.25,
-                probability: 88,
-                homeScore: 1,
-                awayScore: 0,
-                isWon: true,
-                detail: 'Al Nassr 1-0 kazandı.'
-            }),
-            valuePicks[1], // Moreirense vs Benfica MS2
-            createFinishedPick({
-                index: 3,
-                homeTeam: 'Norwich City',
-                awayTeam: 'Birmingham',
-                league: 'İngiltere Championship',
-                timeStr: '21:45',
-                marketTitle: 'Maç Sonucu',
-                pickTitle: 'MS 1 (Norwich City Kazanır)',
-                marketCode: 'MS1',
-                odd: 1.82,
-                probability: 70,
-                homeScore: 2,
-                awayScore: 0,
-                isWon: true,
-                detail: 'Norwich City sahasında 2-0 kazandı.'
-            })
-        ];
-
-        const ueclPicks = [
-            createFinishedPick({
-                index: 1,
-                homeTeam: 'Al Fateh',
-                awayTeam: 'Diriyah',
-                league: 'Suudi Arabistan',
-                timeStr: '18:30',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '2.5 ÜST',
-                marketCode: '2.5UST',
-                odd: 1.68,
-                probability: 75,
-                homeScore: 1,
-                awayScore: 2,
-                isWon: true,
-                detail: '3 golle tamamlandı (1-2 bitti, 2.5 Üst tuttu).'
-            }),
-            createFinishedPick({
-                index: 2,
-                homeTeam: 'Al Kholood',
-                awayTeam: 'Al Shabab Riyadh',
-                league: 'Suudi Arabistan Pro Lig',
-                timeStr: '18:30',
-                marketTitle: 'Karşılıklı Gol',
-                pickTitle: 'KG VAR',
-                marketCode: 'KG_VAR',
-                odd: 1.66,
-                probability: 74,
-                homeScore: 1,
-                awayScore: 1,
-                isWon: true,
-                detail: '1-1 bitti (KG Var tuttu).'
-            }),
-            createFinishedPick({
-                index: 3,
-                homeTeam: 'Twente',
-                awayTeam: 'Telstar',
-                league: 'Hollanda Kupası',
-                timeStr: '19:45',
-                marketTitle: 'Toplam Gol',
-                pickTitle: '2.5 ÜST',
-                marketCode: '2.5UST',
-                odd: 1.60,
-                probability: 70,
-                homeScore: 0,
-                awayScore: 0,
-                isWon: false,
-                detail: 'Maç 0-0 bitti, 2.5 Alt sonuçlandı.'
-            })
-        ];
-
-        const euroCoupons = [
-            buildCouponObj({
-                id: 'coupon-ucl-1',
-                title: '🏆 Şampiyonlar Ligi — Banko & Garantör Kuponu',
-                subtitle: 'Devler Ligi en güvenilir ev sahipleri — %100 İsabet',
-                badge: '🎉 KAZANDI · 3/3 TUTTU',
-                badgeType: 'ucl',
-                icon: '🏆',
-                themeColor: '#1E40AF',
-                accentBg: 'rgba(30, 64, 175, 0.15)',
-                strategy: 'Barcelona, PSG ve Stuttgart galibiyetleriyle Şampiyonlar Ligi banko kuponu kusursuz geldi.',
-                recommendedStake: 200
-            }, ucl1Picks),
-            buildCouponObj({
-                id: 'coupon-ucl-2',
-                title: '🏆 Şampiyonlar Ligi — Gol & Prestij Kuponu',
-                subtitle: 'Devler Ligi gollü eşleşmeleri — %100 İsabet',
-                badge: '🎉 KAZANDI · 3/3 TUTTU',
-                badgeType: 'ucl',
-                icon: '⚽',
-                themeColor: '#3B82F6',
-                accentBg: 'rgba(59, 130, 246, 0.15)',
-                strategy: 'Stuttgart, Sporting-GS ve Liverpool maçlarındaki gol tahminlerinin tamamı tuttu.',
-                recommendedStake: 150
-            }, ucl2Picks),
-            buildCouponObj({
-                id: 'coupon-uel',
-                title: '🟠 UEFA Avrupa Ligi & Uluslararası Özel Kuponu',
-                subtitle: 'Kupalar ve lig sınavları — %100 İsabet',
-                badge: '🎉 KAZANDI · 3/3 TUTTU',
-                badgeType: 'uel',
-                icon: '🟠',
-                themeColor: '#F97316',
-                accentBg: 'rgba(249, 115, 22, 0.15)',
-                strategy: 'Benfica, Al Nassr ve Fluminense maçlarıyla Avrupa/Kupa kuponu kazandı.',
-                recommendedStake: 100
-            }, uelPicks),
-            buildCouponObj({
-                id: 'coupon-uecl',
-                title: '🟢 UEFA Konferans Ligi Özel Kuponu',
-                subtitle: 'Dengeli Avrupa ve lig maçları — 3/2 İsabet',
-                badge: '❌ YATTI · 3/2 İSABET',
-                badgeType: 'uecl',
-                icon: '🟢',
-                themeColor: '#10B981',
-                accentBg: 'rgba(16, 185, 129, 0.15)',
-                strategy: 'Twente maçında beklenmedik 0-0 skor kuponu tek maçtan yatırdı.',
-                recommendedStake: 100
-            }, ueclPicks)
-        ];
-
-        return { coupons: dailyCoupons, euroCoupons };
+        return { coupons: [], euroCoupons: [] };
     }
 };
 
-// Global dışa aktarım
 if (typeof window !== 'undefined') {
     window.CouponEngine = CouponEngine;
+    CouponEngine.clearOldArchiveData();
 }

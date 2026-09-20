@@ -15,32 +15,71 @@ app.use(express.json());
 // Statik dosyaları sun
 app.use(express.static(path.join(__dirname)));
 
-// ---- In-Memory Cache ----
-const cache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 dakika
+// ---- Disk Tabanlı Günlük Önbellek Sistemi (Daily Disk Cache) ----
+const CACHE_DIR = path.join(__dirname, 'data_cache');
+if (!fs.existsSync(CACHE_DIR)) {
+    try { fs.mkdirSync(CACHE_DIR, { recursive: true }); } catch (e) {}
+}
 
-function getCached(key) {
-    const item = cache.get(key);
-    if (item && Date.now() - item.time < CACHE_TTL) return item.data;
-    cache.delete(key);
+const memoryCache = new Map();
+const DAILY_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 Saat (Günde 1 kere)
+
+function getCacheFilePath(key) {
+    const today = new Date().toISOString().slice(0, 10);
+    const cleanKey = key.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 80);
+    return path.join(CACHE_DIR, `${cleanKey}_${today}.json`);
+}
+
+function getCached(key, forceRefresh = false) {
+    if (forceRefresh) {
+        console.log(`🔄 [Zorla Yenileme] ${key} için önbellek atlandı.`);
+        return null;
+    }
+
+    // 1. RAM kontrolü
+    const memItem = memoryCache.get(key);
+    if (memItem && (Date.now() - memItem.time < DAILY_CACHE_TTL)) {
+        return memItem.data;
+    }
+
+    // 2. Günlük Disk Kontrolü (Bugüne ait JSON dosyası)
+    const filePath = getCacheFilePath(key);
+    if (fs.existsSync(filePath)) {
+        try {
+            const stats = fs.statSync(filePath);
+            if (Date.now() - stats.mtimeMs < DAILY_CACHE_TTL) {
+                const fileData = fs.readFileSync(filePath, 'utf8');
+                const parsed = JSON.parse(fileData);
+                memoryCache.set(key, { data: parsed, time: stats.mtimeMs });
+                console.log(`📦 [GÜNLÜK ÖNBELLEK] ${key} diskten hızlıca yüklendi (İnternet/API çağrısı YAPILMADI).`);
+                return parsed;
+            }
+        } catch (e) {
+            console.warn(`Önbellek okuma hatası (${key}):`, e.message);
+        }
+    }
     return null;
 }
 
 function setCache(key, data) {
-    cache.set(key, { data, time: Date.now() });
-    // Cache boyutunu sınırla
-    if (cache.size > 500) {
-        const firstKey = cache.keys().next().value;
-        cache.delete(firstKey);
-    }
+    if (!data) return;
+    memoryCache.set(key, { data, time: Date.now() });
+
+    // Diske asenkron yaz (Sunucuyu ve CPU'yu bekletmez)
+    const filePath = getCacheFilePath(key);
+    fs.writeFile(filePath, JSON.stringify(data), 'utf8', (err) => {
+        if (err) console.warn(`Disk önbellek yazma hatası (${key}):`, err.message);
+        else console.log(`💾 [GÜNLÜK ÖNBELLEK KAYDEDİLDİ] ${path.basename(filePath)}`);
+    });
 }
 
 // ---- Rate Limiting ----
 const requestCounts = new Map();
-const RATE_LIMIT = 300; // dakikada max istek (artırıldı, multi-component yüklemeleri için)
+const RATE_LIMIT = 50000;
 const RATE_WINDOW = 60 * 1000;
 
 function checkRateLimit(ip) {
+    if (!ip || ip.includes('127.0.0.1') || ip.includes('::1') || ip.includes('localhost')) return true;
     const now = Date.now();
     const record = requestCounts.get(ip);
     if (!record || now - record.start > RATE_WINDOW) {
@@ -64,8 +103,9 @@ app.use('/api/proxy', (req, res, next) => {
 // ---- Nesine Proxy ----
 app.get('/api/proxy/nesine/bulten', async (req, res) => {
     try {
+        const force = req.query.force === 'true';
         const cacheKey = 'nesine_bulten_' + JSON.stringify(req.query);
-        const cached = getCached(cacheKey);
+        const cached = getCached(cacheKey, force);
         if (cached) return res.json(cached);
 
         const url = `https://cdnbulten.nesine.com/api/bulten/getprebultenfull`;
@@ -165,8 +205,139 @@ app.get('/api/proxy/bilyoner/odds/:eventId', async (req, res) => {
         setCache(cacheKey, data);
         res.json(data);
     } catch (err) {
-        console.error('Bilyoner odds hatası:', err.message);
-        res.status(502).json({ error: 'Bilyoner oran verisi alınamadı', detail: err.message });
+        console.warn('Bilyoner odds proxy hatası:', err.message);
+        res.json({});
+    }
+});
+
+// ---- Misli.com Canlı ve Bülten Proxy Servisi ----
+async function fetchMisliLiveMatches() {
+    try {
+        const topRes = await fetch('https://apivx.misli.com/api/web/v1/sportsbook/top-events/SOCCER', {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json',
+                'Origin': 'https://www.misli.com',
+                'Referer': 'https://www.misli.com/'
+            },
+            timeout: 5000
+        });
+        if (!topRes.ok) return [];
+        const topData = await topRes.json();
+        const eventIds = topData.data || [];
+        if (!Array.isArray(eventIds) || eventIds.length === 0) return [];
+
+        const matches = [];
+        // İlk 15 önemli maçı paralel/hızlı çek
+        const detailPromises = eventIds.slice(0, 15).map(async (id) => {
+            try {
+                const sRes = await fetch(`https://apivx.misli.com/api/web/v2/sportsbook/event/${id}/single`, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/json',
+                        'Origin': 'https://www.misli.com',
+                        'Referer': 'https://www.misli.com/'
+                    },
+                    timeout: 4000
+                });
+                if (!sRes.ok) return null;
+                const singleJson = await sRes.json();
+                const d = singleJson.data;
+                if (!d || !d.n) return null;
+
+                const teams = d.n.split(' - ');
+                const homeTeam = teams[0]?.trim() || 'Ev Sahibi';
+                const awayTeam = teams[1]?.trim() || 'Deplasman';
+
+                const msMarket = (d.m || []).find(m => m.n === 'Maç Sonucu' || m.t === 1);
+                const ouMarket = (d.m || []).find(m => m.n && m.n.includes('2.5') && m.n.includes('Alt/Üst'));
+                const kgMarket = (d.m || []).find(m => m.n && (m.n.includes('Karşılıklı Gol') || m.n.includes('KG')));
+
+                let odds = {};
+                if (msMarket && msMarket.o) {
+                    const o1 = msMarket.o.find(o => o.n === '1');
+                    const ox = msMarket.o.find(o => o.n === '0' || o.n === 'X');
+                    const o2 = msMarket.o.find(o => o.n === '2');
+                    odds.home = o1 ? o1.od : null;
+                    odds.draw = ox ? ox.od : null;
+                    odds.away = o2 ? o2.od : null;
+                }
+                if (ouMarket && ouMarket.o) {
+                    const oAlt = ouMarket.o.find(o => o.n && o.n.toLowerCase().includes('alt'));
+                    const oUst = ouMarket.o.find(o => o.n && o.n.toLowerCase().includes('üst'));
+                    odds.under25 = oAlt ? oAlt.od : null;
+                    odds.over25 = oUst ? oUst.od : null;
+                }
+                if (kgMarket && kgMarket.o) {
+                    const oVar = kgMarket.o.find(o => o.n && o.n.toLowerCase().includes('var'));
+                    const oYok = kgMarket.o.find(o => o.n && o.n.toLowerCase().includes('yok'));
+                    odds.bttsYes = oVar ? oVar.od : null;
+                    odds.bttsNo = oYok ? oYok.od : null;
+                }
+
+                return {
+                    id: String(d.i),
+                    misliId: d.i,
+                    homeTeam,
+                    awayTeam,
+                    matchName: d.n,
+                    homeLogo: d.htl || null,
+                    awayLogo: d.atl || null,
+                    dateStr: d.d ? new Date(d.d).toISOString() : '',
+                    timeStr: d.d ? new Date(d.d).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '20:00',
+                    isLive: Boolean(d.l),
+                    status: d.l ? 'LIVE' : 'NOT_STARTED',
+                    minute: d.l ? 'Canlı' : 'Başlamadı',
+                    tv: d.tv || 'Misli TV',
+                    odds,
+                    source: 'Misli.com (Resmi Canlı & Kral Oran)'
+                };
+            } catch (err) {
+                return null;
+            }
+        });
+
+        const results = await Promise.all(detailPromises);
+        return results.filter(Boolean);
+    } catch (e) {
+        console.warn('Misli canlı maç çekme uyarısı:', e.message);
+        return [];
+    }
+}
+
+app.get('/api/proxy/misli/live', async (req, res) => {
+    try {
+        const cacheKey = 'misli_live_events_feed';
+        const cached = getCached(cacheKey);
+        if (cached) return res.json(cached);
+
+        const list = await fetchMisliLiveMatches();
+        setCache(cacheKey, list);
+        res.json(list);
+    } catch (err) {
+        res.status(502).json({ error: 'Misli canlı maçlar çekilemedi', detail: err.message });
+    }
+});
+
+app.get('/api/proxy/misli/comments', async (req, res) => {
+    try {
+        const cacheKey = 'misli_author_comments';
+        const cached = getCached(cacheKey);
+        if (cached) return res.json(cached);
+
+        const response = await fetch('https://apivx.misli.com/api/web/v1/sportsbook/comments', {
+            headers: {
+                'User-Agent': 'Mozilla/5.0',
+                'Accept': 'application/json',
+                'Origin': 'https://www.misli.com',
+                'Referer': 'https://www.misli.com/'
+            }
+        });
+        const json = await response.json();
+        setCache(cacheKey, json);
+        res.json(json);
+    } catch (err) {
+        res.status(502).json({ error: 'Misli yorumları çekilemedi', detail: err.message });
     }
 });
 
@@ -238,6 +409,25 @@ async function fetchMackolikLiveScores(targetDate = null) {
             const away = m[4];
             if (!home || !away) return;
 
+            const leagueName = m[36] ? String(m[36][1] || '') : 'Futbol';
+            const leagueLower = leagueName.toLowerCase();
+            
+            // Futbol Harici Sporları Kesinlikle Filtrele (Basketbol, Tenis, Voleybol, Masa Tenisi vb.)
+            const nonFootballKeywords = [
+                'basket', 'nba', 'euroleague', 'tbl', 'bsl', 'cba', 'kbl', 'wnba', 'fiba',
+                'tenis', 'tennis', 'atp', 'wta', 'itf', 'challenger',
+                'voley', 'volleyball', 'efeler', 'sultanlar',
+                'hentbol', 'handball',
+                'hokey', 'hockey', 'nhl', 'khl',
+                'masa tenisi', 'table tennis', 'setka', 'tt cup', 'win cup',
+                'badminton',
+                'esport', 'e-spor', 'esports', 'dota', 'counter-strike', 'cs:go', 'cs2', 'valorant',
+                'snooker', 'dart', 'rugby', 'ragbi', 'kriket', 'cricket',
+                'futsal', 'beyzbol', 'baseball', 'su topu', 'water polo'
+            ];
+            const isNonFootball = nonFootballKeywords.some(kw => leagueLower.includes(kw));
+            if (isNonFootball) return;
+
             const statusCode = m[5];
             const minuteStr = m[6] || '';
             const halfTimeStr = m[7] || ''; // m[7] Maçkolik'te İLK YARI (İY) skorudur (örn: "3-0")
@@ -245,6 +435,9 @@ async function fetchMackolikLiveScores(targetDate = null) {
             // Gerçek Maç Sonu / Anlık Canlı skorlar Maçkolik API'sinde m[12] ve m[13]'tür!
             let homeScore = (typeof m[12] === 'number') ? m[12] : parseInt(m[12]) || 0;
             let awayScore = (typeof m[13] === 'number') ? m[13] : parseInt(m[13]) || 0;
+
+            // Basketbol skoru kontrolü (futbol maçında nadiren 20+ gol olur)
+            if (homeScore > 20 || awayScore > 20 || (homeScore + awayScore) > 30) return;
 
             // İlk yarı skoru ayrıştırması
             let fhHome = 0;
@@ -281,7 +474,8 @@ async function fetchMackolikLiveScores(targetDate = null) {
                 minute: displayMinute,
                 kickoffTime: m[16] || '',
                 date: m[35] || '',
-                league: m[36] ? m[36][1] : 'Futbol',
+                league: leagueName,
+                sport: 'football',
                 mackolikUrl: `https://arsiv.mackolik.com/Match/Default.aspx?id=${id}`,
                 source: 'Mackolik'
             });
@@ -314,8 +508,9 @@ app.get('/api/proxy/mackolik/live', async (req, res) => {
 app.get('/api/proxy/live/scores', async (req, res) => {
     try {
         const queryDate = req.query.date || null;
+        const force = req.query.force === 'true';
         const cacheKey = `live_scores_feed_${queryDate || 'today'}`;
-        const cached = getCached(cacheKey);
+        const cached = getCached(cacheKey, force);
         if (cached) return res.json(cached);
 
         const matches = [];
@@ -749,22 +944,60 @@ app.get('/api/mail/subscribers', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
-        cacheSize: cache.size,
+        cacheSize: memoryCache.size,
         uptime: process.uptime()
     });
 });
 
-// SPA fallback
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// ---- Continuous Background Data Worker (Sürekli Canlı Veri Çekme Motoru) ----
+async function syncLiveFeedsInBackground() {
+    try {
+        // 1. Nesine Bültenini Arka Planda Güncelle
+        const nesineUrl = `https://cdnbulten.nesine.com/api/bulten/getprebultenfull`;
+        const nesineRes = await fetch(nesineUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'application/json',
+                'Referer': 'https://www.nesine.com/'
+            },
+            timeout: 8000
+        });
+        if (nesineRes.ok) {
+            const nesineData = await nesineRes.json();
+            setCache('nesine_bulten_{}', nesineData);
+        }
+    } catch (e) {
+        // sessizce geç
+    }
+
+    try {
+        // 2. Maçkolik Canlı Skorlarını Arka Planda Güncelle
+        const mackolikUrl = `https://vd.mackolik.com/livedata`;
+        const macRes = await fetch(mackolikUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0' },
+            timeout: 6000
+        });
+        if (macRes.ok) {
+            const macData = await macRes.json();
+            setCache('mackolik_live', macData);
+        }
+    } catch (e) {
+        // sessizce geç
+    }
+}
+
+// [DEVRE DIŞI] Kasma ve aşırı CPU/ağ kullanımını önlemek için arka plan döngüsü kapatıldı.
+// Veriler disk önbelleğinden (günde 1 kere) okunmaktadır.
+// setInterval(syncLiveFeedsInBackground, 30000);
+// setTimeout(syncLiveFeedsInBackground, 2000);
 
 app.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   🏆 Spor Analiz Platformu - Proxy Sunucusu     ║
 ║   http://localhost:${PORT}                         ║
-║   Durum: Çalışıyor ✅                            ║
+║   Durum: Sürekli Canlı Akış Aktif 🟢             ║
 ╚══════════════════════════════════════════════════╝
     `);
 });
+
