@@ -30,6 +30,106 @@ const LiveScoreService = {
     /**
      * Gelişmiş Takım Adı Normalizasyonu & Token Ayrıştırıcısı (Fuzzy & Kısaltma Eşleme)
      */
+    
+    /**
+     * Canlı ve biten skor arama indeksini oluşturur (O(1) ve Token tabanlı)
+     */
+    _buildSearchIndex() {
+        this._exactMap = new Map();
+        this._tokenMap = new Map();
+        const feed = this.cachedScores || [];
+        feed.forEach(item => {
+            const h = this.cleanTeamName(item.homeTeam);
+            const a = this.cleanTeamName(item.awayTeam);
+            if (!h.compact || !a.compact) return;
+
+            this._exactMap.set(`${h.compact}_${a.compact}`, item);
+            this._exactMap.set(`${a.compact}_${h.compact}`, { ...item, isReversed: true });
+
+            const entry = { item, h, a, isReversed: false };
+            const revEntry = { item, h: a, a: h, isReversed: true };
+
+            [...h.tokens, ...a.tokens].forEach(tok => {
+                if (tok.length >= 3) {
+                    if (!this._tokenMap.has(tok)) this._tokenMap.set(tok, []);
+                    this._tokenMap.get(tok).push(entry);
+                }
+            });
+        });
+        this._searchIndexed = true;
+    },
+
+    /**
+     * Tek bir maç için canlı/bitmiş skor havuzundan O(1) veya token bazlı anında skor bulur
+     */
+    findMatchScore(match) {
+        if (!match) return null;
+        if (!this._searchIndexed || !this._exactMap) {
+            this._buildSearchIndex();
+        }
+
+        const hRaw = match.homeTeam || match.teams?.home || '';
+        const aRaw = match.awayTeam || match.teams?.away || '';
+        const h = this.cleanTeamName(hRaw);
+        const a = this.cleanTeamName(aRaw);
+        if (!h.compact || !a.compact) return null;
+
+        // 1. O(1) Tam Eşleşme
+        let found = this._exactMap ? this._exactMap.get(`${h.compact}_${a.compact}`) : null;
+
+        // 2. Token Seti & Çapraz Anahtar Kelime Arama
+        if (!found && this._tokenMap && h.tokens.length > 0 && a.tokens.length > 0) {
+            const homeCands = this._tokenMap.get(h.firstToken) || [];
+            for (let i = 0; i < homeCands.length; i++) {
+                const cand = homeCands[i];
+                const homeMatches = h.tokens.some(ht => cand.h.tokens.some(ct => ct.includes(ht) || ht.includes(ct)));
+                const awayMatches = a.tokens.some(at => cand.a.tokens.some(ct => ct.includes(at) || at.includes(ct)));
+                if (homeMatches && awayMatches) {
+                    found = cand.isReversed ? { ...cand.item, isReversed: true } : cand.item;
+                    break;
+                }
+            }
+
+            if (!found) {
+                const awayCands = this._tokenMap.get(a.firstToken) || [];
+                for (let i = 0; i < awayCands.length; i++) {
+                    const cand = awayCands[i];
+                    const homeMatches = h.tokens.some(ht => cand.h.tokens.some(ct => ct.includes(ht) || ht.includes(ct)));
+                    const awayMatches = a.tokens.some(at => cand.a.tokens.some(ct => ct.includes(at) || at.includes(ct)));
+                    if (homeMatches && awayMatches) {
+                        found = cand.isReversed ? { ...cand.item, isReversed: true } : cand.item;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (found) {
+            const isReversed = !!found.isReversed;
+            const realHomeScore = isReversed ? found.awayScore : found.homeScore;
+            const realAwayScore = isReversed ? found.homeScore : found.awayScore;
+            const realFhHome = isReversed ? found.firstHalfAway : found.firstHalfHome;
+            const realFhAway = isReversed ? found.firstHalfHome : found.firstHalfAway;
+
+            const mackolikUrl = found.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar';
+            return {
+                homeScore: realHomeScore,
+                awayScore: realAwayScore,
+                firstHalfHome: realFhHome,
+                firstHalfAway: realFhAway,
+                status: found.status,
+                minute: found.minute || (found.status === 'FINISHED' ? 'MS' : 'Canlı'),
+                isFinished: found.status === 'FINISHED',
+                isLive: found.status === 'LIVE',
+                isManual: false,
+                mackolikUrl: mackolikUrl,
+                source: found.source || 'Mackolik'
+            };
+        }
+
+        return null;
+    },
+
     cleanTeamName(name) {
         if (!name) return { raw: '', clean: '', tokens: [], firstToken: '', compact: '' };
         let n = name.trim().toLowerCase();

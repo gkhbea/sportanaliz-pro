@@ -410,6 +410,23 @@ const MatchTracker = {
             };
         }
 
+        // 4. LiveScoreService anlık ve teyitli skor havuzundan doğrudan çek (Fuzzy & Token destekli)
+        if (typeof window !== 'undefined' && window.LiveScoreService && typeof window.LiveScoreService.findMatchScore === 'function') {
+            try {
+                const liveFound = window.LiveScoreService.findMatchScore(match);
+                if (liveFound && (liveFound.status === 'FINISHED' || liveFound.status === 'LIVE' || (typeof liveFound.homeScore === 'number' && (liveFound.homeScore > 0 || liveFound.awayScore > 0)))) {
+                    const key = typeof match === 'string' ? match : this.getMatchKey(match);
+                    if (this.data && this.data.matches) {
+                        this.data.matches[key] = liveFound;
+                    }
+                    if (typeof match === 'object' && match) {
+                        match.liveScore = liveFound;
+                    }
+                    return liveFound;
+                }
+            } catch (liveErr) {}
+        }
+
         // Varsayılan: Henüz başlamadı (Sadece bugünün ve geleceğin maçları)
         return {
             homeScore: 0,
@@ -6121,8 +6138,8 @@ const MatchTracker = {
             if (topBet) {
                 const pickData = {
                     marketCode: topBet.marketCode || topBet.code || '',
-                    pickTitle: topBet.pick || topBet.pickTitle || '',
-                    marketTitle: topBet.marketTitle || '',
+                    pickTitle: topBet.shortPick || topBet.pick || topBet.pickTitle || topBet.title || '',
+                    marketTitle: topBet.title || topBet.marketTitle || '',
                     homeTeam: home,
                     awayTeam: away,
                     match: rawMatch
@@ -6166,7 +6183,8 @@ const MatchTracker = {
                 scoreStr: scoreStr,
                 scoreStatus: score.status,
                 minuteStr: minuteStr,
-                primaryPick: topBet?.pick || topBet?.pickTitle || 'MS 1',
+                primaryPick: topBet?.shortPick || topBet?.pick || topBet?.pickTitle || topBet?.title || 'MS 1',
+                marketCode: topBet?.marketCode || topBet?.code || '',
                 marketTitle: topBet?.marketTitle || 'Maç Bahsi',
                 odd: topBet?.odd || 1.50,
                 probability: accRate,
@@ -6246,7 +6264,15 @@ const MatchTracker = {
         try {
             const raw = localStorage.getItem(this.DAILY_ANALYSIS_STORAGE_KEY);
             const history = raw ? JSON.parse(raw) : {};
-            const savedRec = history[queryDate];
+            let savedRec = history[queryDate];
+            if (!savedRec && !dateStr) {
+                const dates = Object.keys(history).sort().reverse();
+                if (dates.length > 0 && history[dates[0]]?.matches?.length > 5) {
+                    savedRec = history[dates[0]];
+                    queryDate = dates[0];
+                    isToday = (queryDate === todayStr);
+                }
+            }
 
             if (savedRec && savedRec.matches && savedRec.matches.length > 5) {
                 const hasDecided = (savedRec.wonAnalyzed > 0 || savedRec.lostAnalyzed > 0);
@@ -6266,8 +6292,9 @@ const MatchTracker = {
                     }
                 });
 
-                if (isToday) {
-                    // Bugünün maçlarının skorlarını dinamik olarak MatchTracker ve liveScore ile güncelle
+                const hasPendingOrLive = savedRec.matches.some(m => !m.status || m.status === 'PENDING' || m.status === 'LIVE' || !m.scoreStatus || m.scoreStatus !== 'FINISHED');
+                if (isToday || hasPendingOrLive || !hasDecided) {
+                    // Maçların skorlarını dinamik olarak MatchTracker ve liveScore ile güncelle
                     let wonCount = 0;
                     let lostCount = 0;
                     let liveCount = 0;

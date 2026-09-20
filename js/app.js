@@ -1161,9 +1161,9 @@ const App = {
         }
 
         // Gerçek canlı ve biten maç skorlarını otomatik senkronize et (Simülasyon yok)
-        if (window.LiveScoreService && (!LiveScoreService.lastFetchedAt || (Date.now() - LiveScoreService.lastFetchedAt.getTime() > 60000))) {
+        if (window.LiveScoreService && this.matches && this.matches.length > 0) {
             try {
-                await LiveScoreService.syncBulletinMatches(this.matches || []);
+                await LiveScoreService.syncBulletinMatches(this.matches);
             } catch (e) {
                 console.warn('Canlı skor analiz senkronizasyon uyarısı:', e);
             }
@@ -1262,7 +1262,14 @@ const App = {
             const m = item.match;
             const top = item.topPick || {};
             const scoreData = window.MatchTracker ? window.MatchTracker.getMatchScore(m) : { homeScore: 0, awayScore: 0, status: 'NOT_STARTED', minute: '00:00' };
-            const evalPick = window.MatchTracker ? window.MatchTracker.evaluatePick(top, scoreData) : { status: 'PENDING' };
+            const pickData = {
+                ...top,
+                match: m,
+                homeTeam: m.homeTeam,
+                awayTeam: m.awayTeam,
+                pickTitle: top.shortPick || top.title || ''
+            };
+            const evalPick = window.MatchTracker ? window.MatchTracker.evaluatePick(pickData, scoreData) : { status: 'PENDING' };
 
             const isUltra = (item.confidenceScore >= 80 || (top.confidenceScore || 0) >= 80 || item.probability >= 80 || (top.probability || 0) >= 80);
             if (isUltra) ultraTotal++;
@@ -1446,7 +1453,14 @@ const App = {
 
                             // Maç skoru ve AI tahmin değerlendirmesi
                             const scoreData = window.MatchTracker ? window.MatchTracker.getMatchScore(m) : { homeScore: 0, awayScore: 0, status: 'NOT_STARTED', minute: '00:00' };
-                            const evalPick = window.MatchTracker ? window.MatchTracker.evaluatePick(top, scoreData) : { status: 'PENDING', badge: '⏳ Bekliyor', css: 'status-pending' };
+                            const pickData = {
+                                ...top,
+                                match: m,
+                                homeTeam: m.homeTeam,
+                                awayTeam: m.awayTeam,
+                                pickTitle: top.shortPick || top.title || ''
+                            };
+                            const evalPick = window.MatchTracker ? window.MatchTracker.evaluatePick(pickData, scoreData) : { status: 'PENDING', badge: '⏳ Bekliyor', css: 'status-pending' };
                             const isWon = evalPick.status === 'WON';
                             const isLiveWin = evalPick.status === 'LIVE_WINNING';
                             const isLost = evalPick.status === 'LOST';
