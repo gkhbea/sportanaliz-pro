@@ -6207,12 +6207,11 @@ const MatchTracker = {
             const history = raw ? JSON.parse(raw) : {};
             const existing = history[todayStr];
 
-            // Eğer mevcut kayıt 5 veya daha az maç içeriyorsa (örneğin bozuk 1 maç kaydı), kesinlikle ez!
-            if (existing && existing.totalAnalyzed > 5 && existing.totalAnalyzed > totalAnalyzed) {
-                return existing;
-            }
-
-            if (totalAnalyzed > 5) {
+            // Eğer mevcut kayıt varsa ve yeni analiz listesi daha zenginse veya eşitse kaydet
+            if (totalAnalyzed > 0) {
+                if (existing && existing.matches && existing.matches.length > totalAnalyzed && totalAnalyzed <= 5) {
+                    return existing;
+                }
                 history[todayStr] = dayRecord;
                 localStorage.setItem(this.DAILY_ANALYSIS_STORAGE_KEY, JSON.stringify(history));
             } else if (existing && existing.totalAnalyzed > 5) {
@@ -6268,15 +6267,79 @@ const MatchTracker = {
                 });
 
                 if (isToday) {
-                    const activeCount = Math.max(
-                        window.app?.highConfidenceMatches?.length || 0,
-                        (window.app?.computeHighConfidenceMatches ? window.app.computeHighConfidenceMatches().length : 0),
-                        (window.app?.matches?.length && window.app.matches.length > 5 ? window.app.matches.length : 0),
-                        177
-                    );
-                    if (savedRec.totalAnalyzed >= activeCount) {
-                        return savedRec;
+                    // Bugünün maçlarının skorlarını dinamik olarak MatchTracker ve liveScore ile güncelle
+                    let wonCount = 0;
+                    let lostCount = 0;
+                    let liveCount = 0;
+                    let pendingCount = 0;
+                    let hasScoreUpdate = false;
+
+                    savedRec.matches.forEach(m => {
+                        const score = this.getMatchScore(m);
+                        if (score && (score.status === 'FINISHED' || score.status === 'LIVE' || (typeof score.homeScore === 'number' && (score.homeScore > 0 || score.awayScore > 0)))) {
+                            m.scoreStr = `${score.homeScore} - ${score.awayScore}`;
+                            m.scoreStatus = score.status;
+                            m.minuteStr = score.minute || (score.status === 'FINISHED' ? 'MS' : 'Canlı');
+
+                            const evalRes = this.evaluatePick({
+                                marketCode: m.marketCode || '',
+                                pickTitle: m.primaryPick || '',
+                                homeTeam: m.homeTeam,
+                                awayTeam: m.awayTeam,
+                                match: m
+                            }, score);
+
+                            if (evalRes) {
+                                m.status = evalRes.status;
+                                m.statusBadge = evalRes.status === 'WON' ? '✅ TUTTU' : (evalRes.status === 'LOST' ? '❌ YATTI' : (evalRes.status === 'LIVE' ? '⚡ CANLI' : '⏳ BEKLİYOR'));
+                                if (evalRes.detail) m.detail = evalRes.detail;
+                                hasScoreUpdate = true;
+                            } else if (score.status === 'FINISHED') {
+                                const parts = (m.scoreStr || '0-0').split('-').map(x => parseInt(x.trim()) || 0);
+                                const h = parts[0], a = parts[1];
+                                const p = m.primaryPick || '';
+                                let won = false;
+                                if (p.includes('1') && !p.includes('1.5') && !p.includes('X')) won = (h > a);
+                                else if (p.includes('2') && !p.includes('2.5') && !p.includes('X')) won = (a > h);
+                                else if (p.includes('X') || p.includes('Beraber')) won = (h === a);
+                                else if (p.includes('2.5') && p.includes('Üst')) won = (h + a > 2.5);
+                                else if (p.includes('2.5') && p.includes('Alt')) won = (h + a < 2.5);
+                                else if (p.includes('1.5') && p.includes('Üst')) won = (h + a > 1.5);
+                                else if (p.includes('KG') || p.includes('Var')) won = (h > 0 && a > 0);
+                                else won = (h > a);
+
+                                m.status = won ? 'WON' : 'LOST';
+                                m.statusBadge = won ? '✅ TUTTU' : '❌ YATTI';
+                                hasScoreUpdate = true;
+                            }
+                        }
+
+                        if (m.status === 'WON') wonCount++;
+                        else if (m.status === 'LOST') lostCount++;
+                        else if (m.status === 'LIVE') liveCount++;
+                        else pendingCount++;
+                    });
+
+                    savedRec.wonAnalyzed = wonCount;
+                    savedRec.lostAnalyzed = lostCount;
+                    savedRec.liveAnalyzed = liveCount;
+                    savedRec.pendingAnalyzed = pendingCount;
+                    const decided = wonCount + lostCount;
+                    savedRec.decidedAnalyzed = decided;
+                    savedRec.isDecided = decided > 0;
+                    if (decided > 0) {
+                        savedRec.actualWinRate = Math.round((wonCount / decided) * 1000) / 10;
+                        savedRec.winRate = savedRec.actualWinRate;
                     }
+
+                    if (hasScoreUpdate) {
+                        try {
+                            history[queryDate] = savedRec;
+                            localStorage.setItem(this.DAILY_ANALYSIS_STORAGE_KEY, JSON.stringify(history));
+                        } catch (e) {}
+                    }
+
+                    return savedRec;
                 } else if (!allPending && hasDecided) {
                     return savedRec;
                 }

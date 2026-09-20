@@ -5,7 +5,7 @@
  */
 const LiveScoreService = {
     get API_URL() {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && window.location) {
             const custom = window.ENV_API_URL || (typeof Helpers !== 'undefined' && Helpers.storage ? Helpers.storage.get('sa_api_base_url') : null);
             if (custom) return `${custom.replace(/\/$/, '')}/api/proxy/live/scores`;
             if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001')) {
@@ -26,6 +26,61 @@ const LiveScoreService = {
     /**
      * Takım adını normalize et (Türkçe karakterler, kısaltmalar ve ekleri temizler)
      */
+    
+    /**
+     * Gelişmiş Takım Adı Normalizasyonu & Token Ayrıştırıcısı (Fuzzy & Kısaltma Eşleme)
+     */
+    cleanTeamName(name) {
+        if (!name) return { raw: '', clean: '', tokens: [], firstToken: '', compact: '' };
+        let n = name.trim().toLowerCase();
+        
+        // Türkçe karakterleri basit karşılıklarına dönüştür
+        n = n.replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+             .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c');
+
+        // Noktalama ve rakam temizliği
+        n = n.replace(/[\-_.'’`()\/\\0-9]+/g, ' ');
+
+        // Yaygın takım kısaltmalarını eşitle
+        const expansions = {
+            'dep': 'deportivo',
+            'deport': 'deportivo',
+            'atl': 'atletico',
+            'chac': 'chacarita',
+            'ferro': 'ferrocarril',
+            'gim': 'gimnasia',
+            'est': 'estudiantes',
+            'def': 'defensores',
+            'indep': 'independiente',
+            'd': 'dinamo',
+            'l': 'lokomotiva',
+            'st': 'saint',
+            's': 'san',
+            'utd': 'united',
+            'wan': 'wanderers',
+            'u': 'us',
+            'paneitolikos': 'panaitolikos'
+        };
+
+        const stopWords = new Set([
+            'sk', 'fk', 'as', 'spor', 'kulubu', 'kulübü', 'united', 'fc', 'cf', 'city',
+            'sc', 'cd', 'ud', 'ac', 'bk', 'ik', 'ff', 'fs', 'rb', 'sv', 'vv', 'ks', 'bv',
+            'nk', 'vfb', 'vfl', 'tsv', 'spvgg', 'bsc', 'hsv', 'ssv', 'fsv', 'de', 'la',
+            'el', 'al', 'the', 'and', 'club', 'csd', 'ca', 'real'
+        ]);
+
+        const words = n.split(/\s+/).filter(Boolean).map(w => expansions[w] || w);
+        const filtered = words.filter(w => !stopWords.has(w));
+
+        return {
+            raw: n,
+            clean: filtered.join(' '),
+            tokens: filtered,
+            firstToken: filtered[0] || '',
+            compact: filtered.join('')
+        };
+    },
+
     normalizeTeamName(name) {
         if (!name) return '';
         let str = String(name).toLowerCase().trim();
@@ -139,11 +194,17 @@ const LiveScoreService = {
      */
     async fetchLiveScores(targetDate = null, force = false) {
         const cacheKey = targetDate || 'today';
+        const isToday = !targetDate || targetDate === 'today';
+        const nowMs = Date.now();
         if (!force && this._dateFeedCache && this._dateFeedCache.has(cacheKey)) {
-            return this._dateFeedCache.get(cacheKey);
+            const entry = this._dateFeedCache.get(cacheKey);
+            const isFresh = !isToday || (entry && entry.time && (nowMs - entry.time < 30000));
+            if (isFresh) {
+                return entry.data || (Array.isArray(entry) ? entry : []);
+            }
         }
         try {
-            const endpoint = targetDate ? `${this.API_URL}?date=${encodeURIComponent(targetDate)}` : this.API_URL;
+            const endpoint = targetDate ? `${this.API_URL}?date=${encodeURIComponent(targetDate)}` : `${this.API_URL}?force=${force ? 'true' : 'false'}&_t=${Date.now()}`;
             let response = null;
             try {
                 response = await this._fetchWithTimeout(endpoint, {}, 2500);
@@ -248,7 +309,7 @@ const LiveScoreService = {
             this.cachedScores = scoreList;
             this.lastFetchedAt = new Date();
             if (!this._dateFeedCache) this._dateFeedCache = new Map();
-            this._dateFeedCache.set(cacheKey, scoreList);
+            this._dateFeedCache.set(cacheKey, { time: Date.now(), data: scoreList });
             console.log(`✅ Canlı futbol skor kaynağından (Misli.com + Global) ${scoreList.length} maç verisi başarıyla çekildi.`);
             return scoreList;
         } catch (err) {
@@ -275,9 +336,9 @@ const LiveScoreService = {
         this._isSyncing = true;
 
         try {
-            let liveFeed = await this.fetchLiveScores();
+            let liveFeed = await this.fetchLiveScores(null, true);
 
-            // Yalnızca Bugün ve Dün canlı/bitmiş skor kaynağı taranır (Gelecek haftanın günleri taranmaz!)
+            // Yalnızca Bugün ve Dün canlı/bitmiş skor kaynağı taranır
             const now = new Date();
             const formatMackolikDate = (d) => {
                 const day = String(d.getDate()).padStart(2, '0');
@@ -302,25 +363,27 @@ const LiveScoreService = {
             // Beslemeyi futbola filtrele
             liveFeed = liveFeed.filter(m => this.isStrictFootballMatch(m));
 
-            // HIZLI VE OPTİMİZE HASH & PREFİX İNDEKSİ OLUŞTUR (0.01 sn altında biter)
+            // HIZLI VE OPTİMİZE HASH & TOKEN İNDEKSİ OLUŞTUR (0.01 sn altında biter)
             const exactMap = new Map();
-            const prefixMap = new Map();
+            const tokenMap = new Map();
 
             liveFeed.forEach(item => {
-                const nh = this.normalizeTeamName(item.homeTeam);
-                const na = this.normalizeTeamName(item.awayTeam);
-                if (nh && na) {
-                    exactMap.set(`${nh}_${na}`, item);
-                    exactMap.set(`${na}_${nh}`, { ...item, isReversed: true });
+                const h = this.cleanTeamName(item.homeTeam);
+                const a = this.cleanTeamName(item.awayTeam);
+                if (!h.compact || !a.compact) return;
 
-                    const pHome = nh.slice(0, 4);
-                    if (!prefixMap.has(pHome)) prefixMap.set(pHome, []);
-                    prefixMap.get(pHome).push({ item, nh, na, isReversed: false });
+                exactMap.set(`${h.compact}_${a.compact}`, item);
+                exactMap.set(`${a.compact}_${h.compact}`, { ...item, isReversed: true });
 
-                    const pAway = na.slice(0, 4);
-                    if (!prefixMap.has(pAway)) prefixMap.set(pAway, []);
-                    prefixMap.get(pAway).push({ item, nh, na, isReversed: true });
-                }
+                const entry = { item, h, a, isReversed: false };
+                const revEntry = { item, h: a, a: h, isReversed: true };
+
+                [...h.tokens, ...a.tokens].forEach(tok => {
+                    if (tok.length >= 3) {
+                        if (!tokenMap.has(tok)) tokenMap.set(tok, []);
+                        tokenMap.get(tok).push(entry);
+                    }
+                });
             });
 
             let matchedCount = 0;
@@ -329,31 +392,40 @@ const LiveScoreService = {
             let pendingCount = 0;
 
             matches.forEach(m => {
-                const h = m.homeTeam || m.teams?.home || '';
-                const a = m.awayTeam || m.teams?.away || '';
-                const nh = this.normalizeTeamName(h);
-                const na = this.normalizeTeamName(a);
-                if (!nh || !na) {
+                const hRaw = m.homeTeam || m.teams?.home || '';
+                const aRaw = m.awayTeam || m.teams?.away || '';
+                const h = this.cleanTeamName(hRaw);
+                const a = this.cleanTeamName(aRaw);
+
+                if (!h.compact || !a.compact) {
                     pendingCount++;
                     return;
                 }
 
-                // 1. O(1) Tam Eşleşme
-                let found = exactMap.get(`${nh}_${na}`);
-                
-                // 2. Prefiks tabanlı hızlı kısmi arama (O(N) döngüsü yapmaz, donmayı %100 engeller)
-                if (!found && (nh.length >= 4 || na.length >= 4)) {
-                    const candidates = prefixMap.get(nh.slice(0, 4)) || [];
-                    for (let i = 0; i < candidates.length; i++) {
-                        const c = candidates[i];
-                        if (!c.isReversed) {
-                            if ((c.nh.includes(nh) || nh.includes(c.nh)) && (c.na.includes(na) || na.includes(c.na))) {
-                                found = c.item;
-                                break;
-                            }
-                        } else {
-                            if ((c.na.includes(nh) || nh.includes(c.na)) && (c.nh.includes(na) || na.includes(c.nh))) {
-                                found = { ...c.item, isReversed: true };
+                // 1. O(1) Tam Kompakt Eşleşme
+                let found = exactMap.get(`${h.compact}_${a.compact}`);
+
+                // 2. Token Seti & Çapraz Anahtar Kelime Arama
+                if (!found && h.tokens.length > 0 && a.tokens.length > 0) {
+                    const homeCands = tokenMap.get(h.firstToken) || [];
+                    for (let i = 0; i < homeCands.length; i++) {
+                        const cand = homeCands[i];
+                        const homeMatches = h.tokens.some(ht => cand.h.tokens.some(ct => ct.includes(ht) || ht.includes(ct)));
+                        const awayMatches = a.tokens.some(at => cand.a.tokens.some(ct => ct.includes(at) || at.includes(ct)));
+                        if (homeMatches && awayMatches) {
+                            found = cand.isReversed ? { ...cand.item, isReversed: true } : cand.item;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        const awayCands = tokenMap.get(a.firstToken) || [];
+                        for (let i = 0; i < awayCands.length; i++) {
+                            const cand = awayCands[i];
+                            const homeMatches = h.tokens.some(ht => cand.h.tokens.some(ct => ct.includes(ht) || ht.includes(ct)));
+                            const awayMatches = a.tokens.some(at => cand.a.tokens.some(ct => ct.includes(at) || at.includes(ct)));
+                            if (homeMatches && awayMatches) {
+                                found = cand.isReversed ? { ...cand.item, isReversed: true } : cand.item;
                                 break;
                             }
                         }
@@ -385,6 +457,8 @@ const LiveScoreService = {
                     m.liveScore = {
                         home: realHomeScore,
                         away: realAwayScore,
+                        homeScore: realHomeScore,
+                        awayScore: realAwayScore,
                         firstHalfHome: realFhHome,
                         firstHalfAway: realFhAway,
                         status: found.status,
@@ -401,13 +475,15 @@ const LiveScoreService = {
                     else pendingCount++;
                 } else if (window.MatchTracker) {
                     const existing = window.MatchTracker.getMatchScore(m);
-                    if (existing && (existing.status === 'FINISHED' || existing.isManual)) {
+                    if (existing && (existing.status === 'FINISHED' || existing.status === 'LIVE' || existing.isManual)) {
                         if (existing.status === 'FINISHED') finishedCount++;
                         else if (existing.status === 'LIVE') liveCount++;
                         else pendingCount++;
                         m.liveScore = {
                             home: existing.homeScore,
                             away: existing.awayScore,
+                            homeScore: existing.homeScore,
+                            awayScore: existing.awayScore,
                             firstHalfHome: existing.firstHalfHome,
                             firstHalfAway: existing.firstHalfAway,
                             status: existing.status,
@@ -427,6 +503,13 @@ const LiveScoreService = {
 
             console.log(`📊 [Hızlı Canlı Skor Eşleşmesi] ${matchedCount}/${matches.length} maç eşleşti. (Biten: ${finishedCount}, Canlı: ${liveCount}, Bekleyen: ${pendingCount})`);
 
+            // Bülten skorları güncellendiğinde MatchTracker analiz karnesini de anında güncelle
+            if (window.MatchTracker && typeof window.MatchTracker.recordDailyAnalysis === 'function') {
+                try {
+                    window.MatchTracker.recordDailyAnalysis(matches);
+                } catch (recErr) {}
+            }
+
             return {
                 matchedCount,
                 finishedCount,
@@ -440,9 +523,6 @@ const LiveScoreService = {
         }
     },
 
-    /**
-     * Tüm canlı oynanan maçları liste olarak döner (Sadece Futbol)
-     */
     getLiveMatches() {
         if (!Array.isArray(this.cachedScores) || this.cachedScores.length === 0) return [];
         return this.cachedScores

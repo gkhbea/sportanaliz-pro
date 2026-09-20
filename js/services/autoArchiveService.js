@@ -109,6 +109,12 @@ const AutoArchiveService = {
                     this.app.loadDailyCoupons();
                 } else if (this.app.currentView === 'virtual-coupons' && window.VirtualCouponPanel) {
                     this.app.loadVirtualCouponPanel();
+                } else if (this.app.currentView === 'daily-analysis' && typeof this.app.loadDailyAnalysisPanel === 'function') {
+                    this.app.loadDailyAnalysisPanel();
+                } else if (this.app.currentView === 'all-matches' && typeof this.app.loadAllMatchesTrackerPanel === 'function') {
+                    this.app.loadAllMatchesTrackerPanel();
+                } else if (this.app.currentView === 'matches' && typeof this.app.renderMatches === 'function') {
+                    this.app.renderMatches();
                 }
             }
 

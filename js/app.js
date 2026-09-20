@@ -500,7 +500,12 @@ const App = {
 
         // Arka planda hızlı skor senkronizasyonu
         if (window.LiveScoreService && this.matches && this.matches.length > 0) {
-            LiveScoreService.syncBulletinMatches(this.matches).catch(() => {});
+            LiveScoreService.syncBulletinMatches(this.matches).then(() => {
+                if (this.currentView === 'daily-analysis') {
+                    container.innerHTML = DailyAnalysisViewPanel.render(this);
+                    DailyAnalysisViewPanel.bindEvents(this);
+                }
+            }).catch(() => {});
         }
     },
 

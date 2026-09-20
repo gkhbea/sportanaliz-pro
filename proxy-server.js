@@ -30,28 +30,28 @@ function getCacheFilePath(key) {
     return path.join(CACHE_DIR, `${cleanKey}_${today}.json`);
 }
 
-function getCached(key, forceRefresh = false) {
+function getCached(key, forceRefresh = false, customTTL = null) {
     if (forceRefresh) {
         console.log(`🔄 [Zorla Yenileme] ${key} için önbellek atlandı.`);
         return null;
     }
+    const ttl = customTTL || DAILY_CACHE_TTL;
 
     // 1. RAM kontrolü
     const memItem = memoryCache.get(key);
-    if (memItem && (Date.now() - memItem.time < DAILY_CACHE_TTL)) {
+    if (memItem && (Date.now() - memItem.time < ttl)) {
         return memItem.data;
     }
 
-    // 2. Günlük Disk Kontrolü (Bugüne ait JSON dosyası)
+    // 2. Günlük Disk Kontrolü
     const filePath = getCacheFilePath(key);
     if (fs.existsSync(filePath)) {
         try {
             const stats = fs.statSync(filePath);
-            if (Date.now() - stats.mtimeMs < DAILY_CACHE_TTL) {
+            if (Date.now() - stats.mtimeMs < ttl) {
                 const fileData = fs.readFileSync(filePath, 'utf8');
                 const parsed = JSON.parse(fileData);
                 memoryCache.set(key, { data: parsed, time: stats.mtimeMs });
-                console.log(`📦 [GÜNLÜK ÖNBELLEK] ${key} diskten hızlıca yüklendi (İnternet/API çağrısı YAPILMADI).`);
                 return parsed;
             }
         } catch (e) {
@@ -492,8 +492,12 @@ async function fetchMackolikLiveScores(targetDate = null) {
 app.get('/api/proxy/mackolik/live', async (req, res) => {
     try {
         const queryDate = req.query.date || null;
+        const force = req.query.force === 'true';
+        const isToday = !queryDate || queryDate === 'today';
+        const LIVE_TTL = 30 * 1000;
+        const ttl = isToday ? LIVE_TTL : DAILY_CACHE_TTL;
         const cacheKey = `mackolik_live_feed_${queryDate || 'today'}`;
-        const cached = getCached(cacheKey);
+        const cached = getCached(cacheKey, force, ttl);
         if (cached) return res.json(cached);
 
         const list = await fetchMackolikLiveScores(queryDate);
@@ -509,8 +513,11 @@ app.get('/api/proxy/live/scores', async (req, res) => {
     try {
         const queryDate = req.query.date || null;
         const force = req.query.force === 'true';
+        const isToday = !queryDate || queryDate === 'today';
+        const LIVE_TTL = 30 * 1000; // Canlı skorlar için 30 saniye TTL
+        const ttl = isToday ? LIVE_TTL : DAILY_CACHE_TTL;
         const cacheKey = `live_scores_feed_${queryDate || 'today'}`;
-        const cached = getCached(cacheKey, force);
+        const cached = getCached(cacheKey, force, ttl);
         if (cached) return res.json(cached);
 
         const matches = [];
