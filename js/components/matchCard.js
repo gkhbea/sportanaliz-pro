@@ -31,16 +31,20 @@ const MatchCard = {
             if (margin < 8) badges += '<span class="badge badge-value">💎 Düşük Margin</span>';
         }
 
-        // Canlı / Biten maç skoru rozeti (Başlamamış maçlara asla MS / BİTTİ verilmez)
+        // Canlı / Biten maç skoru rozeti (MatchTracker ve liveScore ile çift teyitli)
+        const ls = match.liveScore || (window.MatchTracker ? window.MatchTracker.getMatchScore(match) : null);
         let scoreHtml = '';
-        if (match.liveScore && (match.liveScore.isFinished || match.liveScore.minute === 'MS' || match.status === 'FINISHED')) {
-            const h = typeof match.liveScore.home === 'number' ? match.liveScore.home : 0;
-            const a = typeof match.liveScore.away === 'number' ? match.liveScore.away : 0;
+        const isFin = ls && (ls.isFinished || ls.status === 'FINISHED' || ls.minute === 'MS' || match.status === 'FINISHED');
+        const isLiv = ls && !isFin && (ls.isLive || ls.status === 'LIVE' || (typeof ls.minute === 'string' && (ls.minute.includes("'") || ls.minute.includes('İY'))));
+
+        if (isFin) {
+            const h = typeof ls.home === 'number' ? ls.home : (typeof ls.homeScore === 'number' ? ls.homeScore : 0);
+            const a = typeof ls.away === 'number' ? ls.away : (typeof ls.awayScore === 'number' ? ls.awayScore : 0);
             scoreHtml = `<div class="match-finished-pill" style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.4);color:#4ade80;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;">🏁 BİTTİ (MS: ${h} - ${a})</div>`;
-        } else if (match.liveScore && (match.liveScore.isLive || match.status === 'LIVE')) {
-            const h = typeof match.liveScore.home === 'number' ? match.liveScore.home : 0;
-            const a = typeof match.liveScore.away === 'number' ? match.liveScore.away : 0;
-            const min = match.liveScore.minute || 'Canlı';
+        } else if (isLiv) {
+            const h = typeof ls.home === 'number' ? ls.home : (typeof ls.homeScore === 'number' ? ls.homeScore : 0);
+            const a = typeof ls.away === 'number' ? ls.away : (typeof ls.awayScore === 'number' ? ls.awayScore : 0);
+            const min = ls.minute || 'Canlı';
             scoreHtml = `<div class="match-live-pill" style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.4);color:#f87171;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;animation:pulse 2s infinite;">🔴 CANLI ${min} (${h} - ${a})</div>`;
         }
 

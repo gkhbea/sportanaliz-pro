@@ -799,7 +799,7 @@ const CouponPanel = {
         const odd = matchItem.odd || '1.50';
 
         // Skor ve durum
-        const scoreData = matchItem.scoreData || matchItem.match?.liveScore || {};
+        const scoreData = matchItem.scoreData || matchItem.match?.liveScore || (window.MatchTracker ? window.MatchTracker.getMatchScore(matchItem.match || matchItem) : null) || {};
         const evalStatus = matchItem.evaluation?.status || 'PENDING';
 
         const isFinished = evalStatus === 'WON' || evalStatus === 'LOST' || scoreData.status === 'FINISHED' || scoreData.minute === 'MS';

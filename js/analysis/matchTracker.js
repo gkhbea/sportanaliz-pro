@@ -192,8 +192,8 @@ const MatchTracker = {
      */
     getMatchKey(match) {
         if (!match) return 'unknown_match';
-        const h = (match.homeTeam || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-        const a = (match.awayTeam || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        const h = this.normalizeTeamKey ? this.normalizeTeamKey(match.homeTeam || match.teams?.home || '') : (match.homeTeam || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        const a = this.normalizeTeamKey ? this.normalizeTeamKey(match.awayTeam || match.teams?.away || '') : (match.awayTeam || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
         if (h && a) return `${h}_vs_${a}`;
         if (match.id) return String(match.id);
         return 'unknown_match';

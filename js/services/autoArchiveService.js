@@ -5,7 +5,7 @@
 const AutoArchiveService = {
     STORAGE_KEY: 'sportanaliz_auto_archive_v1',
     LAST_SYNC_KEY: 'sportanaliz_last_sync_timestamp',
-    SYNC_INTERVAL_MS: 15 * 60 * 1000, // 15 dakikada bir hafif arka plan senkronizasyonu (kasmayı ve donmayı önler)
+    SYNC_INTERVAL_MS: 45 * 1000, // 45 saniyede bir canlı takip // 15 dakikada bir hafif arka plan senkronizasyonu (kasmayı ve donmayı önler)
     timer: null,
     isSyncing: false,
 
@@ -28,7 +28,7 @@ const AutoArchiveService = {
         // 15 dakikada bir hafif aralıkla kontrol et
         this.timer = setInterval(() => {
             // Eğer tarayıcı sekmesi gizliyse veya kullanıcı etkileşimdeyse boşuna CPU harcama
-            if (typeof document !== 'undefined' && document.hidden) return;
+            // Arka planda olsa da canlı maç takibini kesme
             this.checkAndSyncDailyArchive();
         }, this.SYNC_INTERVAL_MS);
 
@@ -100,8 +100,17 @@ const AutoArchiveService = {
 
             localStorage.setItem(this.LAST_SYNC_KEY, new Date().toISOString());
 
-            // 4. Hafif sayaç güncellemeleri yap (DOM'u baştan aşağı yıkıp donma yaratmaz)
+            // 4. Canlı skorları ve arayüzü anlık güncelle
             this.refreshCountersOnly();
+            if (this.app) {
+                if (this.app.currentView === 'dashboard' && typeof this.app.applyFilters === 'function') {
+                    this.app.applyFilters();
+                } else if (this.app.currentView === 'coupons' && typeof this.app.loadDailyCoupons === 'function') {
+                    this.app.loadDailyCoupons();
+                } else if (this.app.currentView === 'virtual-coupons' && window.VirtualCouponPanel) {
+                    this.app.loadVirtualCouponPanel();
+                }
+            }
 
         } catch (e) {
             console.error('AutoArchiveService senkronizasyon hatası:', e);

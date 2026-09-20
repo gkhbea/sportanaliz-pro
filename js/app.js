@@ -100,11 +100,13 @@ const App = {
                 LiveRadarSidebar.init();
             }
 
-            // Kesintisiz Canlı Skor & Online Takip Döngüsü Başlat (Uygulamayı sürekli online tutar)
+            // Kesintisiz Canlı Skor & Online Takip Döngüsü Başlat (Uygulamayı 7/24 sürekli canlı tutar)
             if (window.LiveScoreService && typeof LiveScoreService.startAutoPolling === 'function') {
-                // [OPTİMİZE EDİLDİ] Sistem kasmasını önlemek için başlangıçta agresif döngü başlatılmaz.
-            // Sadece canlı maç sekmesine geçildiğinde hafif aralıkla çalışır.
-            console.log('⚡ Canlı skor arka plan yükü optimize edildi.');
+                LiveScoreService.startAutoPolling(() => this.matches || [], () => {
+                    if (this.currentView === 'dashboard') this.applyFilters();
+                    if (this.currentView === 'coupons') this.loadDailyCoupons();
+                }, 45000);
+                console.log('⚡ Kesintisiz canlı skor döngüsü (45s) aktif edildi.');
             }
         } catch (uiErr) {
             console.error('Bileşen başlatma hatası:', uiErr);
@@ -798,6 +800,15 @@ const App = {
             const result = await DataManager.fetchMatches(this.currentSport);
             this.matches = result.matches;
             this.highConfidenceMatches = this.computeHighConfidenceMatches();
+
+            // Bülten maçlarını anında canlı skor beslemesiyle eşleştir
+            if (window.LiveScoreService && typeof LiveScoreService.syncBulletinMatches === 'function') {
+                try {
+                    await LiveScoreService.syncBulletinMatches(this.matches);
+                } catch (syncErr) {
+                    console.warn('Dashboard canlı skor senkronizasyon uyarısı:', syncErr);
+                }
+            }
             
             // Bülten maçları geldikçe anında bugünün analiz karnesini oluştur ve kaydet (%65+ güven analizleriyle senkronize)
             if (window.MatchTracker?.recordDailyAnalysis) {
