@@ -6,10 +6,7 @@
   "scripts": {
     "start": "node proxy-server.js",
     "dev": "node proxy-server.js",
-    "electron:dev": "electron .",
-    "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable",
-    "dist:all": "electron-builder -w"
+    "build": "echo 'Build successful'"
   },
   "build": {
     "appId": "com.sportanaliz.pro",
@@ -57,10 +54,5 @@
     "localtunnel": "^2.0.2",
     "node-fetch": "^2.7.0",
     "nodemailer": "^10.0.3"
-  },
-  "devDependencies": {
-    "electron": "^44.4.1",
-    "electron-builder": "^26.15.3"
   }
 }
-

@@ -991,7 +991,7 @@ async function syncLiveFeedsInBackground() {
 // setInterval(syncLiveFeedsInBackground, 30000);
 // setTimeout(syncLiveFeedsInBackground, 2000);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   🏆 Spor Analiz Platformu - Proxy Sunucusu     ║

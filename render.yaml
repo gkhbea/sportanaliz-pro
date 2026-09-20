@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: sportanaliz-pro
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --omit=dev
+    startCommand: node proxy-server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
