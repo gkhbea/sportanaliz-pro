@@ -4,7 +4,7 @@
   "description": "Spor Karşılaşması Analiz ve Tahmin Platformu",
   "main": "main.js",
   "scripts": {
-    "start": "node proxy-server.js",
+    "start": "node main.js",
     "dev": "node proxy-server.js",
     "build": "echo 'Build successful'"
   },
