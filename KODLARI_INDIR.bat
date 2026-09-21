@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
 title SportAnaliz Pro - Diger Bilgisayardaki Kodlari Indir
 color 0B
@@ -14,9 +14,13 @@ cd /d %~dp0
 set GIT_CMD=git
 where git >nul 2>nul
 if %errorlevel% neq 0 (
-    for /d %%i in (%LOCALAPPDATA%\GitHubDesktop\app-*) do (
-        if exist %%i\resources\app\git\cmd\git.exe (
-            set GIT_CMD=%%i\resources\app\git\cmd\git.exe
+    if exist "C:\Program Files\Git\cmd\git.exe" (
+        set GIT_CMD="C:\Program Files\Git\cmd\git.exe"
+    ) else (
+        for /d %%i in (%LOCALAPPDATA%\GitHubDesktop\app-*) do (
+            if exist %%i\resources\app\git\cmd\git.exe (
+                set GIT_CMD=%%i\resources\app\git\cmd\git.exe
+            )
         )
     )
 )
