@@ -228,7 +228,8 @@ body {
 
 .header-nav {
     display: flex;
-    gap: 3px;
+    align-items: center;
+    gap: 2px;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -241,13 +242,13 @@ body {
 .nav-btn {
     display: flex;
     align-items: center;
-    gap: 5px;
-    padding: 7px 11px;
+    gap: 4px;
+    padding: 6px 9px;
     border: none;
     background: transparent;
     color: var(--text-secondary);
     font-family: var(--font-main);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 500;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -424,7 +425,7 @@ body {
     box-shadow: var(--shadow-glow-purple);
 }
 
-.auth-area { display: flex; align-items: center; gap: 10px; }
+.auth-area, #btn-login, #auth-area { display: none !important; }
 
 .user-info {
     display: flex;
@@ -7695,16 +7696,17 @@ body:not(:has(#disclaimer-banner)) .main-content {
 .nav-live-master-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
+    gap: 5px;
+    padding: 6px 10px;
     border-radius: var(--radius-md);
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.4);
     color: #ef4444;
     font-weight: 700;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: var(--transition-base);
+    white-space: nowrap;
 }
 
 .nav-live-master-btn:hover {

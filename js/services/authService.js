@@ -125,10 +125,7 @@ const AuthService = {
             }
         } else {
             if (authArea) {
-                authArea.innerHTML = `<button class="btn btn-primary btn-sm" id="btn-login">Giriş Yap</button>`;
-                document.getElementById('btn-login')?.addEventListener('click', () => {
-                    Helpers.openModal('modal-auth');
-                });
+                authArea.innerHTML = '';
             }
             if (drawerAuth) {
                 drawerAuth.innerHTML = `<button class="btn btn-primary btn-sm btn-block" id="btn-mobile-login">Giriş Yap / Kayıt Ol</button>`;
