@@ -99,7 +99,7 @@ const CouponEngine = {
         const usedMatchKeys = new Set();
         const getMatchKey = m => (m.id || (m.homeTeam + '_' + m.awayTeam));
 
-        // Yardımcı seçim fonksiyonu (Aynı kuponda ve mümkünse kuponlar arasında maç tekrarını önler)
+        // Yardımcı seçim fonksiyonu (Aynı kuponda ve kuponlar arasında maç tekrarını KESİNLİKLE önler)
         const selectPicksForCoupon = (filterFn, sortFn, count = 3, allowReuse = false) => {
             const candidates = [];
             pool.forEach(item => {
@@ -126,7 +126,7 @@ const CouponEngine = {
                 }
             }
 
-            // Seçilen maçları kullanıldı olarak işaretle
+            // Seçilen maçları global olarak kullanıldı işaretle
             selected.forEach(s => usedMatchKeys.add(getMatchKey(s.item.match)));
             return selected;
         };
@@ -138,16 +138,19 @@ const CouponEngine = {
         let safePicks = selectPicksForCoupon(
             (c, item) => (c.probability >= 75 && c.odd >= 1.15 && c.odd <= 1.68 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
             (a, b) => (b.pick.probability * 1.6 + b.pick.confidenceScore * 1.4) - (a.pick.probability * 1.6 + a.pick.confidenceScore * 1.4),
-            3
+            3,
+            false
         );
-        // Eğer 3 maç bulunamadıysa kriteri kontrollü esnet
+        // Eğer 3 maç bulunamadıysa kriteri kontrollü esnet ama YİNE DE YENİ/BENZERSİZ MAÇLARDAN SEÇ
         if (safePicks.length < 3) {
-            safePicks = selectPicksForCoupon(
-                (c, item) => (c.probability >= 70 && c.odd >= 1.12 && c.odd <= 1.72 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
+            const needed = 3 - safePicks.length;
+            const extra = selectPicksForCoupon(
+                (c, item) => (c.probability >= 68 && c.odd >= 1.10 && c.odd <= 1.75 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
                 (a, b) => (b.pick.probability * 1.5 + b.pick.confidenceScore) - (a.pick.probability * 1.5 + a.pick.confidenceScore),
-                3,
-                true
+                needed,
+                false
             );
+            safePicks = [...safePicks, ...extra];
         }
 
         // ============================================================
@@ -156,7 +159,6 @@ const CouponEngine = {
         let editorPicks = selectPicksForCoupon(
             (c, item) => {
                 if (c.marketCode === '1.5UST') {
-                    // KULLANICI KURALI: 1.5 Üst yalnızca aşırı tempolu (xG >= 2.65) maçlarda kabul edilir
                     const xgTot = (item.result?.expectedGoals?.home || 0) + (item.result?.expectedGoals?.away || 0);
                     if (xgTot < 2.65) return false;
                 }
@@ -168,15 +170,18 @@ const CouponEngine = {
                 const consB = b.item.editor?.consensus?.percentage || 70;
                 return (consB * 1.4 + b.pick.probability * 1.2 + b.pick.confidenceScore) - (consA * 1.4 + a.pick.probability * 1.2 + a.pick.confidenceScore);
             },
-            3
+            3,
+            false
         );
         if (editorPicks.length < 3) {
-            editorPicks = selectPicksForCoupon(
-                (c, item) => (c.probability >= 65 && c.odd >= 1.22 && c.odd <= 2.35 && c.marketCode !== '1.5UST'),
+            const needed = 3 - editorPicks.length;
+            const extra = selectPicksForCoupon(
+                (c, item) => (c.probability >= 64 && c.odd >= 1.20 && c.odd <= 2.40 && c.marketCode !== '1.5UST'),
                 (a, b) => (b.pick.confidenceScore + b.pick.probability) - (a.pick.confidenceScore + a.pick.probability),
-                3,
-                true
+                needed,
+                false
             );
+            editorPicks = [...editorPicks, ...extra];
         }
 
         // ============================================================
@@ -186,32 +191,38 @@ const CouponEngine = {
         let goalPicks = selectPicksForCoupon(
             (c, item) => isGoalMarket(c) && c.probability >= 68 && c.odd >= 1.20 && c.odd <= 2.15,
             (a, b) => (b.pick.probability * 1.5 + (b.pick.valueEdge > 0 ? 8 : 0)) - (a.pick.probability * 1.5 + (a.pick.valueEdge > 0 ? 8 : 0)),
-            3
+            3,
+            false
         );
         if (goalPicks.length < 3) {
-            goalPicks = selectPicksForCoupon(
-                (c, item) => isGoalMarket(c) && c.probability >= 62,
+            const needed = 3 - goalPicks.length;
+            const extra = selectPicksForCoupon(
+                (c, item) => isGoalMarket(c) && c.probability >= 60 && c.odd >= 1.18 && c.odd <= 2.30,
                 (a, b) => b.pick.probability - a.pick.probability,
-                3,
-                true
+                needed,
+                false
             );
+            goalPicks = [...goalPicks, ...extra];
         }
 
         // ============================================================
         // 4. KUPON: 💎 SÜRPRİZ & VALUE AVCISI KUPONU (Yüksek Getiri & Pozitif Edge)
         // ============================================================
         let valuePicks = selectPicksForCoupon(
-            (c, item) => (c.valueEdge >= 0.03 && c.probability >= 48 && c.odd >= 1.55 && c.odd <= 3.10),
+            (c, item) => (c.valueEdge >= 0.02 && c.probability >= 48 && c.odd >= 1.55 && c.odd <= 3.10),
             (a, b) => (b.pick.valueEdge * 3.0 + b.pick.probability * 0.8 + b.pick.odd * 4) - (a.pick.valueEdge * 3.0 + a.pick.probability * 0.8 + a.pick.odd * 4),
-            3
+            3,
+            false
         );
         if (valuePicks.length < 3) {
-            valuePicks = selectPicksForCoupon(
-                (c, item) => (c.odd >= 1.60 && c.odd <= 3.50 && c.probability >= 42),
+            const needed = 3 - valuePicks.length;
+            const extra = selectPicksForCoupon(
+                (c, item) => (c.odd >= 1.50 && c.odd <= 3.60 && c.probability >= 40),
                 (a, b) => (b.pick.odd * 6 + b.pick.confidenceScore + b.pick.probability) - (a.pick.odd * 6 + a.pick.confidenceScore + a.pick.probability),
-                3,
-                true
+                needed,
+                false
             );
+            valuePicks = [...valuePicks, ...extra];
         }
 
         // ============================================================
@@ -223,20 +234,39 @@ const CouponEngine = {
                 const a = (item.match?.awayTeam || '').toLowerCase();
                 const l = (item.match?.league || '').toLowerCase();
                 const isElite = l.includes('şampiyonlar') || l.includes('champions') || l.includes('avrupa') || l.includes('premier') || l.includes('la liga') || l.includes('serie a') || l.includes('bundesliga') || l.includes('süper lig');
-                return (isElite || c.confidenceScore >= 68) && c.probability >= 70 && c.odd >= 1.25 && c.odd <= 2.15 && c.marketCode !== '1.5UST';
+                return (isElite || c.confidenceScore >= 68) && c.probability >= 68 && c.odd >= 1.25 && c.odd <= 2.20 && c.marketCode !== '1.5UST';
             },
             (a, b) => (b.pick.confidenceScore * 1.4 + b.pick.probability * 1.3) - (a.pick.confidenceScore * 1.4 + a.pick.probability * 1.3),
             3,
-            true
+            false
         );
         if (starPicks.length < 3) {
-            starPicks = selectPicksForCoupon(
-                (c, item) => (c.probability >= 65 && c.odd >= 1.20 && c.odd <= 2.25 && c.marketCode !== '1.5UST'),
+            const needed = 3 - starPicks.length;
+            const extra = selectPicksForCoupon(
+                (c, item) => (c.probability >= 62 && c.odd >= 1.18 && c.odd <= 2.30 && c.marketCode !== '1.5UST'),
                 (a, b) => (b.pick.confidenceScore + b.pick.probability) - (a.pick.confidenceScore + a.pick.probability),
-                3,
-                true
+                needed,
+                false
             );
+            starPicks = [...starPicks, ...extra];
         }
+
+        // Havuzda toplam maç sayısı aşırı az ise (örneğin 15'ten az maç olan dar günlerde)
+        // boş kalan kupon slotlarını güven puanı en yüksek maçlarla tamamla
+        const fillIfEmpty = (picksList, filterFn) => {
+            if (picksList.length >= 3) return picksList;
+            const existingKeys = new Set(picksList.map(p => getMatchKey(p.item.match)));
+            const needed = 3 - picksList.length;
+            const fallbackPicks = selectPicksForCoupon(filterFn, (a, b) => b.pick.probability - a.pick.probability, needed, true)
+                .filter(p => !existingKeys.has(getMatchKey(p.item.match)));
+            return [...picksList, ...fallbackPicks].slice(0, 3);
+        };
+
+        safePicks = fillIfEmpty(safePicks, (c) => c.probability >= 65 && c.marketCode !== '1.5UST');
+        editorPicks = fillIfEmpty(editorPicks, (c) => c.probability >= 60 && c.marketCode !== '1.5UST');
+        goalPicks = fillIfEmpty(goalPicks, (c) => isGoalMarket(c) && c.probability >= 58);
+        valuePicks = fillIfEmpty(valuePicks, (c) => c.odd >= 1.45 && c.probability >= 38);
+        starPicks = fillIfEmpty(starPicks, (c) => c.probability >= 60 && c.marketCode !== '1.5UST');
 
         // Kupon nesnelerini paketle (Tam olarak 5 kupon)
         const coupons = [
@@ -374,7 +404,7 @@ const CouponEngine = {
         }
 
         const poolCL = this._buildAnalysisPool(clMatches);
-        const usedUCLKeys = new Set();
+        const usedEuroKeys = new Set();
 
         // ------------------------------------------------------------
         // 1. KUPON: 🏆 Şampiyonlar Ligi — Banko & Garantör Kuponu (Ultra Güven)
@@ -396,8 +426,8 @@ const CouponEngine = {
         const ucl1Picks = [];
         for (const cand of ucl1Candidates) {
             const k = getMatchKey(cand.item.match);
-            if (!usedUCLKeys.has(k)) {
-                usedUCLKeys.add(k);
+            if (!usedEuroKeys.has(k)) {
+                usedEuroKeys.add(k);
                 ucl1Picks.push(cand);
                 if (ucl1Picks.length >= 3) break;
             }
@@ -406,10 +436,10 @@ const CouponEngine = {
         if (ucl1Picks.length < 3) {
             poolCL.forEach(item => {
                 const k = getMatchKey(item.match);
-                if (usedUCLKeys.has(k)) return;
+                if (usedEuroKeys.has(k)) return;
                 const top = item.candidates[0];
                 if (top && ucl1Picks.length < 3) {
-                    usedUCLKeys.add(k);
+                    usedEuroKeys.add(k);
                     ucl1Picks.push({ item, pick: top, isToday: true });
                 }
             });
@@ -436,7 +466,7 @@ const CouponEngine = {
         const ucl2Candidates = [];
         poolCL.forEach(item => {
             const k = getMatchKey(item.match);
-            if (usedUCLKeys.has(k)) return;
+            if (usedEuroKeys.has(k)) return;
             item.candidates.forEach(c => {
                 if (c.odd >= 1.25 && c.odd <= 2.25) {
                     ucl2Candidates.push({ item, pick: c, isToday: true });
@@ -452,16 +482,19 @@ const CouponEngine = {
         const ucl2Picks = [];
         for (const cand of ucl2Candidates) {
             const k = getMatchKey(cand.item.match);
-            if (!usedUCLKeys.has(k)) {
-                usedUCLKeys.add(k);
+            if (!usedEuroKeys.has(k)) {
+                usedEuroKeys.add(k);
                 ucl2Picks.push(cand);
                 if (ucl2Picks.length >= 3) break;
             }
         }
         if (ucl2Picks.length < 3) {
             poolCL.forEach(item => {
-                const top = item.candidates.find(c => c.category === 'gol' || c.odd >= 1.30);
+                const k = getMatchKey(item.match);
+                if (usedEuroKeys.has(k)) return;
+                const top = item.candidates.find(c => c.category === 'gol' || c.odd >= 1.30) || item.candidates[0];
                 if (top && ucl2Picks.length < 3) {
+                    usedEuroKeys.add(k);
                     ucl2Picks.push({ item, pick: top, isToday: true });
                 }
             });
@@ -482,7 +515,6 @@ const CouponEngine = {
         });
         euroCoupons.push(uclCoupon2);
 
-        // ------------------------------------------------------------
         // ------------------------------------------------------------
         // 3. KUPON: 🟠 UEFA Avrupa Ligi Özel Kuponu
         // ------------------------------------------------------------
@@ -509,9 +541,10 @@ const CouponEngine = {
         }
 
         const poolUEL = this._buildAnalysisPool(uelMatches);
-        const usedUELKeys = new Set();
         const uelCandidates = [];
         poolUEL.forEach(item => {
+            const k = getMatchKey(item.match);
+            if (usedEuroKeys.has(k)) return;
             item.candidates.forEach(c => {
                 if (c.probability >= 65 && c.odd >= 1.15 && c.odd <= 2.25) {
                     uelCandidates.push({ item, pick: c, isToday: true });
@@ -523,8 +556,8 @@ const CouponEngine = {
         const uelPicks = [];
         for (const cand of uelCandidates) {
             const k = getMatchKey(cand.item.match);
-            if (!usedUELKeys.has(k)) {
-                usedUELKeys.add(k);
+            if (!usedEuroKeys.has(k)) {
+                usedEuroKeys.add(k);
                 uelPicks.push(cand);
                 if (uelPicks.length >= 3) break;
             }
@@ -532,8 +565,8 @@ const CouponEngine = {
         if (uelPicks.length < 3) {
             poolUEL.forEach(item => {
                 const k = getMatchKey(item.match);
-                if (!usedUELKeys.has(k) && item.candidates[0]) {
-                    usedUELKeys.add(k);
+                if (!usedEuroKeys.has(k) && item.candidates[0]) {
+                    usedEuroKeys.add(k);
                     uelPicks.push({ item, pick: item.candidates[0], isToday: true });
                 }
             });
@@ -576,9 +609,10 @@ const CouponEngine = {
         }
 
         const poolUECL = this._buildAnalysisPool(ueclMatches);
-        const usedUECLKeys = new Set();
         const ueclCandidates = [];
         poolUECL.forEach(item => {
+            const k = getMatchKey(item.match);
+            if (usedEuroKeys.has(k)) return;
             item.candidates.forEach(c => {
                 if (c.odd >= 1.18 && c.odd <= 2.10) {
                     ueclCandidates.push({ item, pick: c, isToday: true });
@@ -590,8 +624,8 @@ const CouponEngine = {
         const ueclPicks = [];
         for (const cand of ueclCandidates) {
             const k = getMatchKey(cand.item.match);
-            if (!usedUECLKeys.has(k)) {
-                usedUECLKeys.add(k);
+            if (!usedEuroKeys.has(k)) {
+                usedEuroKeys.add(k);
                 ueclPicks.push(cand);
                 if (ueclPicks.length >= 3) break;
             }
@@ -599,8 +633,8 @@ const CouponEngine = {
         if (ueclPicks.length < 3) {
             poolUECL.forEach(item => {
                 const k = getMatchKey(item.match);
-                if (!usedUECLKeys.has(k) && item.candidates[0]) {
-                    usedUECLKeys.add(k);
+                if (!usedEuroKeys.has(k) && item.candidates[0]) {
+                    usedEuroKeys.add(k);
                     ueclPicks.push({ item, pick: item.candidates[0], isToday: true });
                 }
             });
