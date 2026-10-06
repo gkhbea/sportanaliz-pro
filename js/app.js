@@ -1717,8 +1717,8 @@ const App = {
                     <div style="display:inline-block;background:rgba(0,240,255,0.15);border:1px solid #00F0FF;padding:4px 14px;border-radius:20px;font-size:0.85rem;font-weight:900;color:#00F0FF;margin-bottom:12px;">
                         🎯 BÜLTEN ANALİZİ: %65 TAMAMLANDI
                     </div>
-                    <h3 style="color:#ffffff;margin-bottom:8px;font-weight:800;">İddaa Bülteni Taranıyor & Günün 5 Kuponu Seçiliyor...</h3>
-                    <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:16px;">4 platformdan oranlar ve AI tahmin konsensüsü taranarak en garantör 5 kupon hazırlanıyor.</p>
+                    <h3 style="color:#ffffff;margin-bottom:8px;font-weight:800;">İddaa Bülteni Taranıyor & Günün Özel Kuponları Seçiliyor...</h3>
+                    <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:16px;">4 platformdan oranlar, Poisson modelleri ve İY/MS analizleri taranarak en garantör stratejik kuponlar hazırlanıyor.</p>
                     <div style="width:100%;background:rgba(255,255,255,0.08);border-radius:10px;height:8px;overflow:hidden;border:1px solid rgba(0,240,255,0.3);">
                         <div style="width:65%;height:100%;background:linear-gradient(90deg, #00F0FF, #10B981);box-shadow:0 0 10px rgba(0,240,255,0.6);"></div>
                     </div>

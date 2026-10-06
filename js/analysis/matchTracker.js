@@ -705,6 +705,75 @@ const MatchTracker = {
                 reason = `İlk yarı ${homeName} kazanamadı (${firstHalfHome}-${firstHalfAway})`;
             }
         }
+
+        // 8. İLK YARI / MAÇ SONU (İY/MS — HT/FT) MARKETLERİ (1/1, X/1, 2/2, X/2, X/X vb.)
+        else if (code.startsWith('HTFT_') || pickTitle.includes('İY/MS') || pickTitle.includes('1/1') || pickTitle.includes('X/1') || pickTitle.includes('2/2') || pickTitle.includes('X/2') || pickTitle.includes('X/X')) {
+            const isTarget11 = code === 'HTFT_1_1' || pickTitle.includes('1/1');
+            const isTargetX1 = code === 'HTFT_X_1' || pickTitle.includes('X/1');
+            const isTarget22 = code === 'HTFT_2_2' || pickTitle.includes('2/2');
+            const isTargetX2 = code === 'HTFT_X_2' || pickTitle.includes('X/2');
+            const isTargetXX = code === 'HTFT_X_X' || pickTitle.includes('X/X');
+
+            const hasFhEnded = isFinished || minute.includes('MS') || minute.includes('İY') || minute.includes('2.Y') || (parseInt(minute) >= 45);
+
+            // İlk Yarı Sonucu
+            const fhResult = firstHalfHome > firstHalfAway ? '1' : (firstHalfHome === firstHalfAway ? 'X' : '2');
+            // Maç Sonu Sonucu
+            const ftResult = homeScore > awayScore ? '1' : (homeScore === awayScore ? 'X' : '2');
+
+            let htCondition = false;
+            let ftCondition = false;
+            let targetLabel = 'İY/MS';
+
+            if (isTarget11) {
+                targetLabel = '1/1';
+                htCondition = (firstHalfHome > firstHalfAway);
+                ftCondition = (homeScore > awayScore);
+            } else if (isTargetX1) {
+                targetLabel = 'X/1';
+                htCondition = (firstHalfHome === firstHalfAway);
+                ftCondition = (homeScore > awayScore);
+            } else if (isTarget22) {
+                targetLabel = '2/2';
+                htCondition = (firstHalfHome < firstHalfAway);
+                ftCondition = (homeScore < awayScore);
+            } else if (isTargetX2) {
+                targetLabel = 'X/2';
+                htCondition = (firstHalfHome === firstHalfAway);
+                ftCondition = (homeScore < awayScore);
+            } else if (isTargetXX) {
+                targetLabel = 'X/X';
+                htCondition = (firstHalfHome === firstHalfAway);
+                ftCondition = (homeScore === awayScore);
+            }
+
+            if (isFinished) {
+                if (htCondition && ftCondition) {
+                    isWon = true;
+                    reason = `İY/MS ${targetLabel} isabet sağlandı (İY ${firstHalfHome}-${firstHalfAway}, MS ${homeScore}-${awayScore})`;
+                } else {
+                    isLost = true;
+                    reason = `İY/MS ${targetLabel} gelmedi (İY ${firstHalfHome}-${firstHalfAway}, MS ${homeScore}-${awayScore} -> ${fhResult}/${ftResult})`;
+                }
+            } else if (hasFhEnded) {
+                if (!htCondition) {
+                    isLost = true;
+                    earlyLost = true;
+                    reason = `İlk yarı ${firstHalfHome}-${firstHalfAway} bitti, ${targetLabel} ilk yarı şartı tutmadı`;
+                } else {
+                    if (ftCondition) {
+                        isWon = 'LIVE_WIN';
+                        reason = `İlk yarı şartı tamam (${firstHalfHome}-${firstHalfAway}), canlı skor uygun (${homeScore}-${awayScore})`;
+                    } else {
+                        isLost = 'LIVE_LOSE';
+                        reason = `İlk yarı tamam (${firstHalfHome}-${firstHalfAway}), canlı skor beklenen yönde değil (${homeScore}-${awayScore})`;
+                    }
+                }
+            } else {
+                isWon = 'LIVE_WIN';
+                reason = `Karşılaşma oynanıyor (${homeScore}-${awayScore})`;
+            }
+        }
         // Varsayılan / Diğer
         else {
             if (isFinished) {

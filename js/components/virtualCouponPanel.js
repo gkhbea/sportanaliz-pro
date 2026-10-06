@@ -411,8 +411,16 @@ const VirtualCouponManager = {
                     let status = m.resultStatus || 'pending';
                     if (isFin) {
                         const bt = (m.pickTitle || m.pick || '').toUpperCase();
+                        const fhH = sc?.firstHalfHome !== undefined ? sc.firstHalfHome : (m.scoreData?.firstHalfHome !== undefined ? m.scoreData.firstHalfHome : 0);
+                        const fhA = sc?.firstHalfAway !== undefined ? sc.firstHalfAway : (m.scoreData?.firstHalfAway !== undefined ? m.scoreData.firstHalfAway : 0);
+
                         let won = false;
-                        if (bt.includes('MS 1') || bt === '1') won = hs > as;
+                        if (bt.includes('1/1')) won = (fhH > fhA) && (hs > as);
+                        else if (bt.includes('X/1')) won = (fhH === fhA) && (hs > as);
+                        else if (bt.includes('2/2')) won = (fhH < fhA) && (as > hs);
+                        else if (bt.includes('X/2')) won = (fhH === fhA) && (as > hs);
+                        else if (bt.includes('X/X')) won = (fhH === fhA) && (hs === as);
+                        else if (bt.includes('MS 1') || bt === '1') won = hs > as;
                         else if (bt.includes('MS 2') || bt === '2') won = as > hs;
                         else if (bt.includes('MS X') || bt === 'X') won = hs === as;
                         else if (bt.includes('2.5 ÜST') || bt.includes('OVER25')) won = (hs + as) > 2;

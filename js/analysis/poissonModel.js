@@ -41,6 +41,9 @@ const PoissonModel = {
         const firstHalfBtts = this.calculateBTTS(firstHalfMatrix);
         const firstHalfTopScores = this.getTopScores(firstHalfMatrix, 6);
 
+        // ---- İlk Yarı / Maç Sonu (İY/MS — HT/FT) Hesabı ----
+        const htft = this.calculateHTFT(homeExpected, awayExpected);
+
         return {
             homeExpected: Math.round(homeExpected * 100) / 100,
             awayExpected: Math.round(awayExpected * 100) / 100,
@@ -50,6 +53,7 @@ const PoissonModel = {
             overUnder,
             btts,
             topScores,
+            htft,
             firstHalf: {
                 homeExpected: Math.round(firstHalfExpHome * 100) / 100,
                 awayExpected: Math.round(firstHalfExpAway * 100) / 100,
@@ -166,6 +170,74 @@ const PoissonModel = {
             }
         }
         return scores.sort((a, b) => b.probability - a.probability).slice(0, n);
+    },
+
+    /**
+     * İlk Yarı / Maç Sonu (İY/MS — HT/FT) 9 Olasılık Dağılımını Hesapla
+     * 1/1, 1/X, 1/2, X/1, X/X, X/2, 2/1, 2/X, 2/2
+     * @param {number} homeExpected - Ev sahibi beklenen gol
+     * @param {number} awayExpected - Deplasman beklenen gol
+     * @returns {Object} 9 adet İY/MS yüzdesi ve en olası seçimler
+     */
+    calculateHTFT(homeExpected, awayExpected) {
+        if (!homeExpected || !awayExpected || homeExpected < 0 || awayExpected < 0) return null;
+
+        const stats = (typeof Statistics !== 'undefined') ? Statistics : (typeof window !== 'undefined' ? window.Statistics : null);
+        const poissonFn = (lambda, k) => {
+            if (stats && typeof stats.poissonProbability === 'function') {
+                return stats.poissonProbability(lambda, k);
+            }
+            if (lambda <= 0) return k === 0 ? 1 : 0;
+            let fact = 1;
+            for (let i = 2; i <= k; i++) fact *= i;
+            return (Math.pow(lambda, k) * Math.exp(-lambda)) / fact;
+        };
+
+        const fhH = homeExpected * 0.44;
+        const fhA = awayExpected * 0.44;
+        const shH = homeExpected * 0.56;
+        const shA = awayExpected * 0.56;
+
+        const rawProbs = {
+            '1/1': 0, '1/X': 0, '1/2': 0,
+            'X/1': 0, 'X/X': 0, 'X/2': 0,
+            '2/1': 0, '2/X': 0, '2/2': 0
+        };
+
+        let totalProb = 0;
+        const maxGoals = 4;
+
+        for (let h1 = 0; h1 <= maxGoals; h1++) {
+            const p_h1 = poissonFn(fhH, h1);
+            for (let a1 = 0; a1 <= maxGoals; a1++) {
+                const p_a1 = poissonFn(fhA, a1);
+                const p_fh = p_h1 * p_a1;
+                const htRes = h1 > a1 ? '1' : (h1 === a1 ? 'X' : '2');
+
+                for (let h2 = 0; h2 <= maxGoals; h2++) {
+                    const p_h2 = poissonFn(shH, h2);
+                    for (let a2 = 0; a2 <= maxGoals; a2++) {
+                        const p_a2 = poissonFn(shA, a2);
+                        const prob = p_fh * p_h2 * p_a2;
+
+                        const totH = h1 + h2;
+                        const totA = a1 + a2;
+                        const ftRes = totH > totA ? '1' : (totH === totA ? 'X' : '2');
+
+                        const key = `${htRes}/${ftRes}`;
+                        rawProbs[key] += prob;
+                        totalProb += prob;
+                    }
+                }
+            }
+        }
+
+        const normalized = {};
+        for (const k in rawProbs) {
+            normalized[k] = Math.round((rawProbs[k] / (totalProb || 1)) * 10000) / 100;
+        }
+
+        return normalized;
     },
 
     /**

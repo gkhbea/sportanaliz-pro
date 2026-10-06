@@ -252,10 +252,10 @@ const CouponPanel = {
                         <span style="font-size:1.4rem;">🤖</span>
                         <div>
                             <h3 style="margin:0;font-size:1.15rem;color:#ffffff;font-weight:800;">
-                                Benim İçin Bahis Yap — Günün 5 Özel Kuponu
+                                Benim İçin Bahis Yap — Günün Özel Analiz Kuponları (${couponList.length} Kupon)
                             </h3>
                             <span style="font-size:0.82rem;color:var(--text-muted);">
-                                ${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden AI konsensüsüyle hazırlanmış 5 stratejik kupon
+                                ${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden yüksek güven kriterini geçen ${couponList.length} stratejik kupon
                             </span>
                         </div>
                     </div>
@@ -271,10 +271,10 @@ const CouponPanel = {
                         <span class="empty-icon">${activeFilter === 'tutan' ? '✅' : (activeFilter === 'yatan' ? '❌' : '⏳')}</span>
                         <h3 style="color:#ffffff;margin-bottom:6px;">Bu filtrede kupon bulunmuyor</h3>
                         <p style="color:var(--text-muted);font-size:0.9rem;">
-                            ${activeFilter === 'tutan' ? 'Henüz resmi olarak %100 sonuçlanmış tutan kupon yok veya maçlar devam ediyor.' : (activeFilter === 'yatan' ? 'Şu an yatan kupon bulunmuyor.' : 'Günün 5 kuponunu görmek için "Tüm Kuponlar" sekmesine tıklayabilirsiniz.')}
+                            ${activeFilter === 'tutan' ? 'Henüz resmi olarak %100 sonuçlanmış tutan kupon yok veya maçlar devam ediyor.' : (activeFilter === 'yatan' ? 'Şu an yatan kupon bulunmuyor.' : 'Günün hazır kuponlarını görmek için "Tüm Kuponlar" sekmesine tıklayabilirsiniz.')}
                         </p>
                         <button class="btn btn-primary btn-sm btn-filter-all" data-coupon-filter="all" style="margin-top:12px;">
-                            🌐 Tüm Kuponları Göster (5)
+                            🌐 Tüm Kuponları Göster (${totalCount})
                         </button>
                     </div>
                 ` : `
@@ -626,7 +626,7 @@ const CouponPanel = {
                         <span style="font-size:1.3rem;">🌐</span>
                         <div>
                             <div style="font-weight:800;font-size:0.88rem;color:#ffffff;">TÜM KUPONLAR</div>
-                            <div style="font-size:0.72rem;color:var(--text-muted);">Günün 5 kuponu</div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);">Günün ${totalCount} kuponu</div>
                         </div>
                     </div>
                     <span style="background:rgba(255,255,255,0.1);padding:3px 8px;border-radius:12px;font-size:0.78rem;font-weight:800;color:#ffffff;">${totalCount}</span>

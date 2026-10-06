@@ -44,7 +44,7 @@ const EditorEngine = {
         return {
             topPick,
             safePick,
-            allCandidates: candidates.slice(0, 5),
+            allCandidates: candidates,
             firstHalf: firstHalfScenario,
             commentators: commentatorReview,
             consensus: consensusData,
@@ -239,12 +239,20 @@ const EditorEngine = {
 
             let confidenceScore = Math.round(baseConfidence + (cappedValueEdge * 1.0) + oddAttractiveness + commentatorBonus);
 
-            // Gerçekçilik kuralı: Olasılığı %55'in altındaki bir tahmine %60+ güven verilemez!
-            if (prob < 55) {
-                confidenceScore = Math.min(confidenceScore, 52);
-            }
-            if (validOdd > 3.00) {
-                confidenceScore = Math.min(confidenceScore, 58);
+            if (category === 'iyms') {
+                // İY/MS için özel güven formülü (Yüksek oran & değer kombinasyonu)
+                // prob %22-%45 aralığında İY/MS için yüksek olasılıktır
+                baseConfidence = 52 + (prob * 0.72);
+                confidenceScore = Math.round(baseConfidence + (cappedValueEdge * 1.2) + commentatorBonus);
+                confidenceScore = Math.max(50, Math.min(88, confidenceScore));
+            } else {
+                // Gerçekçilik kuralı: Olasılığı %55'in altındaki bir tahmine %60+ güven verilemez!
+                if (prob < 55) {
+                    confidenceScore = Math.min(confidenceScore, 52);
+                }
+                if (validOdd > 3.00) {
+                    confidenceScore = Math.min(confidenceScore, 58);
+                }
             }
 
             confidenceScore = Math.max(25, Math.min(96, confidenceScore));
@@ -332,6 +340,48 @@ const EditorEngine = {
         }
         if (fhmr.away && fhmr.away >= 38) {
             addCandidate('IY2', 'İlk Yarı 2', `İY ${analysis.awayTeam}`, fhmr.away, odds.firstHalfAway || 2.45, 'ilkyari');
+        }
+
+        // ---- İlk Yarı / Maç Sonu (İY/MS — HT/FT) Marketleri ----
+        const htft = p.htft || ((analysis.expectedGoals?.home !== undefined && typeof PoissonModel !== 'undefined' && typeof PoissonModel.calculateHTFT === 'function')
+            ? PoissonModel.calculateHTFT(analysis.expectedGoals.home, analysis.expectedGoals.away)
+            : null);
+
+        if (htft) {
+            // 1/1: Ev Sahibi İlk Yarı ve Maç Sonu Kazanır
+            if (htft['1/1'] && htft['1/1'] >= 22 && mr.home && mr.home >= 46) {
+                const odd11 = +(100 / Math.max(htft['1/1'], 10) * 0.88).toFixed(2);
+                const finalOdd11 = odds.htft11 ? parseFloat(odds.htft11) : Math.max(1.65, Math.min(3.80, odd11));
+                addCandidate('HTFT_1_1', 'İY/MS 1/1', `${analysis.homeTeam} 1/1`, htft['1/1'], finalOdd11, 'iyms');
+            }
+
+            // X/1: İlk Yarı Beraberlik, Maç Sonu Ev Sahibi (Dengeli ilk yarı, 2. yarı ev sahibi baskısı)
+            if (htft['X/1'] && htft['X/1'] >= 15 && mr.home && mr.home >= 40) {
+                const oddX1 = +(100 / Math.max(htft['X/1'], 8) * 0.85).toFixed(2);
+                const finalOddX1 = odds.htftX1 ? parseFloat(odds.htftX1) : Math.max(3.40, Math.min(6.50, oddX1));
+                addCandidate('HTFT_X_1', 'İY/MS X/1', `${analysis.homeTeam} X/1`, htft['X/1'], finalOddX1, 'iyms');
+            }
+
+            // 2/2: Deplasman İlk Yarı ve Maç Sonu Kazanır
+            if (htft['2/2'] && htft['2/2'] >= 20 && mr.away && mr.away >= 42) {
+                const odd22 = +(100 / Math.max(htft['2/2'], 10) * 0.88).toFixed(2);
+                const finalOdd22 = odds.htft22 ? parseFloat(odds.htft22) : Math.max(1.85, Math.min(4.20, odd22));
+                addCandidate('HTFT_2_2', 'İY/MS 2/2', `${analysis.awayTeam} 2/2`, htft['2/2'], finalOdd22, 'iyms');
+            }
+
+            // X/2: İlk Yarı Beraberlik, Maç Sonu Deplasman
+            if (htft['X/2'] && htft['X/2'] >= 14 && mr.away && mr.away >= 38) {
+                const oddX2 = +(100 / Math.max(htft['X/2'], 8) * 0.85).toFixed(2);
+                const finalOddX2 = odds.htftX2 ? parseFloat(odds.htftX2) : Math.max(3.80, Math.min(7.00, oddX2));
+                addCandidate('HTFT_X_2', 'İY/MS X/2', `${analysis.awayTeam} X/2`, htft['X/2'], finalOddX2, 'iyms');
+            }
+
+            // X/X: İlk Yarı ve Maç Sonu Beraberlik (Kısır / Dengeli maçlar)
+            if (htft['X/X'] && htft['X/X'] >= 18 && (mr.draw >= 28 || (ou[2.5]?.under && ou[2.5].under >= 55))) {
+                const oddXX = +(100 / Math.max(htft['X/X'], 10) * 0.86).toFixed(2);
+                const finalOddXX = odds.htftXX ? parseFloat(odds.htftXX) : Math.max(3.50, Math.min(6.00, oddXX));
+                addCandidate('HTFT_X_X', 'İY/MS X/X', 'İY/MS X/X', htft['X/X'], finalOddXX, 'iyms');
+            }
         }
 
         // Sırala: Güven puanı en yüksek olan başa
