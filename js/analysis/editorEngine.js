@@ -44,7 +44,7 @@ const EditorEngine = {
         return {
             topPick,
             safePick,
-            allCandidates: candidates.slice(0, 5),
+            allCandidates: candidates.slice(0, 12),
             firstHalf: firstHalfScenario,
             commentators: commentatorReview,
             consensus: consensusData,
@@ -332,6 +332,41 @@ const EditorEngine = {
         }
         if (fhmr.away && fhmr.away >= 38) {
             addCandidate('IY2', 'İlk Yarı 2', `İY ${analysis.awayTeam}`, fhmr.away, odds.firstHalfAway || 2.45, 'ilkyari');
+        }
+
+        // ---- İlk Yarı / Maç Sonu (İY/MS) Marketleri (Kullanıcı Talebi: İY 0/MS 1, İY 0/MS 2, İY 1/MS 2 Sürpriz) ----
+        const htft = p.halfTimeFullTime || (typeof PoissonModel !== 'undefined' && PoissonModel.calculateHalfTimeFullTime ? PoissonModel.calculateHalfTimeFullTime(analysis.expectedGoals?.home || 1.3, analysis.expectedGoals?.away || 1.0) : null);
+        if (htft) {
+            // İY 0 / MS 1: İlk yarı berabere, maç sonu ev sahibi
+            if (htft['X/1'] && htft['X/1'] >= 14) {
+                const oddX1 = odds.htftX1 || +(100 / Math.max(htft['X/1'], 10) * 0.84).toFixed(2);
+                addCandidate('HTX_FT1', 'İlk Yarı X / Maç Sonu 1', 'İY 0 / MS 1', htft['X/1'], Math.max(3.80, Math.min(5.50, oddX1)), 'iy_ms');
+            }
+            // İY 0 / MS 2: İlk yarı berabere, maç sonu deplasman
+            if (htft['X/2'] && htft['X/2'] >= 13) {
+                const oddX2 = odds.htftX2 || +(100 / Math.max(htft['X/2'], 10) * 0.84).toFixed(2);
+                addCandidate('HTX_FT2', 'İlk Yarı X / Maç Sonu 2', 'İY 0 / MS 2', htft['X/2'], Math.max(4.20, Math.min(6.20, oddX2)), 'iy_ms');
+            }
+            // İY 1 / MS 2: Çevirme / Bomba Sürpriz (Ev önde bitirir, Deplasman maçı alır)
+            if (htft['1/2'] && htft['1/2'] >= 1.2) {
+                const odd12 = odds.htft12 || +(100 / Math.max(htft['1/2'], 0.5) * 0.72).toFixed(2);
+                addCandidate('HT1_FT2', 'İlk Yarı 1 / Maç Sonu 2 (Ters Çevirme)', 'İY 1 / MS 2', htft['1/2'], Math.max(22.0, Math.min(32.0, odd12)), 'iy_ms_surpriz');
+            }
+            // İY 2 / MS 1: Çevirme / Bomba Sürpriz (Deplasman önde bitirir, Ev maçı alır)
+            if (htft['2/1'] && htft['2/1'] >= 1.4) {
+                const odd21 = odds.htft21 || +(100 / Math.max(htft['2/1'], 0.5) * 0.72).toFixed(2);
+                addCandidate('HT2_FT1', 'İlk Yarı 2 / Maç Sonu 1 (Ters Çevirme)', 'İY 2 / MS 1', htft['2/1'], Math.max(20.0, Math.min(30.0, odd21)), 'iy_ms_surpriz');
+            }
+            // İY 1 / MS 1: Güçlü favoriler için
+            if (htft['1/1'] && htft['1/1'] >= 28) {
+                const odd11 = odds.htft11 || +(100 / Math.max(htft['1/1'], 15) * 0.88).toFixed(2);
+                addCandidate('HT1_FT1', 'İlk Yarı 1 / Maç Sonu 1', 'İY 1 / MS 1', htft['1/1'], Math.max(1.85, Math.min(3.20, odd11)), 'iy_ms');
+            }
+            // İY 2 / MS 2: Deplasman favoriler için
+            if (htft['2/2'] && htft['2/2'] >= 25) {
+                const odd22 = odds.htft22 || +(100 / Math.max(htft['2/2'], 15) * 0.88).toFixed(2);
+                addCandidate('HT2_FT2', 'İlk Yarı 2 / Maç Sonu 2', 'İY 2 / MS 2', htft['2/2'], Math.max(2.10, Math.min(3.60, odd22)), 'iy_ms');
+            }
         }
 
         // Sırala: Güven puanı en yüksek olan başa

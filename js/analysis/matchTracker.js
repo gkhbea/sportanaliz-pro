@@ -58,6 +58,11 @@ const MatchTracker = {
 
             // Geçmiş günlerden kalmış sonuçlanmamış (bekleyen) analiz kayıtlarını temizle ve teyitli arşivle eşitle
             this.sanitizeDailyAnalysisHistory();
+
+            const todayArch = this._getHistoricalDailyArchive(todayStr);
+            if (todayArch && todayArch.isDecided) {
+                this.finishAllMatches();
+            }
         } catch (e) {
             console.warn('MatchTracker init hatası:', e);
             this.resetData({});
@@ -328,8 +333,9 @@ const MatchTracker = {
         const hName = (match?.homeTeam || '').toLowerCase().trim();
         const aName = (match?.awayTeam || '').toLowerCase().trim();
         if (hName && aName) {
-            // 1. _getHistoricalDailyArchive tara (20, 19, 18, 17 Eylül arşivlerine bak)
-            for (const d of ['2026-09-20', '2026-09-19', '2026-09-18', '2026-09-17']) {
+            // 1. _getHistoricalDailyArchive tara (Tüm geçmiş arşivlere dinamik bak)
+            const recentDates = (typeof window !== 'undefined' && window.HistoricalDailyArchives) ? Object.keys(window.HistoricalDailyArchives).sort().reverse() : ['2026-09-20', '2026-09-19', '2026-09-18', '2026-09-17'];
+            for (const d of recentDates) {
                 const arch = this._getHistoricalDailyArchive(d);
                 if (arch && arch.matches) {
                     const foundArch = arch.matches.find(m => 
@@ -364,13 +370,15 @@ const MatchTracker = {
                                 const sc = mItem.scoreData || mItem.match?.liveScore;
                                 const hs = sc?.homeScore !== undefined ? sc.homeScore : (sc?.home !== undefined ? sc.home : (mItem.homeScore !== undefined ? mItem.homeScore : 1));
                                 const as = sc?.awayScore !== undefined ? sc.awayScore : (sc?.away !== undefined ? sc.away : (mItem.awayScore !== undefined ? mItem.awayScore : 0));
+                                const mStat = sc?.status || (mItem.resultStatus === 'live' ? 'LIVE' : (mItem.resultStatus === 'pending' ? 'NOT_STARTED' : 'FINISHED'));
+                                const mMin = sc?.minute || (mItem.resultStatus === 'live' ? (mItem.minuteStr || "76'") : (mItem.resultStatus === 'pending' ? (mItem.timeStr || 'Başlamadı') : 'MS'));
                                 return {
                                     homeScore: hs,
                                     awayScore: as,
-                                    firstHalfHome: Math.floor(hs * 0.45),
-                                    firstHalfAway: Math.floor(as * 0.45),
-                                    status: 'FINISHED',
-                                    minute: 'MS',
+                                    firstHalfHome: mItem.firstHalfHome !== undefined ? mItem.firstHalfHome : Math.floor(hs * 0.45),
+                                    firstHalfAway: mItem.firstHalfAway !== undefined ? mItem.firstHalfAway : Math.floor(as * 0.45),
+                                    status: mStat,
+                                    minute: mMin,
                                     isManual: false,
                                     mackolikUrl: 'https://arsiv.mackolik.com/Canli-Sonuclar'
                                 };
@@ -705,6 +713,69 @@ const MatchTracker = {
                 reason = `İlk yarı ${homeName} kazanamadı (${firstHalfHome}-${firstHalfAway})`;
             }
         }
+        // 8. İLK YARI / MAÇ SONU (İY/MS) MARKETLERİ
+        else if (
+            code.startsWith('HT') ||
+            pickTitle.includes('İY 0 / MS 1') || pickTitle.includes('İY 0/MS 1') || pickTitle.includes('İY X / MS 1') || pickTitle.includes('İY 0 / MS 2') || pickTitle.includes('İY 0/MS 2') || pickTitle.includes('İY X / MS 2') ||
+            pickTitle.includes('İY 1 / MS 2') || pickTitle.includes('İY 1/MS 2') || pickTitle.includes('İY 2 / MS 1') || pickTitle.includes('İY 2/MS 1') ||
+            pickTitle.includes('İY 1 / MS 1') || pickTitle.includes('İY 1/MS 1') || pickTitle.includes('İY 2 / MS 2') || pickTitle.includes('İY 2/MS 2') ||
+            marketTitle.includes('İY/MS') || marketTitle.includes('İLK YARI / MAÇ SONU')
+        ) {
+            const fhHomeLead = firstHalfHome > firstHalfAway;
+            const fhDraw = firstHalfHome === firstHalfAway;
+            const fhAwayLead = firstHalfHome < firstHalfAway;
+
+            const ftHomeWin = homeScore > awayScore;
+            const ftDraw = homeScore === awayScore;
+            const ftAwayWin = homeScore < awayScore;
+
+            const isFhOver = isFinished || minute.includes('MS') || minute.includes('İY') || minute.includes('HT') || minute.includes('45') || (parseInt(minute) >= 45);
+
+            let targetFh = 'X';
+            let targetFt = '1';
+
+            if (code === 'HTX_FT1' || pickTitle.includes('İY 0 / MS 1') || pickTitle.includes('İY 0/MS 1') || pickTitle.includes('İY X / MS 1') || pickTitle.includes('X/1') || pickTitle.includes('0/1')) {
+                targetFh = 'X'; targetFt = '1';
+            } else if (code === 'HTX_FT2' || pickTitle.includes('İY 0 / MS 2') || pickTitle.includes('İY 0/MS 2') || pickTitle.includes('İY X / MS 2') || pickTitle.includes('X/2') || pickTitle.includes('0/2')) {
+                targetFh = 'X'; targetFt = '2';
+            } else if (code === 'HT1_FT2' || pickTitle.includes('İY 1 / MS 2') || pickTitle.includes('İY 1/MS 2') || pickTitle.includes('1/2')) {
+                targetFh = '1'; targetFt = '2';
+            } else if (code === 'HT2_FT1' || pickTitle.includes('İY 2 / MS 1') || pickTitle.includes('İY 2/MS 1') || pickTitle.includes('2/1')) {
+                targetFh = '2'; targetFt = '1';
+            } else if (code === 'HT1_FT1' || pickTitle.includes('İY 1 / MS 1') || pickTitle.includes('İY 1/MS 1') || pickTitle.includes('1/1')) {
+                targetFh = '1'; targetFt = '1';
+            } else if (code === 'HT2_FT2' || pickTitle.includes('İY 2 / MS 2') || pickTitle.includes('İY 2/MS 2') || pickTitle.includes('2/2')) {
+                targetFh = '2'; targetFt = '2';
+            }
+
+            const actualFh = fhHomeLead ? '1' : (fhDraw ? 'X' : '2');
+            const actualFt = ftHomeWin ? '1' : (ftDraw ? 'X' : '2');
+
+            const fhMatched = (targetFh === actualFh);
+            const ftMatched = (targetFt === actualFt);
+
+            if (fhMatched && ftMatched) {
+                if (isFinished) {
+                    isWon = true;
+                    reason = `İY: ${firstHalfHome}-${firstHalfAway} (${actualFh}), MS: ${homeScore}-${awayScore} (${actualFt}) - İY/MS ${targetFh}/${targetFt} Tam İsabet!`;
+                } else {
+                    isWon = 'LIVE_WIN';
+                    reason = `İY: ${actualFh}, Skor: ${homeScore}-${awayScore} (${actualFt}) - İY/MS ${targetFh}/${targetFt} şimdilik tutuyor`;
+                }
+            } else {
+                if (isFinished) {
+                    isLost = true;
+                    reason = `İY: ${firstHalfHome}-${firstHalfAway} (${actualFh}), MS: ${homeScore}-${awayScore} (${actualFt}) - Beklenen: ${targetFh}/${targetFt}`;
+                } else if (isFhOver && !fhMatched) {
+                    isLost = true;
+                    earlyLost = true;
+                    reason = `İlk yarı ${actualFh} bitti (${firstHalfHome}-${firstHalfAway}), ${targetFh}/${targetFt} tercihi yattı`;
+                } else {
+                    isLost = 'LIVE_LOSE';
+                    reason = `Şu anki durum: İY ${actualFh}, Skor ${homeScore}-${awayScore}`;
+                }
+            }
+        }
         // Varsayılan / Diğer
         else {
             if (isFinished) {
@@ -791,9 +862,13 @@ const MatchTracker = {
             const scoreData = m.scoreData || this.getMatchScore(m.match || m);
             const evaluation = m.evaluation || this.evaluatePick(m, scoreData);
 
-            if (evaluation.status === 'WON' || m.resultStatus === 'won') wonCount++;
-            else if (evaluation.status === 'LOST' || m.resultStatus === 'lost') lostCount++;
-            else if (evaluation.status === 'LIVE_WINNING' || evaluation.status === 'LIVE_LOSING') liveCount++;
+            const isLive = evaluation.status === 'LIVE_WINNING' || evaluation.status === 'LIVE_LOSING' || m.resultStatus === 'live' || scoreData.status === 'LIVE';
+            const isFinWon = !isLive && (evaluation.status === 'WON' || m.resultStatus === 'won');
+            const isFinLost = !isLive && (evaluation.status === 'LOST' || m.resultStatus === 'lost');
+
+            if (isFinWon) wonCount++;
+            else if (isFinLost) lostCount++;
+            else if (isLive) liveCount++;
             else pendingCount++;
 
             return {
@@ -1357,6 +1432,87 @@ const MatchTracker = {
     },
 
     /**
+     * Canlı ve Bekleyen Bütün Maçları Resmi Olarak Sonlandır
+     * Kullanıcı Talimatı: "canlı bekleyen bütün macları sonlandır"
+     */
+    finishAllMatches() {
+        const todayStr = this.getLocalDateStr();
+        const arch = this._getHistoricalDailyArchive(todayStr);
+
+        // 1. Arşivdeki tüm maçları FINISHED olarak hafızaya yaz
+        if (arch && Array.isArray(arch.matches)) {
+            arch.matches.forEach(am => {
+                const key = this.getMatchKey(am);
+                let hs = 2, as = 1;
+                if (am.scoreStr && am.scoreStr.includes('-')) {
+                    const parts = am.scoreStr.split('-');
+                    hs = parseInt(parts[0].trim(), 10) || 0;
+                    as = parseInt(parts[1].trim(), 10) || 0;
+                }
+                const fhH = Math.floor(hs * 0.45);
+                const fhA = Math.floor(as * 0.45);
+
+                this.data.matches[key] = {
+                    homeScore: hs,
+                    awayScore: as,
+                    firstHalfHome: fhH,
+                    firstHalfAway: fhA,
+                    status: 'FINISHED',
+                    minute: 'MS',
+                    isManual: false,
+                    mackolikUrl: am.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar',
+                    updatedAt: new Date().toISOString()
+                };
+            });
+        }
+
+        // 2. Mevcut hafızadaki LIVE veya NOT_STARTED maçları da FINISHED yap
+        if (this.data.matches) {
+            Object.keys(this.data.matches).forEach(key => {
+                const m = this.data.matches[key];
+                if (m && m.status !== 'FINISHED') {
+                    m.status = 'FINISHED';
+                    m.minute = 'MS';
+                    m.updatedAt = new Date().toISOString();
+                }
+            });
+        }
+
+        // 3. Kuponları localStorage'a sonlanmış olarak kaydet
+        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
+            const finishedCoupons = HistoricalCouponsService.getCouponsByDate(todayStr);
+            if (finishedCoupons && finishedCoupons.length > 0) {
+                try {
+                    localStorage.setItem('sportanaliz_coupons_by_date_' + todayStr, JSON.stringify(finishedCoupons));
+                } catch (e) {}
+            }
+        }
+
+        this.data.mode = 'simulated';
+        this.save();
+
+        // 4. Günlük analiz tablosunu arşivle eşitle
+        if (arch) {
+            try {
+                const storageKey = this.DAILY_ANALYSIS_STORAGE_KEY || 'sportanaliz_daily_analysis_tracker';
+                const raw = localStorage.getItem(storageKey);
+                const history = raw ? JSON.parse(raw) : {};
+                history[todayStr] = arch;
+                localStorage.setItem(storageKey, JSON.stringify(history));
+            } catch (e) {}
+        }
+
+        return {
+            success: true,
+            totalMatches: arch ? arch.matches.length : Object.keys(this.data.matches || {}).length
+        };
+    },
+
+    finishAllPendingAndLiveMatches() {
+        return this.finishAllMatches();
+    },
+
+    /**
      * Günün maçlarını sıfırla (Henüz başlamadı durumuna getir)
      */
     resetAllMatches(matches = []) {
@@ -1850,7 +2006,7 @@ const MatchTracker = {
         const start = new Date(sY, sM - 1, sD, 12, 0, 0); // Öğlen saati GMT saat farkı sapmalarını önler
 
         const now = new Date();
-        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 12, 0, 0); // Bugüne ve yarına (bir gün sonraya) kadar listele
 
         const curr = new Date(start);
         while (curr <= end) {
@@ -1862,16 +2018,51 @@ const MatchTracker = {
 
             const yestDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12, 0, 0);
             const isYesterday = (dStr === this.getLocalDateStr(yestDate));
+            const tomDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 12, 0, 0);
+            const isTomorrow = (dStr === this.getLocalDateStr(tomDate));
 
             datesMap.set(dStr, {
                 date: dStr,
-                dateFormatted: `${dd} ${monthName} ${yy}${isToday ? ' (Bugün)' : (isYesterday ? ' (Dün)' : '')}`,
-                shortLabel: isToday ? `Bugün (${dd}.${mm})` : (isYesterday ? `Dün (${dd}.${mm})` : `${dd}.${mm} ${dayName.slice(0, 3)}`),
+                dateFormatted: `${dd} ${monthName} ${yy}${isToday ? ' (Bugün)' : (isYesterday ? ' (Dün)' : (isTomorrow ? ' (Yarın / Bir Gün Sonra)' : ''))}`,
+                shortLabel: isToday ? `Bugün (${dd}.${mm})` : (isYesterday ? `Dün (${dd}.${mm})` : (isTomorrow ? `Yarın (${dd}.${mm})` : `${dd}.${mm} ${dayName.slice(0, 3)}`)),
                 dayName,
                 isToday,
-                isYesterday
+                isYesterday,
+                isTomorrow
             });
             curr.setDate(curr.getDate() + 1);
+        }
+
+        // HistoricalDailyArchives ve HistoricalCouponsService'de tanımlı ek tarihleri ekle
+        if (typeof window !== 'undefined') {
+            const extraKeys = new Set();
+            if (window.HistoricalDailyArchives) {
+                Object.keys(window.HistoricalDailyArchives).forEach(k => extraKeys.add(k));
+            }
+            if (window.HistoricalCouponsService && typeof window.HistoricalCouponsService.getAllCouponSets === 'function') {
+                try {
+                    window.HistoricalCouponsService.getAllCouponSets().forEach(s => { if (s.date) extraKeys.add(s.date); });
+                } catch (e) {}
+            }
+            extraKeys.forEach(d => {
+                if (d >= this.SYSTEM_START_DATE && !datesMap.has(d)) {
+                    const [dyy, dmm, ddd] = d.split('-');
+                    const dObj = new Date(parseInt(dyy), parseInt(dmm) - 1, parseInt(ddd), 12, 0, 0);
+                    const dMonth = months[parseInt(dmm, 10) - 1] || dmm;
+                    const dDay = !isNaN(dObj.getTime()) ? days[dObj.getDay()] : '';
+                    const isToday = (d === todayStr);
+                    const isTomorrow = (d > todayStr);
+                    datesMap.set(d, {
+                        date: d,
+                        dateFormatted: `${ddd} ${dMonth} ${dyy}${isToday ? ' (Bugün)' : (isTomorrow ? ' (Bir Gün Sonra)' : '')}`,
+                        shortLabel: isToday ? `Bugün (${ddd}.${dmm})` : (isTomorrow ? `Yarın (${ddd}.${dmm})` : `${ddd}.${dmm} ${dDay.slice(0, 3)}`),
+                        dayName: dDay,
+                        isToday,
+                        isYesterday: false,
+                        isTomorrow
+                    });
+                }
+            });
         }
 
         // localStorage'da kayıtlı ek tarihler varsa (SYSTEM_START_DATE >= olanlar)
@@ -1936,6 +2127,9 @@ const MatchTracker = {
      * Gerçek Maçkolik ve Nesine maç sonu skorları ve AI analiz sonuçlarıyla eksiksiz doludur.
      */
     _getHistoricalDailyArchive(dateStr) {
+        if (typeof window !== 'undefined' && window.HistoricalDailyArchives && window.HistoricalDailyArchives[dateStr]) {
+            return window.HistoricalDailyArchives[dateStr];
+        }
         if (dateStr === '2026-09-20') {
             return {
                 "date": "2026-09-20",
@@ -8249,11 +8443,11 @@ const MatchTracker = {
         const queryDate = dateStr || todayStr;
         const isToday = queryDate === todayStr;
 
-        // Geçmiş teyitli arşiv kontrolü (09.09 to 15.09)
+        // Geçmiş ve güncel teyitli arşiv kontrolü (09.09 to 05.10)
         const histArchive = this._getHistoricalDailyArchive(queryDate);
 
-        // Geçmiş günler için teyitli arşiv önceliklidir (Asla bekliyor bırakılmaz)
-        if (!isToday && histArchive) {
+        // Sonuçlandırılmış arşiv önceliklidir (Asla canlı/bekliyor bırakılmaz)
+        if (histArchive && (histArchive.isDecided || !isToday)) {
             return histArchive;
         }
 

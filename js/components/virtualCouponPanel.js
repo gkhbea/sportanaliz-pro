@@ -175,14 +175,23 @@ const VirtualCouponManager = {
             const sets = HistoricalCouponsService.getAllCouponSets('2026-09-09');
             sets.forEach(set => {
                 (set.coupons || []).forEach((c, idx) => {
-                    const isWon = (c.badge && c.badge.includes('KAZANDI')) || c.status === 'WON' || (c.matches || []).every(m => m.resultStatus === 'won');
-                    const isLost = (c.badge && c.badge.includes('KAYBETTİ')) || c.status === 'LOST' || (c.matches || []).some(m => m.resultStatus === 'lost');
+                    const allWon = (c.matches || []).length > 0 && (c.matches || []).every(m => m.resultStatus === 'won');
+                    const anyLost = (c.matches || []).some(m => m.resultStatus === 'lost');
+                    const hasLive = (c.matches || []).some(m => m.resultStatus === 'live' || m.scoreData?.status === 'LIVE');
+
+                    let status = 'pending';
+                    if (allWon) status = 'won';
+                    else if (anyLost) status = 'lost';
+                    else if (hasLive) status = 'live';
+                    else status = 'pending';
+
+                    const isWon = status === 'won';
+                    const isLost = status === 'lost';
                     const stake = c.recommendedStake || 100;
                     const totalOdds = parseFloat(c.totalOdd) || 2.0;
                     const potentialReturn = Math.round(stake * totalOdds * 100) / 100;
-                    const status = isWon ? 'won' : (isLost ? 'lost' : 'pending');
                     const payout = isWon ? potentialReturn : 0;
-                    const netProfit = isWon ? (potentialReturn - stake) : -stake;
+                    const netProfit = isWon ? (potentialReturn - stake) : (isLost ? -stake : 0);
 
                     const dateParts = set.date.split('-');
                     const dateFormatted = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
@@ -206,7 +215,13 @@ const VirtualCouponManager = {
                             const a = m.awayTeam || (m.match && m.match.awayTeam) || '';
                             const hs = m.homeScore !== undefined ? m.homeScore : 0;
                             const as = m.awayScore !== undefined ? m.awayScore : 0;
-                            const isMatchWon = m.resultStatus === 'won' || m.isWon === true;
+
+                            let matchStatus = 'pending';
+                            if (m.resultStatus === 'won') matchStatus = 'won';
+                            else if (m.resultStatus === 'lost') matchStatus = 'lost';
+                            else if (m.resultStatus === 'live' || m.scoreData?.status === 'LIVE') matchStatus = 'live';
+                            else matchStatus = 'pending';
+
                             return {
                                 matchId: m.iddaaCode || m.id || `${h}_${a}`,
                                 homeTeam: h,
@@ -215,8 +230,8 @@ const VirtualCouponManager = {
                                 matchTime: m.timeStr || '20:00',
                                 betType: m.pickTitle || m.pick || 'MS 1',
                                 odds: String(m.odd || 1.50),
-                                status: isMatchWon ? 'won' : 'lost',
-                                score: `${hs} - ${as}`
+                                status: matchStatus,
+                                score: matchStatus === 'pending' ? 'v' : `${hs} - ${as}`
                             };
                         })
                     });
@@ -896,7 +911,7 @@ const VirtualCouponPanel = {
                 <div style="display:flex;align-items:center;gap:10px;">
                     <span style="font-size:1.3rem;">📅</span>
                     <div>
-                        <strong style="color:#ffffff;font-size:1.05rem;display:block;">Günlük Kupon Arşivi (09 - 20 Eylül)</strong>
+                        <strong style="color:#ffffff;font-size:1.05rem;display:block;">Günlük Kupon Arşivi (09 Eylül - Bugün)</strong>
                         <span style="font-size:0.78rem;color:var(--text-muted);">İstediğiniz güne tıklayarak o gün oynanan kuponları, sonuçları ve net kârını inceleyin</span>
                     </div>
                 </div>

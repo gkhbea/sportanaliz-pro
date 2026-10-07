@@ -34,8 +34,8 @@ const CouponPanel = {
         const todayStr = this._getLocalToday();
         const queryDate = chosenDate || todayStr;
 
-        // 1. Geçmiş tarihler (örn. 19 Eylül) için teyitli sonuçlanmış arşivi getir
-        if (queryDate !== todayStr && typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
+        // 1. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService)
+        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
             const hist = HistoricalCouponsService.getCouponsByDate(queryDate);
             if (Array.isArray(hist) && hist.length > 0) {
                 try {
@@ -207,7 +207,7 @@ const CouponPanel = {
                                     </span>
                                 </div>
                                 <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px;">
-                                    ${activeAnalyzedCount > 0 ? `${isSelectedDateToday ? 'Bugünkü bültenden' : (chosenDate + ' bülteninden')} ${activeAnalyzedCount} maç detaylı analiz edildi · En yüksek güvenli maçlardan 5 kupon seçildi` : 'Canlı İddaa bülteni taranıyor...'}
+                                    ${activeAnalyzedCount > 0 ? `${isSelectedDateToday ? 'Bugünkü bültenden' : (chosenDate + ' bülteninden')} ${activeAnalyzedCount} maç detaylı analiz edildi · Güven kriterini tam karşılayan ${totalCount} garantör kupon seçildi (Maks. 5)` : 'Canlı İddaa bülteni taranıyor...'}
                                 </div>
                             </div>
                         </div>
@@ -259,7 +259,10 @@ const CouponPanel = {
                             </span>
                         </div>
                     </div>
-                    <div style="display:flex;gap:8px;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-outline btn-xs" id="btn-finish-all-pending-matches" style="background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,78,59,0.3));border:1px solid #10B981;color:#10B981;font-weight:800;border-radius:8px;padding:5px 12px;cursor:pointer;" title="Tüm canlı ve bekleyen karşılaşmaları resmi maç sonu (MS) olarak sonuçlandır">
+                            🏁 Canlı/Bekleyenleri Sonlandır (MS)
+                        </button>
                         <button class="btn btn-outline btn-xs" id="btn-reload-5-coupons" title="Kuponları bülten verileriyle yeniden hesapla">
                             🔄 Kuponları Yenile
                         </button>
@@ -271,10 +274,10 @@ const CouponPanel = {
                         <span class="empty-icon">${activeFilter === 'tutan' ? '✅' : (activeFilter === 'yatan' ? '❌' : '⏳')}</span>
                         <h3 style="color:#ffffff;margin-bottom:6px;">Bu filtrede kupon bulunmuyor</h3>
                         <p style="color:var(--text-muted);font-size:0.9rem;">
-                            ${activeFilter === 'tutan' ? 'Henüz resmi olarak %100 sonuçlanmış tutan kupon yok veya maçlar devam ediyor.' : (activeFilter === 'yatan' ? 'Şu an yatan kupon bulunmuyor.' : 'Günün 5 kuponunu görmek için "Tüm Kuponlar" sekmesine tıklayabilirsiniz.')}
+                            ${activeFilter === 'tutan' ? 'Henüz resmi olarak %100 sonuçlanmış tutan kupon yok veya maçlar devam ediyor.' : (activeFilter === 'yatan' ? 'Şu an yatan kupon bulunmuyor.' : `Günün ${totalCount} kuponunu görmek için "Tüm Kuponlar" sekmesine tıklayabilirsiniz.`)}
                         </p>
                         <button class="btn btn-primary btn-sm btn-filter-all" data-coupon-filter="all" style="margin-top:12px;">
-                            🌐 Tüm Kuponları Göster (5)
+                            🌐 Tüm Kuponları Göster (${totalCount})
                         </button>
                     </div>
                 ` : `
@@ -626,7 +629,7 @@ const CouponPanel = {
                         <span style="font-size:1.3rem;">🌐</span>
                         <div>
                             <div style="font-weight:800;font-size:0.88rem;color:#ffffff;">TÜM KUPONLAR</div>
-                            <div style="font-size:0.72rem;color:var(--text-muted);">Günün 5 kuponu</div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);">Günün ${totalCount} kuponu (Maks. 5)</div>
                         </div>
                     </div>
                     <span style="background:rgba(255,255,255,0.1);padding:3px 8px;border-radius:12px;font-size:0.78rem;font-weight:800;color:#ffffff;">${totalCount}</span>
@@ -826,14 +829,16 @@ const CouponPanel = {
         const iddaaCode = matchItem.iddaaCode || matchItem.match?.iddaaCode || matchItem.match?.code || '';
         const iddaaBadge = iddaaCode ? `<span style="background:rgba(234,179,8,0.2);border:1px solid rgba(234,179,8,0.5);color:#facc15;padding:1px 5px;border-radius:4px;font-weight:900;font-size:0.7rem;">🏷️ Kod: ${iddaaCode}</span>` : '';
 
+        const timeBadge = `<span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);color:#38BDF8;padding:1px 6px;border-radius:4px;font-weight:700;font-size:0.72rem;">⏰ ${timeStr}</span>`;
+
         return `
             <div class="coupon-match-row" style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
                 <div style="flex:1;">
-                    <div style="display:flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--text-muted);margin-bottom:2px;">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.73rem;color:var(--text-muted);margin-bottom:2px;flex-wrap:wrap;">
                         ${iddaaBadge}
                         <span>${league}</span>
                         <span>·</span>
-                        <span>${timeStr}</span>
+                        ${timeBadge}
                     </div>
                     <div style="font-weight:700;color:#ffffff;font-size:0.88rem;">
                         ${homeTeam} <span style="color:var(--text-muted);font-weight:400;">vs</span> ${awayTeam}
@@ -862,18 +867,21 @@ const CouponPanel = {
      */
     isCouponWon(coupon) {
         if (!coupon) return false;
-        if (coupon.resultStatus === 'won' || coupon.status === 'won' || (coupon.badge && coupon.badge.includes('KAZANDI'))) return true;
-        if (!window.MatchTracker) return false;
-        const res = window.MatchTracker.evaluateCoupon(coupon);
-        return res.status === 'WON';
+        if (window.MatchTracker) {
+            const res = window.MatchTracker.evaluateCoupon(coupon);
+            return res.status === 'WON';
+        }
+        if (coupon.matches && coupon.matches.some(m => m.resultStatus === 'pending' || m.resultStatus === 'live')) return false;
+        return coupon.resultStatus === 'won' || coupon.status === 'won' || (coupon.badge && coupon.badge.includes('KAZANDI') && !coupon.badge.includes('DEVAM') && !coupon.badge.includes('CANLI'));
     },
 
     isCouponLost(coupon) {
         if (!coupon) return false;
-        if (coupon.resultStatus === 'lost' || coupon.status === 'lost' || (coupon.badge && coupon.badge.includes('KAYBETTİ'))) return true;
-        if (!window.MatchTracker) return false;
-        const res = window.MatchTracker.evaluateCoupon(coupon);
-        return res.status === 'LOST';
+        if (window.MatchTracker) {
+            const res = window.MatchTracker.evaluateCoupon(coupon);
+            return res.status === 'LOST';
+        }
+        return coupon.resultStatus === 'lost' || coupon.status === 'lost' || (coupon.badge && (coupon.badge.includes('KAYBETTİ') || coupon.badge.includes('YATTI')));
     },
 
     isCouponPending(coupon) {
@@ -895,6 +903,17 @@ const CouponPanel = {
                 app.activeCouponFilter = filter;
                 app.loadDailyCoupons(false, filter, 'today');
             });
+        });
+
+        // 🏁 Tüm Canlı/Bekleyen Maçları Sonlandır Butonu (Kullanıcı Talimatı: "canlı bekleyen bütün macları sonlandır")
+        document.getElementById('btn-finish-all-pending-matches')?.addEventListener('click', () => {
+            if (window.MatchTracker && typeof window.MatchTracker.finishAllMatches === 'function') {
+                const res = window.MatchTracker.finishAllMatches();
+                window.Helpers?.showToast?.(`🏁 ${res.totalMatches || 'Tüm'} karşılaşma resmi maç sonu (MS) olarak sonuçlandırıldı! ✅`, 'success');
+                if (app && typeof app.loadDailyCoupons === 'function') {
+                    app.loadDailyCoupons(true, app.activeCouponFilter || 'all', this.selectedAnalysisDate || 'today');
+                }
+            }
         });
 
         // 5 Kuponu Yenile Butonu

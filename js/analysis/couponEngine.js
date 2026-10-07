@@ -79,7 +79,7 @@ const CouponEngine = {
     generateDailyCoupons(matches = [], forceNew = false) {
         const todayStr = new Date().toISOString().slice(0, 10);
 
-        if (!forceNew && this.cachedCoupons && this.cachedCoupons.length === 5) {
+        if (!forceNew && this.cachedCoupons && Array.isArray(this.cachedCoupons) && this.cachedCoupons.length > 0 && this.cachedCoupons.length <= 5) {
             return this.cachedCoupons;
         }
 
@@ -99,6 +99,9 @@ const CouponEngine = {
         const usedMatchKeys = new Set();
         const getMatchKey = m => (m.id || (m.homeTeam + '_' + m.awayTeam));
 
+        // Kullanıcı Kuralı: "Bülteni gece gündüz diye ayırma, bütün gün olarak hazırla kuponları en garanti maçlardan"
+        // Gece/Gündüz ayrımı yapmadan tüm günün en yüksek güven ve garanti oranına sahip maçlarını seç
+
         // Yardımcı seçim fonksiyonu (Aynı kuponda ve kuponlar arasında maç tekrarını KESİNLİKLE önler)
         const selectPicksForCoupon = (filterFn, sortFn, count = 3, allowReuse = false) => {
             const candidates = [];
@@ -113,7 +116,8 @@ const CouponEngine = {
                 });
             });
 
-            candidates.sort(sortFn);
+            // Bütün gün havuzundan en garanti / en yüksek güven oranına göre sırala
+            candidates.sort((a, b) => sortFn(a, b));
 
             const selected = [];
             const localKeys = new Set();
@@ -251,29 +255,79 @@ const CouponEngine = {
             starPicks = [...starPicks, ...extra];
         }
 
-        // Havuzda toplam maç sayısı aşırı az ise (örneğin 15'ten az maç olan dar günlerde)
-        // boş kalan kupon slotlarını güven puanı en yüksek maçlarla tamamla
-        const fillIfEmpty = (picksList, filterFn) => {
-            if (picksList.length >= 3) return picksList;
-            const existingKeys = new Set(picksList.map(p => getMatchKey(p.item.match)));
-            const needed = 3 - picksList.length;
-            const fallbackPicks = selectPicksForCoupon(filterFn, (a, b) => b.pick.probability - a.pick.probability, needed, true)
-                .filter(p => !existingKeys.has(getMatchKey(p.item.match)));
-            return [...picksList, ...fallbackPicks].slice(0, 3);
-        };
+        // ============================================================
+        // ⚡ İY / MS ÖZEL ANALİZ KUPONU (Kullanıcı Talebi: İY 0/MS 1, İY 0/MS 2, İY 1/MS 2)
+        // ============================================================
+        let htftPicks = selectPicksForCoupon(
+            (c, item) => (
+                (c.marketCode === 'HTX_FT1' || c.marketCode === 'HTX_FT2' || c.marketCode === 'HT1_FT2' || c.marketCode === 'HT2_FT1' || c.marketCode === 'HT1_FT1' || c.category === 'iy_ms' || c.category === 'iy_ms_surpriz') &&
+                (c.probability >= 14 || (c.marketCode === 'HT1_FT2' && c.probability >= 1.2) || (c.marketCode === 'HT2_FT1' && c.probability >= 1.4))
+            ),
+            (a, b) => {
+                const scoreA = (a.pick.marketCode === 'HT1_FT2' || a.pick.marketCode === 'HT2_FT1') ? (a.pick.probability * 15 + a.pick.odd * 1.5) : (a.pick.probability * 2.2 + a.pick.odd * 2.0);
+                const scoreB = (b.pick.marketCode === 'HT1_FT2' || b.pick.marketCode === 'HT2_FT1') ? (b.pick.probability * 15 + b.pick.odd * 1.5) : (b.pick.probability * 2.2 + b.pick.odd * 2.0);
+                return scoreB - scoreA;
+            },
+            2,
+            true // İY/MS özel bir tür olduğu için güvenli maçları da kullanabilir
+        );
 
-        safePicks = fillIfEmpty(safePicks, (c) => c.probability >= 65 && c.marketCode !== '1.5UST');
-        editorPicks = fillIfEmpty(editorPicks, (c) => c.probability >= 60 && c.marketCode !== '1.5UST');
-        goalPicks = fillIfEmpty(goalPicks, (c) => isGoalMarket(c) && c.probability >= 58);
-        valuePicks = fillIfEmpty(valuePicks, (c) => c.odd >= 1.45 && c.probability >= 38);
-        starPicks = fillIfEmpty(starPicks, (c) => c.probability >= 60 && c.marketCode !== '1.5UST');
+        // Fallback: Eğer havuzda henüz yeterli İY/MS adayı yoksa, bültendeki maçların Poisson modelinden türet
+        if (!htftPicks || htftPicks.length < 2) {
+            pool.forEach(item => {
+                if (htftPicks.length >= 2) return;
+                const p = item.result?.poisson;
+                const htft = p?.halfTimeFullTime;
+                if (!htft) return;
+                
+                if (htft['X/1'] >= 16) {
+                    const exists = htftPicks.some(hp => hp.item.match.id === item.match.id);
+                    if (!exists) {
+                        htftPicks.push({
+                            item,
+                            pick: {
+                                marketCode: 'HTX_FT1',
+                                title: 'İlk Yarı X / Maç Sonu 1',
+                                shortPick: 'İY 0 / MS 1',
+                                probability: htft['X/1'],
+                                odd: +(100 / Math.max(htft['X/1'], 10) * 0.85).toFixed(2),
+                                confidenceScore: 78,
+                                category: 'iy_ms'
+                            }
+                        });
+                    }
+                } else if (htft['X/2'] >= 14) {
+                    const exists = htftPicks.some(hp => hp.item.match.id === item.match.id);
+                    if (!exists) {
+                        htftPicks.push({
+                            item,
+                            pick: {
+                                marketCode: 'HTX_FT2',
+                                title: 'İlk Yarı X / Maç Sonu 2',
+                                shortPick: 'İY 0 / MS 2',
+                                probability: htft['X/2'],
+                                odd: +(100 / Math.max(htft['X/2'], 10) * 0.85).toFixed(2),
+                                confidenceScore: 74,
+                                category: 'iy_ms'
+                            }
+                        });
+                    }
+                }
+            });
+        }
 
-        // Kupon nesnelerini paketle (Tam olarak 5 kupon)
-        const coupons = [
-            this._formatCoupon({
+        // ============================================================
+        // 🎯 KULLANICI KURALI: GARANTİN NEYSE O, MAKSİMUM 5 KUPON
+        // Her gün zorla 5 kupon yapılmaz. Sadece güven kriterlerini
+        // tam olarak sağlayan kuponlar paketlenir (1 ile 5 arası).
+        // ============================================================
+        const qualifiedCoupons = [];
+
+        if (safePicks && safePicks.length >= 2) {
+            qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-safe',
                 title: 'Kasa Katlama / En Garantör Kupon',
-                subtitle: 'Günün en banko, en yüksek kazanma ihtimalli 3 seçimi',
+                subtitle: `Günün en banko, en yüksek kazanma ihtimalli ${safePicks.length} seçimi`,
                 badge: '🛡️ ULTRA GÜVEN · BANKO',
                 badgeType: 'success',
                 icon: '🛡️',
@@ -282,8 +336,11 @@ const CouponEngine = {
                 picks: safePicks,
                 strategy: 'Kasa katlama ve sermaye koruma odaklıdır. Poisson simülasyonlarında sapma riski minimum olan tercihlerden oluşturulmuştur.',
                 recommendedStake: 200
-            }),
-            this._formatCoupon({
+            }));
+        }
+
+        if (editorPicks && editorPicks.length >= 2) {
+            qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-editor',
                 title: 'İdeal Günlük Editör Kuponu',
                 subtitle: '4 Platform ortak konsensüsü ve dengeli oranlar',
@@ -295,8 +352,28 @@ const CouponEngine = {
                 picks: editorPicks,
                 strategy: 'Nesine, Bilyoner, İddaa ve Misli yorumcularının ortak görüş bildirdiği, oran/risk dengesi kusursuz ana kupon.',
                 recommendedStake: 100
-            }),
-            this._formatCoupon({
+            }));
+        }
+
+        // ⚡ İY / MS ÖZEL KUPONU
+        if (htftPicks && htftPicks.length >= 2) {
+            qualifiedCoupons.push(this._formatCoupon({
+                id: 'coupon-htft',
+                title: '⚡ İY / MS Özel Analiz Kuponu',
+                subtitle: 'Yüksek model yüzdeli İY 0/MS 1, İY 0/MS 2 ve Bomba İY 1/MS 2',
+                badge: '⚡ İY / MS ÖZEL · YÜKSEK ÇARPAN',
+                badgeType: 'special',
+                icon: '⚡',
+                themeColor: '#8B5CF6',
+                accentBg: 'rgba(139, 92, 246, 0.14)',
+                picks: htftPicks,
+                strategy: 'İlk yarı ve ikinci yarı bağımsız Poisson simülasyonlarıyla hesaplanan yüksek yüzdeli İY 0/MS 1, İY 0/MS 2 ve sürpriz çevirme (İY 1/MS 2) tercihlerini birleştiren özel kupondur.',
+                recommendedStake: 50
+            }));
+        }
+
+        if (goalPicks && goalPicks.length >= 2) {
+            qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-goals',
                 title: 'Günün Gol Yağmuru Kuponu',
                 subtitle: 'Taraf riskine girmeden saf gol istatistikleri',
@@ -308,8 +385,11 @@ const CouponEngine = {
                 picks: goalPicks,
                 strategy: 'Takımların son maç gol ortalamaları, hücum güç indeksleri ve ilk yarı tempo analizleriyle seçilmiş gol kuponu.',
                 recommendedStake: 100
-            }),
-            this._formatCoupon({
+            }));
+        }
+
+        if (valuePicks && valuePicks.length >= 2) {
+            qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-value',
                 title: 'Sürpriz & Değer (Value) Kuponu',
                 subtitle: 'Piyasa oranlarının gerçek gücün üzerinde açıldığı tercihler',
@@ -321,8 +401,11 @@ const CouponEngine = {
                 picks: valuePicks,
                 strategy: 'Matematiksel modelin piyasa oranından daha yüksek ihtimal gördüğü, küçük bütçeyle yüksek kazanç hedefleyen kupon.',
                 recommendedStake: 50
-            }),
-            this._formatCoupon({
+            }));
+        }
+
+        if (starPicks && starPicks.length >= 2) {
+            qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-star',
                 title: 'Günün Yıldız Kuponu / Süper Kombine',
                 subtitle: 'Günün en formda elit takımları ve seçkin maçları',
@@ -332,10 +415,13 @@ const CouponEngine = {
                 themeColor: '#EC4899',
                 accentBg: 'rgba(236, 72, 153, 0.12)',
                 picks: starPicks,
-                strategy: 'Günün en prestijli liglerinden form durumu en yüksek takımların bir araya getirildiği özel 5. kupon.',
+                strategy: 'Günün en prestijli liglerinden form durumu en yüksek takımların bir araya getirildiği özel kupon.',
                 recommendedStake: 100
-            })
-        ];
+            }));
+        }
+
+        // Tavan sınır: Maksimum 5 kupon
+        const coupons = qualifiedCoupons.slice(0, 5);
 
         this.cachedCoupons = coupons;
         this.lastGeneratedAt = new Date();
@@ -876,7 +962,11 @@ const CouponEngine = {
 
             // Seçim gerekçesi üret
             let reason = 'İstatistiksel Poisson modelinde yüksek gerçekleşme ihtimali.';
-            if (cand.category === 'gol') {
+            if (cand.category === 'iy_ms' || cand.marketCode?.startsWith('HT')) {
+                reason = `Çift Poisson modelinde ilk yarı dengesi ve ikinci yarı taktik üstünlüğüyle %${cand.probability} gerçekleşme ihtimali.`;
+            } else if (cand.category === 'iy_ms_surpriz') {
+                reason = `İki takımın devre arası hücum/savunma dönüşümüne göre yüksek çarpanlı (+%${cand.valueEdge}) sürpriz çevirme senaryosu.`;
+            } else if (cand.category === 'gol') {
                 reason = `İki takımın toplam beklenen golü (xG) yüksek; 4 platform konsensüsü %${cons.percentage}.`;
             } else if (cand.category === 'taraf') {
                 reason = `${m.homeTeam} iç saha formunda istikrarlı; model kazanma ihtimalini %${cand.probability} hesapladı.`;
