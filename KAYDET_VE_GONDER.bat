@@ -41,12 +41,20 @@ echo [2/3] GitHub ve Render'a yukleniyor (Push)...
 %GIT_CMD% push origin master
 %GIT_CMD% push origin master:main
 
-echo.
-echo =======================================================
-echo   ✅ İŞLEM TAMAMLANDI!
-echo   Tüm kodlar buluta gönderildi.
-echo   Render canlı siteniz 1 dakika içinde otomatik güncellenecek!
-echo =======================================================
-echo.
-echo Bu pencere 5 saniye içinde otomatik kapanacaktır...
-timeout /t 5
+if %errorlevel% neq 0 (
+    echo.
+    echo ⚠️ GitHub yetkilendirme veya baglanti bekleniyor.
+    echo Tarayicida GitHub giris penceresi acildiysa lutfen onaylayin.
+    echo.
+    pause
+) else (
+    echo.
+    echo =======================================================
+    echo   ✅ İŞLEM TAMAMLANDI!
+    echo   Tüm kodlar buluta gönderildi.
+    echo   Render canlı siteniz 1 dakika içinde otomatik güncellenecek!
+    echo =======================================================
+    echo.
+    echo Bu pencere 5 saniye içinde otomatik kapanacaktır...
+    timeout /t 5
+)
