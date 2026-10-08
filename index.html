@@ -109,10 +109,6 @@
                         <span class="nav-icon">🌐</span>
                         <span>Tüm Kuponlar</span>
                     </button>
-                    <button class="nav-btn nav-virtual-btn" data-view="virtual-coupon" id="nav-virtual-coupon" style="color:#C084FC;font-weight:800;border:1px solid rgba(168,85,247,0.4);background:rgba(168,85,247,0.08);">
-                        <span class="nav-icon">🎮</span>
-                        <span>Kupon Arşivi &amp; Kasa</span>
-                    </button>
                     <button class="nav-btn nav-profit-loss-btn" data-view="profit-loss" id="nav-profit-loss" style="color:#10B981;font-weight:700;border:1px solid rgba(16,185,129,0.4);background:rgba(16,185,129,0.08);">
                         <span class="nav-icon">💰</span>
                         <span>Kasa / Kâr-Zarar</span>
@@ -207,13 +203,6 @@
                             <span class="m-drawer-sub">09.09'dan beri kuponlar &amp; net bakiye</span>
                         </div>
                     </button>
-                    <button class="m-drawer-item" data-view="virtual-coupon" style="border-left: 3px solid #A855F7;">
-                        <span class="m-drawer-icon">🎮</span>
-                        <div class="m-drawer-text">
-                            <span class="m-drawer-title" style="color:#C084FC;font-weight:800;">Kupon Arşivi &amp; Kasa</span>
-                            <span class="m-drawer-sub">Günlük oynanan kuponlar &amp; kâr/zarar arşivi</span>
-                        </div>
-                    </button>
                     <button class="m-drawer-item" data-view="coupons">
                         <span class="m-drawer-icon">🤖</span>
                         <div class="m-drawer-text">
@@ -276,7 +265,6 @@
                 <button class="m-pill-btn" data-view="live" style="color:#EF4444;font-weight:800;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.1);">🔴 Canlı Maçlar</button>
                 <button class="m-pill-btn" data-view="value-live" style="color:#F59E0B;font-weight:800;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);">⚡ Canlı Value</button>
                 <button class="m-pill-btn" data-view="radar" style="color:#00F0FF;font-weight:800;border:1px solid rgba(0,240,255,0.4);background:rgba(0,240,255,0.1);">📡 Canlı Radar</button>
-                <button class="m-pill-btn" data-view="virtual-coupon" style="color:#C084FC;font-weight:800;">🎮 Sanal Kupon</button>
                 <button class="m-pill-btn" data-view="profit-loss" style="color:#10B981;font-weight:800;">💰 Kasa / Kâr-Zarar</button>
                 <button class="m-pill-btn" data-view="daily-analysis" style="color:#00F0FF;font-weight:800;">📅 Geçmiş Analizler</button>
                 <button class="m-pill-btn" data-view="coupons-all">🌐 Tüm Kuponlar</button>
@@ -339,9 +327,6 @@
                     <button class="btn btn-primary btn-sm" id="btn-quick-all-coupons" onclick="App.navigate('coupons-all')" style="background:linear-gradient(135deg, #0284c7, #38bdf8);color:#fff;font-weight:700;" title="Bültenin tüm hazır kuponları">
                         🌐 Tüm Kuponlar
                     </button>
-                    <button class="btn btn-primary btn-sm" id="btn-quick-virtual-coupon" onclick="App.navigate('virtual-coupon')" style="background:linear-gradient(135deg, #a855f7, #ec4899);color:#fff;font-weight:800;" title="Sanal para ile kupon yap & kasanı yönet">
-                        🎮 Sanal Kupon &amp; Kasa
-                    </button>
                     <button class="btn btn-primary btn-sm" id="btn-quick-radar" style="background:linear-gradient(135deg, #0284c7, #06b6d4);color:#fff;font-weight:700;border:1px solid rgba(255,255,255,0.25);" title="InPlayFlux canlı baskı ve APPI/RXG radarı">
                         📡 Canlı Radar
                     </button>
@@ -364,9 +349,9 @@
                         <div class="stat-value">0</div>
                         <div class="stat-label">Value Bet</div>
                     </div>
-                    <div class="stat-card" id="stat-virtual-balance" onclick="App.navigate('virtual-coupon')" style="cursor:pointer;" title="Sanal Kasa Bakiyeniz">
-                        <div class="stat-value" id="dash-virtual-bal-val">10.000 TL</div>
-                        <div class="stat-label">🎮 Sanal Kasa Bakiyesi</div>
+                    <div class="stat-card accent-green" id="stat-won-bets" onclick="App.navigate('daily-analysis')" style="cursor:pointer;" title="Resmi Maçkolik &amp; TFF Sonuçlarıyla Tutan Tercihler">
+                        <div class="stat-value" id="dash-won-bets-val" style="color:#10B981;">0</div>
+                        <div class="stat-label">✅ Tutan Tercihler</div>
                     </div>
                     <div class="stat-card accent-amber" id="stat-data-source">
                         <div class="stat-value">—</div>
@@ -714,11 +699,8 @@
                             <button class="hist-filter-btn" data-hist-filter="value">💎 Value Betler</button>
                         </div>
                         <div class="history-action-btns">
-                            <button class="btn btn-primary btn-sm" id="btn-hist-simulate" title="Günün maçlarını Poisson modeline göre sonuçlandır">
-                                ⚡ Gün Sonu Skorlarını Simüle Et
-                            </button>
-                            <button class="btn btn-ghost btn-sm" id="btn-hist-sync" title="Skorları ve veritabanını eşitle">
-                                🔄 Skorları Eşitle
+                            <button class="btn btn-primary btn-sm" id="btn-hist-sync" title="Resmi Maçkolik ve TFF canlı skorlarını eşitle">
+                                🔄 Resmi Skorları Eşitle
                             </button>
                             <button class="btn btn-ghost btn-sm" id="btn-hist-open-scores" title="Maç skorlarını elle gir">
                                 ✏️ Skor Düzenle
@@ -739,10 +721,6 @@
                 </div>
             </section>
 
-            <!-- Virtual Coupon & Bankroll Simulator View -->
-            <section class="view" id="view-virtual-coupon">
-                <div id="virtual-coupon-container"></div>
-            </section>
         </main>
 
         <!-- ===== FOOTER ===== -->
@@ -769,9 +747,9 @@
                 <span class="m-nav-icon">🤖</span>
                 <span class="m-nav-label">Kuponlar</span>
             </button>
-            <button class="m-nav-btn" data-view="virtual-coupon" id="m-nav-virtual" style="color:#C084FC;">
-                <span class="m-nav-icon">🎮</span>
-                <span class="m-nav-label">Kupon Arşiv</span>
+            <button class="m-nav-btn" data-view="daily-analysis" id="m-nav-daily-analysis" style="color:#00F0FF;">
+                <span class="m-nav-icon">📅</span>
+                <span class="m-nav-label">Karne</span>
             </button>
             <button class="m-nav-btn" data-view="analysis" id="m-nav-analysis">
                 <span class="m-nav-icon">📊</span>
@@ -1026,7 +1004,6 @@
     <script src="js/components/chartsPanel.js"></script>
     <script src="js/components/kasaManager.js"></script>
     <script src="js/components/profitLossPanel.js"></script>
-    <script src="js/components/virtualCouponPanel.js"></script>
     <script src="js/components/valueLiveUnifiedPanel.js"></script>
     <script src="js/components/liveMatchesPanel.js"></script>
     <script src="js/analysis/squadRatingEngine.js"></script>

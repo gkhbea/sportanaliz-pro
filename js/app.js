@@ -62,12 +62,7 @@ const App = {
                     console.log('Auth event:', event);
                 });
             }
-            // Supabase Cloud'dan Kupon ve Kasa Senkronizasyonu (Telefon & PC Senkronu)
-            if (window.VirtualCouponManager && typeof VirtualCouponManager.syncFromSupabase === 'function') {
-                VirtualCouponManager.syncFromSupabase().then(() => {
-                    if (this.updateHeaderStats) this.updateHeaderStats();
-                }).catch(() => {});
-            }
+
         } catch (authErr) {
             console.warn('Auth/Supabase başlatma uyarısı:', authErr);
         }
@@ -473,7 +468,8 @@ const App = {
         } else if (view === 'profit-loss') {
             this.loadProfitLossPanel();
         } else if (view === 'virtual-coupon') {
-            this.loadVirtualCouponPanel();
+            this.navigate('coupons');
+            return;
         } else if (view === 'value-live') {
             this.loadValueLivePanel();
         } else if (view === 'radar') {
@@ -699,38 +695,7 @@ const App = {
      * Sanal Kupon & Kasa Kâr/Zarar Simülatörü Panelini Yükle
      */
     loadVirtualCouponPanel() {
-        const container = document.getElementById('virtual-coupon-container');
-        if (!container) return;
-
-        // Maçlar henüz çekilmediyse bülteni arka planda çek
-        if (!this.matches || this.matches.length === 0) {
-            this.loadDashboard();
-        }
-
-        try {
-            if (window.VirtualCouponPanel) {
-                container.innerHTML = VirtualCouponPanel.render(this);
-                VirtualCouponPanel.bindEvents(this);
-                VirtualCouponManager.updateBadge();
-            } else {
-                container.innerHTML = `
-                    <div class="empty-state" style="padding:60px 20px;">
-                        <span class="empty-icon">🎮</span>
-                        <h3>Sanal Kupon Modülü Yükleniyor...</h3>
-                        <p>Lütfen sayfayı yenileyin.</p>
-                    </div>
-                `;
-            }
-        } catch (e) {
-            console.error('VirtualCouponPanel render hatası:', e);
-            container.innerHTML = `
-                <div class="empty-state" style="padding:60px 20px;">
-                    <span class="empty-icon">❌</span>
-                    <h3>Sanal Kupon Paneli Yüklenemedi</h3>
-                    <p style="font-size:0.85rem;color:var(--text-muted);">${e.message}</p>
-                </div>
-            `;
-        }
+        this.navigate('coupons');
     },
 
     /**
@@ -1010,11 +975,11 @@ const App = {
             highConfEl.textContent = total > 0 ? total : (this.highConfidenceMatches || this.computeHighConfidenceMatches()).length;
         }
 
-        // Sanal Kasa Bakiyesi güncelle
-        const virtualBalEl = document.getElementById('dash-virtual-bal-val');
-        if (virtualBalEl && window.VirtualCouponManager) {
-            const w = VirtualCouponManager.getWallet();
-            virtualBalEl.textContent = (w.currentBalance || 10000).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' TL';
+        // Tutan Tercihler (Resmi Maçkolik & TFF Sonuçlarıyla)
+        const wonBetsEl = document.getElementById('dash-won-bets-val');
+        if (wonBetsEl) {
+            const wonTotal = cumulativeTotals.wonAnalyzed || 0;
+            wonBetsEl.textContent = wonTotal > 0 ? wonTotal : (window.MatchTracker?.getWonCount?.() || 0);
         }
     },
 
@@ -1757,14 +1722,7 @@ const App = {
         // Günün 5 hazır kuponunu HIGH-CONF havuzundan üret
         const coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh);
 
-        // Kullanıcıya sormadan 5 kuponu otomatik tut ve kupon arşivine kaydet
-        if (window.VirtualCouponManager && typeof VirtualCouponManager.autoTrackDailyCoupons === 'function') {
-            try {
-                VirtualCouponManager.autoTrackDailyCoupons(coupons);
-            } catch (autoErr) {
-                console.warn('Kuponları otomatik tutma uyarısı:', autoErr);
-            }
-        }
+
 
         container.innerHTML = CouponPanel.render(coupons, [], currentFilter, chosenDate, totalAnalyzedCount);
         CouponPanel.bindEvents(this, coupons, [], chosenDate);

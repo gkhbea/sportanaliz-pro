@@ -115,40 +115,9 @@ const ValueLiveUnifiedPanel = {
         const allMatches = this.getAllMatches(app);
 
         // Canlı oynanan maçları topla (LiveScoreService + app.liveMatches)
-        let liveSource = (app?.liveMatches && app.liveMatches.length > 0)
+        const liveSource = (app?.liveMatches && app.liveMatches.length > 0)
             ? app.liveMatches
             : (window.LiveScoreService ? LiveScoreService.getLiveMatches() : []);
-
-        // Eğer anlık canlı maç yoksa, bültendeki ilk 10 maçı canlı simülasyona al
-        if (liveSource.length === 0 && allMatches.length > 0) {
-            liveSource = allMatches.slice(0, 10).map((m, idx) => {
-                const sampleMinutes = [24, 38, 45, 58, 67, 74, 81, 33, 62, 70];
-                const sampleScores = [
-                    { home: 1, away: 0 },
-                    { home: 0, away: 0 },
-                    { home: 1, away: 1 },
-                    { home: 2, away: 1 },
-                    { home: 0, away: 1 },
-                    { home: 2, away: 0 },
-                    { home: 1, away: 2 },
-                    { home: 0, away: 0 },
-                    { home: 3, away: 1 },
-                    { home: 1, away: 1 }
-                ];
-                const min = sampleMinutes[idx % sampleMinutes.length];
-                const sc = sampleScores[idx % sampleScores.length];
-
-                return {
-                    ...m,
-                    isLive: true,
-                    minute: `${min}'`,
-                    minuteDisplay: `${min}'`,
-                    homeScore: sc.home,
-                    awayScore: sc.away,
-                    liveScore: { home: sc.home, away: sc.away, minute: `${min}'`, isLive: true }
-                };
-            });
-        }
 
         const activeLiveMatches = liveSource.filter(m => {
             if (window.LiveScoreService && typeof LiveScoreService.isStrictFootballMatch === 'function') {
@@ -518,18 +487,10 @@ const ValueLiveUnifiedPanel = {
                 </div>
             </div>
 
-            <!-- Aksiyon Butonu -->
-            <button class="btn btn-sm btn-block btn-add-live-to-slip" 
-                data-match-id="${alert.matchId || `${alert.homeTeam}-${alert.awayTeam}`}"
-                data-home="${alert.homeTeam}"
-                data-away="${alert.awayTeam}"
-                data-league="${alert.league}"
-                data-market="Canlı İddaa"
-                data-selection="${sig.targetMarket}"
-                data-odd="${sig.approxOdd}"
-                style="background:linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.2));border:1px solid rgba(168,85,247,0.5);color:#E879F9;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:8px;">
-                <span>🎮 Sanal Kupona Ekle (@${sig.approxOdd})</span>
-            </button>
+            <!-- Canlı İddaa Oranı -->
+            <div style="background:linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.15));border:1px solid rgba(168,85,247,0.4);color:#E879F9;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:8px;font-size:0.85rem;">
+                <span>⚡ Canlı Sinyal Oranı: @${sig.approxOdd}</span>
+            </div>
         </div>
         `;
     },
@@ -598,18 +559,10 @@ const ValueLiveUnifiedPanel = {
                 </div>
             </div>
 
-            <!-- Aksiyon Butonu -->
-            <button class="btn btn-sm btn-block btn-add-value-to-slip"
-                data-match-id="${v.matchId || `${v.homeTeam}-${v.awayTeam}`}"
-                data-home="${v.homeTeam}"
-                data-away="${v.awayTeam}"
-                data-league="${v.league}"
-                data-market="${opp?.market || 'Value Bet'}"
-                data-selection="${opp?.pickTitle || 'MS 1'}"
-                data-odd="${opp?.bookmakerOdd || 1.80}"
-                style="background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2));border:1px solid rgba(16,185,129,0.5);color:#34D399;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:8px;">
-                <span>🎮 Sanal Kupona Ekle (@${opp?.bookmakerOdd || 1.80})</span>
-            </button>
+            <!-- Tespit Edilen Değer Oranı -->
+            <div style="background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,182,212,0.15));border:1px solid rgba(16,185,129,0.4);color:#34D399;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:8px;font-size:0.85rem;">
+                <span>💎 Tespit Edilen Değer Oranı: @${opp?.bookmakerOdd || 1.80}</span>
+            </div>
         </div>
         `;
     },
@@ -643,29 +596,6 @@ const ValueLiveUnifiedPanel = {
             });
         }
 
-        // Sanal Kupona Ekle Butonları (Live & Value)
-        document.querySelectorAll('.btn-add-live-to-slip, .btn-add-value-to-slip').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (window.VirtualCouponManager) {
-                    const item = {
-                        matchId: btn.dataset.matchId,
-                        homeTeam: btn.dataset.home,
-                        awayTeam: btn.dataset.away,
-                        league: btn.dataset.league,
-                        market: btn.dataset.market,
-                        selection: btn.dataset.selection,
-                        odd: parseFloat(btn.dataset.odd) || 1.50,
-                        dateStr: 'Bugün',
-                        matchTime: 'Canlı/Bugün'
-                    };
-                    VirtualCouponManager.addToSlip(item);
-                    if (window.Helpers && typeof Helpers.showToast === 'function') {
-                        Helpers.showToast(`🎮 ${item.homeTeam} vs ${item.awayTeam} (${item.selection} @${item.odd}) sanal kuponunuza eklendi!`, 'success');
-                    }
-                }
-            });
-        });
     }
 };
 

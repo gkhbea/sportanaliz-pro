@@ -334,7 +334,7 @@ const CouponEngine = {
                 themeColor: '#10B981',
                 accentBg: 'rgba(16, 185, 129, 0.1)',
                 picks: safePicks,
-                strategy: 'Kasa katlama ve sermaye koruma odaklıdır. Poisson simülasyonlarında sapma riski minimum olan tercihlerden oluşturulmuştur.',
+                strategy: 'Kasa katlama ve sermaye koruma odaklıdır. Poisson olasılık modelinde sapma riski minimum olan tercihlerden oluşturulmuştur.',
                 recommendedStake: 200
             }));
         }
@@ -367,7 +367,7 @@ const CouponEngine = {
                 themeColor: '#8B5CF6',
                 accentBg: 'rgba(139, 92, 246, 0.14)',
                 picks: htftPicks,
-                strategy: 'İlk yarı ve ikinci yarı bağımsız Poisson simülasyonlarıyla hesaplanan yüksek yüzdeli İY 0/MS 1, İY 0/MS 2 ve sürpriz çevirme (İY 1/MS 2) tercihlerini birleştiren özel kupondur.',
+                strategy: 'İlk yarı ve ikinci yarı bağımsız Poisson olasılık modeliyle hesaplanan yüksek yüzdeli İY 0/MS 1, İY 0/MS 2 ve sürpriz çevirme (İY 1/MS 2) tercihlerini birleştiren özel kupondur.',
                 recommendedStake: 50
             }));
         }

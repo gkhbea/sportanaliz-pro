@@ -97,7 +97,7 @@ const MatchCard = {
         const matchId = match ? (match.id || `${safeHome}-${safeAway}`) : 'm_' + Math.random();
 
         return `
-            <div class="odds-btn" onclick="event.stopPropagation(); if(window.VirtualCouponManager){ window.VirtualCouponManager.addToSlip({ matchId: '${matchId}', homeTeam: '${safeHome}', awayTeam: '${safeAway}', league: '${safeLeague}', betType: '${label}', odds: ${value} }); if(window.Helpers) Helpers.showToast('🎮 ${safeHome} vs ${safeAway} (${label}: ${value.toFixed(2)}) Sanal Kupona Eklendi!', 'success'); }" title="🎮 Tıkla: Sanal Kupona Ekle">
+            <div class="odds-btn" title="${label}: ${value.toFixed(2)}">
                 <div class="odds-label">${label}</div>
                 <div class="odds-value">${value.toFixed(2)}</div>
             </div>

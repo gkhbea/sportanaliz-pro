@@ -81,23 +81,6 @@ const AutoArchiveService = {
                 }
             }
 
-            // 2.5 Günlük 5 Hazır Kuponu Kullanıcıya Sormadan Otomatik Tut & Arşive Ekle
-            if (window.VirtualCouponManager && typeof VirtualCouponManager.autoTrackDailyCoupons === 'function') {
-                try {
-                    const daily = (window.CouponEngine && this.app?.matches) ? CouponEngine.generateDailyCoupons(this.app.matches) : [];
-                    VirtualCouponManager.autoTrackDailyCoupons(daily);
-                } catch (autoErr) {
-                    console.warn('AutoArchiveService kupon otomatik tutma:', autoErr);
-                }
-            }
-
-            // 3. Sanal Kuponları Otomatik Sonuçlandır
-            if (window.VirtualCouponManager && typeof VirtualCouponManager.evaluateAllCoupons === 'function') {
-                try {
-                    VirtualCouponManager.evaluateAllCoupons(this.app?.matches || []);
-                } catch (vErr) {}
-            }
-
             localStorage.setItem(this.LAST_SYNC_KEY, new Date().toISOString());
 
             // 4. Canlı skorları ve arayüzü anlık güncelle
@@ -107,8 +90,6 @@ const AutoArchiveService = {
                     this.app.applyFilters();
                 } else if (this.app.currentView === 'coupons' && typeof this.app.loadDailyCoupons === 'function') {
                     this.app.loadDailyCoupons();
-                } else if (this.app.currentView === 'virtual-coupons' && window.VirtualCouponPanel) {
-                    this.app.loadVirtualCouponPanel();
                 } else if (this.app.currentView === 'daily-analysis' && typeof this.app.loadDailyAnalysisPanel === 'function') {
                     this.app.loadDailyAnalysisPanel();
                 } else if (this.app.currentView === 'all-matches' && typeof this.app.loadAllMatchesTrackerPanel === 'function') {

@@ -172,18 +172,18 @@ const CouponPanel = {
                 <!-- 🤖 KULLANICIYA SORMADAN OTOMATİK KUPON TUTMA GÖSTERGESİ -->
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:linear-gradient(135deg,rgba(16,185,129,0.14),rgba(6,78,59,0.3));border:1px solid rgba(16,185,129,0.45);border-radius:14px;padding:12px 18px;margin-bottom:16px;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
                     <div style="display:flex;align-items:center;gap:12px;">
-                        <span style="font-size:1.6rem;background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;">🤖</span>
+                        <span style="font-size:1.6rem;background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;">📋</span>
                         <div>
                             <div style="display:flex;align-items:center;gap:8px;">
-                                <strong style="color:#10B981;font-size:0.95rem;">Otomatik Kupon &amp; Kasa Takibi Devrede</strong>
+                                <strong style="color:#10B981;font-size:0.95rem;">Resmi Maçkolik &amp; TFF Teyitli Kupon Takibi</strong>
                                 <span class="pulse-dot" style="background:#10B981;width:7px;height:7px;border-radius:50%;display:inline-block;"></span>
                             </div>
-                            <span style="font-size:0.8rem;color:#cbd5e1;">Günün 5 hazır kuponu size sorulmadan otomatik olarak sanal kasada tutuldu ve kupon arşivine eklendi. Maçlar bittikçe sonuçlar işlenir.</span>
+                            <span style="font-size:0.8rem;color:#cbd5e1;">Günün hazır bülten kuponları resmi maç skorlarıyla anlık teyit edilir; tüm sonuçlar ve oranlar 100% gerçektir.</span>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <button class="btn btn-sm" onclick="App.navigate('virtual-coupon')" style="background:linear-gradient(135deg,#10B981,#059669);color:#000;font-weight:800;border:none;border-radius:8px;padding:6px 14px;font-size:0.8rem;cursor:pointer;">
-                            🎮 Kupon Arşivinde Gör
+                        <button class="btn btn-sm" onclick="App.navigate('daily-analysis')" style="background:linear-gradient(135deg,#10B981,#059669);color:#000;font-weight:800;border:none;border-radius:8px;padding:6px 14px;font-size:0.8rem;cursor:pointer;">
+                            📅 Günlük Karnede İncele
                         </button>
                     </div>
                 </div>
@@ -771,20 +771,17 @@ const CouponPanel = {
                         </div>
                     ` : ''}
 
-                    <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.35);padding:10px 14px;border-radius:10px;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.35);padding:10px 14px;border-radius:10px;">
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span class="pulse-dot" style="background:#10B981;width:7px;height:7px;border-radius:50%;display:inline-block;"></span>
                             <span style="font-size:0.82rem;font-weight:800;color:#10B981;">
-                                🤖 Otomatik Tutuldu &amp; Arşivde
+                                ⚡ Gerçek Bülten &amp; Resmi Arşiv Kaydı
                             </span>
                         </div>
                         <span style="font-size:0.75rem;color:#cbd5e1;font-weight:700;">
-                            ${defaultStake} TL Sanal Kasada
+                            Toplam Oran: ${totalOdds}
                         </span>
                     </div>
-                    <button class="btn btn-outline btn-block btn-sm" onclick="event.stopPropagation(); if(window.VirtualCouponManager){ window.VirtualCouponManager.addAiCouponToSlip(${JSON.stringify(coupon).replace(/"/g, '&quot;')}); if(window.Helpers) Helpers.showToast('🎮 &quot;${coupon.title}&quot; Sanal Kupon Sepetinize Aktarıldı!', 'success'); }" style="border-color:rgba(168,85,247,0.5);color:#c084fc;font-weight:700;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;">
-                        <span>🎮</span> Bu Kuponu Sanal Kasa ile Oyna
-                    </button>
                 </div>
             </div>
         `;

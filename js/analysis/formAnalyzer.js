@@ -52,7 +52,7 @@ const FormAnalyzer = {
         const awayXG = Math.max(0.3, ((awayAvgScored + homeAvgConceded) / 2) * 0.9);
         const totalXG = (homeXG + awayXG);
 
-        // Olasılık projeksiyonları (Poisson simülasyon desteğiyle)
+        // Olasılık projeksiyonları (Poisson olasılık modeliyle)
         const over25Prob = Math.min(92, Math.max(25, Math.round((1 - Math.exp(-totalXG) * (1 + totalXG + Math.pow(totalXG, 2)/2)) * 100)));
         const bttsProb = Math.min(88, Math.max(20, Math.round((1 - Math.exp(-homeXG)) * (1 - Math.exp(-awayXG)) * 100)));
 
