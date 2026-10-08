@@ -659,7 +659,7 @@ const App = {
             <div style="text-align:center;padding:60px 20px;">
                 <div class="spinner" style="margin:0 auto 16px;"></div>
                 <h3 style="color:var(--text-primary);margin-bottom:8px;">Kupon Arşivi Hesaplanıyor...</h3>
-                <p style="color:var(--text-secondary);font-size:0.9rem;">09.09.2026'dan bugüne tüm kuponlar ve kasa sonuçları yükleniyor.</p>
+                <p style="color:var(--text-secondary);font-size:0.9rem;">09.09.2026'dan bugüne tüm kuponlar ve başarı istatistikleri yükleniyor.</p>
             </div>
         `;
 

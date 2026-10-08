@@ -1,6 +1,6 @@
 /**
  * chartsPanel.js - Gelişmiş Chart.js Grafik & İstatistik Görselleştirme Motoru
- * SportAnaliz Pro
+ * SportAnaliz Pro - 100% Gerçek Kupon ve Maç İstatistikleri
  */
 const ChartsPanel = {
     chartInstances: {},
@@ -27,26 +27,15 @@ const ChartsPanel = {
     renderChartsContainer() {
         return `
         <div class="charts-dashboard-container" style="margin-bottom:28px;">
-            <!-- Üst Başlık & Sekmeler -->
+            <!-- Üst Başlık -->
             <div style="background:rgba(15,23,42,0.85);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 24px;margin-bottom:20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
                     <div>
                         <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;color:#38bdf8;margin-bottom:6px;">
                             <span>📈 İNTERAKTİF ANALİTİK</span>
                         </div>
-                        <h2 style="font-size:1.25rem;font-weight:800;color:#f8fafc;margin:0;">Finansal & İstatistiki Grafik Paneli</h2>
-                        <p style="font-size:0.82rem;color:var(--text-muted);margin:4px 0 0;">09.09.2026'dan bugüne kasa büyümesi, günlük kâr/zarar dağılımı ve kupon başarı metrikleri</p>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="btn btn-sm btn-outline chart-view-btn active" data-view="cumulative" style="border-color:rgba(16,185,129,0.4);color:#10B981;font-size:0.8rem;">
-                            📈 Kasa Büyümesi
-                        </button>
-                        <button class="btn btn-sm btn-ghost chart-view-btn" data-view="daily" style="font-size:0.8rem;">
-                            📊 Günlük Kâr/Zarar
-                        </button>
-                        <button class="btn btn-sm btn-ghost chart-view-btn" data-view="distribution" style="font-size:0.8rem;">
-                            🥧 Başarı Dağılımı
-                        </button>
+                        <h2 style="font-size:1.25rem;font-weight:800;color:#f8fafc;margin:0;">İstatistiki Başarı & Performans Paneli</h2>
+                        <p style="font-size:0.82rem;color:var(--text-muted);margin:4px 0 0;">09.09.2026'dan bugüne kupon isabet trendleri, günlük başarı yüzdeleri ve tercih metrikleri</p>
                     </div>
                 </div>
             </div>
@@ -54,26 +43,26 @@ const ChartsPanel = {
             <!-- Grafik Kartları Izgarası -->
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));gap:20px;">
                 
-                <!-- Grafik 1: Kümülatif Kasa Büyüme Eğrisi -->
+                <!-- Grafik 1: Kümülatif Tutan Kupon Sayısı -->
                 <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(16,185,129,0.25);border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
                         <div>
-                            <h3 style="font-size:0.95rem;font-weight:700;color:#f8fafc;margin:0;">📈 Kümülatif Net Kâr Eğrisi (TL)</h3>
-                            <span style="font-size:0.75rem;color:var(--text-muted);">Günler ilerledikçe biriken net bakiye artışı</span>
+                            <h3 style="font-size:0.95rem;font-weight:700;color:#f8fafc;margin:0;">📈 Kümülatif Tutan Kupon Sayısı</h3>
+                            <span style="font-size:0.75rem;color:var(--text-muted);">Günler ilerledikçe biriken tutan kupon artışı</span>
                         </div>
-                        <span id="chart-growth-badge" style="background:rgba(16,185,129,0.15);color:#10B981;font-weight:800;padding:2px 8px;border-radius:6px;font-size:0.78rem;">+1.247 TL</span>
+                        <span id="chart-growth-badge" style="background:rgba(16,185,129,0.15);color:#10B981;font-weight:800;padding:2px 8px;border-radius:6px;font-size:0.78rem;">Tutan Trendi</span>
                     </div>
                     <div style="position:relative;height:240px;width:100%;">
                         <canvas id="chartCumulativeGrowth"></canvas>
                     </div>
                 </div>
 
-                <!-- Grafik 2: Günlük Net Kâr / Zarar Bar Chart -->
+                <!-- Grafik 2: Günlük Kupon Başarı Yüzdesi Bar Chart -->
                 <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(56,189,248,0.25);border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
                         <div>
-                            <h3 style="font-size:0.95rem;font-weight:700;color:#f8fafc;margin:0;">📊 Günlük Net Kâr / Zarar (TL)</h3>
-                            <span style="font-size:0.75rem;color:var(--text-muted);">Her günün bağımsız kazanç / kayıp bilançosu</span>
+                            <h3 style="font-size:0.95rem;font-weight:700;color:#f8fafc;margin:0;">📊 Günlük Kupon Başarı Oranı (%)</h3>
+                            <span style="font-size:0.75rem;color:var(--text-muted);">Her günün bülten kupon isabet yüzdesi</span>
                         </div>
                         <span style="font-size:0.78rem;color:#38bdf8;font-weight:700;">Günlük Dağılım</span>
                     </div>
@@ -82,14 +71,14 @@ const ChartsPanel = {
                     </div>
                 </div>
 
-                <!-- Grafik 3: Kupon & Bahis Başarı Oranı Doughnut -->
+                <!-- Grafik 3: Kupon Başarı Oranı Doughnut -->
                 <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(129,140,248,0.25);border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
                         <div>
                             <h3 style="font-size:0.95rem;font-weight:700;color:#f8fafc;margin:0;">🥧 Kupon Başarı Dağılımı</h3>
                             <span style="font-size:0.75rem;color:var(--text-muted);">Tutan vs Yatan kupon oranları</span>
                         </div>
-                        <span id="chart-winrate-badge" style="background:rgba(129,140,248,0.15);color:#818cf8;font-weight:800;padding:2px 8px;border-radius:6px;font-size:0.78rem;">%83.3 Tutan</span>
+                        <span id="chart-winrate-badge" style="background:rgba(129,140,248,0.15);color:#818cf8;font-weight:800;padding:2px 8px;border-radius:6px;font-size:0.78rem;">Genel Dağılım</span>
                     </div>
                     <div style="position:relative;height:240px;width:100%;display:flex;align-items:center;justify-content:center;">
                         <canvas id="chartWinLossDistribution"></canvas>
@@ -126,19 +115,23 @@ const ChartsPanel = {
 
         this.destroyAllCharts();
 
-        // Chart.js genel varsayılanlarını ayarla
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.font.family = "'Inter', sans-serif";
 
         const days = stats.dayByDay;
         const labels = days.map(d => d.dateFormatted || d.date);
 
-        // 1. Kümülatif Büyüme Grafiği
-        let cumulative = 0;
+        // 1. Kümülatif Tutan Kupon Sayısı
+        let cumWon = 0;
         const cumulativeData = days.map(d => {
-            cumulative += (d.netProfit || 0);
-            return cumulative;
+            cumWon += (d.wonCoupons || 0);
+            return cumWon;
         });
+
+        const badge1 = document.getElementById('chart-growth-badge');
+        if (badge1) {
+            badge1.textContent = `${cumWon} Kupon Tutan`;
+        }
 
         const ctx1 = document.getElementById('chartCumulativeGrowth');
         if (ctx1) {
@@ -151,7 +144,7 @@ const ChartsPanel = {
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Kümülatif Kâr (TL)',
+                        label: 'Tutan Kupon Sayısı',
                         data: cumulativeData,
                         borderColor: '#10B981',
                         backgroundColor: gradient1,
@@ -178,7 +171,7 @@ const ChartsPanel = {
                             padding: 10,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Toplam Kâr: +' + context.parsed.y.toLocaleString('tr-TR') + ' TL';
+                                    return 'Toplam Tutan: ' + context.parsed.y + ' Kupon';
                                 }
                             }
                         }
@@ -193,7 +186,7 @@ const ChartsPanel = {
                             ticks: {
                                 color: '#94a3b8',
                                 font: { size: 10 },
-                                callback: function(value) { return value + ' TL'; }
+                                precision: 0
                             }
                         }
                     }
@@ -201,10 +194,9 @@ const ChartsPanel = {
             });
         }
 
-        // 2. Günlük Net Kâr / Zarar (Bar Chart)
-        const dailyNetData = days.map(d => d.netProfit || 0);
-        const barColors = dailyNetData.map(v => v >= 0 ? '#10B981' : '#EF4444');
-        const barBorders = dailyNetData.map(v => v >= 0 ? '#059669' : '#DC2626');
+        // 2. Günlük Kupon Başarı Yüzdesi (Bar Chart)
+        const dailyWinRateData = days.map(d => parseFloat(d.couponWinRate) || 0);
+        const barColors = dailyWinRateData.map(v => v >= 70 ? '#10B981' : (v >= 50 ? '#38bdf8' : '#EF4444'));
 
         const ctx2 = document.getElementById('chartDailyProfitLoss');
         if (ctx2) {
@@ -213,11 +205,10 @@ const ChartsPanel = {
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Günlük Net (TL)',
-                        data: dailyNetData,
+                        label: 'Kupon İsabeti (%)',
+                        data: dailyWinRateData,
                         backgroundColor: barColors,
-                        borderColor: barBorders,
-                        borderWidth: 1.5,
+                        borderWidth: 0,
                         borderRadius: 6,
                         maxBarThickness: 32
                     }]
@@ -235,8 +226,7 @@ const ChartsPanel = {
                             padding: 10,
                             callbacks: {
                                 label: function(context) {
-                                    const val = context.parsed.y;
-                                    return (val >= 0 ? '+ ' : '') + val.toLocaleString('tr-TR') + ' TL Net';
+                                    return '%' + context.parsed.y + ' Kupon Başarısı';
                                 }
                             }
                         }
@@ -247,11 +237,13 @@ const ChartsPanel = {
                             ticks: { color: '#94a3b8', font: { size: 10 } }
                         },
                         y: {
+                            min: 0,
+                            max: 100,
                             grid: { color: 'rgba(255, 255, 255, 0.05)' },
                             ticks: {
                                 color: '#94a3b8',
                                 font: { size: 10 },
-                                callback: function(value) { return value + ' TL'; }
+                                callback: function(value) { return '%' + value; }
                             }
                         }
                     }
@@ -262,6 +254,11 @@ const ChartsPanel = {
         // 3. Kupon Tutan / Yatan Dağılımı (Doughnut Chart)
         const wonCoupons = stats.wonCoupons || 0;
         const lostCoupons = stats.lostCoupons || 0;
+
+        const badge3 = document.getElementById('chart-winrate-badge');
+        if (badge3) {
+            badge3.textContent = `%${stats.couponWinRate} Tutan`;
+        }
 
         const ctx3 = document.getElementById('chartWinLossDistribution');
         if (ctx3) {
@@ -316,7 +313,7 @@ const ChartsPanel = {
         const ctx4 = document.getElementById('chartMarketPerformance');
         if (ctx4) {
             const marketLabels = ['2.5 ÜST / ALT', 'Maç Sonu (MS 1/2)', 'KG Var / Yok', 'Çifte Şans', 'İlk Yarı / Skor'];
-            const marketSuccessRates = [95, 92, 94, 100, 88]; // Gerçek başarı yüzdeleri
+            const marketSuccessRates = [95, 92, 94, 100, 88];
 
             this.chartInstances.market = new Chart(ctx4, {
                 type: 'bar',

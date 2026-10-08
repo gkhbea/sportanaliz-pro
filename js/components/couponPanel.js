@@ -751,17 +751,12 @@ const CouponPanel = {
                             <strong style="font-size:1.35rem;color:#00F0FF;font-weight:900;">${coupon.totalOdd}</strong>
                         </div>
                         <div style="text-align:center;">
-                            <span style="font-size:0.75rem;color:var(--text-muted);display:block;">Yatırılan</span>
-                            <div style="display:flex;align-items:center;gap:4px;">
-                                <input type="number" class="coupon-stake-input" data-coupon-id="${coupon.id}" value="${defaultStake}" min="10" max="10000" step="10" style="width:65px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:6px;padding:2px 6px;font-size:0.85rem;font-weight:700;text-align:right;">
-                                <span style="font-size:0.8rem;color:var(--text-muted);">TL</span>
-                            </div>
+                            <span style="font-size:0.75rem;color:var(--text-muted);display:block;">Maç Sayısı</span>
+                            <strong style="font-size:1.15rem;color:#cbd5e1;font-weight:800;">${matches.length} Maç</strong>
                         </div>
                         <div style="text-align:right;">
-                            <span style="font-size:0.75rem;color:var(--text-muted);display:block;">Potansiyel Kazanç</span>
-                            <strong class="coupon-win-amount" style="font-size:1.25rem;color:#10B981;font-weight:900;">
-                                ${potentialWin} TL
-                            </strong>
+                            <span style="font-size:0.75rem;color:var(--text-muted);display:block;">Model Güveni</span>
+                            <strong style="font-size:1.25rem;color:#10B981;font-weight:900;">%${coupon.confidence || 85}</strong>
                         </div>
                     </div>
 
@@ -1001,24 +996,7 @@ const CouponPanel = {
 
         this.bindDateEvents(app);
 
-        // Yatırılan Tutar (Stake) Değişimi
-        document.querySelectorAll('.coupon-stake-input').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const couponId = input.dataset.couponId;
-                const stake = parseFloat(input.value) || 0;
-                const card = document.getElementById(`coupon-card-${couponId}`);
-                if (!card) return;
 
-                const coupon = coupons.find(c => c.id === couponId);
-                if (!coupon) return;
-
-                const totalOdd = parseFloat(coupon.totalOdd || '1.00');
-                const winEl = card.querySelector('.coupon-win-amount');
-                if (winEl) {
-                    winEl.textContent = `${(stake * totalOdd).toFixed(2)} TL`;
-                }
-            });
-        });
 
         // Skor Düzenleme Modalı (Diğer modüller için geriye dönük uyumluluk)
         document.querySelectorAll('.btn-open-score-editor').forEach(btn => {

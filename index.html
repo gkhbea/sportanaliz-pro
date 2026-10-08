@@ -110,8 +110,8 @@
                         <span>Tüm Kuponlar</span>
                     </button>
                     <button class="nav-btn nav-profit-loss-btn" data-view="profit-loss" id="nav-profit-loss" style="color:#10B981;font-weight:700;border:1px solid rgba(16,185,129,0.4);background:rgba(16,185,129,0.08);">
-                        <span class="nav-icon">💰</span>
-                        <span>Kasa / Kâr-Zarar</span>
+                        <span class="nav-icon">📊</span>
+                        <span>Kupon Karnesi</span>
                     </button>
                     <button class="nav-btn nav-daily-analysis-btn" data-view="daily-analysis" id="nav-daily-analysis" style="color:#00F0FF;font-weight:800;border:1px solid rgba(0,240,255,0.4);background:rgba(0,240,255,0.08);">
                         <span class="nav-icon">📅</span>
@@ -197,10 +197,10 @@
                         </div>
                     </button>
                     <button class="m-drawer-item" data-view="profit-loss" style="border-left: 3px solid #10B981;">
-                        <span class="m-drawer-icon">💰</span>
+                        <span class="m-drawer-icon">📊</span>
                         <div class="m-drawer-text">
-                            <span class="m-drawer-title" style="color:#10B981;font-weight:800;">Kasa &amp; Kâr/Zarar</span>
-                            <span class="m-drawer-sub">09.09'dan beri kuponlar &amp; net bakiye</span>
+                            <span class="m-drawer-title" style="color:#10B981;font-weight:800;">Kupon Başarı Karnesi</span>
+                            <span class="m-drawer-sub">09.09'dan beri kupon arşivi ve isabet oranları</span>
                         </div>
                     </button>
                     <button class="m-drawer-item" data-view="coupons">
@@ -265,7 +265,7 @@
                 <button class="m-pill-btn" data-view="live" style="color:#EF4444;font-weight:800;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.1);">🔴 Canlı Maçlar</button>
                 <button class="m-pill-btn" data-view="value-live" style="color:#F59E0B;font-weight:800;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);">⚡ Canlı Value</button>
                 <button class="m-pill-btn" data-view="radar" style="color:#00F0FF;font-weight:800;border:1px solid rgba(0,240,255,0.4);background:rgba(0,240,255,0.1);">📡 Canlı Radar</button>
-                <button class="m-pill-btn" data-view="profit-loss" style="color:#10B981;font-weight:800;">💰 Kasa / Kâr-Zarar</button>
+                <button class="m-pill-btn" data-view="profit-loss" style="color:#10B981;font-weight:800;">📊 Kupon Karnesi</button>
                 <button class="m-pill-btn" data-view="daily-analysis" style="color:#00F0FF;font-weight:800;">📅 Geçmiş Analizler</button>
                 <button class="m-pill-btn" data-view="coupons-all">🌐 Tüm Kuponlar</button>
                 <button class="m-pill-btn" data-view="analysis">📊 %65+ Analiz</button>
@@ -405,9 +405,9 @@
             <section class="view" id="view-profit-loss">
                 <div class="profit-loss-container" id="profit-loss-container">
                     <div class="empty-state" style="padding:60px 20px;">
-                        <span class="empty-icon">💰</span>
-                        <h3>Kasa & Kâr/Zarar Raporu Yükleniyor...</h3>
-                        <p>09.09.2026'dan beri yapılan kuponlar ve net bilanço hesaplanıyor.</p>
+                        <span class="empty-icon">📊</span>
+                        <h3>Kupon Başarı Karnesi Yükleniyor...</h3>
+                        <p>09.09.2026'dan beri üretilen kuponlar ve resmi sonuçlar hesaplanıyor.</p>
                     </div>
                 </div>
             </section>
@@ -756,8 +756,8 @@
                 <span class="m-nav-label">Analiz</span>
             </button>
             <button class="m-nav-btn" data-view="profit-loss" id="m-nav-profit-loss" style="color:#10B981;">
-                <span class="m-nav-icon">💰</span>
-                <span class="m-nav-label">Kasa</span>
+                <span class="m-nav-icon">📊</span>
+                <span class="m-nav-label">Karne</span>
             </button>
         </nav>
     </div>
@@ -994,7 +994,6 @@
     <script src="js/components/allMatchesTrackerPanel.js"></script>
     <script src="js/components/dailyAnalysisViewPanel.js"></script>
     <script src="js/services/historicalCouponsService.js"></script>
-    <script src="js/services/userProfileService.js"></script>
     <script src="js/services/autoArchiveService.js"></script>
     <script src="js/services/valueRadarService.js"></script>
     <script src="js/services/valueLiveTrackerService.js"></script>
@@ -1002,7 +1001,6 @@
     <script src="js/analysis/predictionEngine.js"></script>
     <script src="js/analysis/liveSniperEngine.js"></script>
     <script src="js/components/chartsPanel.js"></script>
-    <script src="js/components/kasaManager.js"></script>
     <script src="js/components/profitLossPanel.js"></script>
     <script src="js/components/valueLiveUnifiedPanel.js"></script>
     <script src="js/components/liveMatchesPanel.js"></script>
