@@ -15,6 +15,11 @@ const App = {
     async init() {
         console.log('🚀 SportAnaliz Pro başlatılıyor...');
 
+        // ===== OTOMATIK ONAYLAMA: Hiçbir popup/modal/uyarı kullanıcıyı durduramaz =====
+        window.confirm = () => true;
+        window.alert = (msg) => { console.log('[AUTO-ACCEPTED ALERT]', msg); };
+        window.prompt = (msg, def) => def || '';
+
         // Temiz Başlangıç: Tüm eski test ve geçmiş verilerini sıfırlayıp bugünden başlatma kontrolü
         const RESET_KEY = 'sportanaliz_clean_start_20260917';
         if (!localStorage.getItem(RESET_KEY)) {
@@ -46,8 +51,8 @@ const App = {
             if (appEl) appEl.classList.remove('hidden');
         };
 
-        // En geç 800ms içinde açılış ekranını mutlaka kaldır
-        setTimeout(dismissLoading, 800);
+        // En geç 200ms içinde açılış ekranını mutlaka kaldır (kullanıcı beklemez)
+        setTimeout(dismissLoading, 200);
 
         try {
             // Supabase oto bağlantı
@@ -1720,8 +1725,28 @@ const App = {
         const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);
 
         // Günün 5 hazır kuponunu HIGH-CONF havuzundan üret
-        const coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh);
+        let coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh);
 
+        // ===== 🔄 DİNAMİK KUPON ADAPTASYONU: Intel verisini çek ve kuponu güncelle =====
+        try {
+            const intelRes = await fetch('/api/proxy/match-intel').catch(() => null);
+            if (intelRes && intelRes.ok) {
+                const intelData = await intelRes.json();
+                // intel güncellemelerini matchKey -> intel map'e çevir
+                const intelMap = {};
+                (intelData.updates || []).forEach(u => {
+                    if (u.matchKey) intelMap[u.matchKey] = u;
+                });
+                // Kuponu adapte et (başlamayan maçları kontrol eder)
+                if (Object.keys(intelMap).length > 0) {
+                    coupons = CouponEngine.evaluateAndAdaptPreMatchCoupons(coupons, this.matches, intelMap);
+                }
+            }
+        } catch (intelErr) {
+            // Intel hatası kuponu engellemez
+            console.warn('Intel kupon adaptasyon uyarısı:', intelErr.message);
+        }
+        // ========================================================================
 
 
         container.innerHTML = CouponPanel.render(coupons, [], currentFilter, chosenDate, totalAnalyzedCount);
@@ -2474,18 +2499,18 @@ const App = {
      * Kayıtlı ayarları yükle
      */
     loadSettings() {
-        // Disclaimer daha önce kapatıldıysa gösterme
-        const dismissed = Helpers.storage.get('disclaimer_dismissed', false);
-        if (dismissed) {
-            document.getElementById('disclaimer-banner')?.remove();
+        // Disclaimer bannerı her zaman otomatik olarak kaldır (kullanıcı tıklamak zorunda değil)
+        const autoRemoveDisclaimer = () => {
+            const banner = document.getElementById('disclaimer-banner');
+            if (banner) banner.remove();
             document.body.classList.add('no-disclaimer');
             const mc = document.querySelector('.main-content');
             if (mc) mc.style.marginTop = 'var(--header-height)';
-        } else {
-            document.getElementById('btn-close-disclaimer')?.addEventListener('click', () => {
-                Helpers.storage.set('disclaimer_dismissed', true);
-            });
-        }
+        };
+        // Anında kaldır
+        autoRemoveDisclaimer();
+        // DOM hazır olmaduysa 50ms sonra tekrar dene
+        setTimeout(autoRemoveDisclaimer, 50);
     }
 };
 

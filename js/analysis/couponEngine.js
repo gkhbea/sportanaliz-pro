@@ -1258,6 +1258,102 @@ const CouponEngine = {
 
     getYesterdayCoupons() {
         return { coupons: [], euroCoupons: [] };
+    },
+
+    // ============================================================
+    // 🔄 DİNAMİK ÖN-MAÇ KUPON ADAPTASYONU
+    // Maç başlamadıysa sakatlık / hakem değişikliği / oran düşüşü
+    // tespit edildiğinde kuponu otomatik günceller.
+    // ============================================================
+    /**
+     * Kuponları intel verisiyle değerlendirip gerekirse adapte eder.
+     * @param {Array} coupons - Mevcut kupon listesi
+     * @param {Array} allMatches - Tüm bülten maçları (yedek havuz)
+     * @param {Object} intelMap - { matchKey: { injury, referee, oddsDrift } }
+     * @returns {Array} Adapte edilmiş kupon listesi
+     */
+    evaluateAndAdaptPreMatchCoupons(coupons, allMatches = [], intelMap = {}) {
+        if (!Array.isArray(coupons) || coupons.length === 0) return coupons;
+
+        const getMatchKey = (m) => `${(m.homeTeam||'').toLowerCase()}_${(m.awayTeam||'').toLowerCase()}`;
+
+        // Kupondaki maçlarla KULLANILMAYAN yüksek güvenli yedek maçları hazırla
+        const usedKeys = new Set();
+        coupons.forEach(c => {
+            (c.matches || []).forEach(item => {
+                usedKeys.add(getMatchKey(item.match || item));
+            });
+        });
+
+        // Yedek havuz: bugünün henüz başlamamış, yüksek oranlı maçları
+        const pool = this._buildAnalysisPool((allMatches || []).filter(m => {
+            const k = getMatchKey(m);
+            if (usedKeys.has(k)) return false;
+            if (m.status === 'LIVE' || m.status === 'FINISHED') return false;
+            if (m.minute && m.minute !== 'Başlamadı') return false;
+            return true;
+        }));
+
+        return coupons.map(coupon => {
+            if (!coupon || !Array.isArray(coupon.matches)) return coupon;
+
+            const adaptedMatches = coupon.matches.map(item => {
+                const m = item.match || item;
+                if (!m) return item;
+
+                // Maç zaten başladıysa kilitle — değiştirme
+                const isStarted = m.status === 'LIVE' || m.status === 'FINISHED' ||
+                    (m.minute && m.minute !== 'Başlamadı' && m.minute !== '');
+                if (isStarted) return item;
+
+                // Intel kontrolü
+                const key = getMatchKey(m);
+                const intel = intelMap[key] || {};
+                const hasInjury = intel.majorInjury === true;
+                const hasRefChange = intel.refereeChange === true;
+                const hasOddsDrift = intel.oddsDriftPct && Math.abs(intel.oddsDriftPct) >= 20;
+
+                const needsAdaptation = hasInjury || hasRefChange || hasOddsDrift;
+                if (!needsAdaptation) return item;
+
+                // Havuzdan en iyi yedek maçı bul
+                const bestAlt = pool.find(p => {
+                    const altKey = getMatchKey(p.match);
+                    return !usedKeys.has(altKey);
+                });
+
+                if (!bestAlt || !bestAlt.candidates || bestAlt.candidates.length === 0) return item;
+
+                // Uyarı rozeti ekle ve yedek maçı koy
+                const altMatch = bestAlt.match;
+                const altPick = bestAlt.candidates[0];
+                usedKeys.add(getMatchKey(altMatch));
+
+                const reasons = [];
+                if (hasInjury) reasons.push('Anahtar Oyuncu Sakatlığı');
+                if (hasRefChange) reasons.push('Hakem Değişikliği');
+                if (hasOddsDrift) reasons.push(`Oran Düşüşü %${Math.abs(intel.oddsDriftPct)}`);
+
+                return {
+                    ...item,
+                    match: altMatch,
+                    homeTeam: altMatch.homeTeam,
+                    awayTeam: altMatch.awayTeam,
+                    league: altMatch.league,
+                    marketTitle: altPick.title || item.marketTitle,
+                    pickTitle: altPick.shortPick || altPick.title,
+                    odd: Number(altPick.odd || 1.40).toFixed(2),
+                    probability: altPick.probability,
+                    confidenceScore: altPick.confidenceScore,
+                    adaptationBadge: `🔄 Son Dakika Güncelleme: ${reasons.join(' + ')}`,
+                    adaptationReason: `Orijinal maç (${m.homeTeam} vs ${m.awayTeam}) ${reasons.join(', ')} nedeniyle değiştirildi. Sistem otomatik olarak daha güvenli alternatif seçti.`,
+                    wasAdapted: true,
+                    originalMatch: { homeTeam: m.homeTeam, awayTeam: m.awayTeam }
+                };
+            });
+
+            return { ...coupon, matches: adaptedMatches };
+        });
     }
 };
 
