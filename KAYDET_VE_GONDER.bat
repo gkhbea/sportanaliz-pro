@@ -8,7 +8,7 @@ echo    🚀 SPORTANALIZ PRO - TEK TIKLA GÖNDERME SISTEMI
 echo =======================================================
 echo.
 
-cd /d %~dp0
+cd /d "%~dp0"
 
 :: Git komutunu tespit et
 set GIT_CMD=git
@@ -17,9 +17,9 @@ if %errorlevel% neq 0 (
     if exist "C:\Program Files\Git\cmd\git.exe" (
         set GIT_CMD="C:\Program Files\Git\cmd\git.exe"
     ) else (
-        for /d %%i in (%LOCALAPPDATA%\GitHubDesktop\app-*) do (
-            if exist %%i\resources\app\git\cmd\git.exe (
-                set GIT_CMD=%%i\resources\app\git\cmd\git.exe
+        for /d %%i in ("%LOCALAPPDATA%\GitHubDesktop\app-*") do (
+            if exist "%%i\resources\app\git\cmd\git.exe" (
+                set GIT_CMD="%%i\resources\app\git\cmd\git.exe"
             )
         )
     )

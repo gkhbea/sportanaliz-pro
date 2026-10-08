@@ -6,6 +6,8 @@ echo     ⚡ SportAnaliz Pro - Otomatik Baslatici ⚡
 echo ===================================================
 echo.
 
+cd /d "%~dp0"
+
 if not exist "node_modules\" (
     echo [BILGI] Ilk calistirma tespit edildi. Paketler yukleniyor...
     call npm install
@@ -18,5 +20,5 @@ if not exist "node_modules\" (
 
 echo [BASLATILIYOR] SportAnaliz Pro aciliyor...
 start http://localhost:3001
-call npm start
+node proxy-server.js
 pause
