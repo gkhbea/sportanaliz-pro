@@ -28,18 +28,18 @@ if %errorlevel% neq 0 (
 echo [1/3] Değişiklikler taranıyor ve paketleniyor...
 %GIT_CMD% add .
 
-for /f tokens=1-4 delims=/:.  %%a in (%date% %time%) do (
-    set MSG=otomatik_kayit_%%a-%%b-%%c_%%d
-)
+set MSG=otomatik_kayit_%date%_%time%
+set MSG=%MSG: =_%
+set MSG=%MSG:/=-%
+set MSG=%MSG::=-%
+set MSG=%MSG:.=-%
 
-%GIT_CMD% commit -m guncelleme: %MSG%
+%GIT_CMD% commit -m "guncelleme: %MSG%" 2>nul
 
 echo.
 echo [2/3] GitHub ve Render'a yukleniyor (Push)...
-%GIT_CMD% push origin main
-if %errorlevel% neq 0 (
-    %GIT_CMD% push origin master
-)
+%GIT_CMD% push origin master
+%GIT_CMD% push origin master:main
 
 echo.
 echo =======================================================
