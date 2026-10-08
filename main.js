@@ -19,6 +19,8 @@ if (!electron || !electron.app) {
     // Masaüstü Electron Penceresi
     const { app, BrowserWindow, Menu, shell } = electron;
     const http = require('http');
+    const path = require('path');
+    const fs = require('fs');
     let mainWindow = null;
     const SERVER_PORT = process.env.PORT || 3001;
     const SERVER_URL = `http://localhost:${SERVER_PORT}`;

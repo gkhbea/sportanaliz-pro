@@ -2929,6 +2929,17 @@ body:not(:has(#disclaimer-banner)) .main-content {
     width: 100%;
 }
 
+/* İY / MS Kuponu Özel Kart Efekti */
+#coupon-card-coupon-iyms {
+    border: 1px solid rgba(244, 63, 94, 0.4) !important;
+    background: linear-gradient(180deg, rgba(35, 18, 30, 0.9) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+    box-shadow: 0 4px 25px rgba(244, 63, 94, 0.15) !important;
+}
+#coupon-card-coupon-iyms:hover {
+    border-color: rgba(244, 63, 94, 0.75) !important;
+    box-shadow: 0 8px 32px rgba(244, 63, 94, 0.28) !important;
+}
+
 /* European Cup Special Cards Styling */
 .coupon-coupon-ucl-1,
 .coupon-coupon-ucl {
