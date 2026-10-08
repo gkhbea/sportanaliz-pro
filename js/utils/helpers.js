@@ -29,12 +29,18 @@ const Helpers = {
      */
     openModal(id) {
         const modal = document.getElementById(id);
-        if (modal) modal.classList.add('active');
+        if (modal) {
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+        }
     },
 
     closeModal(id) {
         const modal = document.getElementById(id);
-        if (modal) modal.classList.remove('active');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+        }
     },
 
     /**

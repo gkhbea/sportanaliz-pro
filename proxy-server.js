@@ -32,6 +32,11 @@ function getCacheFilePath(key) {
 
 function getCached(key, forceRefresh = false, customTTL = null) {
     if (forceRefresh) {
+        // Hızlı art arda isteklerde (son 5 saniye) aynı veriyi RAM'den dönerek harici API kilitlenmesini ve aşırı CPU/ağ yükünü önle
+        const memItem = memoryCache.get(key);
+        if (memItem && (Date.now() - memItem.time < 5000)) {
+            return memItem.data;
+        }
         console.log(`🔄 [Zorla Yenileme] ${key} için önbellek atlandı.`);
         return null;
     }
@@ -73,30 +78,12 @@ function setCache(key, data) {
     });
 }
 
-// ---- Rate Limiting ----
-const requestCounts = new Map();
-const RATE_LIMIT = 50000;
-const RATE_WINDOW = 60 * 1000;
+// ---- Rate Limiting (Korumalı ve Engellemesiz) ----
+// Render ve yerel ağ arkasındaki proxy başlıklarını tanı
+app.set('trust proxy', true);
 
-function checkRateLimit(ip) {
-    if (!ip || ip.includes('127.0.0.1') || ip.includes('::1') || ip.includes('localhost')) return true;
-    const now = Date.now();
-    const record = requestCounts.get(ip);
-    if (!record || now - record.start > RATE_WINDOW) {
-        requestCounts.set(ip, { count: 1, start: now });
-        return true;
-    }
-    if (record.count >= RATE_LIMIT) return false;
-    record.count++;
-    return true;
-}
-
-// Rate limit middleware
+// Rate limit middleware: Kullanıcının veya arka plan servislerinin 'Lütfen biraz bekleyin' 429 hatasıyla kilitlenmesi TAMAMEN ENGELLENDİ
 app.use('/api/proxy', (req, res, next) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    if (!checkRateLimit(ip)) {
-        return res.status(429).json({ error: 'Rate limit aşıldı. Lütfen biraz bekleyin.' });
-    }
     next();
 });
 
@@ -104,7 +91,7 @@ app.use('/api/proxy', (req, res, next) => {
 app.get('/api/proxy/nesine/bulten', async (req, res) => {
     try {
         const force = req.query.force === 'true';
-        const cacheKey = 'nesine_bulten_' + JSON.stringify(req.query);
+        const cacheKey = 'nesine_bulten_today';
         const cached = getCached(cacheKey, force);
         if (cached) return res.json(cached);
 
@@ -115,7 +102,8 @@ app.get('/api/proxy/nesine/bulten', async (req, res) => {
                 'Accept': 'application/json',
                 'Referer': 'https://www.nesine.com/',
                 'Origin': 'https://www.nesine.com'
-            }
+            },
+            timeout: 10000
         });
 
         if (!response.ok) throw new Error(`Nesine API: ${response.status}`);
@@ -124,6 +112,12 @@ app.get('/api/proxy/nesine/bulten', async (req, res) => {
         res.json(data);
     } catch (err) {
         console.error('Nesine proxy hatası:', err.message);
+        // Hata durumunda son disk önbelleğini kurtarıcı olarak dön (Kullanıcı asla 'hata / bekle' ile karşılaşmaz)
+        const fallbackCached = getCached('nesine_bulten_today', false, 7 * 24 * 60 * 60 * 1000);
+        if (fallbackCached) {
+            console.log('📦 [KURTARICI ÖNBELLEK] Nesine API gecikmesi nedeniyle mevcut disk verisi anında sunuldu.');
+            return res.json(fallbackCached);
+        }
         res.status(502).json({ error: 'Nesine verisi alınamadı', detail: err.message });
     }
 });
@@ -998,7 +992,7 @@ async function syncLiveFeedsInBackground() {
 // setInterval(syncLiveFeedsInBackground, 30000);
 // setTimeout(syncLiveFeedsInBackground, 2000);
 
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   🏆 Spor Analiz Platformu - Proxy Sunucusu     ║
@@ -1007,4 +1001,13 @@ app.listen(PORT, '0.0.0.0', () => {
 ╚══════════════════════════════════════════════════╝
     `);
 });
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`⚠️ Port ${PORT} zaten başka bir süreç tarafından dinleniyor. Mevcut sunucu üzerinden çalışmaya devam ediliyor.`);
+    } else {
+        console.error('Sunucu dinleme hatası:', err);
+    }
+});
+
 

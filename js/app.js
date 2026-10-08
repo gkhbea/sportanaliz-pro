@@ -443,6 +443,9 @@ const App = {
         // Nav butonlarını güncelle (Header, Mobil Alt Bar, Kayan Haplar ve Çekmece)
         document.querySelectorAll('.nav-btn, .m-nav-btn, .m-pill-btn, .m-drawer-item').forEach(b => b.classList.remove('active'));
         document.querySelectorAll(`.nav-btn[data-view="${view}"], .m-nav-btn[data-view="${view}"], .m-pill-btn[data-view="${view}"], .m-drawer-item[data-view="${view}"]`).forEach(b => b.classList.add('active'));
+        if (view === 'coupons') {
+            document.querySelectorAll('.nav-coupons-all-btn, [data-view="coupons-all"]').forEach(b => b.classList.add('active'));
+        }
         
         // Canlı & Value ana menü sekmesini aktif tut
         if (['live', 'value-live', 'radar'].includes(view)) {

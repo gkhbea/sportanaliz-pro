@@ -307,14 +307,14 @@ const LiveScoreService = {
             const endpoint = targetDate ? `${this.API_URL}?date=${encodeURIComponent(targetDate)}` : `${this.API_URL}?force=${force ? 'true' : 'false'}&_t=${Date.now()}`;
             let response = null;
             try {
-                response = await this._fetchWithTimeout(endpoint, {}, 2500);
+                response = await this._fetchWithTimeout(endpoint, {}, 8000);
             } catch (netErr) {
                 console.warn('Proxy canlı skor uç noktasına ulaşılamadı, doğrudan fallback deneniyor...');
             }
 
             if (!response || !response.ok) {
                 try {
-                    response = await this._fetchWithTimeout(this.DIRECT_FALLBACK_URL, {}, 3000);
+                    response = await this._fetchWithTimeout(this.DIRECT_FALLBACK_URL, {}, 8000);
                 } catch (fallbackErr) {
                     console.warn('Doğrudan fallback servisine ulaşılamadı:', fallbackErr.message);
                 }
@@ -426,7 +426,7 @@ const LiveScoreService = {
      * Bültendeki maçları canlı skor beslemesiyle eşleştir ve MatchTracker'a yaz
      * (Hızlı Hash Map O(1) indeksleme ile saniyenin yüzde birinde çalışır, tarayıcıyı ASLA dondurmaz)
      */
-    async syncBulletinMatches(matches = []) {
+    async syncBulletinMatches(matches = [], force = false) {
         if (!Array.isArray(matches) || matches.length === 0) {
             return { matchedCount: 0, finishedCount: 0, liveCount: 0, pendingCount: 0, totalMatches: 0, liveFeedTotal: 0 };
         }
@@ -436,7 +436,7 @@ const LiveScoreService = {
         this._isSyncing = true;
 
         try {
-            let liveFeed = await this.fetchLiveScores(null, true);
+            let liveFeed = await this.fetchLiveScores(null, force);
 
             // Yalnızca Bugün ve Dün canlı/bitmiş skor kaynağı taranır
             const now = new Date();
