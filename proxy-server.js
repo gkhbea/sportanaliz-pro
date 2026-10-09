@@ -944,8 +944,18 @@ async function createMailTransporter(smtpConfig) {
     const port = (smtpConfig && smtpConfig.port) || process.env.SMTP_PORT || 587;
 
     if (user && pass) {
-        // Özel SMTP / Gmail Uygulama Şifresi sağlandı
-        if (host) {
+        // Özel SMTP veya doğrudan Gmail servisi
+        const isGmail = (user && user.includes('gmail.com')) || (host && host.includes('gmail.com'));
+        if (isGmail) {
+            return {
+                transporter: nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: { user, pass }
+                }),
+                isTest: false,
+                from: (smtpConfig && smtpConfig.from) || `"SportAnaliz Pro" <${user}>`
+            };
+        } else if (host) {
             return {
                 transporter: nodemailer.createTransport({
                     host: host,
@@ -957,7 +967,6 @@ async function createMailTransporter(smtpConfig) {
                 from: (smtpConfig && smtpConfig.from) || process.env.SMTP_FROM || `"SportAnaliz Pro" <${user}>`
             };
         } else {
-            // Standart Gmail servisi
             return {
                 transporter: nodemailer.createTransport({
                     service: 'gmail',
