@@ -37,24 +37,26 @@ set MSG=%MSG:.=-%
 %GIT_CMD% commit -m "guncelleme: %MSG%" 2>nul
 
 echo.
-echo [2/3] GitHub ve Render'a yukleniyor (Push)...
-%GIT_CMD% push origin master
-%GIT_CMD% push origin master:main
+echo [2/3] GitHub ile senkronize ediliyor...
+%GIT_CMD% pull --rebase origin main 2>nul
 
-if %errorlevel% neq 0 (
-    echo.
-    echo ⚠️ GitHub yetkilendirme veya baglanti bekleniyor.
-    echo Tarayicida GitHub giris penceresi acildiysa lutfen onaylayin.
-    echo.
-    pause
-) else (
+echo [3/3] GitHub ve Render'a yukleniyor (Push)...
+%GIT_CMD% push origin HEAD:main
+if %errorlevel% equ 0 (
+    %GIT_CMD% push origin HEAD:master 2>nul
     echo.
     echo =======================================================
-    echo   ✅ İŞLEM TAMAMLANDI!
-    echo   Tüm kodlar buluta gönderildi.
+    echo   ✅ İŞLEM BAŞARIYLA TAMAMLANDI!
+    echo   Tüm kodlar GitHub'a gönderildi.
     echo   Render canlı siteniz 1 dakika içinde otomatik güncellenecek!
     echo =======================================================
     echo.
     echo Bu pencere 5 saniye içinde otomatik kapanacaktır...
     timeout /t 5
+) else (
+    echo.
+    echo ⚠️ Hata: Gönderme tamamlanamadı.
+    echo Olası nedenler: İnternet bağlantısı veya GitHub yetkilendirmesi.
+    echo.
+    pause
 )

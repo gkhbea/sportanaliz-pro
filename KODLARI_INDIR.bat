@@ -26,6 +26,7 @@ if %errorlevel% neq 0 (
 )
 
 echo [1/2] GitHub'daki en son yenilikler kontrol ediliyor...
+%GIT_CMD% fetch origin
 %GIT_CMD% pull origin main
 if %errorlevel% neq 0 (
     %GIT_CMD% pull origin master
