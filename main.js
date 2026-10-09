@@ -29,6 +29,11 @@ if (!electron || !electron.app) {
     const SERVER_PORT = process.env.PORT || 3001;
     const SERVER_URL = `http://localhost:${SERVER_PORT}`;
 
+    app.name = 'SportAnaliz Pro';
+    try {
+        app.setPath('userData', path.join(app.getPath('appData'), 'SportAnaliz Pro'));
+    } catch(e) {}
+
     // Tekil oturum kontrolü (İki kez açılmasını engeller)
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
