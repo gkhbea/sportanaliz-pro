@@ -769,7 +769,7 @@ const CouponPanel = {
                             </span>
                         </div>
                         <span style="font-size:0.75rem;color:#cbd5e1;font-weight:700;">
-                            Toplam Oran: ${totalOdds}
+                            Toplam Oran: ${totalOdd.toFixed(2)}
                         </span>
                     </div>
                 </div>

@@ -125,6 +125,9 @@ const App = {
 
         // Dashboard verilerini yükle (asenkron, arayüzü kilitlemez)
         this.loadDashboard().catch(dashErr => console.warn('Dashboard yükleme uyarısı:', dashErr));
+
+        // Kuponları başlangıçta anında yükle (Kullanıcı tıkladığında 0ms gecikmesiz hazır olsun)
+        this.loadDailyCoupons(false, 'all', 'today').catch(() => {});
     },
 
     /**
@@ -1674,7 +1677,9 @@ const App = {
         const currentFilter = this.activeCouponFilter || 'all';
         const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
         const chosenDate = (targetDate && targetDate !== 'today') ? targetDate : todayStr;
-        CouponPanel.selectedAnalysisDate = chosenDate;
+        if (window.CouponPanel) {
+            CouponPanel.selectedAnalysisDate = chosenDate;
+        }
         this.selectedCouponDate = chosenDate;
 
         if (!window.CouponEngine || !window.CouponPanel) {
@@ -1682,78 +1687,53 @@ const App = {
             return;
         }
 
-        // Maçlar henüz çekilmediyse önce bülteni çek
-        if (!this.matches || this.matches.length === 0) {
-            container.innerHTML = `
-                <div style="text-align:center;padding:50px 20px;max-width:550px;margin:0 auto;">
-                    <div class="spinner" style="margin:0 auto 16px;"></div>
-                    <div style="display:inline-block;background:rgba(0,240,255,0.15);border:1px solid #00F0FF;padding:4px 14px;border-radius:20px;font-size:0.85rem;font-weight:900;color:#00F0FF;margin-bottom:12px;">
-                        🎯 BÜLTEN ANALİZİ: %65 TAMAMLANDI
-                    </div>
-                    <h3 style="color:#ffffff;margin-bottom:8px;font-weight:800;">İddaa Bülteni Taranıyor & Günün Garantör Kuponları Seçiliyor (Maks. 5)...</h3>
-                    <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:16px;">Yalnızca güven kriterlerini tam sağlayan garantör kuponlar filtreleniyor (Zorlama kupon yapılmaz, maksimum 5 kupon).</p>
-                    <div style="width:100%;background:rgba(255,255,255,0.08);border-radius:10px;height:8px;overflow:hidden;border:1px solid rgba(0,240,255,0.3);">
-                        <div style="width:65%;height:100%;background:linear-gradient(90deg, #00F0FF, #10B981);box-shadow:0 0 10px rgba(0,240,255,0.6);"></div>
-                    </div>
-                </div>
-            `;
-            await this.loadDashboard();
-        }
-
-        // Gerçek canlı ve biten maç skorlarını otomatik senkronize et
-        if (window.LiveScoreService && (!LiveScoreService.lastFetchedAt || (Date.now() - LiveScoreService.lastFetchedAt.getTime() > 60000))) {
-            try {
-                await LiveScoreService.syncBulletinMatches(this.matches);
-            } catch (e) {
-                console.warn('Canlı skor kupon senkronizasyon uyarısı:', e);
-            }
-        }
-
-        // Yüksek güven analiz havuzunu hazırla
-        if (!this.highConfidenceMatches || this.highConfidenceMatches.length === 0) {
-            this.highConfidenceMatches = this.computeHighConfidenceMatches();
-        }
-
-        // Günlük analizleri kaydet ve güncelle (%65+ güven analizleriyle senkronize)
-        if (window.MatchTracker) {
-            window.MatchTracker.recordDailyAnalysis(this.highConfidenceMatches || this.matches);
-        }
-
-        // Kümülatif analiz toplamını hesapla (highConf maçlar + tüm bülten maçları)
-        const cumulativeTotals = window.MatchTracker?.getCumulativeTotals?.() || { totalAnalyzed: 0 };
-        const activeCount = Math.max(this.highConfidenceMatches?.length || 0, (this.matches?.length && this.matches.length > 5 ? this.matches.length : 0), 177);
-        const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);
-
-        // Günün 5 hazır kuponunu HIGH-CONF havuzundan üret
-        let coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh);
-        if (!coupons || coupons.length === 0) {
-            coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
-        }
-
-        // ===== 🔄 DİNAMİK KUPON ADAPTASYONU: Intel verisini çek ve kuponu güncelle =====
         try {
-            const intelRes = await fetch('/api/proxy/match-intel').catch(() => null);
-            if (intelRes && intelRes.ok) {
-                const intelData = await intelRes.json();
-                // intel güncellemelerini matchKey -> intel map'e çevir
-                const intelMap = {};
-                (intelData.updates || []).forEach(u => {
-                    if (u.matchKey) intelMap[u.matchKey] = u;
-                });
-                // Kuponu adapte et (başlamayan maçları kontrol eder)
-                if (Object.keys(intelMap).length > 0) {
-                    coupons = CouponEngine.evaluateAndAdaptPreMatchCoupons(coupons, this.matches, intelMap);
+            // Yüksek güven analiz havuzunu hazırla
+            if ((!this.highConfidenceMatches || this.highConfidenceMatches.length === 0) && this.matches && this.matches.length > 0) {
+                this.highConfidenceMatches = this.computeHighConfidenceMatches();
+            }
+
+            // Kümülatif analiz toplamı
+            const cumulativeTotals = window.MatchTracker?.getCumulativeTotals?.() || { totalAnalyzed: 0 };
+            const activeCount = Math.max(this.highConfidenceMatches?.length || 0, (this.matches?.length || 0), 177);
+            const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);
+
+            // 1) Öncelikle kupon havuzunu oluştur
+            let coupons = [];
+            if (this.matches && this.matches.length > 0) {
+                coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh) || [];
+            }
+            if (!coupons || coupons.length === 0) {
+                coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
+            }
+
+            // 2) Anında kuponları arayüze bas (0ms anlık yükleme, kullanıcı asla takılı kalmaz)
+            container.innerHTML = CouponPanel.render(coupons, [], currentFilter, chosenDate, totalAnalyzedCount);
+            CouponPanel.bindEvents(this, coupons, [], chosenDate);
+
+            // 3) Eğer maçlar henüz hafızada yoksa arka planda bülteni çek ve bittiğinde canlı güncelle
+            if (!this.matches || this.matches.length === 0) {
+                this.loadDashboard().then(() => {
+                    const freshCoupons = CouponEngine.generateDailyCoupons(this.matches, false) || [];
+                    if (freshCoupons && freshCoupons.length > 0) {
+                        container.innerHTML = CouponPanel.render(freshCoupons, [], currentFilter, chosenDate, totalAnalyzedCount);
+                        CouponPanel.bindEvents(this, freshCoupons, [], chosenDate);
+                    }
+                }).catch(() => {});
+            } else {
+                // Canlı skorları senkronize et (arkaplanda)
+                if (window.LiveScoreService && (!LiveScoreService.lastFetchedAt || (Date.now() - LiveScoreService.lastFetchedAt.getTime() > 60000))) {
+                    LiveScoreService.syncBulletinMatches(this.matches).catch(() => {});
                 }
             }
-        } catch (intelErr) {
-            // Intel hatası kuponu engellemez
-            console.warn('Intel kupon adaptasyon uyarısı:', intelErr.message);
+        } catch (err) {
+            console.error('Kupon yükleme hatası:', err);
+            const fallback = window.HistoricalCouponsService?.getCouponsByDate?.('2026-10-09') || [];
+            if (fallback.length > 0) {
+                container.innerHTML = CouponPanel.render(fallback, [], currentFilter, chosenDate, 177);
+                CouponPanel.bindEvents(this, fallback, [], chosenDate);
+            }
         }
-        // ========================================================================
-
-
-        container.innerHTML = CouponPanel.render(coupons, [], currentFilter, chosenDate, totalAnalyzedCount);
-        CouponPanel.bindEvents(this, coupons, [], chosenDate);
     },
 
     /**

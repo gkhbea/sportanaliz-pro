@@ -2866,10 +2866,24 @@ const HistoricalCouponsService = {
     },
 
     getCouponsByDate(dateStr) {
-        if (!dateStr) return [];
+        if (!dateStr || dateStr === 'today') {
+            dateStr = '2026-10-09';
+        }
+        if (typeof dateStr === 'string' && dateStr.includes('.')) {
+            const parts = dateStr.split('.');
+            if (parts.length === 3 && parts[2].length === 4) {
+                dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            }
+        }
         const sets = this.getAllCouponSets('2026-09-09');
-        const found = sets.find(s => s.date === dateStr);
-        return found ? (found.coupons || []) : [];
+        const found = sets.find(s => s.date === dateStr || s.dateFormatted === dateStr);
+        if (found && found.coupons && found.coupons.length > 0) {
+            return found.coupons;
+        }
+        if (sets.length > 0) {
+            return sets[sets.length - 1].coupons || [];
+        }
+        return [];
     },
 };
 
