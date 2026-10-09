@@ -175,16 +175,13 @@ const LiveMatchesPanel = {
                             </div>
                             <h2 class="live-hero-title">Canlı Karşılaşmalar, Skor Değişimleri & Kupon İsabetleri</h2>
                             <p class="live-hero-desc">
-                                Dünyadaki canlı maç skorlarını, kuponlarınızdaki maçların anlık durumlarını (önde/riskli) ve yapay zekanın canlı tahminlerini bu ekrandan takip edin.
+                                Dünyadaki canlı maç skorlarını, kuponlarınızdaki maçların anlık durumlarını ve yapay zekanın canlı tahminlerini bu ekrandan takip edin.
                             </p>
                         </div>
 
                         <div class="live-hero-actions">
                             <button class="btn btn-primary" id="btn-sync-live-scores" title="Canlı skor API'sini tara ve verileri tazele">
                                 🔄 Canlı Skorları Güncelle
-                            </button>
-                            <button class="btn btn-outline" id="btn-toggle-live-polling" title="Otomatik canlı skor taramasını aç/kapa">
-                                ${isPollingActive ? '⏸️ Otomatik Taramayı Durdur' : '⏱️ 30 Sn Otomatik Takip Başlat'}
                             </button>
                             <button class="btn btn-ghost" id="btn-open-score-editor-live" title="Maç skorunu kendiniz elle düzenleyin">
                                 ✏️ Skor Düzenle
@@ -477,23 +474,7 @@ const LiveMatchesPanel = {
             }
         });
 
-        // 2. Otomatik Polling Aç / Kapa
-        container.querySelector('#btn-toggle-live-polling')?.addEventListener('click', () => {
-            if (!window.LiveScoreService) return;
-
-            if (window.LiveScoreService.isPolling) {
-                window.LiveScoreService.stopAutoPolling();
-                Helpers.showToast('⏸️ Canlı otomatik takip durduruldu.', 'info');
-            } else {
-                window.LiveScoreService.startAutoPolling(app.matches || [], () => {
-                    app.loadLiveMatches(this.currentFilter, this.searchQuery);
-                }, 30000);
-                Helpers.showToast('⏱️ 30 saniyelik canlı otomatik takip başlatıldı!', 'success');
-            }
-            app.loadLiveMatches(this.currentFilter, this.searchQuery);
-        });
-
-        // 3. Skor Düzenle Modalı
+        // 2. Skor Düzenle Modalı
         container.querySelectorAll('#btn-open-score-editor-live, .btn-edit-match-score').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();

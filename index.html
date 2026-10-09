@@ -99,19 +99,15 @@
                     </div>
                     <button class="nav-btn" data-view="coupons" id="nav-coupons">
                         <span class="nav-icon">🤖</span>
-                        <span>Bahis Yap</span>
+                        <span>Bahis</span>
                     </button>
                     <button class="nav-btn" data-view="analysis" id="nav-analysis">
                         <span class="nav-icon">📊</span>
-                        <span>Analiz</span>
+                        <span>Bahis Analiz</span>
                     </button>
                     <button class="nav-btn nav-coupons-all-btn" data-view="coupons-all" id="nav-coupons-all">
                         <span class="nav-icon">🌐</span>
                         <span>Tüm Kuponlar</span>
-                    </button>
-                    <button class="nav-btn nav-profit-loss-btn" data-view="profit-loss" id="nav-profit-loss" style="color:#10B981;font-weight:700;border:1px solid rgba(16,185,129,0.4);background:rgba(16,185,129,0.08);">
-                        <span class="nav-icon">📊</span>
-                        <span>Kupon Karnesi</span>
                     </button>
                     <button class="nav-btn nav-daily-analysis-btn" data-view="daily-analysis" id="nav-daily-analysis" style="color:#00F0FF;font-weight:800;border:1px solid rgba(0,240,255,0.4);background:rgba(0,240,255,0.08);">
                         <span class="nav-icon">📅</span>
@@ -119,11 +115,7 @@
                     </button>
                     <button class="nav-btn" data-view="all-stats" id="nav-all-stats">
                         <span class="nav-icon">📈</span>
-                        <span>Karnem</span>
-                    </button>
-                    <button class="nav-btn" data-view="manual" id="nav-manual">
-                        <span class="nav-icon">✏️</span>
-                        <span>Manuel</span>
+                        <span>Bahis Karnesi</span>
                     </button>
                     <button class="nav-btn" data-view="history" id="nav-history">
                         <span class="nav-icon">📋</span>
@@ -189,32 +181,25 @@
                     </button>
 
                     <span class="m-drawer-section-title" style="margin-top:8px;">ANALİZ &amp; KUPONLAR</span>
-                    <button class="m-drawer-item" data-view="coupons-all">
-                        <span class="m-drawer-icon">🌐</span>
-                        <div class="m-drawer-text">
-                            <span class="m-drawer-title">Tüm Kuponlar</span>
-                            <span class="m-drawer-sub">Hazır bülten kuponları</span>
-                        </div>
-                    </button>
-                    <button class="m-drawer-item" data-view="profit-loss" style="border-left: 3px solid #10B981;">
-                        <span class="m-drawer-icon">📊</span>
-                        <div class="m-drawer-text">
-                            <span class="m-drawer-title" style="color:#10B981;font-weight:800;">Kupon Başarı Karnesi</span>
-                            <span class="m-drawer-sub">09.09'dan beri kupon arşivi ve isabet oranları</span>
-                        </div>
-                    </button>
                     <button class="m-drawer-item" data-view="coupons">
                         <span class="m-drawer-icon">🤖</span>
                         <div class="m-drawer-text">
-                            <span class="m-drawer-title">Benim İçin Bahis Yap</span>
-                            <span class="m-drawer-sub">Günün 5 Özel Kuponu</span>
+                            <span class="m-drawer-title">Bahis (Günün 5 Kuponu)</span>
+                            <span class="m-drawer-sub">Günün hazır elit kuponları</span>
                         </div>
                     </button>
                     <button class="m-drawer-item" data-view="analysis">
                         <span class="m-drawer-icon">📊</span>
                         <div class="m-drawer-text">
-                            <span class="m-drawer-title">Güven %65+ Analiz</span>
-                            <span class="m-drawer-sub">En yüksek ihtimalli maçlar</span>
+                            <span class="m-drawer-title">Bahis Analiz</span>
+                            <span class="m-drawer-sub">%65+ yüksek güvenli maçlar</span>
+                        </div>
+                    </button>
+                    <button class="m-drawer-item" data-view="coupons-all">
+                        <span class="m-drawer-icon">🌐</span>
+                        <div class="m-drawer-text">
+                            <span class="m-drawer-title">Tüm Kuponlar</span>
+                            <span class="m-drawer-sub">Hazır bülten kuponları</span>
                         </div>
                     </button>
                     <button class="m-drawer-item" data-view="daily-analysis" style="border-left: 3px solid #00F0FF;">
@@ -229,13 +214,6 @@
                         <div class="m-drawer-text">
                             <span class="m-drawer-title">Bahis Karnesi</span>
                             <span class="m-drawer-sub">Tüm maçların başarı raporu</span>
-                        </div>
-                    </button>
-                    <button class="m-drawer-item" data-view="manual">
-                        <span class="m-drawer-icon">✏️</span>
-                        <div class="m-drawer-text">
-                            <span class="m-drawer-title">Manuel Analiz Girişi</span>
-                            <span class="m-drawer-sub">Kendi maçını test et</span>
                         </div>
                     </button>
                     <button class="m-drawer-item" data-view="history">
@@ -265,14 +243,14 @@
                 <button class="m-pill-btn" data-view="live" style="color:#EF4444;font-weight:800;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.1);">🔴 Canlı Maçlar</button>
                 <button class="m-pill-btn" data-view="value-live" style="color:#F59E0B;font-weight:800;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);">⚡ Canlı Value</button>
                 <button class="m-pill-btn" data-view="radar" style="color:#00F0FF;font-weight:800;border:1px solid rgba(0,240,255,0.4);background:rgba(0,240,255,0.1);">📡 Canlı Radar</button>
-                <button class="m-pill-btn" data-view="profit-loss" style="color:#10B981;font-weight:800;">📊 Kupon Karnesi</button>
-                <button class="m-pill-btn" data-view="daily-analysis" style="color:#00F0FF;font-weight:800;">📅 Geçmiş Analizler</button>
+                <button class="m-pill-btn" data-view="coupons" style="color:#10B981;font-weight:800;">🤖 Bahis (5 Kupon)</button>
+                <button class="m-pill-btn" data-view="analysis" style="color:#6366f1;font-weight:800;">📊 Bahis Analiz</button>
                 <button class="m-pill-btn" data-view="coupons-all">🌐 Tüm Kuponlar</button>
-                <button class="m-pill-btn" data-view="analysis">📊 %65+ Analiz</button>
+                <button class="m-pill-btn" data-view="daily-analysis" style="color:#00F0FF;font-weight:800;">📅 Geçmiş Analizler</button>
                 <button class="m-pill-btn" data-view="all-stats">📈 Bahis Karnesi</button>
                 <button class="m-pill-btn" data-view="history">📋 Geçmiş</button>
             </div>
-        </div></div>
+        </div>
 
         <!-- ===== DISCLAIMER BANNER ===== -->
         <div class="disclaimer-banner" id="disclaimer-banner">
@@ -401,16 +379,6 @@
                 </div>
             </section>
 
-            <!-- Profit & Loss View (09.09.2026'dan Beri Kasa & Kâr/Zarar Menüsü) -->
-            <section class="view" id="view-profit-loss">
-                <div class="profit-loss-container" id="profit-loss-container">
-                    <div class="empty-state" style="padding:60px 20px;">
-                        <span class="empty-icon">📊</span>
-                        <h3>Kupon Başarı Karnesi Yükleniyor...</h3>
-                        <p>09.09.2026'dan beri üretilen kuponlar ve resmi sonuçlar hesaplanıyor.</p>
-                    </div>
-                </div>
-            </section>
 
             <!-- InPlayFlux Live Radar & Scanner View -->
             <section class="view" id="view-radar">
@@ -455,203 +423,6 @@
             <section class="view" id="view-all-stats">
                 <div class="all-stats-container" id="all-stats-container">
                     <!-- Rendered dynamically by AllMatchesTrackerPanel -->
-                </div>
-            </section>
-
-            <!-- Manual Input View -->
-            <section class="view" id="view-manual">
-                <div class="manual-container" id="manual-container">
-                    <div class="section-header">
-                        <h2>Manuel Veri Girişi</h2>
-                        <p>Analiz yapmak istediğiniz maçın verilerini girin</p>
-                    </div>
-
-                    <form id="manual-form" class="manual-form">
-                        <input type="hidden" name="sport_type" value="football">
-
-                        <!-- Match Info -->
-                        <div class="form-section">
-                            <h3 class="form-section-title">Maç Bilgisi</h3>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="home_team">Ev Sahibi</label>
-                                    <input type="text" id="home_team" placeholder="ör. Galatasaray" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="away_team">Deplasman</label>
-                                    <input type="text" id="away_team" placeholder="ör. Fenerbahçe" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="league">Lig / Turnuva</label>
-                                    <input type="text" id="league" placeholder="ör. Süper Lig">
-                                </div>
-                                <div class="form-group">
-                                    <label for="match_date">Maç Tarihi</label>
-                                    <input type="datetime-local" id="match_date">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Football Stats (dynamic) -->
-                        <div class="form-section" id="football-stats-section">
-                            <h3 class="form-section-title">İstatistikler</h3>
-
-                            <!-- Home Team Stats -->
-                            <div class="team-stats-block">
-                                <h4 class="team-stats-title" id="home-stats-title">Ev Sahibi İstatistikleri</h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label for="home_goals_scored_avg">Attığı Gol Ort.</label>
-                                        <input type="number" id="home_goals_scored_avg" step="0.01" placeholder="1.85">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_goals_conceded_avg">Yediği Gol Ort.</label>
-                                        <input type="number" id="home_goals_conceded_avg" step="0.01" placeholder="0.95">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_home_goals_avg">İç Saha Gol Ort.</label>
-                                        <input type="number" id="home_home_goals_avg" step="0.01" placeholder="2.10">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_home_conceded_avg">İç Saha Yenilen Ort.</label>
-                                        <input type="number" id="home_home_conceded_avg" step="0.01" placeholder="0.75">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_last8_wins">Son 8 Galibiyet</label>
-                                        <input type="number" id="home_last8_wins" min="0" max="8" placeholder="5">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_last8_draws">Son 8 Beraberlik</label>
-                                        <input type="number" id="home_last8_draws" min="0" max="8" placeholder="2">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_last8_losses">Son 8 Mağlubiyet</label>
-                                        <input type="number" id="home_last8_losses" min="0" max="8" placeholder="1">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_league_position">Lig Sırası</label>
-                                        <input type="number" id="home_league_position" min="1" placeholder="3">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_first_half_goals">İY Gol Ort.</label>
-                                        <input type="number" id="home_first_half_goals" step="0.01" placeholder="0.85">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="home_second_half_goals">İY2 Gol Ort.</label>
-                                        <input type="number" id="home_second_half_goals" step="0.01" placeholder="1.00">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Away Team Stats -->
-                            <div class="team-stats-block">
-                                <h4 class="team-stats-title" id="away-stats-title">Deplasman İstatistikleri</h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label for="away_goals_scored_avg">Attığı Gol Ort.</label>
-                                        <input type="number" id="away_goals_scored_avg" step="0.01" placeholder="1.50">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_goals_conceded_avg">Yediği Gol Ort.</label>
-                                        <input type="number" id="away_goals_conceded_avg" step="0.01" placeholder="1.20">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_away_goals_avg">Deplasman Gol Ort.</label>
-                                        <input type="number" id="away_away_goals_avg" step="0.01" placeholder="1.30">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_away_conceded_avg">Deplasman Yenilen Ort.</label>
-                                        <input type="number" id="away_away_conceded_avg" step="0.01" placeholder="1.50">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_last8_wins">Son 8 Galibiyet</label>
-                                        <input type="number" id="away_last8_wins" min="0" max="8" placeholder="4">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_last8_draws">Son 8 Beraberlik</label>
-                                        <input type="number" id="away_last8_draws" min="0" max="8" placeholder="2">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_last8_losses">Son 8 Mağlubiyet</label>
-                                        <input type="number" id="away_last8_losses" min="0" max="8" placeholder="2">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_league_position">Lig Sırası</label>
-                                        <input type="number" id="away_league_position" min="1" placeholder="7">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_first_half_goals">İY Gol Ort.</label>
-                                        <input type="number" id="away_first_half_goals" step="0.01" placeholder="0.65">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="away_second_half_goals">İY2 Gol Ort.</label>
-                                        <input type="number" id="away_second_half_goals" step="0.01" placeholder="0.85">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- H2H -->
-                            <div class="team-stats-block">
-                                <h4 class="team-stats-title">H2H (Karşılıklı Sonuçlar)</h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label for="h2h_home_wins">Ev Sahibi Galibiyetleri</label>
-                                        <input type="number" id="h2h_home_wins" min="0" placeholder="3">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="h2h_draws">Beraberlikler</label>
-                                        <input type="number" id="h2h_draws" min="0" placeholder="2">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="h2h_away_wins">Deplasman Galibiyetleri</label>
-                                        <input type="number" id="h2h_away_wins" min="0" placeholder="1">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="h2h_total_goals_avg">H2H Gol Ort.</label>
-                                        <input type="number" id="h2h_total_goals_avg" step="0.01" placeholder="2.80">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Odds -->
-                            <div class="team-stats-block">
-                                <h4 class="team-stats-title">Piyasa Oranları</h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label for="odds_home">MS 1 Oranı</label>
-                                        <input type="number" id="odds_home" step="0.01" placeholder="1.65">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="odds_draw">MS X Oranı</label>
-                                        <input type="number" id="odds_draw" step="0.01" placeholder="3.80">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="odds_away">MS 2 Oranı</label>
-                                        <input type="number" id="odds_away" step="0.01" placeholder="5.20">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="odds_over25">Üst 2.5 Oranı</label>
-                                        <input type="number" id="odds_over25" step="0.01" placeholder="1.85">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="odds_under25">Alt 2.5 Oranı</label>
-                                        <input type="number" id="odds_under25" step="0.01" placeholder="1.95">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="odds_btts_yes">KG Var Oranı</label>
-                                        <input type="number" id="odds_btts_yes" step="0.01" placeholder="1.75">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-ghost" id="btn-clear-form">Temizle</button>
-                            <button type="button" class="btn btn-primary btn-lg" id="btn-analyze">
-                                <span>📊</span> Analiz Et
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </section>
 
@@ -744,18 +515,18 @@
             </button>
             <button class="m-nav-btn" data-view="coupons" id="m-nav-coupons">
                 <span class="m-nav-icon">🤖</span>
-                <span class="m-nav-label">Kuponlar</span>
-            </button>
-            <button class="m-nav-btn" data-view="daily-analysis" id="m-nav-daily-analysis" style="color:#00F0FF;">
-                <span class="m-nav-icon">📅</span>
-                <span class="m-nav-label">Karne</span>
+                <span class="m-nav-label">Bahis</span>
             </button>
             <button class="m-nav-btn" data-view="analysis" id="m-nav-analysis">
                 <span class="m-nav-icon">📊</span>
-                <span class="m-nav-label">Analiz</span>
+                <span class="m-nav-label">Bahis Analiz</span>
             </button>
-            <button class="m-nav-btn" data-view="profit-loss" id="m-nav-profit-loss" style="color:#10B981;">
-                <span class="m-nav-icon">📊</span>
+            <button class="m-nav-btn" data-view="coupons-all" id="m-nav-coupons-all">
+                <span class="m-nav-icon">🌐</span>
+                <span class="m-nav-label">Tüm Kuponlar</span>
+            </button>
+            <button class="m-nav-btn" data-view="daily-analysis" id="m-nav-daily-analysis" style="color:#00F0FF;">
+                <span class="m-nav-icon">📅</span>
                 <span class="m-nav-label">Karne</span>
             </button>
         </nav>

@@ -108,14 +108,7 @@ const App = {
                 LiveRadarSidebar.init();
             }
 
-            // Kesintisiz Canlı Skor & Online Takip Döngüsü Başlat (Uygulamayı 7/24 sürekli canlı tutar)
-            if (window.LiveScoreService && typeof LiveScoreService.startAutoPolling === 'function') {
-                LiveScoreService.startAutoPolling(() => this.matches || [], () => {
-                    if (this.currentView === 'dashboard') this.applyFilters();
-                    if (this.currentView === 'coupons') this.loadDailyCoupons();
-                }, 45000);
-                console.log('⚡ Kesintisiz canlı skor döngüsü (45s) aktif edildi.');
-            }
+
         } catch (uiErr) {
             console.error('Bileşen başlatma hatası:', uiErr);
         }
@@ -474,9 +467,13 @@ const App = {
         } else if (view === 'all-stats') {
             this.loadAllMatchesStats();
         } else if (view === 'profit-loss') {
-            this.loadProfitLossPanel();
+            this.navigate('daily-analysis');
+            return;
         } else if (view === 'virtual-coupon') {
             this.navigate('coupons');
+            return;
+        } else if (view === 'manual') {
+            this.navigate('dashboard');
             return;
         } else if (view === 'value-live') {
             this.loadValueLivePanel();
@@ -815,6 +812,13 @@ const App = {
 
             this.applyFilters();
 
+            // Arka planda yüksek güven analiz havuzunu önceden hazırla (Menüye tıklandığında 0ms açılsın)
+            setTimeout(() => {
+                if (!this.highConfidenceMatches || this.highConfidenceMatches.length === 0) {
+                    this.highConfidenceMatches = this.computeHighConfidenceMatches();
+                }
+            }, 50);
+
             // Eğer kullanıcı kupon veya analiz sekmesindeyse bülten geldiğinde anında kuponları yükle
             if (this.currentView === 'coupons') {
                 this.loadDailyCoupons();
@@ -1136,16 +1140,15 @@ const App = {
             await this.loadDashboard();
         }
 
-        // Gerçek canlı ve biten maç skorlarını otomatik senkronize et (Simülasyon yok)
+        // Canlı skorları arkaplanda sessizce senkronize et (UI'yi asla bekletmez)
         if (window.LiveScoreService && this.matches && this.matches.length > 0) {
-            try {
-                await LiveScoreService.syncBulletinMatches(this.matches);
-            } catch (e) {
-                console.warn('Canlı skor analiz senkronizasyon uyarısı:', e);
-            }
+            LiveScoreService.syncBulletinMatches(this.matches).catch(() => {});
         }
 
-        const highConfList = this.highConfidenceMatches || this.computeHighConfidenceMatches();
+        if (!this.highConfidenceMatches || this.highConfidenceMatches.length === 0) {
+            this.highConfidenceMatches = this.computeHighConfidenceMatches();
+        }
+        const highConfList = this.highConfidenceMatches || [];
 
         // Kümülatif toplam analiz sayısı (tüm günlerin toplamı — hiçbir zaman düşmez)
         const cumulativeTotals = window.MatchTracker?.getCumulativeTotals?.() || { totalAnalyzed: 0, wonAnalyzed: 0, lostAnalyzed: 0, winRate: 0 };
@@ -1688,12 +1691,7 @@ const App = {
         }
 
         try {
-            // Yüksek güven analiz havuzunu hazırla
-            if ((!this.highConfidenceMatches || this.highConfidenceMatches.length === 0) && this.matches && this.matches.length > 0) {
-                this.highConfidenceMatches = this.computeHighConfidenceMatches();
-            }
-
-            // Kümülatif analiz toplamı
+            // Kümülatif analiz toplamı (0ms anlık)
             const cumulativeTotals = window.MatchTracker?.getCumulativeTotals?.() || { totalAnalyzed: 0 };
             const activeCount = Math.max(this.highConfidenceMatches?.length || 0, (this.matches?.length || 0), 177);
             const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);

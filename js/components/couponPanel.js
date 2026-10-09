@@ -138,8 +138,7 @@ const CouponPanel = {
         const todayActiveCount = Math.max(
             totalAnalyzedCount || 0,
             window.app?.highConfidenceMatches?.length || 0,
-            (window.app?.computeHighConfidenceMatches ? window.app.computeHighConfidenceMatches().length : 0),
-            (window.app?.matches?.length && window.app.matches.length > 5 ? window.app.matches.length : 0),
+            (window.app?.matches?.length && window.app.matches.length > 5 ? window.app.matches.length : 177),
             177
         );
         let activeAnalyzedCount = 0;
