@@ -95,9 +95,6 @@ const AllMatchesTrackerPanel = {
                             <button class="btn btn-primary" id="btn-all-matches-sync-live" style="background: linear-gradient(135deg, #10B981, #00F0FF); color: #000; font-weight: 800;" title="Gerçek canlı ve biten maç skorlarını çek">
                                 🔄 Canlı Skorları Çek & Senkronize Et
                             </button>
-                            <button class="btn btn-secondary" id="btn-toggle-auto-polling" title="Canlı skorları otomatik yenile">
-                                ⏱️ Canlı Otomatik Takip: Aktif
-                            </button>
                             <button class="btn btn-ghost" id="btn-all-matches-save-db" title="Supabase ve belleğe kaydet">
                                 💾 Supabase'e Kaydet
                             </button>

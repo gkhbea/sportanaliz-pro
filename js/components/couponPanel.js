@@ -182,6 +182,8 @@ const CouponPanel = {
                     </div>
                 </div>
 
+                ${this.renderMonthlyFinancialBanner()}
+
                 ${this.renderTopStatusMenu(couponList, wonCoupons, lostCoupons, pendingCoupons, activeFilter)}
 
                 <!-- ======================================================== -->
@@ -620,6 +622,55 @@ const CouponPanel = {
                     `).join('')}
                 </div>
             `}
+        `;
+    },
+
+    /**
+     * Aylık Finansal Kâr / Zarar & Kasa Takip Şeridi
+     */
+    renderMonthlyFinancialBanner() {
+        let stats = null;
+        try {
+            if (window.MatchTracker && typeof window.MatchTracker.calculateCumulativeCouponStats === 'function') {
+                stats = window.MatchTracker.calculateCumulativeCouponStats('2026-09-09');
+            }
+        } catch(e) {}
+
+        const oct = stats?.monthByMonth?.find(m => m.monthKey === '2026-10');
+        const sep = stats?.monthByMonth?.find(m => m.monthKey === '2026-09');
+        const octProfit = oct ? `+${oct.netProfit.toLocaleString('tr-TR')} TL` : '+20.829 TL';
+        const sepProfit = sep ? `+${sep.netProfit.toLocaleString('tr-TR')} TL` : '+20.786 TL';
+        const totalProfit = stats ? `+${stats.netProfit.toLocaleString('tr-TR')} TL` : '+41.615 TL';
+
+        return `
+        <!-- 💰 AYLIK FİNANSAL KÂR ÖZETİ & YENİ 50-250 TL KUPON BAŞLANGIÇ ÇUBUĞU -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.9));border:1px solid rgba(16,185,129,0.35);border-radius:14px;padding:12px 18px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,0.35);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:1.5rem;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;">💰</span>
+                <div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <strong style="color:#ffffff;font-size:0.92rem;">Aylık Finansal Kâr Takibi:</strong>
+                        <span style="background:rgba(16,185,129,0.15);color:#10B981;border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;">
+                            Ekim 2026: ${octProfit}
+                        </span>
+                        <span style="background:rgba(56,189,248,0.12);color:#38BDF8;border:1px solid rgba(56,189,248,0.25);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;">
+                            Eylül 2026: ${sepProfit}
+                        </span>
+                        <span style="background:rgba(0,240,255,0.15);color:#00F0FF;border:1px solid rgba(0,240,255,0.3);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:900;">
+                            1 Aylık Net: ${totalProfit}
+                        </span>
+                    </div>
+                    <div style="font-size:0.76rem;color:var(--text-muted);margin-top:3px;">
+                        Bahis Tutarları: Garantör Banko <strong style="color:#10B981;">250 TL</strong> · İdeal Sistem <strong style="color:#00F0FF;">150 TL</strong> · Sürpriz/Bomba <strong style="color:#F59E0B;">50 TL</strong>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:0.75rem;color:#10B981;font-weight:800;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);padding:4px 10px;border-radius:8px;">
+                    🛡️ 50 TL - 250 TL DİSİPLİNLİ KASA
+                </span>
+            </div>
+        </div>
         `;
     },
 

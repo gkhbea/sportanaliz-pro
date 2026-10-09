@@ -10,11 +10,12 @@ const UserProfileService = {
         startingBankroll: 1000,       // Başlangıç Kasası (TL)
         currentBankroll: 1000,        // Güncel Kasa (TL)
         stakeStrategy: 'fixed',       // 'fixed' (Sabit TL), 'percentage' (% Kasa), 'kelly' (Kelly Kriteri)
-        fixedStakeAmount: 100,        // Sabit kupon tutarı (TL)
+        fixedStakeAmount: 250,        // Banko kupon başlangıç tutarı (250 TL)
+        minStakeAmount: 50,           // Sürpriz/Bomba kupon başlangıç tutarı (50 TL)
         percentageStakeRate: 5,       // Kasa yüzdesi (%)
-        dailyProfitGoal: 150,         // Günlük kâr hedefi (TL)
-        weeklyProfitGoal: 800,        // Haftalık kâr hedefi (TL)
-        stopLossDaily: 250,           // Günlük stop-loss limiti (TL)
+        dailyProfitGoal: 500,         // Günlük kâr hedefi (TL)
+        weeklyProfitGoal: 2500,       // Haftalık kâr hedefi (TL)
+        stopLossDaily: 500,           // Günlük stop-loss limiti (TL)
         currency: 'TL',
         createdAt: '2026-09-09'
     },
@@ -83,13 +84,17 @@ const UserProfileService = {
         const currentBank = Math.max(100, summary.currentBankroll);
 
         if (profile.stakeStrategy === 'fixed') {
-            return Math.round(profile.fixedStakeAmount || 100);
+            // Güven puanına göre 50 TL ile 250 TL arası dinamik kademeli başlangıç
+            if (confidence >= 93) return 250; // Banko / Garantör Kupon
+            if (confidence >= 88) return 150; // İdeal Sistem Kuponu
+            if (confidence >= 80) return 100; // Gol / Özel Kupon
+            return 50; // Sürpriz / Değer / Bomba Kupon
         }
 
         if (profile.stakeStrategy === 'percentage') {
             const pct = (profile.percentageStakeRate || 5) / 100;
             const amount = Math.round(currentBank * pct);
-            return Math.max(20, Math.min(amount, currentBank * 0.25));
+            return Math.max(50, Math.min(250, amount));
         }
 
         if (profile.stakeStrategy === 'kelly') {
@@ -98,13 +103,13 @@ const UserProfileService = {
             const p = Math.min(0.95, Math.max(0.1, confidence / 100));
             const q = 1 - p;
             let kellyFraction = (b * p - q) / b;
-            kellyFraction = Math.max(0.01, Math.min(kellyFraction * 0.5, 0.15)); // max %15 kasa
+            kellyFraction = Math.max(0.01, Math.min(kellyFraction * 0.5, 0.15));
 
             const stake = Math.round(currentBank * kellyFraction);
-            return Math.max(20, stake);
+            return Math.max(50, Math.min(250, stake));
         }
 
-        return 100;
+        return confidence >= 92 ? 250 : (confidence >= 80 ? 100 : 50);
     },
 
     /**

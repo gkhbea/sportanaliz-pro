@@ -2809,7 +2809,7 @@ const HistoricalCouponsService = {
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~10.15 Oran)',
             subtitle: 'Vasas, Tarma ve Al-Ettifaq KG ile Yüksek Kazanç Fırsatı', badge: '⏳ BEKLİYOR (Yüksek Oran)',
-            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 75, confidence: 75
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 75
         }, [p_vasas, p_tarma, p_ettifaq_val], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };

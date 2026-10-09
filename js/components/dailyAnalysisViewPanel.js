@@ -166,6 +166,11 @@ const DailyAnalysisViewPanel = {
                 </div>
 
                 <!-- ========================================== -->
+                <!-- 2.5 AYLIK BAZDA FİNANSAL KÂR / ZARAR KARTI -->
+                <!-- ========================================== -->
+                ${this.renderMonthlyFinancialSection()}
+
+                <!-- ========================================== -->
                 <!-- 3. SEÇİLEN GÜNÜN İSTATİSTİK METRİK KARTLARI -->
                 <!-- ========================================== -->
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;margin-bottom:22px;">
@@ -372,6 +377,112 @@ const DailyAnalysisViewPanel = {
             this.refreshView(app);
             window.Helpers?.showToast?.('✅ Skorlar ve analiz karnesi teyit edildi!', 'success');
         });
+    },
+
+    /**
+     * Aylık Bazda Finansal Kâr / Zarar & Kasa Karnesi Bölümünü Render Et
+     */
+    renderMonthlyFinancialSection() {
+        let stats = null;
+        try {
+            if (window.MatchTracker && typeof window.MatchTracker.calculateCumulativeCouponStats === 'function') {
+                stats = window.MatchTracker.calculateCumulativeCouponStats('2026-09-09');
+            }
+        } catch(e) {}
+
+        if (!stats || !stats.monthByMonth || stats.monthByMonth.length === 0) return '';
+
+        const months = stats.monthByMonth;
+        const totalProfit = stats.netProfit || 0;
+        const overallRoi = stats.roi || 0;
+
+        return `
+        <!-- ======================================================== -->
+        <!-- 💰 AYLIK BAZDA FİNANSAL KÂR / ZARAR & KASA RAPORU        -->
+        <!-- ======================================================== -->
+        <div class="monthly-financial-card" style="background:linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(16, 24, 39, 0.95)); border:1px solid rgba(16, 185, 129, 0.35); border-radius:18px; padding:20px 24px; margin-bottom:24px; box-shadow:0 10px 30px rgba(0, 0, 0, 0.45); position:relative; overflow:hidden;">
+            <div style="position:absolute;top:-30px;right:-30px;width:150px;height:150px;background:radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%);pointer-events:none;"></div>
+            
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1.8rem;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);padding:6px 12px;border-radius:12px;">💰</span>
+                    <div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <h2 style="margin:0;font-size:1.25rem;color:#ffffff;font-weight:900;">Aylık Finansal Kâr / Zarar &amp; Kasa Karnesi</h2>
+                            <span style="background:rgba(16,185,129,0.2);color:#10B981;font-size:0.75rem;padding:3px 10px;border-radius:12px;font-weight:800;border:1px solid rgba(16,185,129,0.4);">AY BAZLI TAKİP</span>
+                        </div>
+                        <span style="font-size:0.82rem;color:var(--text-muted);margin-top:2px;display:block;">
+                            Resmi maç sonuçlarıyla her ayın yatırılan kupon tutarı, brüt kazancı ve net kârı şeffaf listelenir.
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(16,185,129,0.3);padding:8px 16px;border-radius:12px;">
+                    <div>
+                        <span style="font-size:0.7rem;color:var(--text-muted);display:block;font-weight:700;">1 AYLIK TOPLAM NET KÂR</span>
+                        <strong style="font-size:1.3rem;color:#10B981;font-weight:900;">+${totalProfit.toLocaleString('tr-TR')} TL</strong>
+                    </div>
+                    <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;">
+                        <span style="font-size:0.7rem;color:var(--text-muted);display:block;font-weight:700;">TOPLAM ROI</span>
+                        <strong style="font-size:1.15rem;color:#00F0FF;font-weight:900;">+%${overallRoi}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aylık Kartlar Grid -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;">
+                ${months.map(m => {
+                    const isProfit = m.netProfit >= 0;
+                    return `
+                        <div style="background:rgba(255,255,255,0.03);border:1px solid ${isProfit ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'};border-radius:14px;padding:16px;position:relative;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <span style="font-size:1.1rem;">📅</span>
+                                    <strong style="color:#ffffff;font-size:1.05rem;">${m.monthName}</strong>
+                                    <span style="font-size:0.72rem;color:var(--text-muted);">(${m.daysCount} Gün)</span>
+                                </div>
+                                <span style="background:${isProfit ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${isProfit ? '#10B981' : '#EF4444'};font-size:0.75rem;padding:2px 8px;border-radius:6px;font-weight:800;">
+                                    ROI %${m.roi}
+                                </span>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;font-size:0.85rem;">
+                                <div style="background:rgba(0,0,0,0.3);padding:8px 10px;border-radius:8px;">
+                                    <span style="font-size:0.7rem;color:var(--text-muted);display:block;">Tutan Kupon</span>
+                                    <strong style="color:#10B981;font-size:0.95rem;">${m.wonCoupons} / ${m.totalCoupons}</strong>
+                                    <span style="font-size:0.7rem;color:var(--text-muted);"> (%${m.couponWinRate} Başarı)</span>
+                                </div>
+                                <div style="background:rgba(0,0,0,0.3);padding:8px 10px;border-radius:8px;">
+                                    <span style="font-size:0.7rem;color:var(--text-muted);display:block;">Yatırılan Tutar</span>
+                                    <strong style="color:#f8fafc;font-size:0.95rem;">${m.totalStake.toLocaleString('tr-TR')} TL</strong>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
+                                <div>
+                                    <span style="font-size:0.7rem;color:var(--text-muted);display:block;">Toplam Geri Dönüş</span>
+                                    <span style="color:#cbd5e1;font-size:0.85rem;font-weight:700;">${m.totalReturn.toLocaleString('tr-TR')} TL</span>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span style="font-size:0.7rem;color:var(--text-muted);display:block;">Net Aylık Kâr</span>
+                                    <strong style="color:#10B981;font-size:1.15rem;font-weight:900;">+${m.netProfit.toLocaleString('tr-TR')} TL</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+
+            <!-- Yeni Bahis Kuralı Bilgilendirme Notu -->
+            <div style="margin-top:14px;padding:10px 14px;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:0.82rem;">
+                <div style="display:flex;align-items:center;gap:8px;color:#cbd5e1;">
+                    <span style="font-size:1rem;">🛡️</span>
+                    <span><strong>Yeni Kupon Başlangıç Stratejisi:</strong> En Sağlam Garantör Banko: <strong style="color:#10B981;">250 TL</strong> · İdeal Sistem: <strong style="color:#00F0FF;">150 TL</strong> · Sürpriz/Bomba Kupon: <strong style="color:#F59E0B;">50 TL</strong></span>
+                </div>
+                <span style="color:#00F0FF;font-weight:800;font-size:0.75rem;">50 TL - 250 TL DİSİPLİNLİ KASA</span>
+            </div>
+        </div>
+        `;
     },
 
     /**

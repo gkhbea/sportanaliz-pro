@@ -1104,6 +1104,68 @@ const MatchTracker = {
         const netProfit = +(totalReturn - totalStake).toFixed(2);
         const roi = totalStake > 0 ? Math.round((netProfit / totalStake) * 1000) / 10 : 0;
 
+        // Aylık Bazda Finansal Kâr / Zarar ve Performans Ayrıştırması
+        const monthMap = {};
+        const trMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        dayByDay.forEach(day => {
+            const monthKey = (day.date || '').substring(0, 7) || '2026-10';
+            if (!monthMap[monthKey]) {
+                const parts = monthKey.split('-');
+                const y = parts[0] || '2026';
+                const mIdx = parseInt(parts[1] || '10', 10) - 1;
+                const monthName = (trMonths[mIdx] || '') + ' ' + y;
+                monthMap[monthKey] = {
+                    monthKey,
+                    monthName,
+                    daysCount: 0,
+                    totalCoupons: 0,
+                    wonCoupons: 0,
+                    lostCoupons: 0,
+                    liveCoupons: 0,
+                    pendingCoupons: 0,
+                    totalBets: 0,
+                    wonBets: 0,
+                    lostBets: 0,
+                    totalStake: 0,
+                    totalReturn: 0,
+                    days: []
+                };
+            }
+            const m = monthMap[monthKey];
+            m.daysCount++;
+            m.totalCoupons += day.totalCoupons;
+            m.wonCoupons += day.wonCoupons;
+            m.lostCoupons += day.lostCoupons;
+            m.liveCoupons += day.liveCoupons;
+            m.pendingCoupons += day.pendingCoupons;
+            m.totalBets += day.totalBets;
+            m.wonBets += day.wonBets;
+            m.lostBets += day.lostBets;
+            m.totalStake += day.totalStake;
+            m.totalReturn += day.totalReturn;
+            m.days.push(day);
+        });
+
+        const monthByMonth = Object.values(monthMap).map(m => {
+            const decidedCoupons = m.wonCoupons + m.lostCoupons;
+            const couponWinRate = decidedCoupons > 0 ? Math.round((m.wonCoupons / decidedCoupons) * 1000) / 10 : 0;
+            const decidedBets = m.wonBets + m.lostBets;
+            const winRate = decidedBets > 0 ? Math.round((m.wonBets / decidedBets) * 1000) / 10 : 0;
+            const netProfit = Math.round((m.totalReturn - m.totalStake) * 100) / 100;
+            const roi = m.totalStake > 0 ? Math.round((netProfit / m.totalStake) * 1000) / 10 : 0;
+            return {
+                ...m,
+                decidedCoupons,
+                couponWinRate,
+                decidedBets,
+                winRate,
+                totalReturn: Math.round(m.totalReturn * 100) / 100,
+                netProfit,
+                roi
+            };
+        });
+
         const result = {
             startDate,
             startDateFormatted: '09 Eylül 2026',
@@ -1127,6 +1189,7 @@ const MatchTracker = {
             netProfit,
             roi,
             dayByDay,
+            monthByMonth,
             allEvaluatedCoupons,
             calculatedAt: new Date().toISOString()
         };
