@@ -33,6 +33,16 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// HTML ve ServiceWorker için tarayıcı önbelleğini devre dışı bırak (Güncellemeler 0 sn'de yansısın)
+app.use((req, res, next) => {
+    if (req.path === '/' || req.path.endsWith('.html') || req.path.endsWith('sw.js')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
+    next();
+});
+
 // Statik dosyaları sun
 app.use(express.static(path.join(__dirname)));
 

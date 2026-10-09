@@ -1,4 +1,4 @@
-/**
+﻿/**
  * historicalCouponsService.js - %100 Resmi Maçkolik & Nesine İddaa Bülten Verileriyle Doğrulanmış Geçmiş Kuponlar
  * 
  * BU DOSYADAKİ TÜM MAÇLAR, SKORLAR, ORANLAR VE İDDAA KODLARI
@@ -427,7 +427,7 @@ const HistoricalCouponsService = {
         }, yDate, dFmt);
 
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Ultra Güvenli Resmi Avrupa Ligi Maçları', badge: 'KAZANDI 2/2', badgeType: 'safe',
             icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -524,7 +524,7 @@ const HistoricalCouponsService = {
         }, yDate, dFmt);
 
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Ultra Güvenli Resmi Lig Karşılaşmaları', badge: 'KAZANDI 2/2', badgeType: 'safe',
             icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -621,7 +621,7 @@ const HistoricalCouponsService = {
         }, yDate, dFmt);
 
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Süper Lig & Avrupa En Güvenli Tercihler', badge: 'KAZANDI 2/2', badgeType: 'safe',
             icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -724,7 +724,7 @@ const HistoricalCouponsService = {
         }, yDate, dFmt);
         
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Süper Lig & Premier Lig En Güvenli Tercihler', badge: 'KAZANDI 2/2', badgeType: 'safe',
             icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -817,7 +817,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Pazartesi Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -909,7 +909,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Salı Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1001,7 +1001,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Çarşamba Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1093,7 +1093,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Perşembe Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1185,7 +1185,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Cuma Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1277,7 +1277,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Cumartesi Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1369,7 +1369,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Pazar Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1461,7 +1461,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Pazartesi Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1553,7 +1553,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Salı Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1645,7 +1645,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Çarşamba Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1737,7 +1737,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Perşembe Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1829,7 +1829,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Cuma Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -1921,7 +1921,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Cumartesi Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -2013,7 +2013,7 @@ const HistoricalCouponsService = {
 
         const isToday = false;
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Pazar (Dün) Gününün En Güvenli 2 Tercihi', badge: isToday ? '⏳ BEKLİYOR' : (p1.resultStatus === 'won' && p2.resultStatus === 'won' ? 'KAZANDI 2/2' : 'KAYBETTİ'),
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -2128,7 +2128,7 @@ const HistoricalCouponsService = {
         }, yDate, dFmt);
 
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Pazartesi Gününün En Güvenli 2 Tercihi', badge: 'KAZANDI 2/2',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -2236,7 +2236,7 @@ const HistoricalCouponsService = {
         }, yDate, dFmt);
 
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Salı Gününün En Güvenli 2 Tercihi', badge: 'KAZANDI 2/2',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p1, p2], dFmt);
@@ -2363,7 +2363,7 @@ const HistoricalCouponsService = {
 
         // 1. Kupon: Zapspor 6-1 ve Eskişehirspor 4-1 maçları net skorlarla bitti -> KAZANDI (2/2)
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Bütün Günün En Yüksek Olasılıklı 2 Garantör Tercihi', badge: '🎉 KAZANDI 2/2',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p_demir, p_eskesk], dFmt);
@@ -2461,9 +2461,9 @@ const HistoricalCouponsService = {
             detail: "Shamrock Rovers 2 - 0 Drogheda United · MS 1 (✅ BİTTİ / KAZANDI)"
         }, yDate, dFmt);
 
-        // 1. Kupon: Kasa Katlama (TUTTU)
+        // 1. Kupon: Garantör Banko (TUTTU)
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Bütün Günün En Yüksek Olasılıklı 2 Garantör Tercihi', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p_vitoria, p_erciyes], dFmt);
@@ -2615,9 +2615,9 @@ const HistoricalCouponsService = {
             detail: "Vanspor FK vs Bandırmaspor · MS 2 (Bandırmaspor Form Grafiği)"
         }, yDate, dFmt);
 
-        // Kupon 1: Kasa Katlama (3 maç)
+        // Kupon 1: Garantör Banko (3 maç)
         const c1 = this._createArchivedCoupon({
-            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Garantör Kupon',
             subtitle: 'Galatasaray, Al-Nassr ve Nordsjælland ile Günün En Sağlam 3 Tercihi', badge: '⏳ BEKLİYOR (Günün Bankosu)',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 95
         }, [p_galatasaray, p_nassr, p_nordsjaelland], dFmt);
@@ -2914,3 +2914,4 @@ const HistoricalCouponsService = {
 if (typeof window !== 'undefined') {
     window.HistoricalCouponsService = HistoricalCouponsService;
 }
+

@@ -171,7 +171,6 @@ const LiveMatchesPanel = {
                                     <span class="pulse-ring"></span>
                                     🔴 CANLI MAÇLAR VE ANLIK SKORLAR
                                 </span>
-                                ${isPollingActive ? '<span class="live-auto-pill">⏱️ Otomatik Takip: 30 sn 🟢</span>' : '<span class="live-auto-pill inactive">⚪ Manuel Takip</span>'}
                             </div>
                             <h2 class="live-hero-title">Canlı Karşılaşmalar, Skor Değişimleri & Kupon İsabetleri</h2>
                             <p class="live-hero-desc">

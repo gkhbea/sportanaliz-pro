@@ -351,7 +351,7 @@
                             <span class="empty-icon">📭</span>
                             <h3>Maç bulunamadı</h3>
                             <p>Veri kaynağından maç çekilemedi veya filtrelere uygun maç yok.</p>
-                            <button class="btn btn-primary" id="btn-try-manual">Manuel Giriş Yap</button>
+                            <button class="btn btn-primary" id="btn-try-refresh" onclick="App.loadDashboard()">🔄 Bülteni Yenile</button>
                         </div>
                     </div>
                 </div>
@@ -363,7 +363,7 @@
                     <div class="empty-state">
                         <span class="empty-icon">📊</span>
                         <h3>Analiz için bir maç seçin</h3>
-                        <p>Dashboard'dan bir maça tıklayın veya manuel veri girin.</p>
+                        <p>Bültenden veya günün maçlarından bir karşılaşma seçin.</p>
                     </div>
                 </div>
             </section>
@@ -673,7 +673,7 @@
                 <!-- Info Banner -->
                 <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:0.85rem;color:#cbd5e1;line-height:1.5;">
                     <strong style="color:#38bdf8;">📅 Bugünün Bülteni (10.09.2026):</strong>
-                    Kasa Katlama, Editör, Gol Yağmuru, Değer Kuponları, Şampiyonlar Ligi ve Önümüzdeki 3 Saat kuponları özet oranlar, güven yüzdeleri ve resmi Maçkolik linkleriyle e-postanıza gönderilir.
+                    Garantör Banko, Editör, Gol Yağmuru, Değer Kuponları, Şampiyonlar Ligi ve Önümüzdeki 3 Saat kuponları özet oranlar, güven yüzdeleri ve resmi Maçkolik linkleriyle e-postanıza gönderilir.
                 </div>
 
                 <form id="form-send-coupons" onsubmit="return false;">

@@ -1,19 +1,7 @@
-// sw.js — Service Worker for SportAnaliz Pro
-const CACHE_NAME = 'sportanaliz-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './css/style.css',
-  './js/app.js'
-];
+// sw.js — Service Worker for SportAnaliz Pro (Network First & Cache Purging)
+const CACHE_NAME = 'sportanaliz-v3';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -21,9 +9,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
+        keys.map((key) => caches.delete(key))
       );
     })
   );
@@ -31,13 +17,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // API veya dinamik proxy çağrılarını cache'leme
+  // API veya dinamik proxy çağrılarını asla önbelleğe alma
   if (event.request.url.includes('/api/')) {
     return;
   }
+
+  // Network First: Önce her zaman güncel dosyayı sunucudan çek
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });

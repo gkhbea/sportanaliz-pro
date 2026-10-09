@@ -329,7 +329,7 @@ const CouponEngine = {
         if (safePicks && safePicks.length >= 2) {
             qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-safe',
-                title: 'Kasa Katlama / En Garantör Kupon',
+                title: '🛡️ Garantör / En Güvenilir Kupon',
                 subtitle: `Günün en banko, en yüksek kazanma ihtimalli ${safePicks.length} seçimi`,
                 badge: '🛡️ ULTRA GÜVEN · BANKO',
                 badgeType: 'success',
@@ -337,7 +337,7 @@ const CouponEngine = {
                 themeColor: '#10B981',
                 accentBg: 'rgba(16, 185, 129, 0.1)',
                 picks: safePicks,
-                strategy: 'Kasa katlama ve sermaye koruma odaklıdır. Poisson olasılık modelinde sapma riski minimum olan tercihlerden oluşturulmuştur.',
+                strategy: 'Yüksek güvenilirlik ve riskten kaçınma odaklıdır. Poisson olasılık modelinde sapma riski minimum olan tercihlerden oluşturulmuştur.',
                 recommendedStake: 200
             }));
         }
