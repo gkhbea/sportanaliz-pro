@@ -17,8 +17,8 @@ const DataManager = {
 
         // Paralel olarak tüm kaynaklardan çek
         const [nesineRes, bilyonerRes] = await Promise.allSettled([
-            NesineService.getBulletin(sportType),
-            BilyonerService.getEvents(sportType)
+            (typeof NesineService !== 'undefined' && typeof NesineService.getBulletin === 'function') ? NesineService.getBulletin(sportType) : Promise.resolve([]),
+            (typeof BilyonerService !== 'undefined' && typeof BilyonerService.getEvents === 'function') ? BilyonerService.getEvents(sportType) : Promise.resolve([])
         ]);
 
         if (nesineRes.status === 'fulfilled' && Array.isArray(nesineRes.value) && nesineRes.value.length > 0) {

@@ -1698,13 +1698,11 @@ const App = {
             const activeCount = Math.max(this.highConfidenceMatches?.length || 0, (this.matches?.length || 0), 177);
             const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);
 
-            // 1) Öncelikle kupon havuzunu oluştur
-            let coupons = [];
-            if (this.matches && this.matches.length > 0) {
-                coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh) || [];
-            }
-            if (!coupons || coupons.length === 0) {
-                coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
+            // 1) Öncelikle günün özenle seçilmiş elit kupon havuzunu al (Galatasaray, Al Nassr, Espanyol vs.)
+            let coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
+            if ((!coupons || coupons.length === 0 || forceRefresh) && this.matches && this.matches.length > 0) {
+                const generated = CouponEngine.generateDailyCoupons(this.matches, forceRefresh) || [];
+                if (generated && generated.length > 0) coupons = generated;
             }
 
             // 2) Anında kuponları arayüze bas (0ms anlık yükleme, kullanıcı asla takılı kalmaz)
