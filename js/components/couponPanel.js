@@ -276,6 +276,27 @@ const CouponPanel = {
                         </button>
                     </div>
                 ` : `
+                    <!-- 🎯 Günün Kuponları Tutma Olasılıkları Üst Özet Şeridi -->
+                    <div class="coupons-probability-top-summary" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:18px;">
+                        ${displayedCoupons.map((c, i) => {
+                            const p = c.confidence || c.winProbability || 88;
+                            const pCol = p >= 92 ? '#10B981' : (p >= 88 ? '#00F0FF' : (p >= 80 ? '#8B5CF6' : '#F59E0B'));
+                            const shortTitle = (c.title || '').replace(/Kuponu.*/i, '').replace(/Kupon.*/i, '').trim();
+                            return `
+                                <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.08);border-left:4px solid ${pCol};border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                                    <div>
+                                        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:800;text-transform:uppercase;">${i+1}. ${shortTitle}</div>
+                                        <div style="font-size:0.8rem;font-weight:800;color:#cbd5e1;margin-top:2px;">Oran: <span style="color:#00F0FF;font-weight:900;">${c.totalOdd}</span></div>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <div style="font-size:0.65rem;color:var(--text-muted);font-weight:800;letter-spacing:0.5px;">TUTMA ŞANSI</div>
+                                        <div style="font-size:1.25rem;color:${pCol};font-weight:900;line-height:1;margin-top:2px;">%${p}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
                     <div class="coupons-grid">
                         ${displayedCoupons.map((coupon, idx) => this.renderCouponCard(coupon, idx)).join('')}
                     </div>
@@ -705,6 +726,45 @@ const CouponPanel = {
 
         const matches = evalResult.evaluatedMatches || coupon.matches || [];
 
+        // 🎯 Kupon Tutma Olasılığı Hesaplama & Tasarımı
+        const winProb = coupon.confidence || coupon.winProbability || 88;
+        let probBadgeColor = '#10B981';
+        let probBg = 'rgba(16,185,129,0.15)';
+        let probBorder = 'rgba(16,185,129,0.35)';
+        let probLabel = '🏆 Ultra Garantör';
+        let probGlow = 'rgba(16,185,129,0.6)';
+        let probGradient = 'linear-gradient(90deg, #10B981, #34D399)';
+
+        if (winProb >= 92) {
+            probBadgeColor = '#10B981';
+            probLabel = '🏆 Ultra Garantör';
+            probBg = 'rgba(16,185,129,0.15)';
+            probBorder = 'rgba(16,185,129,0.4)';
+            probGradient = 'linear-gradient(90deg, #10B981, #34D399)';
+            probGlow = 'rgba(16,185,129,0.6)';
+        } else if (winProb >= 88) {
+            probBadgeColor = '#00F0FF';
+            probLabel = '⚡ Çok Yüksek İhtimal';
+            probBg = 'rgba(0,240,255,0.15)';
+            probBorder = 'rgba(0,240,255,0.4)';
+            probGradient = 'linear-gradient(90deg, #00F0FF, #3B82F6)';
+            probGlow = 'rgba(0,240,255,0.6)';
+        } else if (winProb >= 80) {
+            probBadgeColor = '#8B5CF6';
+            probLabel = '🎯 İdeal Olasılık';
+            probBg = 'rgba(139,92,246,0.15)';
+            probBorder = 'rgba(139,92,246,0.4)';
+            probGradient = 'linear-gradient(90deg, #8B5CF6, #A855F7)';
+            probGlow = 'rgba(139,92,246,0.6)';
+        } else {
+            probBadgeColor = '#F59E0B';
+            probLabel = '💎 Yüksek Değer & Sürpriz';
+            probBg = 'rgba(245,158,11,0.15)';
+            probBorder = 'rgba(245,158,11,0.4)';
+            probGradient = 'linear-gradient(90deg, #F59E0B, #EF4444)';
+            probGlow = 'rgba(245,158,11,0.6)';
+        }
+
         return `
             <div class="coupon-card ${isWon ? 'coupon-won' : (isLost ? 'coupon-lost' : '')}" id="coupon-card-${coupon.id}" style="${statusBorder}background:linear-gradient(180deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.85) 100%);border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;position:relative;">
                 
@@ -724,11 +784,36 @@ const CouponPanel = {
                                 </h3>
                             </div>
                         </div>
-                        <div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                             ${statusBadgeHtml}
                         </div>
                     </div>
-                    <p style="margin:8px 0 0 0;font-size:0.82rem;color:var(--text-muted);line-height:1.4;">
+
+                    <!-- 🎯 ÜSTTE KUPON TUTMA OLASILIĞI GÖSTERGESİ -->
+                    <div class="coupon-win-probability-box" style="margin-top:12px;background:linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,41,59,0.75) 100%);border:1px solid ${probBorder};border-radius:12px;padding:10px 14px;box-shadow:0 4px 15px rgba(0,0,0,0.25);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="font-size:1rem;">🎯</span>
+                                <span style="font-size:0.8rem;font-weight:900;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;">
+                                    TUTMA OLASILIĞI:
+                                </span>
+                                <span style="font-size:0.72rem;color:${probBadgeColor};font-weight:800;background:${probBg};border:1px solid ${probBorder};padding:2px 8px;border-radius:12px;">
+                                    ${probLabel}
+                                </span>
+                            </div>
+                            <div style="display:flex;align-items:baseline;gap:2px;">
+                                <span style="font-size:0.85rem;color:${probBadgeColor};font-weight:900;">%</span>
+                                <strong style="font-size:1.45rem;font-weight:900;color:${probBadgeColor};line-height:1;text-shadow:0 0 16px ${probGlow};">
+                                    ${winProb}
+                                </strong>
+                            </div>
+                        </div>
+                        <div style="width:100%;background:rgba(255,255,255,0.08);border-radius:10px;height:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);">
+                            <div style="width:${winProb}%;height:100%;background:${probGradient};border-radius:10px;box-shadow:0 0 12px ${probGlow};transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                        </div>
+                    </div>
+
+                    <p style="margin:10px 0 0 0;font-size:0.82rem;color:var(--text-muted);line-height:1.4;">
                         ${coupon.subtitle || ''}
                     </p>
                 </div>

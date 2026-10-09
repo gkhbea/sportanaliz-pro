@@ -107,7 +107,7 @@ const HistoricalCouponsService = {
             badgeType: cfg.badgeType || defaultBadgeType,
             icon: cfg.icon || '🎯',
             themeColor: cfg.themeColor || '#38BDF8',
-            confidence: 88,
+            confidence: cfg.confidence || Math.round(picks.reduce((acc, p) => acc + (Number(p.confidence) || 88), 0) / Math.max(picks.length, 1)),
             totalOdd: Number(totalOdd.toFixed(2)),
             recommendedStake: stake,
             potentialReturn: Math.round(stake * totalOdd),
@@ -2619,35 +2619,35 @@ const HistoricalCouponsService = {
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
             subtitle: 'Galatasaray, Al-Nassr ve Nordsjælland ile Günün En Sağlam 3 Tercihi', badge: '⏳ BEKLİYOR (Günün Bankosu)',
-            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250
+            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 95
         }, [p_galatasaray, p_nassr, p_nordsjaelland], dFmt);
 
         // Kupon 2: İdeal Sistem (3 maç)
         const c2 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
             subtitle: 'Ahli Saudi, Nancy ve Bohemians ile Yüksek İsabetli Kombinasyon', badge: '⏳ BEKLİYOR (Günün İdeali)',
-            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150
+            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 91
         }, [p_ahli, p_nancy, p_bohemians], dFmt);
 
         // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç)
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
             subtitle: 'Brann-Viking, Shanghai Port ve Al Sadd ile Gollü Karşılaşmalar', badge: '⏳ BEKLİYOR (Günün Golleri)',
-            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150
+            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 89
         }, [p_brann, p_shanghai, p_alsadd], dFmt);
 
         // Kupon 4: İY/MS Özel Analiz Kuponu (3 maç)
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
             subtitle: 'Galatasaray İY 1, Dunkerque İY 0.5 ÜST ve Al Fateh İY Gol Fırsatı', badge: '⏳ BEKLİYOR (Günün Özel Tercihi)',
-            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100
+            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 87
         }, [p_gs_iy, p_dunkerque, p_ahli], dFmt);
 
         // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~10.30 Oran)',
             subtitle: 'Espanyol, Sivasspor ve Bandırmaspor ile Yüksek Kazanç Potansiyeli', badge: '⏳ BEKLİYOR (Yüksek Oran)',
-            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 75
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 75, confidence: 75
         }, [p_espanyol, p_sivas, p_bandirma], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
