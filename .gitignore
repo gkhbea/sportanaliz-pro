@@ -5,6 +5,8 @@ dist/
 scratch/
 *.log
 *.bak
+.env
+.env.local
 data_cache/*
 !data_cache/default_bulten.json
 !data_cache/nesine_bulten_today.json

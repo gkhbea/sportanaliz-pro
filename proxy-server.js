@@ -5,6 +5,27 @@ const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 
+// .env dosyasını otomatik yükle (eğer varsa)
+try {
+    const envPath = path.join(__dirname, '.env');
+    if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        envContent.split(/\r?\n/).forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#')) {
+                const eqIdx = trimmed.indexOf('=');
+                if (eqIdx !== -1) {
+                    const k = trimmed.substring(0, eqIdx).trim();
+                    const v = trimmed.substring(eqIdx + 1).trim().replace(/^['"]|['"]$/g, '');
+                    if (!process.env[k]) {
+                        process.env[k] = v;
+                    }
+                }
+            }
+        });
+    }
+} catch (e) {}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
