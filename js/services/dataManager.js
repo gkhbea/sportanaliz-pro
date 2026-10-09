@@ -39,52 +39,35 @@ const DataManager = {
         // SADECE Resmi İddaa Kodu olan ve oranları açılmış maçları filtrele
         results.matches = results.matches.filter(m => (m.iddaaCode || m.code) && (m.odds?.home || m.odds?.over25 || m.odds?.under25));
 
-        // ===== BU GÜN FiLTRESi: Sadece bugünün maçlarını göster =====
-        // Bülten genellikle haftalarönce olan ve gelecek haftanın maçlarını da içerir.
-        // Kullanıcıya sadece BUGÜN oynanacak maçları göster.
+        // ===== BUGÜN ETİKETLEMESİ: Bugünün maçlarını önceliklendir =====
         const now = new Date();
         const todayY = now.getFullYear();
         const todayM = now.getMonth();
         const todayD = now.getDate();
         const todayStr = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
         const todayFmtDot = `${String(todayD).padStart(2, '0')}.${String(todayM + 1).padStart(2, '0')}.${todayY}`;
-        const tomorrowStart = new Date(todayY, todayM, todayD + 1, 0, 0, 0).getTime();
-        const todayStart = new Date(todayY, todayM, todayD, 0, 0, 0).getTime();
 
-        const todayMatches = results.matches.filter(m => {
-            // 1. matchDate ISO formatı varsa
+        results.matches.forEach(m => {
+            let isTod = false;
             if (m.matchDate) {
                 const d = new Date(m.matchDate);
                 if (!isNaN(d.getTime())) {
-                    return d.getFullYear() === todayY && d.getMonth() === todayM && d.getDate() === todayD;
+                    isTod = (d.getFullYear() === todayY && d.getMonth() === todayM && d.getDate() === todayD);
                 }
             }
-            // 2. dateStr formatı ("17.09.2026" veya "2026-09-17")
-            if (m.dateStr) {
-                if (m.dateStr === todayFmtDot || m.dateStr === todayStr) return true;
+            if (!isTod && m.dateStr) {
+                if (m.dateStr === todayFmtDot || m.dateStr === todayStr) isTod = true;
                 const parts = m.dateStr.split('.');
                 if (parts.length === 3) {
                     const d = parseInt(parts[0], 10);
                     const mo = parseInt(parts[1], 10) - 1;
                     const y = parseInt(parts[2], 10);
-                    return y === todayY && mo === todayM && d === todayD;
+                    if (y === todayY && mo === todayM && d === todayD) isTod = true;
                 }
             }
-            // 3. isToday bayrağı
-            if (m.isToday === true) return true;
-            return false;
+            if (m.isToday === true) isTod = true;
+            m.isToday = isTod;
         });
-
-        // Bugün maç bulunduysa onları kullan, yoksa tüm bülteni göster (fallback)
-        if (todayMatches.length >= 5) {
-            results.matches = todayMatches;
-        }
-
-        // Maksimum gösterim sınırı: Dashboard'da çok fazla maç gösterme, güçlü olanları öne al
-        const MAX_DISPLAY = 120;
-        if (results.matches.length > MAX_DISPLAY) {
-            results.matches = results.matches.slice(0, MAX_DISPLAY);
-        }
         // ====================================================================
 
         // Tarih ve lig önemine göre akıllı sırala (Bugünün kaliteli maçları en üstte)

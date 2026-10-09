@@ -89,11 +89,14 @@ const CouponEngine = {
 
         // 2. Kuponları günün aktif ve elit bülten maçlarından oluştur
         const todayMatches = (matches || []).filter(m => this._isMatchToday(m));
-        let targetMatches = todayMatches.length >= 3 ? todayMatches : matches;
+        let targetMatches = todayMatches.length >= 15 ? todayMatches : matches;
         this.poolSourceLabel = 'Günün Maçları (Bugünün Bülteni)';
 
         // 2. Maç havuzunu analiz et
-        const pool = this._buildAnalysisPool(targetMatches);
+        let pool = this._buildAnalysisPool(targetMatches);
+        if (pool.length < 10 && targetMatches !== matches) {
+            pool = this._buildAnalysisPool(matches);
+        }
         if (pool.length === 0) return [];
 
         const usedMatchKeys = new Set();
@@ -1352,7 +1355,8 @@ const CouponEngine = {
                 };
             });
 
-            return { ...coupon, matches: adaptedMatches };
+            const newTotalOdd = adaptedMatches.reduce((acc, it) => acc * (parseFloat(it.odd) || 1), 1).toFixed(2);
+            return { ...coupon, matches: adaptedMatches, totalOdd: newTotalOdd };
         });
     }
 };

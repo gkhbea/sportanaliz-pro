@@ -35,9 +35,32 @@ function getCacheFilePath(key) {
     return path.join(CACHE_DIR, `${cleanKey}_${today}.json`);
 }
 
+function findLatestDiskCache(key) {
+    const cleanKey = key.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 80);
+    try {
+        if (!fs.existsSync(CACHE_DIR)) return null;
+        const files = fs.readdirSync(CACHE_DIR)
+            .filter(f => (f.startsWith(`${cleanKey}_`) || f === `${cleanKey}.json` || f === 'default_bulten.json' || f === 'nesine_bulten_today.json') && f.endsWith('.json'))
+            .map(f => {
+                const fullPath = path.join(CACHE_DIR, f);
+                try {
+                    const stats = fs.statSync(fullPath);
+                    return { fullPath, mtimeMs: stats.mtimeMs, size: stats.size };
+                } catch (e) {
+                    return null;
+                }
+            })
+            .filter(Boolean)
+            .filter(f => f.size > 1000)
+            .sort((a, b) => b.mtimeMs - a.mtimeMs);
+        return files.length > 0 ? files[0] : null;
+    } catch (e) {
+        return null;
+    }
+}
+
 function getCached(key, forceRefresh = false, customTTL = null) {
     if (forceRefresh) {
-        // Hızlı art arda isteklerde (son 5 saniye) aynı veriyi RAM'den dönerek harici API kilitlenmesini ve aşırı CPU/ağ yükünü önle
         const memItem = memoryCache.get(key);
         if (memItem && (Date.now() - memItem.time < 5000)) {
             return memItem.data;
@@ -68,6 +91,21 @@ function getCached(key, forceRefresh = false, customTTL = null) {
             console.warn(`Önbellek okuma hatası (${key}):`, e.message);
         }
     }
+
+    // 3. Disk Geriye Dönük Kurtarıcı (Son kayıtlı dosya)
+    const latest = findLatestDiskCache(key);
+    if (latest) {
+        try {
+            const fileData = fs.readFileSync(latest.fullPath, 'utf8');
+            const parsed = JSON.parse(fileData);
+            memoryCache.set(key, { data: parsed, time: latest.mtimeMs });
+            console.log(`📦 [DİSK ÖNBELLEK YÜKLENDİ] ${path.basename(latest.fullPath)} (${Math.round(latest.size / 1024)} KB)`);
+            return parsed;
+        } catch (e) {
+            console.warn(`Kurtarıcı önbellek okuma hatası (${key}):`, e.message);
+        }
+    }
+
     return null;
 }
 
@@ -99,6 +137,8 @@ async function refreshNesineBulletinBackground() {
     isFetchingNesine = true;
     try {
         const url = `https://cdnbulten.nesine.com/api/bulten/getprebultenfull`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -106,8 +146,9 @@ async function refreshNesineBulletinBackground() {
                 'Referer': 'https://www.nesine.com/',
                 'Origin': 'https://www.nesine.com'
             },
-            timeout: 12000
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (response.ok) {
             const data = await response.json();
             setCache('nesine_bulten_today', data);
@@ -124,10 +165,9 @@ app.get('/api/proxy/nesine/bulten', async (req, res) => {
     const force = req.query.force === 'true';
     const cacheKey = 'nesine_bulten_today';
 
-    // Stale-While-Revalidate: Önce cache'den ÂNİNDA döndür (<15ms)
+    // 1. Stale-While-Revalidate: Önce cache'den ÂNİNDA döndür (<15ms)
     const cached = getCached(cacheKey, false, DAILY_CACHE_TTL);
     if (cached) {
-        // Sadece BUGÜNÜN maçlarını filtrele ve küçük JSON döndür (<1MB)
         const slimData = slimNesineData(cached);
         res.json(slimData);
         // Zorla yenile veya önbellek 2 saatten eskiyse arka planda yenile
@@ -139,46 +179,62 @@ app.get('/api/proxy/nesine/bulten', async (req, res) => {
         return;
     }
 
-    // Cache yoksa ilk sefer: hızlı getir ve döndür
+    // 2. Cache yoksa canlı çekmeyi dene
     try {
         await refreshNesineBulletinBackground();
         const fresh = getCached(cacheKey, false, DAILY_CACHE_TTL);
         if (fresh) return res.json(slimNesineData(fresh));
-        res.status(502).json({ error: 'Nesine verisi alınamadı' });
     } catch (err) {
-        console.error('Nesine proxy hatası:', err.message);
-        res.status(502).json({ error: 'Nesine verisi alınamadı', detail: err.message });
+        console.warn('Nesine API canli cekme gecikmesi:', err.message);
     }
+
+    // 3. Canlı çekme başarısız olsa bile son disk önbelleğini kurtarıcı olarak sun (ASLA 502 dönme)
+    const fallback = getCached(cacheKey, false, 30 * 24 * 60 * 60 * 1000);
+    if (fallback) {
+        console.log('📦 [KURTARICI ÖNBELLEK] Nesine API gecikmesi nedeniyle mevcut disk verisi anında sunuldu.');
+        return res.json(slimNesineData(fallback));
+    }
+
+    res.status(502).json({ error: 'Nesine verisi alınamadı' });
 });
 
-// Nesine bültenini sadece BUGÜN ve YARIN maçlarına filtrele (11MB -> ~1MB)
+// Nesine bültenini akıllı filtrele (Bugün, Yarın ve Yakın Maçlar)
 function slimNesineData(data) {
     if (!data || !data.sg || !data.sg.EA) return data;
 
     const now = new Date();
-    const todayY = now.getFullYear();
-    const todayM = now.getMonth() + 1;
-    const todayD = now.getDate();
+    // Türkiye saati (UTC+3)
+    const trNow = new Date(now.getTime() + (3 * 60 + now.getTimezoneOffset()) * 60 * 1000);
+    const todayY = trNow.getFullYear();
+    const todayM = trNow.getMonth() + 1;
+    const todayD = trNow.getDate();
     const todayFmt = `${String(todayD).padStart(2,'0')}.${String(todayM).padStart(2,'0')}.${todayY}`;
 
-    // Yarın da dahil et (gece geç saatte oynayan maçlar için)
-    const tomorrow = new Date(todayY, todayM - 1, todayD + 1);
+    const tomorrow = new Date(trNow.getTime() + 24 * 60 * 60 * 1000);
     const tomorrowFmt = `${String(tomorrow.getDate()).padStart(2,'0')}.${String(tomorrow.getMonth()+1).padStart(2,'0')}.${tomorrow.getFullYear()}`;
 
+    const afterTomorrow = new Date(trNow.getTime() + 48 * 60 * 60 * 1000);
+    const afterTomorrowFmt = `${String(afterTomorrow.getDate()).padStart(2,'0')}.${String(afterTomorrow.getMonth()+1).padStart(2,'0')}.${afterTomorrow.getFullYear()}`;
+
     const filteredEA = (data.sg.EA || []).filter(event => {
-        if (!event.D) return false; // Tarih yoksa atla
-        return event.D === todayFmt || event.D === tomorrowFmt;
+        if (!event.D) return false;
+        return event.D === todayFmt || event.D === tomorrowFmt || event.D === afterTomorrowFmt;
     });
 
-    console.log(`🔪 [SLIM] Nesine bülten: ${data.sg.EA.length} -> ${filteredEA.length} maç (bugün+yarın)`);
+    console.log(`🔪 [SLIM] Nesine bülten: ${data.sg.EA.length} -> ${filteredEA.length} maç`);
 
-    return {
-        ...data,
-        sg: {
-            ...data.sg,
-            EA: filteredEA
-        }
-    };
+    // Eğer filtre sonucu en az 20 maç bulunduysa slim versiyonu dön, yoksa tüm EA'yı dön (asla sıfır maç kalmasın)
+    if (filteredEA.length >= 20) {
+        return {
+            ...data,
+            sg: {
+                ...data.sg,
+                EA: filteredEA
+            }
+        };
+    }
+
+    return data;
 }
 
 app.get('/api/proxy/nesine/events/:sportType', async (req, res) => {

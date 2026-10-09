@@ -2,6 +2,14 @@
  * app.js — Ana Uygulama
  * SportAnaliz Pro - Spor Karşılaşması Analiz ve Tahmin Platformu
  */
+
+// ===== OTOMATİK ONAYLAMA: Hiçbir popup/modal/uyarı kullanıcıyı durduramaz (Tümüne Otomatik Evet/Onay) =====
+if (typeof window !== 'undefined') {
+    window.confirm = () => true;
+    window.alert = (msg) => { console.log('[AUTO-ACCEPTED ALERT]', msg); return true; };
+    window.prompt = (msg, def) => def || '';
+}
+
 const App = {
     currentView: 'dashboard',
     currentSport: 'football',
@@ -15,9 +23,9 @@ const App = {
     async init() {
         console.log('🚀 SportAnaliz Pro başlatılıyor...');
 
-        // ===== OTOMATIK ONAYLAMA: Hiçbir popup/modal/uyarı kullanıcıyı durduramaz =====
+        // Her ihtimale karşı yeniden bağla
         window.confirm = () => true;
-        window.alert = (msg) => { console.log('[AUTO-ACCEPTED ALERT]', msg); };
+        window.alert = (msg) => { console.log('[AUTO-ACCEPTED ALERT]', msg); return true; };
         window.prompt = (msg, def) => def || '';
 
         // Temiz Başlangıç: Tüm eski test ve geçmiş verilerini sıfırlayıp bugünden başlatma kontrolü
@@ -411,23 +419,15 @@ const App = {
         if (view === 'coupons-all') {
             this.selectedCouponDate = 'today';
             this.activeCouponFilter = 'all';
-            this.navigate('coupons');
-            this.loadDailyCoupons(false, 'all', 'today');
-            return;
-        }
-        if (view === 'coupons-won') {
+            view = 'coupons';
+        } else if (view === 'coupons-won') {
             this.selectedCouponDate = 'today';
             this.activeCouponFilter = 'tutan';
-            this.navigate('coupons');
-            this.loadDailyCoupons(false, 'tutan', 'today');
-            return;
-        }
-        if (view === 'coupons-lost') {
+            view = 'coupons';
+        } else if (view === 'coupons-lost') {
             this.selectedCouponDate = 'today';
             this.activeCouponFilter = 'yatan';
-            this.navigate('coupons');
-            this.loadDailyCoupons(false, 'yatan', 'today');
-            return;
+            view = 'coupons';
         }
 
         this.currentView = view;
@@ -1726,6 +1726,9 @@ const App = {
 
         // Günün 5 hazır kuponunu HIGH-CONF havuzundan üret
         let coupons = CouponEngine.generateDailyCoupons(this.matches, forceRefresh);
+        if (!coupons || coupons.length === 0) {
+            coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
+        }
 
         // ===== 🔄 DİNAMİK KUPON ADAPTASYONU: Intel verisini çek ve kuponu güncelle =====
         try {

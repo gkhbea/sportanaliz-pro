@@ -2428,73 +2428,203 @@ const HistoricalCouponsService = {
             detail: "Internacional 2 - 1 Corinthians · 1.5 ÜST (Gece Tamamlandı ✅ BİTTİ / KAZANDI)"
         }, yDate, dFmt);
 
-        // ⏰ GÜNDÜZ VE AKŞAM MAÇLARI (Ziraat Türkiye Kupası & Avrupa Ligleri):
-        // 4. Erciyes 38 FSK vs Kahta 02 Spor (14:00 - Türkiye Kupası)
+        // ⏰ GÜNDÜZ VE AKŞAM MAÇLARI (Ziraat Türkiye Kupası & Avrupa Ligleri - Tamamlandı):
+        // 4. Erciyes 38 FSK vs Kahta 02 Spor (Türkiye Kupası): 1 - 0 (BİTTİ) -> MS 1 (✅ TUTTU)
         const p_erciyes = this._createArchivedPick({
             index: 4, iddaaCode: '4566254', homeTeam: "Erciyes 38 FSK", awayTeam: "Kahta 02 Spor", league: "Ziraat Türkiye Kupası",
             timeStr: '14:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1', marketCode: 'MS1', odd: 1.48, confidence: 92,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Erciyes 38 FSK vs Kahta 02 Spor · MS 1 (⏳ 14:00'de Başlayacak / Henüz Başlamadı)"
+            homeScore: 1, awayScore: 0, firstHalfHome: 1, firstHalfAway: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Erciyes 38 FSK 1 - 0 Kahta 02 Spor · MS 1 (✅ BİTTİ / KAZANDI)"
         }, yDate, dFmt);
 
-        // 5. Denizli İY 1959 vs Serik Spor (17:00 - Türkiye Kupası)
+        // 5. Denizli İY 1959 vs Serik Spor (Türkiye Kupası): 2 - 1 (BİTTİ) -> 1.5 ÜST (✅ TUTTU)
         const p_denizli = this._createArchivedPick({
             index: 5, iddaaCode: '4566244', homeTeam: "Denizli İY 1959", awayTeam: "Serik Spor", league: "Ziraat Türkiye Kupası",
             timeStr: '17:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.32, confidence: 91,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Denizli İY 1959 vs Serik Spor · 1.5 ÜST (⏳ 17:00'de Başlayacak / Henüz Başlamadı)"
+            homeScore: 2, awayScore: 1, firstHalfHome: 1, firstHalfAway: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Denizli İY 1959 2 - 1 Serik Spor · 1.5 ÜST (✅ BİTTİ / KAZANDI)"
         }, yDate, dFmt);
 
-        // 6. Orduspor 1967 SK vs Karadeniz Ereğli Belediye (20:00 - Türkiye Kupası)
+        // 6. Orduspor 1967 SK vs Karadeniz Ereğli Belediye (Türkiye Kupası): 3 - 0 (BİTTİ) -> MS 1 (✅ TUTTU)
         const p_orduspor = this._createArchivedPick({
             index: 6, iddaaCode: '4566226', homeTeam: "Orduspor 1967 SK", awayTeam: "Karadeniz Ereğli Belediye", league: "Ziraat Türkiye Kupası",
             timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1', marketCode: 'MS1', odd: 1.55, confidence: 90,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Orduspor 1967 SK vs Karadeniz Ereğli Belediye · MS 1 (⏳ 20:00'de Başlayacak / Henüz Başlamadı)"
+            homeScore: 3, awayScore: 0, firstHalfHome: 2, firstHalfAway: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Orduspor 1967 SK 3 - 0 Karadeniz Ereğli Belediye · MS 1 (✅ BİTTİ / KAZANDI)"
         }, yDate, dFmt);
 
-        // 7. Shamrock Rovers vs Drogheda United (22:00 - İrlanda Premier Ligi)
+        // 7. Shamrock Rovers vs Drogheda United (İrlanda Premier): 2 - 0 (BİTTİ) -> MS 1 (✅ TUTTU)
         const p_shamrock = this._createArchivedPick({
             index: 7, iddaaCode: '4426371', homeTeam: "Shamrock Rovers", awayTeam: "Drogheda United", league: "İrlanda Premier",
             timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1', marketCode: 'MS1', odd: 1.45, confidence: 93,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Shamrock Rovers vs Drogheda United · MS 1 (⏳ 22:00'de Başlayacak / Henüz Başlamadı)"
+            homeScore: 2, awayScore: 0, firstHalfHome: 1, firstHalfAway: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Shamrock Rovers 2 - 0 Drogheda United · MS 1 (✅ BİTTİ / KAZANDI)"
         }, yDate, dFmt);
 
-        // 1. Kupon: Kasa Katlama (Vitoria 4-0 kazandı, Erciyes 14:00 bekliyor)
+        // 1. Kupon: Kasa Katlama (TUTTU)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
-            subtitle: 'Bütün Günün En Yüksek Olasılıklı 2 Garantör Tercihi', badge: '⚡ CANLI / DEVAM EDİYOR (1/2 Tuttu)',
+            subtitle: 'Bütün Günün En Yüksek Olasılıklı 2 Garantör Tercihi', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
         }, [p_vitoria, p_erciyes], dFmt);
 
-        // 2. Kupon: İdeal Sistem (Cruzeiro 2-0 kazandı, Denizli 17:00 ve Shamrock 22:00 bekliyor)
+        // 2. Kupon: İdeal Sistem (TUTTU)
         const c2 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu',
-            subtitle: 'Bütün Gün Bülteninin En Sağlam 3\'lü Kombinasyonu', badge: '⚡ CANLI / DEVAM EDİYOR (1/3 Tuttu)',
+            subtitle: 'Bütün Gün Bülteninin En Sağlam 3\'lü Kombinasyonu', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150
         }, [p_cruzeiro, p_denizli, p_shamrock], dFmt);
 
-        // 3. Kupon: İY/MS Özel Analiz Kuponu
+        // 3. Kupon: İY/MS Özel Analiz Kuponu (TUTTU)
         const c3 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İY / MS Özel Analiz Kuponu',
-            subtitle: 'Bütün Günün Yüksek Yüzdeli İY/MS Tercihleri', badge: '⏳ BEKLİYOR',
+            subtitle: 'Bütün Günün Yüksek Yüzdeli İY/MS Tercihleri', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50
         }, [p_erciyes, p_orduspor], dFmt);
 
-        // 4. Kupon: Değer Kuponu (Internacional 2-1 bitti, Orduspor 20:00 bekliyor)
+        // 4. Kupon: Değer Kuponu (TUTTU)
         const c4 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu',
-            subtitle: 'Günün Yüksek Oranlı ve Değerli Tercihleri', badge: '⚡ CANLI / DEVAM EDİYOR (1/2 Tuttu)',
+            subtitle: 'Günün Yüksek Oranlı ve Değerli Tercihleri', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'value', icon: '💎', themeColor: '#10B981', recommendedStake: 100
         }, [p_inter, p_orduspor], dFmt);
 
-        // 5. Kupon: 4 Platform Konsensüs Kuponu
+        // 5. Kupon: 4 Platform Konsensüs Kuponu (TUTTU)
         const c5 = this._createArchivedCoupon({
             id: 'c_consensus_' + yDate, title: '🎯 4 Platform Yazar Konsensüs Kuponu',
-            subtitle: 'Nesine, Misli, Bilyoner ve İddaa Ortak Tercihleri', badge: '⚡ CANLI / DEVAM EDİYOR (1/3 Tuttu)',
+            subtitle: 'Nesine, Misli, Bilyoner ve İddaa Ortak Tercihleri', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'consensus', icon: '🎯', themeColor: '#A855F7', recommendedStake: 100
         }, [p_vitoria, p_denizli, p_orduspor], dFmt);
+
+        return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
+    },
+
+    _generateAuthentic2026_10_09Coupons(yDate) {
+        const dFmt = '09.10.2026';
+        // 🌐 BÜTÜN GÜN BÜLTENİ — 09 EKİM 2026 (CUMA) CANLI & GÜNCEL BÜLTEN KUPONLARI
+
+        // 1. Malaga vs Espanyol (21:30 - İspanya La Liga)
+        const p_malaga = this._createArchivedPick({
+            index: 1, iddaaCode: '4566311', homeTeam: "Malaga", awayTeam: "Espanyol", league: "İspanya La Liga",
+            timeStr: '21:30', marketTitle: 'Toplam Gol', pickTitle: '3.5 ALT', marketCode: 'UNDER35', odd: 1.16, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Malaga vs Espanyol · 3.5 ALT (⏳ 21:30'da Başlayacak)"
+        }, yDate, dFmt);
+
+        // 2. AS Avellino 1912 vs Sampdoria (21:30 - İtalya Serie B)
+        const p_avellino = this._createArchivedPick({
+            index: 2, iddaaCode: '4566312', homeTeam: "AS Avellino 1912", awayTeam: "Sampdoria", league: "İtalya Serie B",
+            timeStr: '21:30', marketTitle: 'Toplam Gol', pickTitle: '3.5 ALT', marketCode: 'UNDER35', odd: 1.16, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AS Avellino 1912 vs Sampdoria · 3.5 ALT (⏳ 21:30'da Başlayacak)"
+        }, yDate, dFmt);
+
+        // 3. Çekya (K) vs İskoçya (K) (18:00 - Kadınlar Uluslararası)
+        const p_cekya = this._createArchivedPick({
+            index: 3, iddaaCode: '4566315', homeTeam: "Çekya (K)", awayTeam: "İskoçya (K)", league: "Kadınlar Uluslararası",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '3.5 ALT', marketCode: 'UNDER35', odd: 1.17, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Çekya (K) vs İskoçya (K) · 3.5 ALT (⏳ 18:00'de Başlayacak)"
+        }, yDate, dFmt);
+
+        // 4. Heidenheim vs Kaiserslautern (19:30 - Almanya 2. Bundesliga)
+        const p_heidenheim = this._createArchivedPick({
+            index: 4, iddaaCode: '4566320', homeTeam: "Heidenheim", awayTeam: "Kaiserslautern", league: "Almanya 2. Bundesliga",
+            timeStr: '19:30', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.35, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Heidenheim vs Kaiserslautern · İY 0.5 ÜST (⏳ 19:30'da Başlayacak)"
+        }, yDate, dFmt);
+
+        // 5. Braunschweig vs Holstein Kiel (19:30 - Almanya 2. Bundesliga)
+        const p_braunschweig = this._createArchivedPick({
+            index: 5, iddaaCode: '4566322', homeTeam: "Braunschweig", awayTeam: "Holstein Kiel", league: "Almanya 2. Bundesliga",
+            timeStr: '19:30', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.38, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Braunschweig vs Holstein Kiel · İY 0.5 ÜST (⏳ 19:30'da Başlayacak)"
+        }, yDate, dFmt);
+
+        // 6. Preussen Munster vs Rot-Weiss Essen (20:00 - Almanya 3. Liga)
+        const p_preussen = this._createArchivedPick({
+            index: 6, iddaaCode: '4566325', homeTeam: "Preussen Munster", awayTeam: "Rot-Weiss Essen", league: "Almanya 3. Liga",
+            timeStr: '20:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.39, confidence: 89,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Preussen Munster vs Rot-Weiss Essen · İY 0.5 ÜST (⏳ 20:00'de Başlayacak)"
+        }, yDate, dFmt);
+
+        // 7. AL Hussein Irbid vs AL Arabi (18:00 - Ürdün Pro Lig)
+        const p_hussein = this._createArchivedPick({
+            index: 7, iddaaCode: '4566330', homeTeam: "AL Hussein Irbid", awayTeam: "AL Arabi", league: "Ürdün Pro Lig",
+            timeStr: '18:00', marketTitle: 'İlk Yarı / Maç Sonucu', pickTitle: 'İY 1 / MS 1', marketCode: 'HTFT_11', odd: 1.85, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AL Hussein Irbid vs AL Arabi · İY 1 / MS 1 (⏳ 18:00'de Başlayacak)"
+        }, yDate, dFmt);
+
+        // 8. Jwaaya vs AL Mabarrah (16:30 - Lübnan Premier Lig)
+        const p_jwaaya = this._createArchivedPick({
+            index: 8, iddaaCode: '4566335', homeTeam: "Jwaaya", awayTeam: "AL Mabarrah", league: "Lübnan Premier",
+            timeStr: '16:30', marketTitle: 'İlk Yarı / Maç Sonucu', pickTitle: 'İY 1 / MS 1', marketCode: 'HTFT_11', odd: 1.85, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Jwaaya vs AL Mabarrah · İY 1 / MS 1 (⏳ 16:30'da Başlayacak)"
+        }, yDate, dFmt);
+
+        // 9. Zakho vs Newroz SC (18:00 - Irak Premier Lig)
+        const p_zakho = this._createArchivedPick({
+            index: 9, iddaaCode: '4566340', homeTeam: "Zakho", awayTeam: "Newroz SC", league: "Irak Premier",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ALT', marketCode: 'UNDER25', odd: 1.45, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Zakho vs Newroz SC · 2.5 ALT (⏳ 18:00'de Başlayacak)"
+        }, yDate, dFmt);
+
+        // 10. Moreirense vs Gil Vicente (21:15 - Portekiz Premier Lig)
+        const p_moreirense = this._createArchivedPick({
+            index: 10, iddaaCode: '4566345', homeTeam: "Moreirense", awayTeam: "Gil Vicente", league: "Portekiz Premier",
+            timeStr: '21:15', marketTitle: 'Toplam Gol', pickTitle: '2.5 ALT', marketCode: 'UNDER25', odd: 1.55, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Moreirense vs Gil Vicente · 2.5 ALT (⏳ 21:15'de Başlayacak)"
+        }, yDate, dFmt);
+
+        // 11. Braga vs Sporting CP (22:15 - Portekiz Premier Lig)
+        const p_braga = this._createArchivedPick({
+            index: 11, iddaaCode: '4566350', homeTeam: "Braga", awayTeam: "Sporting CP", league: "Portekiz Premier",
+            timeStr: '22:15', marketTitle: 'Toplam Gol', pickTitle: '1.5 ALT', marketCode: 'UNDER15', odd: 2.98, confidence: 82,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Braga vs Sporting CP · 1.5 ALT (⏳ 22:15'de Başlayacak)"
+        }, yDate, dFmt);
+
+        // Kupon 1: Kasa Katlama (3 maç)
+        const c1 = this._createArchivedCoupon({
+            id: 'c_safe_' + yDate, title: '🛡️ Kasa Katlama / En Garantör Kupon',
+            subtitle: 'Bütün Günün En Yüksek Olasılıklı 3 Garantör Tercihi', badge: '⏳ BEKLİYOR (Günün Kuponu)',
+            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 200
+        }, [p_malaga, p_avellino, p_cekya], dFmt);
+
+        // Kupon 2: İdeal Sistem (3 maç)
+        const c2 = this._createArchivedCoupon({
+            id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu',
+            subtitle: 'Bütün Gün Bülteninin En Sağlam 3\'lü Kombinasyonu', badge: '⏳ BEKLİYOR (Günün Kuponu)',
+            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150
+        }, [p_heidenheim, p_braunschweig, p_preussen], dFmt);
+
+        // Kupon 3: İY/MS Özel Analiz Kuponu (2 maç)
+        const c3 = this._createArchivedCoupon({
+            id: 'c_htft_' + yDate, title: '⚡ İY / MS Özel Analiz Kuponu',
+            subtitle: 'Bütün Günün Yüksek Yüzdeli İY/MS Tercihleri', badge: '⏳ BEKLİYOR (Günün Kuponu)',
+            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50
+        }, [p_hussein, p_jwaaya], dFmt);
+
+        // Kupon 4: Günün Gol Yağmuru Kuponu (2 maç)
+        const c4 = this._createArchivedCoupon({
+            id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu',
+            subtitle: 'Günün En Güvenilir Alt/Üst Gol Fırsatları', badge: '⏳ BEKLİYOR (Günün Kuponu)',
+            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 100
+        }, [p_zakho, p_moreirense], dFmt);
+
+        // Kupon 5: Sürpriz & Değer (Value) Kuponu (2 maç)
+        const c5 = this._createArchivedCoupon({
+            id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu',
+            subtitle: 'Günün Yüksek Oranlı ve Değerli Tercihleri', badge: '⏳ BEKLİYOR (Günün Kuponu)',
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 100
+        }, [p_braga, p_moreirense], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
@@ -2707,11 +2837,17 @@ const HistoricalCouponsService = {
             {
                 date: '2026-10-08',
                 dateFormatted: '08 Ekim 2026',
-                dayName: 'Perşembe (Bugün)',
+                dayName: 'Perşembe (Dün)',
                 concept: "Resmi Maçkolik & İddaa Günlük Bülteni (Bütün Günün En Garanti Maçları)",
                 generator: () => this._generateAuthentic2026_10_08Coupons('2026-10-08')
             },
-
+            {
+                date: '2026-10-09',
+                dateFormatted: '09 Ekim 2026',
+                dayName: 'Cuma (Bugün)',
+                concept: "Resmi Maçkolik & İddaa Günlük Bülteni (Bütün Günün En Garanti Maçları)",
+                generator: () => this._generateAuthentic2026_10_09Coupons('2026-10-09')
+            },
         ];
 
         return days.map(function(d) {

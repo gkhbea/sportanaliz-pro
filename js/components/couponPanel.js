@@ -34,7 +34,12 @@ const CouponPanel = {
         const todayStr = this._getLocalToday();
         const queryDate = chosenDate || todayStr;
 
-        // 1. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService)
+        // 1. Bugün için: Eğer dinamik üretilen bülten kuponları varsa bunları kullan
+        if (queryDate === todayStr && Array.isArray(todayCoupons) && todayCoupons.length > 0) {
+            return todayCoupons;
+        }
+
+        // 2. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService)
         if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
             const hist = HistoricalCouponsService.getCouponsByDate(queryDate);
             if (Array.isArray(hist) && hist.length > 0) {
@@ -45,7 +50,7 @@ const CouponPanel = {
             }
         }
 
-        // 2. localStorage'da bu tarihe ait kayıtlı kupon var mı kontrol et
+        // 3. localStorage'da bu tarihe ait kayıtlı kupon var mı kontrol et
         try {
             const saved = localStorage.getItem('sportanaliz_coupons_by_date_' + queryDate);
             if (saved) {
@@ -69,24 +74,14 @@ const CouponPanel = {
             }
         } catch (e) {}
 
-        // 2. Bugünün kuponları güncel bültenden dinamik üretilir
+        // 4. Bugünün kuponları için bülten kupon motorundan yeniden üretmeyi dene
         if (queryDate === todayStr) {
-            if (todayCoupons && todayCoupons.length > 0) return todayCoupons;
             const gen = window.CouponEngine ? CouponEngine.generateDailyCoupons(window.app?.matches || []) : [];
             if (gen && gen.length > 0) return gen;
-            if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
-                const hist = HistoricalCouponsService.getCouponsByDate(queryDate);
-                if (hist && hist.length > 0) return hist;
-            }
-            return [];
         }
 
-        // 3. Geçmiş tarihler için HistoricalCouponsService arşivinden getir
+        // 5. Geçmiş tarihler için HistoricalCouponsService arşivinden getir
         if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
-            if (typeof HistoricalCouponsService.getCouponsByDate === 'function') {
-                const byDate = HistoricalCouponsService.getCouponsByDate(queryDate);
-                if (byDate && byDate.length > 0) return byDate;
-            }
             if (typeof HistoricalCouponsService.getAllCouponSets === 'function') {
                 const allSets = HistoricalCouponsService.getAllCouponSets('2026-09-09');
                 const foundSet = allSets.find(s => s.date === queryDate);
@@ -96,7 +91,7 @@ const CouponPanel = {
             }
         }
 
-        return todayCoupons;
+        return todayCoupons && todayCoupons.length > 0 ? todayCoupons : [];
     },
 
     /**
