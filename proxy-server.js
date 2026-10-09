@@ -917,34 +917,33 @@ function buildCouponsEmailHtml({ coupons = [], dateStr = '', targetEmail = '' })
  * Mail Taşıyıcı Oluşturucu
  */
 async function createMailTransporter(smtpConfig) {
-    if (smtpConfig && smtpConfig.user && smtpConfig.pass) {
+    const user = (smtpConfig && smtpConfig.user) || process.env.SMTP_USER || process.env.GMAIL_USER;
+    const pass = (smtpConfig && smtpConfig.pass) || process.env.SMTP_PASS || process.env.GMAIL_APP_PASS || process.env.SMTP_PASSWORD;
+    const host = (smtpConfig && smtpConfig.host) || process.env.SMTP_HOST;
+    const port = (smtpConfig && smtpConfig.port) || process.env.SMTP_PORT || 587;
+
+    if (user && pass) {
         // Özel SMTP / Gmail Uygulama Şifresi sağlandı
-        if (smtpConfig.host) {
+        if (host) {
             return {
                 transporter: nodemailer.createTransport({
-                    host: smtpConfig.host,
-                    port: parseInt(smtpConfig.port) || 587,
-                    secure: smtpConfig.secure === true || parseInt(smtpConfig.port) === 465,
-                    auth: {
-                        user: smtpConfig.user,
-                        pass: smtpConfig.pass
-                    }
+                    host: host,
+                    port: parseInt(port) || 587,
+                    secure: parseInt(port) === 465,
+                    auth: { user, pass }
                 }),
                 isTest: false,
-                from: smtpConfig.from || smtpConfig.user
+                from: (smtpConfig && smtpConfig.from) || process.env.SMTP_FROM || `"SportAnaliz Pro" <${user}>`
             };
         } else {
             // Standart Gmail servisi
             return {
                 transporter: nodemailer.createTransport({
                     service: 'gmail',
-                    auth: {
-                        user: smtpConfig.user,
-                        pass: smtpConfig.pass
-                    }
+                    auth: { user, pass }
                 }),
                 isTest: false,
-                from: smtpConfig.user
+                from: (smtpConfig && smtpConfig.from) || `"SportAnaliz Pro" <${user}>`
             };
         }
     }
@@ -1054,6 +1053,80 @@ app.post('/api/mail/subscribe', (req, res) => {
 app.get('/api/mail/subscribers', (req, res) => {
     const subscribers = getSubscribers();
     res.json({ total: subscribers.length, subscribers });
+});
+
+// ---- Günlük Otomatik Kupon Gönderim Servisi (Tüm Aboneler İçin) ----
+let lastDailyMailDate = null;
+
+async function sendDailyCouponsToSubscribers(force = false) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (!force && lastDailyMailDate === today) {
+        return { skipped: true, reason: 'Bugün zaten gönderildi.' };
+    }
+
+    const subscribers = getSubscribers().filter(s => s.active !== false);
+    if (subscribers.length === 0) {
+        return { skipped: true, reason: 'Kayıtlı aktif abone yok.' };
+    }
+
+    try {
+        console.log(`[GÜNLÜK MAIL] ${subscribers.length} aboneye günün kuponları hazırlanıyor...`);
+        let coupons = [];
+        try {
+            global.window = global;
+            require('./js/utils/statistics.js');
+            require('./js/utils/helpers.js');
+            require('./js/services/historicalCouponsService.js');
+            coupons = global.HistoricalCouponsService?.getCouponsByDate?.(today) || [];
+        } catch (e) {
+            console.warn('[GÜNLÜK MAIL] Kupon alma uyarısı:', e.message);
+        }
+
+        if (!coupons || coupons.length === 0) {
+            return { skipped: true, reason: 'Günün kuponları henüz hazır değil.' };
+        }
+
+        const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const { transporter, isTest, from } = await createMailTransporter();
+        const results = [];
+
+        for (const sub of subscribers) {
+            try {
+                const htmlContent = buildCouponsEmailHtml({
+                    coupons,
+                    dateStr,
+                    targetEmail: sub.email
+                });
+
+                const mailOptions = {
+                    from,
+                    to: sub.email,
+                    subject: `🎯 SportAnaliz Pro — Günün 5 Özel Analiz Kuponu (${dateStr})`,
+                    html: htmlContent
+                };
+
+                const info = await transporter.sendMail(mailOptions);
+                const previewUrl = isTest ? nodemailer.getTestMessageUrl(info) : null;
+                console.log(`[GÜNLÜK MAIL] Gönderildi -> ${sub.email} (${info.messageId}) ${isTest ? '[Ethereal]' : '[Canlı]'}`);
+                results.push({ email: sub.email, success: true, messageId: info.messageId, previewUrl });
+            } catch (err) {
+                console.error(`[GÜNLÜK MAIL] ${sub.email} gönderilemedi:`, err.message);
+                results.push({ email: sub.email, success: false, error: err.message });
+            }
+        }
+
+        lastDailyMailDate = today;
+        return { success: true, sentCount: results.filter(r => r.success).length, results };
+    } catch (err) {
+        console.error('[GÜNLÜK MAIL HATASI]:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// POST /api/mail/trigger-daily: Günlük kupon dağıtımını manuel tetikle
+app.post('/api/mail/trigger-daily', async (req, res) => {
+    const result = await sendDailyCouponsToSubscribers(true);
+    res.json(result);
 });
 
 // ---- Health Check ----
@@ -1178,6 +1251,10 @@ setInterval(() => runAutonomousSportsIntelAgent(), 2 * 60 * 1000); // Her 2 daki
 // Canlı skor arka plan senkronizasyonunu başlat (her 45 saniyede bir)
 setTimeout(() => syncLiveFeedsInBackground(), 5000); // 5 sn sonra ilk çalışma
 setInterval(() => syncLiveFeedsInBackground(), 45 * 1000); // Her 45 saniyede bir
+
+// Günlük kupon e-posta gönderimini başlat (sunucu açılışında ve periyodik kontrol)
+setTimeout(() => sendDailyCouponsToSubscribers(), 8000); // 8 sn sonra ilk kontrol
+setInterval(() => sendDailyCouponsToSubscribers(), 30 * 60 * 1000); // Her 30 dakikada bir kontrol
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`
