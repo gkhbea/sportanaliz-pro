@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node main.js",
     "dev": "node proxy-server.js",
+    "desktop": "electron .",
     "build": "echo 'Build successful'"
   },
   "build": {
@@ -54,5 +55,8 @@
     "localtunnel": "^2.0.2",
     "node-fetch": "^2.7.0",
     "nodemailer": "^10.0.3"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0"
   }
 }
