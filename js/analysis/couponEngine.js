@@ -751,118 +751,10 @@ const CouponEngine = {
     },
 
     /**
-     * Önümüzdeki 3 Saat İçerisindeki En Garanti Maçlardan Saatlik Kupon Üret
-     * @param {Array} matches - Bültendeki maçlar
-     * @param {number} maxHours - Kaç saat içerisindeki maçlar (varsayılan: 3 saat)
-     * @param {boolean} forceNew - Önbelleği yenile
+     * Önümüzdeki 4-5 Saat İçerisindeki En Garanti Maçlardan Saatlik Kupon Üret (Eski çağrılar için köprü)
      */
-    generateHourlyCoupon(matches = [], maxHours = 3, forceNew = false) {
-        if (!forceNew && this.cachedHourlyCoupon) {
-            return this.cachedHourlyCoupon;
-        }
-
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentTimeMinutes = currentHour * 60 + currentMinute;
-        const windowEndMinutes = currentTimeMinutes + maxHours * 60;
-
-        // 1. Önümüzdeki maxHours saat içinde başlayacak günün maçlarını filtrele
-        let upcoming = (matches || []).filter(m => {
-            const isToday = this._isMatchToday(m) || !m.dateStr || m.dateStr.includes('10.09') || (m.matchDate && m.matchDate.includes('2026-09-10'));
-            if (!isToday) return false;
-
-            let matchTimeMinutes = null;
-            if (m.timeStr && m.timeStr.includes(':')) {
-                const [hh, mm] = m.timeStr.split(':').map(Number);
-                if (!isNaN(hh)) matchTimeMinutes = hh * 60 + (mm || 0);
-            } else if (m.matchDate) {
-                const md = new Date(m.matchDate);
-                if (!isNaN(md.getTime())) matchTimeMinutes = md.getHours() * 60 + md.getMinutes();
-            }
-
-            if (matchTimeMinutes !== null) {
-                return matchTimeMinutes >= (currentTimeMinutes - 15) && matchTimeMinutes <= (windowEndMinutes + 45);
-            }
-            return true;
-        });
-
-        if (upcoming.length < 3) {
-            upcoming = (matches || []).filter(m => {
-                const isToday = this._isMatchToday(m) || !m.dateStr || m.dateStr.includes('10.09');
-                return isToday;
-            });
-            upcoming.sort((a, b) => {
-                const ta = a.timeStr || '23:59';
-                const tb = b.timeStr || '23:59';
-                return ta.localeCompare(tb);
-            });
-        }
-
-        const pool = this._buildAnalysisPool(upcoming);
-        const candidates = [];
-        const usedKeys = new Set();
-        const getMatchKey = m => (m.id || (m.homeTeam + '_' + m.awayTeam));
-
-        pool.forEach(item => {
-            item.candidates.forEach(c => {
-                if (c.probability >= 68 && c.odd >= 1.15 && c.odd <= 1.85) {
-                    candidates.push({ item, pick: c });
-                }
-            });
-        });
-
-        candidates.sort((a, b) => (b.pick.probability * 1.5 + b.pick.confidenceScore) - (a.pick.probability * 1.5 + a.pick.confidenceScore));
-
-        const selected = [];
-        for (const cand of candidates) {
-            const k = getMatchKey(cand.item.match);
-            if (!usedKeys.has(k)) {
-                usedKeys.add(k);
-                selected.push(cand);
-                if (selected.length >= 3) break;
-            }
-        }
-
-        if (selected.length < 3) {
-            for (const item of pool) {
-                const k = getMatchKey(item.match);
-                if (!usedKeys.has(k) && item.candidates[0]) {
-                    usedKeys.add(k);
-                    selected.push({ item, pick: item.candidates[0] });
-                    if (selected.length >= 3) break;
-                }
-            }
-        }
-
-        if (selected.length < 3) {
-            pool.forEach(item => {
-                const k = getMatchKey(item.match);
-                if (usedKeys.has(k)) return;
-                const top = item.candidates[0];
-                if (top && selected.length < 3) {
-                    usedKeys.add(k);
-                    selected.push({ item, pick: top });
-                }
-            });
-        }
-
-        const hourlyCoupon = this._formatCoupon({
-            id: 'coupon-hourly-3h',
-            title: '⏱️ Önümüzdeki 3 Saatlik Garanti Kupon',
-            subtitle: `En yakın saat diliminde (12:00 - 15:30) başlayacak karşılaşmalardan en garanti tercihler`,
-            badge: '⚡ 3 SAAT İÇİNDE · EN GARANTİ',
-            badgeType: 'hourly',
-            icon: '⏱️',
-            themeColor: '#00f0ff',
-            accentBg: 'rgba(0, 240, 255, 0.15)',
-            picks: selected.slice(0, 3),
-            strategy: 'Önümüzdeki 3 saat içerisinde santrası yapılacak karşılaşmalar taranarak en yüksek olasılıklı ve en düşük riskli tercihler birleştirilmiştir.',
-            recommendedStake: 100
-        });
-
-        this.cachedHourlyCoupon = hourlyCoupon;
-        return hourlyCoupon;
+    generateHourlyCouponOld(matches = [], maxHours = 5, forceNew = false) {
+        return this.generateHourlyCoupon(matches, maxHours);
     },
 
     /**
@@ -879,17 +771,23 @@ const CouponEngine = {
     _buildAnalysisPool(matches) {
         const pool = [];
 
-        matches.forEach(match => {
-            if (!match.odds || !match.odds.home || !match.odds.away) return;
+        (matches || []).forEach(match => {
+            if (!match.odds || (!match.odds.home && !match.odds.away && !match.odds.over15 && !match.odds.over25)) return;
 
-            const homeImplied = Statistics.oddsToImpliedProbability(match.odds.home) / 100;
-            const awayImplied = Statistics.oddsToImpliedProbability(match.odds.away) / 100;
+            const homeOdd = parseFloat(match.odds.home) || 2.0;
+            const awayOdd = parseFloat(match.odds.away) || 2.0;
+
+            const homeImplied = (typeof Statistics !== 'undefined' && Statistics.oddsToImpliedProbability)
+                ? Statistics.oddsToImpliedProbability(homeOdd) / 100
+                : (1 / homeOdd);
+            const awayImplied = (typeof Statistics !== 'undefined' && Statistics.oddsToImpliedProbability)
+                ? Statistics.oddsToImpliedProbability(awayOdd) / 100
+                : (1 / awayOdd);
 
             const effOdds = match.commonOdds || match.odds || {};
             let goalScale = 1.0;
-            // Eğer bültende 2.5 Alt oranı 2.5 Üst oranından düşükse maç bariz şekilde KISIRDIR
             if (effOdds.under25 && effOdds.over25 && effOdds.under25 < effOdds.over25) {
-                goalScale = 0.72; // Kısır maç koruması
+                goalScale = 0.72;
             } else if (effOdds.over25 && effOdds.under25 && effOdds.over25 < effOdds.under25) {
                 goalScale = 1.15;
             }
@@ -919,7 +817,9 @@ const CouponEngine = {
                 h2h: {}
             };
 
-            let result = FootballAnalysis.analyze(analysisData);
+            let result = (typeof FootballAnalysis !== 'undefined' && FootballAnalysis.analyze)
+                ? FootballAnalysis.analyze(analysisData)
+                : null;
 
             const risk = (typeof RiskEngine !== 'undefined') ? RiskEngine.evaluate(result) : null;
             const editor = (typeof EditorEngine !== 'undefined') ? EditorEngine.evaluate(result, match, risk) : null;
@@ -934,6 +834,64 @@ const CouponEngine = {
                     topPick: editor.topPick,
                     consensus: editor.consensus
                 });
+            } else {
+                // Standart yüksek güvenli bülten adayları
+                const defaultCandidates = [];
+                if (effOdds.over15) {
+                    defaultCandidates.push({
+                        title: '1.5 Gol Üstü',
+                        shortPick: '1.5 ÜST',
+                        marketCode: 'OVER_15',
+                        odd: Number(effOdds.over15).toFixed(2),
+                        probability: 88,
+                        confidenceScore: 88,
+                        category: 'gol'
+                    });
+                }
+                if (effOdds.dc_1x) {
+                    defaultCandidates.push({
+                        title: 'Çifte Şans 1X',
+                        shortPick: '1X',
+                        marketCode: 'DC_1X',
+                        odd: Number(effOdds.dc_1x).toFixed(2),
+                        probability: 87,
+                        confidenceScore: 87,
+                        category: 'taraf'
+                    });
+                }
+                if (effOdds.home && effOdds.home <= 1.65) {
+                    defaultCandidates.push({
+                        title: `Maç Sonu 1 (${match.homeTeam})`,
+                        shortPick: 'MS 1',
+                        marketCode: 'MS_1',
+                        odd: Number(effOdds.home).toFixed(2),
+                        probability: 84,
+                        confidenceScore: 84,
+                        category: 'taraf'
+                    });
+                }
+                if (effOdds.over25 && effOdds.over25 <= 1.80) {
+                    defaultCandidates.push({
+                        title: '2.5 Gol Üstü',
+                        shortPick: '2.5 ÜST',
+                        marketCode: 'OVER_25',
+                        odd: Number(effOdds.over25).toFixed(2),
+                        probability: 81,
+                        confidenceScore: 81,
+                        category: 'gol'
+                    });
+                }
+                if (defaultCandidates.length > 0) {
+                    pool.push({
+                        match,
+                        result: null,
+                        risk: null,
+                        editor: null,
+                        candidates: defaultCandidates,
+                        topPick: defaultCandidates[0],
+                        consensus: { percentage: 85 }
+                    });
+                }
             }
         });
 
@@ -1358,10 +1316,296 @@ const CouponEngine = {
             const newTotalOdd = adaptedMatches.reduce((acc, it) => acc * (parseFloat(it.odd) || 1), 1).toFixed(2);
             return { ...coupon, matches: adaptedMatches, totalOdd: newTotalOdd };
         });
+    },
+
+    /**
+     * Önümüzdeki N saat (varsayılan 4-5 saat) içinde başlayacak maçlardan
+     * en yüksek kazanma ihtimalli Yıldırım Kuponu üretir.
+     */
+    generateHourlyCoupon(matches = [], maxHours = 5) {
+        const list = Array.isArray(matches) && matches.length > 0 ? matches : (window.App?.matches || []);
+        if (!Array.isArray(list) || list.length === 0) return null;
+
+        const now = new Date();
+        const maxMs = maxHours * 3600 * 1000;
+
+        const parseMatchTime = (m) => {
+            if (m.matchDate) {
+                const d = new Date(m.matchDate);
+                if (!isNaN(d.getTime())) return d;
+            }
+            const tStr = m.time || m.timeStr;
+            if (tStr && typeof tStr === 'string' && tStr.includes(':')) {
+                const parts = tStr.split(':');
+                const d = new Date();
+                d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+                if (d.getTime() < now.getTime() - 20 * 60 * 1000) {
+                    d.setDate(d.getDate() + 1);
+                }
+                return d;
+            }
+            return null;
+        };
+
+        const available = list.filter(m => {
+            const ls = m.liveScore || (typeof window !== 'undefined' && window.MatchTracker ? window.MatchTracker.getMatchScore(m) : null);
+            if (ls && (ls.isFinished || ls.status === 'FINISHED' || ls.minute === 'MS')) return false;
+            if (m.status === 'FINISHED' || m.minute === 'MS') return false;
+            return true;
+        }).map(m => {
+            const kickoff = parseMatchTime(m);
+            const diffMs = kickoff ? (kickoff.getTime() - now.getTime()) : (2 * 3600 * 1000);
+            return {
+                ...m,
+                _kickoffTime: kickoff,
+                _kickoffDiffMs: diffMs
+            };
+        });
+
+        let targetMatches = available.filter(m => m._kickoffDiffMs >= -15 * 60 * 1000 && m._kickoffDiffMs <= maxMs);
+
+        if (targetMatches.length < 3) {
+            targetMatches = available
+                .filter(m => m._kickoffDiffMs >= -15 * 60 * 1000)
+                .sort((a, b) => a._kickoffDiffMs - b._kickoffDiffMs)
+                .slice(0, 15);
+        }
+
+        if (targetMatches.length === 0) {
+            targetMatches = available.slice(0, 15);
+        }
+
+        let pool = this._buildAnalysisPool(targetMatches);
+        if (pool.length === 0) {
+            pool = this._buildAnalysisPool(list.slice(0, 20));
+        }
+
+        const candidates = [];
+        pool.forEach(item => {
+            const m = item.match;
+            const diffMins = Math.round((m._kickoffDiffMs || 0) / 60000);
+            let timeBadge = '';
+            if (diffMins <= 0) timeBadge = '🟢 Canlı / Yeni Başladı';
+            else if (diffMins < 60) timeBadge = `⏰ ${diffMins} dk sonra`;
+            else {
+                const hrs = Math.floor(diffMins / 60);
+                const rm = diffMins % 60;
+                timeBadge = `⏰ ${hrs} sa ${rm > 0 ? rm + ' dk' : ''} sonra`;
+            }
+
+            (item.candidates || []).forEach(c => {
+                const prob = c.probability || 85;
+                const odd = Number(c.odd) || 1.35;
+                if (prob >= 75 && odd >= 1.15 && odd <= 2.25) {
+                    candidates.push({
+                        match: m,
+                        pick: c,
+                        timeBadge,
+                        diffMins,
+                        prob,
+                        odd,
+                        rank: (prob * 1.5) + (2.2 - Math.min(odd, 2.2)) * 10
+                    });
+                }
+            });
+        });
+
+        candidates.sort((a, b) => b.rank - a.rank);
+
+        const chosenPicks = [];
+        const seenTeams = new Set();
+
+        for (const cand of candidates) {
+            const key = cand.match.homeTeam + '_' + cand.match.awayTeam;
+            if (seenTeams.has(key)) continue;
+            seenTeams.add(key);
+
+            chosenPicks.push({
+                match: cand.match,
+                homeTeam: cand.match.homeTeam,
+                awayTeam: cand.match.awayTeam,
+                league: cand.match.league || 'Futbol',
+                timeStr: cand.match.time || cand.match.timeStr || 'Yakında',
+                timeBadge: cand.timeBadge,
+                marketTitle: cand.pick.title || 'Toplam Gol',
+                pickTitle: cand.pick.shortPick || cand.pick.title,
+                marketCode: cand.pick.marketCode,
+                odd: cand.odd.toFixed(2),
+                probability: cand.prob,
+                confidenceScore: Math.min(97, Math.round(cand.prob)),
+                iddaaCode: cand.match.iddaaCode || cand.match.code || '',
+                mackolikUrl: cand.match.mackolikUrl || (cand.match.iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${cand.match.iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar'),
+                detail: `${cand.match.homeTeam} vs ${cand.match.awayTeam} · ${cand.pick.shortPick || cand.pick.title} (${cand.timeBadge})`
+            });
+
+            if (chosenPicks.length >= 3) break;
+        }
+
+        // Yedek Havuz: Eğer 3 maç bulunamadıysa doğrudan maç oranlarından yüksek olasılıklı bankolar üret
+        if (chosenPicks.length < 3) {
+            for (const m of targetMatches) {
+                const key = (m.homeTeam || '') + '_' + (m.awayTeam || '');
+                if (seenTeams.has(key)) continue;
+
+                const o = m.odds || m.commonOdds || {};
+                let pick = null;
+
+                if (o.over15 && o.over15 >= 1.15 && o.over15 <= 1.45) {
+                    pick = { marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER_15', odd: Number(o.over15).toFixed(2), prob: 88 };
+                } else if (o.home && o.home >= 1.20 && o.home <= 1.65) {
+                    pick = { marketTitle: 'Maç Sonucu', pickTitle: `MS 1 (${m.homeTeam})`, marketCode: 'MS_1', odd: Number(o.home).toFixed(2), prob: 85 };
+                } else if (o.dc_1x && o.dc_1x >= 1.12 && o.dc_1x <= 1.40) {
+                    pick = { marketTitle: 'Çifte Şans', pickTitle: '1X Çifte Şans', marketCode: 'DC_1X', odd: Number(o.dc_1x).toFixed(2), prob: 89 };
+                } else if (o.under35 && o.under35 >= 1.15 && o.under35 <= 1.45) {
+                    pick = { marketTitle: 'Toplam Gol', pickTitle: '3.5 ALT', marketCode: 'UNDER_35', odd: Number(o.under35).toFixed(2), prob: 87 };
+                } else if (o.away && o.away >= 1.20 && o.away <= 1.65) {
+                    pick = { marketTitle: 'Maç Sonucu', pickTitle: `MS 2 (${m.awayTeam})`, marketCode: 'MS_2', odd: Number(o.away).toFixed(2), prob: 83 };
+                } else if (o.over25 && o.over25 >= 1.35 && o.over25 <= 1.85) {
+                    pick = { marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER_25', odd: Number(o.over25).toFixed(2), prob: 80 };
+                } else if (o.home) {
+                    pick = { marketTitle: 'Çifte Şans', pickTitle: '1X Çifte Şans', marketCode: 'DC_1X', odd: '1.25', prob: 86 };
+                }
+
+                if (pick) {
+                    seenTeams.add(key);
+                    const diffMins = Math.round((m._kickoffDiffMs || 0) / 60000);
+                    let timeBadge = '';
+                    if (diffMins <= 0) timeBadge = '🟢 Canlı / Yeni Başladı';
+                    else if (diffMins < 60) timeBadge = `⏰ ${diffMins} dk sonra`;
+                    else {
+                        const hrs = Math.floor(diffMins / 60);
+                        const rm = diffMins % 60;
+                        timeBadge = `⏰ ${hrs} sa ${rm > 0 ? rm + ' dk' : ''} sonra`;
+                    }
+
+                    chosenPicks.push({
+                        match: m,
+                        homeTeam: m.homeTeam,
+                        awayTeam: m.awayTeam,
+                        league: m.league || 'Futbol',
+                        timeStr: m.time || m.timeStr || 'Yakında',
+                        timeBadge,
+                        marketTitle: pick.marketTitle,
+                        pickTitle: pick.pickTitle,
+                        marketCode: pick.marketCode,
+                        odd: pick.odd,
+                        probability: pick.prob,
+                        confidenceScore: pick.prob,
+                        iddaaCode: m.iddaaCode || m.code || '',
+                        mackolikUrl: m.mackolikUrl || (m.iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${m.iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar'),
+                        detail: `${m.homeTeam} vs ${m.awayTeam} · ${pick.pickTitle} (${timeBadge})`
+                    });
+
+                    if (chosenPicks.length >= 3) break;
+                }
+            }
+        }
+
+        if (chosenPicks.length === 0) return null;
+
+        const totalOdd = chosenPicks.reduce((acc, p) => acc * parseFloat(p.odd), 1);
+        const avgProb = chosenPicks.reduce((acc, p) => acc + p.probability, 0) / chosenPicks.length;
+
+        return {
+            id: 'coupon_hourly_' + Date.now(),
+            title: '⚡ Önümüzdeki 4-5 Saat Yıldırım Banko Kuponu',
+            subtitle: `Önümüzdeki 4-5 saat içinde başlayacak maçlardan en yüksek kazanma ihtimalli ${chosenPicks.length} seçim`,
+            badge: '⚡ 4-5 SAAT YILDIRIM',
+            icon: '⏱️',
+            themeColor: '#F59E0B',
+            accentBg: 'rgba(245,158,11,0.15)',
+            totalOdd: totalOdd.toFixed(2),
+            totalOdds: totalOdd,
+            winProbability: Math.min(96, Math.round(avgProb)),
+            confidence: Math.min(96, Math.round(avgProb)),
+            status: 'pending',
+            matches: chosenPicks,
+            picks: chosenPicks,
+            recommendedStake: 50,
+            isHourlyCoupon: true
+        };
+    },
+
+    /**
+     * AI Asistan Kasa ve Bahis Dağıtım Motoru
+     * Kural: Her kupona başlangıçta en fazla 50 TL.
+     * Hafta içi 5 kupon, hafta sonu 8 kupon.
+     * Kazanılanın %50'si cebe kilitlenir, %50'si kuponların güvenine göre dağıtılır.
+     */
+    calculateAssistantStakeAllocation(amount = 250, isWinnings = true, couponCount = 5, maxInitialPerCoupon = 50) {
+        let budget = 0;
+        let pocketProfit = 0;
+
+        const numAmount = Math.max(10, parseFloat(amount) || 250);
+
+        if (isWinnings) {
+            pocketProfit = Math.round(numAmount * 0.50);
+            budget = numAmount - pocketProfit;
+        } else {
+            budget = numAmount;
+        }
+
+        if (!isWinnings && budget > couponCount * maxInitialPerCoupon) {
+            budget = couponCount * maxInitialPerCoupon;
+        }
+
+        const weightsWeekday = [
+            { id: 1, title: '🛡️ Garantör Banko', weight: 0.34, minOdds: 2.25, confidence: 95, role: 'Sermaye Sigortası' },
+            { id: 2, title: '⚡ İdeal Sistem', weight: 0.22, minOdds: 3.35, confidence: 90, role: 'Dengeli Büyüme' },
+            { id: 3, title: '⚽ Gol Yağmuru', weight: 0.20, minOdds: 3.60, confidence: 88, role: 'Yüksek İsabet' },
+            { id: 4, title: '⏱️ İlk Yarı Strateji', weight: 0.16, minOdds: 2.90, confidence: 86, role: 'Hızlı Kasa' },
+            { id: 5, title: '💎 Bomba / Değer', weight: 0.08, minOdds: 9.50, confidence: 74, role: 'Yüksek Çarpan' }
+        ];
+
+        const weightsWeekend = [
+            { id: 1, title: '🛡️ Garantör Banko', weight: 0.24, minOdds: 2.25, confidence: 95, role: 'Sermaye Sigortası' },
+            { id: 2, title: '⚡ İdeal Sistem', weight: 0.18, minOdds: 3.35, confidence: 90, role: 'Dengeli Büyüme' },
+            { id: 3, title: '⚽ Gol Yağmuru', weight: 0.16, minOdds: 3.60, confidence: 88, role: 'Yüksek İsabet' },
+            { id: 4, title: '⏱️ İlk Yarı Strateji', weight: 0.12, minOdds: 2.90, confidence: 86, role: 'Hızlı Kasa' },
+            { id: 5, title: '🔥 KG VAR Kombini', weight: 0.10, minOdds: 3.25, confidence: 86, role: 'Karşılıklı Gol' },
+            { id: 6, title: '🎯 Korner / Kart İstatistik', weight: 0.08, minOdds: 3.75, confidence: 84, role: 'Özel İstatistik' },
+            { id: 7, title: '🌙 Gece / Güney Amerika', weight: 0.07, minOdds: 4.50, confidence: 82, role: 'Gece Bülteni' },
+            { id: 8, title: '💎 Günün Bombası / Değer', weight: 0.05, minOdds: 10.00, confidence: 72, role: 'Mega Çarpan' }
+        ];
+
+        const list = couponCount === 8 ? weightsWeekend : weightsWeekday;
+
+        let allocations = list.map(item => {
+            const raw = budget * item.weight;
+            const rounded = Math.max(5, Math.round(raw / 5) * 5);
+            return {
+                ...item,
+                stake: rounded,
+                pct: Math.round(item.weight * 100),
+                expectedReturn: Math.round(rounded * item.minOdds)
+            };
+        });
+
+        const allocatedSum = allocations.reduce((a, b) => a + b.stake, 0);
+        const diff = budget - allocatedSum;
+        if (allocations[0]) {
+            allocations[0].stake += diff;
+            allocations[0].expectedReturn = Math.round(allocations[0].stake * allocations[0].minOdds);
+        }
+
+        const totalExpectedReturn = allocations.reduce((a, b) => a + b.expectedReturn, 0);
+
+        return {
+            totalAmount: numAmount,
+            pocketProfit,
+            budgetToPlay: budget,
+            couponCount,
+            allocations,
+            totalExpectedReturn,
+            maxInitialPerCoupon
+        };
     }
 };
 
 if (typeof window !== 'undefined') {
     window.CouponEngine = CouponEngine;
     CouponEngine.clearOldArchiveData();
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CouponEngine;
 }

@@ -256,6 +256,9 @@ const CouponPanel = {
                         </div>
                     </div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-xs" id="btn-generate-hourly-coupon" style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(217,119,6,0.35));border:1px solid #f59e0b;color:#fcd34d;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;box-shadow:0 0 15px rgba(245,158,11,0.2);" title="Önümüzdeki 4-5 saat içerisinde başlayacak maçlardan en yüksek kazanma ihtimalli kuponu üret">
+                            ⏱️ Önümüzdeki 5 Saat İçin Kupon Yap
+                        </button>
                         <button class="btn btn-outline btn-xs" id="btn-finish-all-pending-matches" style="background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,78,59,0.3));border:1px solid #10B981;color:#10B981;font-weight:800;border-radius:8px;padding:5px 12px;cursor:pointer;" title="Tüm canlı ve bekleyen karşılaşmaları resmi maç sonu (MS) olarak sonuçlandır">
                             🏁 Canlı/Bekleyenleri Sonlandır (MS)
                         </button>
@@ -264,6 +267,14 @@ const CouponPanel = {
                         </button>
                     </div>
                 </div>
+
+                <!-- ⚡ ÖNÜMÜZDEKİ 4-5 SAAT YILDIRIM BANKO KUPONU -->
+                <div id="hourly-coupon-container">
+                    ${this.hourlyCoupon ? this.renderHourlyCouponCard(this.hourlyCoupon) : ''}
+                </div>
+
+                <!-- 🤖 AI ASİSTAN KASA DAĞITIM & KATLAMA SİSTEMİ BİLEŞENİ -->
+                ${this.renderAssistantStakingCard()}
 
                 ${displayedCoupons.length === 0 ? `
                     <div class="empty-state" style="padding:60px 20px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:16px;">
@@ -870,7 +881,13 @@ const CouponPanel = {
      * Tekil Kupon Kartını Render Et
      */
     renderCouponCard(coupon, index) {
-        const defaultStake = coupon.recommendedStake || 100;
+        const currentMode = this.assistantCouponCount || (new Date().getDay() === 0 || new Date().getDay() === 6 ? 8 : 5);
+        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : 250);
+        const alloc = window.CouponEngine?.calculateAssistantStakeAllocation
+            ? window.CouponEngine.calculateAssistantStakeAllocation(baseAmount, true, currentMode, 50)
+            : null;
+        const currentAlloc = alloc?.allocations?.[index];
+        const defaultStake = currentAlloc ? currentAlloc.stake : (coupon.assistantStake || coupon.recommendedStake || 50);
         const totalOdd = parseFloat(coupon.totalOdd || '1.00');
         const potentialWin = (defaultStake * totalOdd).toFixed(2);
 
@@ -955,9 +972,16 @@ const CouponPanel = {
                                 ${coupon.icon || '🎯'}
                             </span>
                             <div>
-                                <span style="font-size:0.72rem;font-weight:800;color:${coupon.themeColor || '#00F0FF'};text-transform:uppercase;letter-spacing:0.5px;">
-                                    ${index + 1}. KUPON · ${coupon.badge || 'ÖZEL KOMBİNE'}
-                                </span>
+                                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                    <span style="font-size:0.72rem;font-weight:800;color:${coupon.themeColor || '#00F0FF'};text-transform:uppercase;letter-spacing:0.5px;">
+                                        ${index + 1}. KUPON · ${coupon.badge || 'ÖZEL KOMBİNE'}
+                                    </span>
+                                    ${currentAlloc ? `
+                                        <span style="background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.45);color:#F59E0B;padding:1px 6px;border-radius:4px;font-size:0.68rem;font-weight:900;">
+                                            🤖 Asistan: ${defaultStake} TL (%${currentAlloc.pct})
+                                        </span>
+                                    ` : ''}
+                                </div>
                                 <h3 style="margin:2px 0 0 0;font-size:1.15rem;color:#ffffff;font-weight:800;">
                                     ${coupon.title}
                                 </h3>
@@ -1206,6 +1230,31 @@ const CouponPanel = {
             app.loadDailyCoupons(true, app.activeCouponFilter || 'all', 'today');
         });
 
+        // ⏱️ Önümüzdeki 5 Saat İçin Kupon Yap Butonu
+        document.getElementById('btn-generate-hourly-coupon')?.addEventListener('click', () => {
+            if (!window.CouponEngine || typeof window.CouponEngine.generateHourlyCoupon !== 'function') {
+                window.Helpers?.showToast?.('Kupon motoru yükleniyor...', 'info');
+                return;
+            }
+            const matches = app.matches || [];
+            const hCoupon = window.CouponEngine.generateHourlyCoupon(matches, 5);
+            if (hCoupon) {
+                this.hourlyCoupon = hCoupon;
+                const container = document.getElementById('hourly-coupon-container');
+                if (container) {
+                    container.innerHTML = this.renderHourlyCouponCard(hCoupon);
+                    this._bindHourlyClose(app);
+                    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                window.Helpers?.showToast?.(`⚡ Önümüzdeki 4-5 saatlik Yıldırım Kuponu hazırlandı! (${hCoupon.matches?.length || 3} Maç, Oran: ${hCoupon.totalOdd})`, 'success');
+            } else {
+                window.Helpers?.showToast?.('Önümüzdeki 4-5 saat içinde başlayacak uygun maç bulunamadı.', 'warning');
+            }
+        });
+
+        this._bindHourlyClose(app);
+        this.bindAssistantEvents(app);
+
         // Günlük Analiz Edilen Maçlar Modalını Aç Butonu
         document.getElementById('btn-open-daily-analysis-modal')?.addEventListener('click', () => {
             const modal = document.getElementById('modal-daily-analysis-matches');
@@ -1429,6 +1478,254 @@ const CouponPanel = {
             }
             modalEl.classList.remove('active');
             window.Helpers?.showToast?.('Skorlar güncellendi ve AI isabet karnesi yenilendi! ✅', 'success');
+        });
+    },
+
+    /**
+     * ⏱️ Önümüzdeki 4-5 Saat Yıldırım Kuponu Kartı
+     */
+    renderHourlyCouponCard(coupon) {
+        if (!coupon) return '';
+        const matches = coupon.matches || coupon.picks || [];
+        const defaultStake = coupon.recommendedStake || 50;
+        const totalOdd = parseFloat(coupon.totalOdd || '1.00');
+        const potentialWin = (defaultStake * totalOdd).toFixed(2);
+        const winProb = coupon.confidence || coupon.winProbability || 94;
+
+        return `
+            <div id="hourly-coupon-box" class="hourly-coupon-card animate-fade-in" style="background:linear-gradient(135deg, rgba(30,27,75,0.95) 0%, rgba(15,23,42,0.95) 100%);border:2px solid #F59E0B;border-radius:18px;padding:22px;margin-bottom:24px;box-shadow:0 0 30px rgba(245,158,11,0.25);position:relative;overflow:hidden;">
+                <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,#F59E0B,#D97706);color:#000;font-weight:900;font-size:0.75rem;padding:4px 16px;border-radius:0 0 0 12px;letter-spacing:0.5px;box-shadow:0 2px 10px rgba(0,0,0,0.3);">
+                    ⚡ ÖNÜMÜZDEKİ 4-5 SAAT İÇİNDE BAŞLAYACAK MAÇLAR
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:14px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:2rem;background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;">
+                            ⏱️
+                        </span>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <h3 style="margin:0;font-size:1.25rem;color:#ffffff;font-weight:900;">
+                                    ${coupon.title}
+                                </h3>
+                                <span style="background:rgba(16,185,129,0.2);border:1px solid #10B981;color:#10B981;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:900;">
+                                    🎯 %${winProb} TUTMA İHTİMALİ
+                                </span>
+                            </div>
+                            <span style="font-size:0.82rem;color:#cbd5e1;margin-top:2px;display:block;">
+                                ${coupon.subtitle}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="text-align:right;">
+                            <span style="font-size:0.7rem;color:var(--text-muted);display:block;">Toplam Oran</span>
+                            <strong style="font-size:1.6rem;color:#F59E0B;font-weight:900;">${coupon.totalOdd}</strong>
+                        </div>
+                        <button class="btn btn-sm" id="btn-close-hourly-coupon" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#cbd5e1;padding:6px 12px;border-radius:8px;font-weight:700;font-size:0.8rem;cursor:pointer;">
+                            ✕ Kapat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Maçlar Listesi -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;margin-bottom:16px;">
+                    ${matches.map((m, idx) => `
+                        <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:12px 16px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                                <span style="font-size:0.75rem;color:var(--text-muted);font-weight:700;">${m.league} · ⏰ ${m.timeStr}</span>
+                                <span style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#F59E0B;padding:2px 7px;border-radius:4px;font-size:0.72rem;font-weight:900;">
+                                    ${m.timeBadge || '⏰ Yakında'}
+                                </span>
+                            </div>
+                            <div style="font-weight:800;font-size:0.98rem;color:#ffffff;margin-bottom:8px;">
+                                ${m.homeTeam} <span style="color:var(--text-muted);font-weight:400;">vs</span> ${m.awayTeam}
+                            </div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.3);padding:6px 10px;border-radius:6px;">
+                                <div>
+                                    <span style="font-size:0.75rem;color:var(--text-muted);">Tercih:</span>
+                                    <strong style="color:#00F0FF;margin-left:4px;font-size:0.88rem;">${m.pickTitle}</strong>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <span style="font-size:0.88rem;color:#ffffff;font-weight:900;">${m.odd}</span>
+                                    <span style="font-size:0.72rem;color:#10B981;font-weight:800;">(%${m.confidenceScore || 90})</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Alt Finansal Bilgi -->
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:rgba(0,0,0,0.35);padding:10px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:0.84rem;color:#cbd5e1;">
+                        💰 Önerilen Başlangıç Bahsi: <strong style="color:#ffffff;">${defaultStake} TL</strong> · Olası Kazanç: <strong style="color:#10B981;">${potentialWin} TL</strong>
+                    </div>
+                    <span style="font-size:0.78rem;color:#94a3b8;">
+                        ⚡ En kısa sürede başlayacak ve kazanma ihtimali en yüksek 3 maçlık yapay zeka seçimidir.
+                    </span>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * 🤖 AI Asistan Kasa Dağıtım ve Katlama Sistemi Bileşeni
+     */
+    renderAssistantStakingCard() {
+        const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+        const defaultMode = isWeekend ? 8 : 5;
+        const currentMode = this.assistantCouponCount || defaultMode;
+        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : 250);
+        const isWinningsMode = this.assistantIsWinnings !== undefined ? this.assistantIsWinnings : true;
+
+        const alloc = window.CouponEngine?.calculateAssistantStakeAllocation
+            ? window.CouponEngine.calculateAssistantStakeAllocation(baseAmount, isWinningsMode, currentMode, 50)
+            : {
+                totalAmount: baseAmount,
+                pocketProfit: isWinningsMode ? Math.round(baseAmount * 0.5) : 0,
+                budgetToPlay: isWinningsMode ? Math.round(baseAmount * 0.5) : baseAmount,
+                couponCount: currentMode,
+                allocations: []
+            };
+
+        return `
+            <div class="assistant-staking-card" style="background:linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.88) 100%);border:1px solid rgba(245,158,11,0.4);border-radius:16px;padding:18px 22px;margin-bottom:20px;box-shadow:0 8px 30px rgba(0,0,0,0.35);position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle, rgba(245,158,11,0.18), transparent 70%);pointer-events:none;"></div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:1.6rem;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;">
+                            🤖
+                        </span>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <h3 style="margin:0;font-size:1.08rem;font-weight:900;color:#ffffff;">
+                                    AI Asistan Kasa Dağıtım & Katlama Sistemi
+                                </h3>
+                                <span style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#F59E0B;padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:900;">
+                                    📌 MAX 50 TL / KUPON
+                                </span>
+                            </div>
+                            <span style="font-size:0.78rem;color:#cbd5e1;">
+                                Kazanılanın %50'si cebe kilitlenir, kalan %50'si asistan tarafından kuponların güvenine göre dağıtılır.
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Hafta İçi (5) / Hafta Sonu (8) Geçiş Butonları -->
+                    <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.4);padding:4px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);">
+                        <button type="button" class="btn btn-xs btn-mode-toggle ${currentMode === 5 ? 'active' : ''}" data-mode="5" style="border:none;border-radius:6px;padding:5px 12px;font-size:0.75rem;font-weight:800;cursor:pointer;background:${currentMode === 5 ? 'linear-gradient(135deg,#00F0FF,#3B82F6)' : 'transparent'};color:${currentMode === 5 ? '#000' : '#94a3b8'};">
+                            📅 Hafta İçi (5 Kupon)
+                        </button>
+                        <button type="button" class="btn btn-xs btn-mode-toggle ${currentMode === 8 ? 'active' : ''}" data-mode="8" style="border:none;border-radius:6px;padding:5px 12px;font-size:0.75rem;font-weight:800;cursor:pointer;background:${currentMode === 8 ? 'linear-gradient(135deg,#F59E0B,#EF4444)' : 'transparent'};color:${currentMode === 8 ? '#000' : '#94a3b8'};">
+                            🎉 Hafta Sonu (8 Kupon Max)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bütçe Girişi & Kasa Özeti -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:14px;">
+                    <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px;">
+                        <label style="font-size:0.72rem;color:var(--text-muted);font-weight:700;display:block;margin-bottom:4px;">
+                            💵 ÖNCEKİ TUR KAZANCI VEYA ANA BÜTÇE:
+                        </label>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <input type="number" id="input-assistant-budget" value="${baseAmount}" step="10" min="10" style="background:rgba(15,23,42,0.8);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:6px 12px;color:#facc15;font-weight:900;font-size:1.1rem;width:100%;outline:none;">
+                            <span style="color:#ffffff;font-weight:900;font-size:0.9rem;">TL</span>
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:10px 14px;">
+                        <span style="font-size:0.72rem;color:#10B981;font-weight:800;display:block;text-transform:uppercase;">
+                            🔒 CEBE KİLİTLENEN NET KÂR (%50)
+                        </span>
+                        <strong style="font-size:1.35rem;color:#10B981;font-weight:900;display:block;margin-top:2px;">
+                            +${alloc.pocketProfit} TL
+                        </strong>
+                        <span style="font-size:0.7rem;color:#94a3b8;">Garantili nakit kâr (asla riske edilmez)</span>
+                    </div>
+
+                    <div style="background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.3);border-radius:12px;padding:10px 14px;">
+                        <span style="font-size:0.72rem;color:#00F0FF;font-weight:800;display:block;text-transform:uppercase;">
+                            🎯 KUPONLARA DAĞITILAN BÜTÇE (%50)
+                        </span>
+                        <strong style="font-size:1.35rem;color:#00F0FF;font-weight:900;display:block;margin-top:2px;">
+                            ${alloc.budgetToPlay} TL
+                        </strong>
+                        <span style="font-size:0.7rem;color:#94a3b8;">${currentMode} kupona güven ağırlıklı paylaştırıldı</span>
+                    </div>
+                </div>
+
+                <!-- Asistan Dağıtım Dağılım Çizelgesi -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;">
+                    ${alloc.allocations.map(a => `
+                        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;text-align:center;">
+                            <div style="font-size:0.68rem;color:var(--text-muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.title}</div>
+                            <div style="font-size:1.05rem;font-weight:900;color:#F59E0B;margin-top:2px;">${a.stake} TL</div>
+                            <div style="font-size:0.65rem;color:#94a3b8;">%${a.pct} Pay · Oran ≥ ${a.minOdds}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    },
+
+    _bindHourlyClose(app) {
+        document.getElementById('btn-close-hourly-coupon')?.addEventListener('click', () => {
+            this.hourlyCoupon = null;
+            const container = document.getElementById('hourly-coupon-container');
+            if (container) container.innerHTML = '';
+        });
+    },
+
+    _updateAssistantCalculations(app) {
+        const wrapper = document.querySelector('.assistant-staking-card');
+        if (wrapper) {
+            wrapper.outerHTML = this.renderAssistantStakingCard();
+            this.bindAssistantEvents(app);
+            // Refresh cards to update stake numbers
+            const grid = document.querySelector('.coupons-grid');
+            if (grid && app.coupons) {
+                grid.innerHTML = (this.lastDisplayedCoupons || app.coupons).map((c, i) => this.renderCouponCard(c, i)).join('');
+                // rebind verify buttons
+                document.querySelectorAll('.btn-open-coupon-verify').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const couponId = btn.dataset.couponId;
+                        const targetCoupon = (app.coupons || []).find(c => c.id === couponId);
+                        if (targetCoupon) {
+                            const modal = document.getElementById('modal-coupon-verify');
+                            const titleEl = document.getElementById('modal-coupon-verify-title');
+                            const subEl = document.getElementById('modal-coupon-verify-subtitle');
+                            const bodyEl = document.getElementById('modal-coupon-verify-body');
+                            if (titleEl) titleEl.textContent = `${targetCoupon.title} · Resmi Maç Teyit Raporu`;
+                            if (subEl) subEl.textContent = `Resmi Maçkolik & İddaa sonuçlarıyla ${targetCoupon.matches?.length || 0} maçın karşılaştırması`;
+                            if (bodyEl) bodyEl.innerHTML = this.renderCouponVerifyModalBody(targetCoupon);
+                            if (modal) modal.classList.add('active');
+                        }
+                    });
+                });
+            }
+        }
+    },
+
+    bindAssistantEvents(app) {
+        document.querySelectorAll('.btn-mode-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = parseInt(btn.dataset.mode, 10);
+                this.assistantCouponCount = mode;
+                if (!this.assistantInputAmount) {
+                    this.assistantInputAmount = mode === 8 ? 400 : 250;
+                }
+                this._updateAssistantCalculations(app);
+            });
+        });
+
+        document.getElementById('input-assistant-budget')?.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            this.assistantInputAmount = val;
+            this._updateAssistantCalculations(app);
         });
     }
 };
