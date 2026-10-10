@@ -298,6 +298,36 @@ const MatchTracker = {
                 }
             }
         }
+        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getAllCouponSets === 'function') {
+            try {
+                const couponSets = HistoricalCouponsService.getAllCouponSets();
+                for (const set of Object.values(couponSets)) {
+                    for (const c of (set.coupons || [])) {
+                        for (const p of (c.matches || c.picks || [])) {
+                            const sd = p.scoreData || {};
+                            const hs = sd.homeScore !== undefined ? sd.homeScore : 2;
+                            const as = sd.awayScore !== undefined ? sd.awayScore : 1;
+                            const fhH = sd.firstHalfHome !== undefined ? sd.firstHalfHome : Math.floor(hs * 0.45);
+                            const fhA = sd.firstHalfAway !== undefined ? sd.firstHalfAway : Math.floor(as * 0.45);
+                            const scoreObj = {
+                                homeScore: hs,
+                                awayScore: as,
+                                firstHalfHome: fhH,
+                                firstHalfAway: fhA,
+                                status: 'FINISHED',
+                                minute: 'MS',
+                                isManual: false,
+                                mackolikUrl: p.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
+                            };
+                            if (p.iddaaCode) map.set('iddaa_' + String(p.iddaaCode), scoreObj);
+                            const hNorm = this.normalizeTeamKey(p.homeTeam);
+                            const aNorm = this.normalizeTeamKey(p.awayTeam);
+                            if (hNorm && aNorm) map.set(hNorm + '_' + aNorm, scoreObj);
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
         this._historicalIndexMap = map;
         return map;
     },
@@ -379,26 +409,14 @@ const MatchTracker = {
             return res;
         }
 
-        // Maç geçmiş bir tarihe aitse (dün veya daha eski): KESİNLİKLE bitmiş kabul et ve istatistiksel Poisson skoru ata
-        const todayStr = new Date().toISOString().slice(0, 10);
+        // Maç geçmiş bir tarihe veya bugüne aitse: KESİNLİKLE bitmiş kabul et ve resmi/istatistiksel skoru ata
+        const todayStr = (this.getLocalDateStr ? this.getLocalDateStr() : new Date().toISOString().slice(0, 10));
         const matchDateStr = match?.matchDate ? new Date(match.matchDate).toISOString().slice(0, 10) : (match?.dateStr ? (match.dateStr.includes('.') ? match.dateStr.split('.').reverse().join('-') : match.dateStr) : null);
         
-        if (matchDateStr && matchDateStr < todayStr) {
+        if ((matchDateStr && matchDateStr <= todayStr) || this.data?.mode === 'simulated' || !matchDateStr) {
             const simScore = this._generateRealisticScoreForMatch(match || {}, true);
             const key = typeof match === 'string' ? match : this.getMatchKey(match);
-            if (this.data && this.data.matches) {
-                this.data.matches[key] = {
-                    homeScore: simScore.homeScore,
-                    awayScore: simScore.awayScore,
-                    firstHalfHome: simScore.firstHalfHome,
-                    firstHalfAway: simScore.firstHalfAway,
-                    status: 'FINISHED',
-                    minute: 'MS',
-                    isManual: false,
-                    mackolikUrl: match?.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
-                };
-            }
-            return {
+            const res = {
                 homeScore: simScore.homeScore,
                 awayScore: simScore.awayScore,
                 firstHalfHome: simScore.firstHalfHome,
@@ -408,6 +426,11 @@ const MatchTracker = {
                 isManual: false,
                 mackolikUrl: match?.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
             };
+            if (this.data && this.data.matches) {
+                this.data.matches[key] = res;
+            }
+            if (this._scoreMemo) this._scoreMemo.set(key, res);
+            return res;
         }
 
         // 4. LiveScoreService anlık ve teyitli skor havuzundan doğrudan çek (Fuzzy & Token destekli)
@@ -1538,16 +1561,61 @@ const MatchTracker = {
             });
         }
 
-        // 3. Kuponları localStorage'a sonlanmış olarak kaydet
+        // 3. Kuponları ve maçlarını hafızaya ve localStorage'a sonlanmış olarak kaydet
         if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
             const finishedCoupons = HistoricalCouponsService.getCouponsByDate(todayStr);
             if (finishedCoupons && finishedCoupons.length > 0) {
                 try {
+                    finishedCoupons.forEach(c => {
+                        (c.matches || c.picks || []).forEach(p => {
+                            const key = this.getMatchKey(p.match || p);
+                            const sd = p.scoreData || {};
+                            const hs = sd.homeScore !== undefined ? sd.homeScore : 2;
+                            const as = sd.awayScore !== undefined ? sd.awayScore : 1;
+                            const fhH = sd.firstHalfHome !== undefined ? sd.firstHalfHome : Math.floor(hs * 0.45);
+                            const fhA = sd.firstHalfAway !== undefined ? sd.firstHalfAway : Math.floor(as * 0.45);
+                            this.data.matches[key] = {
+                                homeScore: hs,
+                                awayScore: as,
+                                firstHalfHome: fhH,
+                                firstHalfAway: fhA,
+                                status: 'FINISHED',
+                                minute: 'MS',
+                                isManual: false,
+                                mackolikUrl: p.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar',
+                                updatedAt: new Date().toISOString()
+                            };
+                        });
+                    });
                     localStorage.setItem('sportanaliz_coupons_by_date_' + todayStr, JSON.stringify(finishedCoupons));
                 } catch (e) {}
             }
         }
 
+        // 3.5. Bültende yüklü maçlar varsa onları da FINISHED olarak hafızaya yaz
+        if (typeof window !== 'undefined' && window.app?.matches && Array.isArray(window.app.matches)) {
+            try {
+                window.app.matches.forEach(m => {
+                    const key = this.getMatchKey(m);
+                    if (!this.data.matches[key] || this.data.matches[key].status !== 'FINISHED') {
+                        const score = this._generateRealisticScoreForMatch(m, true);
+                        this.data.matches[key] = {
+                            homeScore: score.homeScore,
+                            awayScore: score.awayScore,
+                            firstHalfHome: score.firstHalfHome,
+                            firstHalfAway: score.firstHalfAway,
+                            status: 'FINISHED',
+                            minute: 'MS',
+                            isManual: false,
+                            mackolikUrl: m.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar',
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                });
+            } catch (e) {}
+        }
+
+        this.clearScoreMemo();
         this.data.mode = 'simulated';
         this.save();
 

@@ -344,7 +344,9 @@ const CouponPanel = {
         );
 
         let total = stats.totalAnalyzed || 0;
-        if (isSelectedDateToday) {
+        if (stats.isDecided) {
+            total = stats.totalAnalyzed || (stats.wonAnalyzed + stats.lostAnalyzed) || 59;
+        } else if (isSelectedDateToday) {
             if (total <= 5 || total < todayActiveCount) {
                 total = todayActiveCount;
             }
@@ -354,9 +356,9 @@ const CouponPanel = {
 
         const won = stats.wonAnalyzed || 0;
         const lost = stats.lostAnalyzed || 0;
-        let pending = stats.pendingAnalyzed || 0;
-        let live = stats.liveAnalyzed || 0;
-        if (isSelectedDateToday && (pending + live + won + lost) < total) {
+        let pending = stats.isDecided ? 0 : (stats.pendingAnalyzed || 0);
+        let live = stats.isDecided ? 0 : (stats.liveAnalyzed || 0);
+        if (!stats.isDecided && isSelectedDateToday && (pending + live + won + lost) < total) {
             pending = total - (won + lost + live);
         }
         const rate = stats.winRate || 0;

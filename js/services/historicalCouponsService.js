@@ -2661,154 +2661,154 @@ const HistoricalCouponsService = {
         const p_hilal = this._createArchivedPick({
             index: 1, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'Maç Sonucu & 1.5 ÜST', pickTitle: 'MS 1 & 1.5 ÜST', marketCode: 'MS1_O15', odd: 1.38, confidence: 95,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Al Hilal vs AL Ittihad · MS 1 & 1.5 ÜST (Mitrovic, Neymar & Benzema Dev Derbi)"
+            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Al Hilal 3-1 AL Ittihad · MS 1 & 1.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 2. NK Celje vs NK Aluminij (18:30 - Slovenya Prva Liga)
         const p_celje = this._createArchivedPick({
             index: 2, iddaaCode: '3193641', homeTeam: "NK Celje", awayTeam: "NK Aluminij K.", league: "Slovenya Prva Liga",
             timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Celje Kazanır)', marketCode: 'MS1', odd: 1.32, confidence: 93,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "NK Celje vs NK Aluminij · MS 1 (Slovenya Lideri İç Sahada Hata Yapmaz)"
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "NK Celje 2-0 NK Aluminij · MS 1 (KAZANDI)"
         }, yDate, dFmt);
 
         // 3. Magdeburg vs Hannover 96 - Garantör (14:00 - Almanya Bundesliga 2)
         const p_magdeburg_safe = this._createArchivedPick({
             index: 3, iddaaCode: '3193617', homeTeam: "Magdeburg", awayTeam: "Hannover 96", league: "Almanya Bundesliga 2",
             timeStr: '14:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.25, confidence: 95,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Magdeburg vs Hannover 96 · 1.5 ÜST (Bundesliga 2 Yüksek Tempo & Hücum Gücü)"
+            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Magdeburg 2-2 Hannover 96 · 1.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 4. AL Ettifaq vs AL Khaleej Saihat (17:55 - Suudi Arabistan Pro Lig)
         const p_ettifaq = this._createArchivedPick({
             index: 4, iddaaCode: '3134211', homeTeam: "AL Ettifaq", awayTeam: "AL Khaleej Saihat", league: "Suudi Arabistan Pro Lig",
             timeStr: '17:55', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (AL Ettifaq Kazanır)', marketCode: 'MS1', odd: 1.48, confidence: 91,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "AL Ettifaq vs AL Khaleej Saihat · MS 1 (Gerrard Önderliğinde Ev Sahibi Hakimiyeti)"
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "AL Ettifaq 2-1 AL Khaleej Saihat · MS 1 (KAZANDI)"
         }, yDate, dFmt);
 
         // 5. RC Lens U19 vs C Chartres Football U19 (14:00 - Fransa U19 Ulusal Ligi)
         const p_lens_u19 = this._createArchivedPick({
             index: 5, iddaaCode: '3107619', homeTeam: "RC Lens U19", awayTeam: "C Chartres Football U19", league: "Fransa U19 Ligi",
             timeStr: '14:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (RC Lens U19 Kazanır)', marketCode: 'MS1', odd: 1.63, confidence: 89,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "RC Lens U19 vs C Chartres U19 · MS 1 (Gençler Ligi Güç Dengesi)"
+            homeScore: 3, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "RC Lens U19 3-0 C Chartres U19 · MS 1 (KAZANDI)"
         }, yDate, dFmt);
 
         // 6. AL Ahli Doha vs Al Sailiya (20:00 - Katar Yıldızlar Ligi)
         const p_doha_ideal = this._createArchivedPick({
             index: 6, iddaaCode: '3189049', homeTeam: "AL Ahli Doha", awayTeam: "Al Sailiya", league: "Katar Yıldızlar Ligi",
             timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.42, confidence: 90,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "AL Ahli Doha vs Al Sailiya · 2.5 ÜST (Katar Ligi Açık Futbol)"
+            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "AL Ahli Doha 2-2 Al Sailiya · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 7. Magdeburg vs Hannover 96 - Gol Yağmuru (14:00 - Almanya Bundesliga 2)
         const p_magdeburg_goals = this._createArchivedPick({
             index: 7, iddaaCode: '3193617', homeTeam: "Magdeburg", awayTeam: "Hannover 96", league: "Almanya Bundesliga 2",
             timeStr: '14:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.65, confidence: 90,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Magdeburg vs Hannover 96 · 2.5 ÜST (Karşılıklı Gol ve Bol Pozisyon)"
+            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Magdeburg 2-2 Hannover 96 · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 8. Al Hilal vs AL Ittihad - Goller (21:00)
         const p_hilal_goals = this._createArchivedPick({
             index: 8, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST (Süper Derbi Düellosu)', marketCode: 'OVER25', odd: 1.50, confidence: 92,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Al Hilal vs AL Ittihad · 2.5 ÜST (Yıldızlar Kapışması)"
+            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Al Hilal 3-1 AL Ittihad · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 9. Grossaspach vs Mannheim 07 (15:00 - Almanya Bölgesel Lig)
         const p_grossaspach = this._createArchivedPick({
             index: 9, iddaaCode: '3193618', homeTeam: "Grossaspach", awayTeam: "Mannheim 07", league: "Almanya Bölgesel Lig",
             timeStr: '15:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.45, confidence: 88,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Grossaspach vs Mannheim 07 · 2.5 ÜST (Tempolu Hücum Hatları)"
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Grossaspach 2-1 Mannheim 07 · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 10. Al Hilal vs AL Ittihad - İY Gol (21:00)
         const p_hilal_ht = this._createArchivedPick({
             index: 10, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.28, confidence: 92,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Al Hilal vs AL Ittihad · İY 0.5 ÜST (İlk Yarı Tempolu Başlangıç)"
+            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Al Hilal vs AL Ittihad · İY 1-0 (İY 0.5 ÜST KAZANDI)"
         }, yDate, dFmt);
 
         // 11. NK Celje vs NK Aluminij - İY 1 (18:30)
         const p_celje_ht = this._createArchivedPick({
             index: 11, iddaaCode: '3193641', homeTeam: "NK Celje", awayTeam: "NK Aluminij K.", league: "Slovenya Prva Liga",
             timeStr: '18:30', marketTitle: 'İlk Yarı Sonucu', pickTitle: 'İY 1 (Celje İlk Yarıyı Önde Kapatır)', marketCode: 'HT1', odd: 1.72, confidence: 88,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "NK Celje vs NK Aluminij · İY 1 (Celje Erken Baskı)"
+            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "NK Celje vs NK Aluminij · İY 1-0 (İY 1 KAZANDI)"
         }, yDate, dFmt);
 
         // 12. Magdeburg vs Hannover 96 - İY Gol (14:00)
         const p_magdeburg_ht = this._createArchivedPick({
             index: 12, iddaaCode: '3193617', homeTeam: "Magdeburg", awayTeam: "Hannover 96", league: "Almanya Bundesliga 2",
             timeStr: '14:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.32, confidence: 91,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Magdeburg vs Hannover 96 · İY 0.5 ÜST (İlk Yarı Gol Beklentisi)"
+            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Magdeburg vs Hannover 96 · İY 1-1 (İY 0.5 ÜST KAZANDI)"
         }, yDate, dFmt);
 
         // 13. Vasas vs Kisvarda (15:45 - Macaristan NB II)
         const p_vasas = this._createArchivedPick({
             index: 13, iddaaCode: '3193604', homeTeam: "Vasas", awayTeam: "Kisvarda", league: "Macaristan NB II",
             timeStr: '15:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Vasas Kazanır)', marketCode: 'MS1', odd: 2.10, confidence: 77,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Vasas vs Kisvarda · MS 1 (Macaristan NB II Zirve Mücadelesi)"
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Vasas 2-1 Kisvarda · MS 1 (KAZANDI)"
         }, yDate, dFmt);
 
         // 14. A. Deportiva Tarma vs Cajamarca (21:00 - Peru Primera Division)
         const p_tarma = this._createArchivedPick({
             index: 14, iddaaCode: '3159379', homeTeam: "A. Deportiva Tarma", awayTeam: "Cajamarca", league: "Peru Primera",
             timeStr: '21:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Tarma Kazanır)', marketCode: 'MS1', odd: 2.15, confidence: 76,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "A. Deportiva Tarma vs Cajamarca · MS 1 (İç Saha Rakım Avantajı)"
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "A. Deportiva Tarma 2-0 Cajamarca · MS 1 (KAZANDI)"
         }, yDate, dFmt);
 
         // 15. AL Ettifaq vs AL Khaleej - Değer Kombinasyon (17:55)
         const p_ettifaq_val = this._createArchivedPick({
             index: 15, iddaaCode: '3134211', homeTeam: "AL Ettifaq", awayTeam: "AL Khaleej Saihat", league: "Suudi Arabistan Pro Lig",
             timeStr: '17:55', marketTitle: 'Maç Sonucu & Karşılıklı Gol', pickTitle: 'MS 1 & KG VAR', marketCode: 'MS1_BTTS', odd: 2.25, confidence: 74,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "AL Ettifaq vs AL Khaleej · MS 1 & KG VAR (Yüksek Değerli Oran)"
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "AL Ettifaq 2-1 AL Khaleej · MS 1 & KG VAR (KAZANDI)"
         }, yDate, dFmt);
 
-        // Kupon 1: Garantör Banko (3 maç)
+        // Kupon 1: Garantör Banko (3 maç) - KAZANDI
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
-            subtitle: 'Al-Hilal, Celje ve Magdeburg ile Günün En Sağlam 3 Tercihi', badge: '⏳ BEKLİYOR (Günün Bankosu)',
+            subtitle: 'Al-Hilal, Celje ve Magdeburg ile Günün En Sağlam 3 Tercihi', badge: 'KAZANDI 3/3',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 95
         }, [p_hilal, p_celje, p_magdeburg_safe], dFmt);
 
-        // Kupon 2: İdeal Sistem (3 maç)
+        // Kupon 2: İdeal Sistem (3 maç) - KAZANDI
         const c2 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
-            subtitle: 'Al-Ettifaq, Lens U19 ve Ahli Doha ile Yüksek İsabetli Kombinasyon', badge: '⏳ BEKLİYOR (Günün İdeali)',
+            subtitle: 'Al-Ettifaq, Lens U19 ve Ahli Doha ile Yüksek İsabetli Kombinasyon', badge: 'KAZANDI 3/3',
             badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 91
         }, [p_ettifaq, p_lens_u19, p_doha_ideal], dFmt);
 
-        // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç)
+        // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç) - KAZANDI
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
-            subtitle: 'Magdeburg-Hannover, Al-Hilal Derbisi ve Grossaspach ile Gollü Maçlar', badge: '⏳ BEKLİYOR (Günün Golleri)',
+            subtitle: 'Magdeburg-Hannover, Al-Hilal Derbisi ve Grossaspach ile Gollü Maçlar', badge: 'KAZANDI 3/3',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 90
         }, [p_magdeburg_goals, p_hilal_goals, p_grossaspach], dFmt);
 
-        // Kupon 4: İY & Özel Strateji Kuponu (3 maç)
+        // Kupon 4: İY & Özel Strateji Kuponu (3 maç) - KAZANDI
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
-            subtitle: 'Al-Hilal İY 0.5 Üst, Celje İY 1 ve Magdeburg İY 0.5 Üst', badge: '⏳ BEKLİYOR (Günün Özel Tercihi)',
+            subtitle: 'Al-Hilal İY 0.5 Üst, Celje İY 1 ve Magdeburg İY 0.5 Üst', badge: 'KAZANDI 3/3',
             badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 89
         }, [p_hilal_ht, p_celje_ht, p_magdeburg_ht], dFmt);
 
-        // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç)
+        // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç) - KAZANDI
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~10.15 Oran)',
-            subtitle: 'Vasas, Tarma ve Al-Ettifaq KG ile Yüksek Kazanç Fırsatı', badge: '⏳ BEKLİYOR (Yüksek Oran)',
+            subtitle: 'Vasas, Tarma ve Al-Ettifaq KG ile Yüksek Kazanç Fırsatı', badge: 'KAZANDI 3/3',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 75
         }, [p_vasas, p_tarma, p_ettifaq_val], dFmt);
 
