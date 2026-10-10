@@ -2996,25 +2996,33 @@ const HistoricalCouponsService = {
             detail: "Gaziantep FK vs Çorum FK · Toplam Kart 3.5 ÜST (Bugün 16:00 | İddaa Kod: 3199391)"
         }, yDate, dFmt);
 
-        // 22. Flamengo vs Fluminense (23:30 - Brezilya Serie A)
-        const p_flamengo = this._createArchivedPick({
-            index: 22, iddaaCode: '3199485', homeTeam: "Flamengo", awayTeam: "Fluminense", league: "Brezilya Serie A",
-            timeStr: '23:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Flamengo Kazanır)', marketCode: 'MS1', odd: 1.32, confidence: 92,
+        // 22. Atl Junior vs Inter Bogota (02:10 - Kolombiya Primera A)
+        const p_atljunior = this._createArchivedPick({
+            index: 22, iddaaCode: '3195376', homeTeam: "Atl Junior", awayTeam: "Inter Bogota", league: "Kolombiya Primera A",
+            timeStr: '02:10', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atl Junior Kazanır)', marketCode: 'MS1', odd: 1.34, confidence: 91,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Flamengo vs Fluminense · MS 1 (Bugün 23:30 | İddaa Kod: 3199485)"
+            detail: "Atl Junior vs Inter Bogota · MS 1 (Bugün 02:10 | İddaa Kod: 3195376)"
         }, yDate, dFmt);
 
-        // 23. Palmeiras vs Corinthians (23:30 - Brezilya Serie A)
-        const p_palmeiras = this._createArchivedPick({
-            index: 23, iddaaCode: '3199547', homeTeam: "Palmeiras SP", awayTeam: "Corinthians", league: "Brezilya Serie A",
-            timeStr: '23:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Palmeiras Kazanır)', marketCode: 'MS1', odd: 1.40, confidence: 90,
+        // 23. Inter Miami vs DC United (02:30 - ABD MLS)
+        const p_intermiami = this._createArchivedPick({
+            index: 23, iddaaCode: '3194599', homeTeam: "Inter Miami", awayTeam: "DC Utd", league: "ABD MLS",
+            timeStr: '02:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Inter Miami Kazanır)', marketCode: 'MS1', odd: 1.29, confidence: 94,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Palmeiras SP vs Corinthians · MS 1 (Bugün 23:30 | İddaa Kod: 3199547)"
+            detail: "Inter Miami vs DC Utd · MS 1 (Bugün 02:30 | İddaa Kod: 3194599)"
         }, yDate, dFmt);
 
-        // 24. River Plate vs Estudiantes Río Cuarto (03:30 - Arjantin)
+        // 24. Sao Paulo vs Vitoria BA (03:00 - Brezilya Serie A)
+        const p_saopaulo = this._createArchivedPick({
+            index: 24, iddaaCode: '3199277', homeTeam: "Sao Paulo SP", awayTeam: "Vitoria BA", league: "Brezilya Serie A",
+            timeStr: '03:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Sao Paulo Kazanır)', marketCode: 'MS1', odd: 1.48, confidence: 89,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Sao Paulo SP vs Vitoria BA · MS 1 (Bugün 03:00 | İddaa Kod: 3199277)"
+        }, yDate, dFmt);
+
+        // 25. River Plate vs Estudiantes Río Cuarto (03:30 - Arjantin)
         const p_river = this._createArchivedPick({
-            index: 24, iddaaCode: '3199587', homeTeam: "River Plate", awayTeam: "Estudiantes Río C.", league: "Arjantin",
+            index: 25, iddaaCode: '3199587', homeTeam: "River Plate", awayTeam: "Estudiantes Río C.", league: "Arjantin",
             timeStr: '03:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (River Plate Kazanır)', marketCode: 'MS1', odd: 1.15, confidence: 94,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
             detail: "River Plate vs Estudiantes Río C. · MS 1 (Bugün 03:30 | İddaa Kod: 3199587)"
@@ -3069,12 +3077,12 @@ const HistoricalCouponsService = {
             badgeType: 'primary', icon: '🎯', themeColor: '#10B981', recommendedStake: 50, confidence: 88
         }, [p_southampton_cnr, p_betis_stat, p_gaziantep_crd], dFmt);
 
-        // Kupon 8: Gece / Güney Amerika (3 maç)
+        // Kupon 8: Gece / Güney Amerika & MLS (3 maç)
         const c8 = this._createArchivedCoupon({
-            id: 'c_night_' + yDate, title: '🌙 Gece / Güney Amerika & Özel Ligler',
-            subtitle: 'Flamengo, Palmeiras ve River Plate ile Gece Seansı Fırsatları', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
-            badgeType: 'special', icon: '🌙', themeColor: '#6366F1', recommendedStake: 50, confidence: 91
-        }, [p_flamengo, p_palmeiras, p_river], dFmt);
+            id: 'c_night_' + yDate, title: '🌙 Gece / Güney Amerika & MLS Kuponu',
+            subtitle: 'Atl Junior, Inter Miami ve Sao Paulo ile Önümüzdeki 1-3 Saatin Gece Seansı Bankoları', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'special', icon: '🌙', themeColor: '#6366F1', recommendedStake: 50, confidence: 92
+        }, [p_atljunior, p_intermiami, p_saopaulo], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5, c6, c7, c8], euroCoupons: [] };
     },

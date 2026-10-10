@@ -152,6 +152,11 @@ const CouponPanel = {
         // Yüzde kaç analiz edildi hesabı
         const analysisPercent = activeAnalyzedCount > 0 ? 100 : 0;
 
+        // ⏱️ Önümüzdeki 4-5 saatlik yıldırım kuponunu her zaman hazır tut
+        if (!this.hourlyCoupon && window.CouponEngine && typeof window.CouponEngine.generateHourlyCoupon === 'function') {
+            this.hourlyCoupon = window.CouponEngine.generateHourlyCoupon(window.app?.matches || app?.matches || [], 5);
+        }
+
         return `
             <div class="coupons-view-container animate-fade-in">
                 <!-- ======================================================== -->
