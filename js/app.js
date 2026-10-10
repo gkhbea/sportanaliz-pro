@@ -1728,10 +1728,15 @@ const App = {
             const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);
 
             // 1) Öncelikle günün özenle seçilmiş elit kupon havuzunu al (Galatasaray, Al Nassr, Espanyol vs.)
+            const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+            const currentMode = window.CouponPanel?.assistantCouponCount || (isWeekend ? 8 : 5);
             let coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
             if ((!coupons || coupons.length === 0 || forceRefresh) && this.matches && this.matches.length > 0) {
-                const generated = CouponEngine.generateDailyCoupons(this.matches, forceRefresh) || [];
+                const generated = CouponEngine.generateDailyCoupons(this.matches, forceRefresh, currentMode) || [];
                 if (generated && generated.length > 0) coupons = generated;
+            }
+            if (currentMode === 8 && coupons.length < 8 && window.CouponEngine?.expandTo8Coupons) {
+                coupons = window.CouponEngine.expandTo8Coupons(coupons, this.matches, chosenDate);
             }
 
             // 2) Anında kuponları arayüze bas (0ms anlık yükleme, kullanıcı asla takılı kalmaz)

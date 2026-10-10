@@ -30,73 +30,63 @@ const CouponPanel = {
         return `${y}-${m}-${d}`;
     },
 
-    getCouponsForDate(chosenDate, todayCoupons = []) {
+    getCouponsForDate(chosenDate, todayCoupons = [], targetMode = null) {
         const todayStr = this._getLocalToday();
         const queryDate = chosenDate || todayStr;
+        const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+        const mode = targetMode || this.assistantCouponCount || (isWeekend ? 8 : 5);
+
+        let result = [];
 
         // 1. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService - Resmi Maçkolik & İddaa Teyitli)
         if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
             const hist = HistoricalCouponsService.getCouponsByDate(queryDate);
             if (Array.isArray(hist) && hist.length > 0) {
-                try {
-                    localStorage.setItem('sportanaliz_coupons_by_date_' + queryDate, JSON.stringify(hist));
-                } catch (e) {}
-                return hist;
+                result = [...hist];
             }
         }
 
         // 2. Bugün için: Eğer dinamik üretilen bülten kuponları varsa bunları kullan
-        if (queryDate === todayStr && Array.isArray(todayCoupons) && todayCoupons.length > 0) {
-            return todayCoupons;
+        if (result.length === 0 && queryDate === todayStr && Array.isArray(todayCoupons) && todayCoupons.length > 0) {
+            result = [...todayCoupons];
         }
 
         // 3. localStorage'da bu tarihe ait kayıtlı kupon var mı kontrol et
-        try {
-            const saved = localStorage.getItem('sportanaliz_coupons_by_date_' + queryDate);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    // Eğer geçmiş tarih kuponu sonuçlanmamışsa sonuçlandır
-                    if (queryDate !== todayStr && window.MatchTracker) {
-                        parsed.forEach(c => {
-                            const ev = window.MatchTracker.evaluateCoupon(c);
-                            if (ev.status === 'WON') {
-                                c.resultStatus = 'won';
-                                c.status = 'won';
-                            } else if (ev.status === 'LOST') {
-                                c.resultStatus = 'lost';
-                                c.status = 'lost';
-                            }
-                        });
+        if (result.length === 0) {
+            try {
+                const saved = localStorage.getItem('sportanaliz_coupons_by_date_' + queryDate);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        result = [...parsed];
                     }
-                    return parsed;
                 }
-            }
-        } catch (e) {}
+            } catch (e) {}
+        }
 
         // 4. Bugünün kuponları için bülten kupon motorundan yeniden üretmeyi dene
-        if (queryDate === todayStr) {
-            const gen = window.CouponEngine ? CouponEngine.generateDailyCoupons(window.app?.matches || []) : [];
-            if (gen && gen.length > 0) return gen;
+        if (result.length === 0 && queryDate === todayStr) {
+            const gen = window.CouponEngine ? CouponEngine.generateDailyCoupons(window.app?.matches || [], false, mode) : [];
+            if (gen && gen.length > 0) result = [...gen];
         }
 
-        // 5. Geçmiş tarihler için HistoricalCouponsService arşivinden getir
-        if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
-            if (typeof HistoricalCouponsService.getAllCouponSets === 'function') {
-                const allSets = HistoricalCouponsService.getAllCouponSets('2026-09-09');
-                const foundSet = allSets.find(s => s.date === queryDate);
-                if (foundSet && foundSet.coupons && foundSet.coupons.length > 0) {
-                    return foundSet.coupons;
-                }
-            }
+        if (result.length === 0 && Array.isArray(todayCoupons) && todayCoupons.length > 0) {
+            result = [...todayCoupons];
         }
 
-        return todayCoupons && todayCoupons.length > 0 ? todayCoupons : [];
+        // Eğer 8 kupon modu aktifse ve 8'den az kupon varsa expandTo8Coupons ile 8'e tamamla
+        if (mode === 8 && result.length < 8 && window.CouponEngine?.expandTo8Coupons) {
+            result = window.CouponEngine.expandTo8Coupons(result, window.app?.matches || [], queryDate);
+        } else if (mode === 5 && result.length > 5) {
+            result = result.slice(0, 5);
+        }
+
+        return result;
     },
 
     /**
      * Kuponları ve Günlük Analiz Karnesini Render Et
-     * @param {Array} coupons - Günlük 5 kupon
+     * @param {Array} coupons - Günlük kuponlar
      * @param {Array} euroCoupons - (Devre dışı bırakıldı)
      * @param {string} activeFilter - 'all', 'tutan', 'yatan', 'pending'
      * @param {string} activeDate - 'today' veya 'YYYY-MM-DD'
@@ -109,7 +99,18 @@ const CouponPanel = {
         this.selectedAnalysisDate = chosenDate;
         this._lastTotalAnalyzedCount = totalAnalyzedCount; // bindEvents için sakla
 
-        const couponList = this.getCouponsForDate(chosenDate, coupons);
+        const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+        const currentMode = this.assistantCouponCount || (isWeekend ? 8 : 5);
+        this.assistantCouponCount = currentMode;
+
+        let couponList = this.getCouponsForDate(chosenDate, coupons, currentMode);
+        if (currentMode === 8 && couponList.length < 8 && window.CouponEngine?.expandTo8Coupons) {
+            couponList = window.CouponEngine.expandTo8Coupons(couponList, window.app?.matches || [], chosenDate);
+        } else if (currentMode === 5 && couponList.length > 5) {
+            couponList = couponList.slice(0, 5);
+        }
+        if (window.app) window.app.coupons = couponList;
+        this.lastDisplayedCoupons = couponList;
 
         // Seçilen Tarihin Analiz İstatistiklerini Al
         const dailyAnalysisStats = window.MatchTracker 
@@ -248,10 +249,10 @@ const CouponPanel = {
                         <span style="font-size:1.4rem;">🤖</span>
                         <div>
                             <h3 style="margin:0;font-size:1.15rem;color:#ffffff;font-weight:800;">
-                                Benim İçin Bahis Yap — Günün 5 Özel Kuponu
+                                Benim İçin Bahis Yap — Günün ${couponList.length} Özel Kuponu ${currentMode === 8 ? '(Hafta Sonu 8 Kupon Modu)' : '(5 Kupon Modu)'}
                             </h3>
                             <span style="font-size:0.82rem;color:var(--text-muted);">
-                                ${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden AI konsensüsüyle hazırlanmış 5 stratejik kupon
+                                ${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden AI konsensüsüyle hazırlanmış ${couponList.length} stratejik kupon
                             </span>
                         </div>
                     </div>
@@ -1701,33 +1702,59 @@ const CouponPanel = {
     },
 
     _updateAssistantCalculations(app) {
+        const mode = this.assistantCouponCount || (new Date().getDay() === 0 || new Date().getDay() === 6 ? 8 : 5);
+        this.assistantCouponCount = mode;
+
+        // 1. Asistan kartını güncelle
         const wrapper = document.querySelector('.assistant-staking-card');
         if (wrapper) {
             wrapper.outerHTML = this.renderAssistantStakingCard();
             this.bindAssistantEvents(app);
-            // Refresh cards to update stake numbers
-            const grid = document.querySelector('.coupons-grid');
-            if (grid && app.coupons) {
-                grid.innerHTML = (this.lastDisplayedCoupons || app.coupons).map((c, i) => this.renderCouponCard(c, i)).join('');
-                // rebind verify buttons
-                document.querySelectorAll('.btn-open-coupon-verify').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const couponId = btn.dataset.couponId;
-                        const targetCoupon = (app.coupons || []).find(c => c.id === couponId);
-                        if (targetCoupon) {
-                            const modal = document.getElementById('modal-coupon-verify');
-                            const titleEl = document.getElementById('modal-coupon-verify-title');
-                            const subEl = document.getElementById('modal-coupon-verify-subtitle');
-                            const bodyEl = document.getElementById('modal-coupon-verify-body');
-                            if (titleEl) titleEl.textContent = `${targetCoupon.title} · Resmi Maç Teyit Raporu`;
-                            if (subEl) subEl.textContent = `Resmi Maçkolik & İddaa sonuçlarıyla ${targetCoupon.matches?.length || 0} maçın karşılaştırması`;
-                            if (bodyEl) bodyEl.innerHTML = this.renderCouponVerifyModalBody(targetCoupon);
-                            if (modal) modal.classList.add('active');
-                        }
-                    });
+        }
+
+        // 2. Mod (5 veya 8) doğrultusunda kupon listesini dinamik güncelle
+        let targetCoupons = this.getCouponsForDate(this.selectedAnalysisDate, app?.coupons || [], mode);
+        if (mode === 8 && targetCoupons.length < 8 && window.CouponEngine?.expandTo8Coupons) {
+            targetCoupons = window.CouponEngine.expandTo8Coupons(targetCoupons, app?.matches || [], this.selectedAnalysisDate);
+        } else if (mode === 5 && targetCoupons.length > 5) {
+            targetCoupons = targetCoupons.slice(0, 5);
+        }
+
+        if (app) app.coupons = targetCoupons;
+        this.lastDisplayedCoupons = targetCoupons;
+
+        // 3. Kuponlar gridini anında 8 (veya 5) kupon kartıyla doldur
+        const grid = document.querySelector('.coupons-grid');
+        if (grid) {
+            grid.innerHTML = targetCoupons.map((c, i) => this.renderCouponCard(c, i)).join('');
+            // rebind verify buttons
+            document.querySelectorAll('.btn-open-coupon-verify').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const couponId = btn.dataset.couponId;
+                    const targetCoupon = (targetCoupons || []).find(c => c.id === couponId);
+                    if (targetCoupon) {
+                        const modal = document.getElementById('modal-coupon-verify');
+                        const titleEl = document.getElementById('modal-coupon-verify-title');
+                        const subEl = document.getElementById('modal-coupon-verify-subtitle');
+                        const bodyEl = document.getElementById('modal-coupon-verify-body');
+                        if (titleEl) titleEl.textContent = `${targetCoupon.title} · Resmi Maç Teyit Raporu`;
+                        if (subEl) subEl.textContent = `Resmi Maçkolik & İddaa sonuçlarıyla ${targetCoupon.matches?.length || 0} maçın karşılaştırması`;
+                        if (bodyEl) bodyEl.innerHTML = this.renderCouponVerifyModalBody(targetCoupon);
+                        if (modal) modal.classList.add('active');
+                    }
                 });
-            }
+            });
+        }
+
+        // 4. Bölüm başlığı ve filtre sayacını güncelle
+        const titleEl = document.querySelector('.coupons-section-header h3');
+        if (titleEl) {
+            titleEl.textContent = `Benim İçin Bahis Yap — Günün ${targetCoupons.length} Özel Kuponu ${mode === 8 ? '(Hafta Sonu 8 Kupon Modu)' : '(5 Kupon Modu)'}`;
+        }
+        const allBtnBadge = document.querySelector('.c-status-menu-btn.status-all span:last-child');
+        if (allBtnBadge) {
+            allBtnBadge.textContent = targetCoupons.length;
         }
     },
 
