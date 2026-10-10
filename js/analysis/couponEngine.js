@@ -1528,19 +1528,27 @@ const CouponEngine = {
 
     /**
      * AI Asistan Kasa ve Bahis Dağıtım Motoru
-     * Kural: Her kupona başlangıçta en fazla 50 TL.
-     * Hafta içi 5 kupon, hafta sonu 8 kupon.
-     * Kazanılanın %50'si cebe kilitlenir, %50'si kuponların güvenine göre dağıtılır.
+     * Kural: 2.000 TL'ye kadar %50 cebe kilitleme devre dışıdır; ne kazandıysak
+     * üstüne koyarak bütün bakiye (%100) kuponlara paylaştırılır (tam katlama).
+     * Bakiye 2.000 TL'yi geçtikten sonra sistem devreye girer: Kazanılanın %50'si cebe kilitlenir, %50'si kuponlara dağıtılır.
      */
-    calculateAssistantStakeAllocation(amount = 250, isWinnings = true, couponCount = 5, maxInitialPerCoupon = 50) {
+    calculateAssistantStakeAllocation(amount = 250, isWinnings = true, couponCount = 5, maxInitialPerCoupon = 50, profitLockThreshold = 2000) {
         let budget = 0;
         let pocketProfit = 0;
 
         const numAmount = Math.max(10, parseFloat(amount) || 250);
+        const isAboveThreshold = numAmount > profitLockThreshold;
 
         if (isWinnings) {
-            pocketProfit = Math.round(numAmount * 0.50);
-            budget = numAmount - pocketProfit;
+            if (isAboveThreshold) {
+                // 2.000 TL barajı aşıldı: %50 garantili cebe kilitlenir, %50 kuponlara dağıtılır
+                pocketProfit = Math.round(numAmount * 0.50);
+                budget = numAmount - pocketProfit;
+            } else {
+                // 2.000 TL'ye kadar tam katlama: %50 cebe atma yok, tüm bakiye kuponlara dağıtılır
+                pocketProfit = 0;
+                budget = numAmount;
+            }
         } else {
             budget = numAmount;
         }
@@ -1592,6 +1600,8 @@ const CouponEngine = {
 
         return {
             totalAmount: numAmount,
+            profitLockThreshold,
+            isAboveThreshold,
             pocketProfit,
             budgetToPlay: budget,
             couponCount,

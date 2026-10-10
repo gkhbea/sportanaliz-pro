@@ -1589,26 +1589,31 @@ const CouponPanel = {
                 allocations: []
             };
 
+        const isUnderThreshold = baseAmount <= 2000;
+        const progressPct = Math.min(100, Math.round((baseAmount / 2000) * 100));
+
         return `
-            <div class="assistant-staking-card" style="background:linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.88) 100%);border:1px solid rgba(245,158,11,0.4);border-radius:16px;padding:18px 22px;margin-bottom:20px;box-shadow:0 8px 30px rgba(0,0,0,0.35);position:relative;overflow:hidden;">
-                <div style="position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle, rgba(245,158,11,0.18), transparent 70%);pointer-events:none;"></div>
+            <div class="assistant-staking-card" style="background:linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.88) 100%);border:1px solid ${isUnderThreshold ? 'rgba(0,240,255,0.45)' : 'rgba(245,158,11,0.5)'};border-radius:16px;padding:18px 22px;margin-bottom:20px;box-shadow:0 8px 30px rgba(0,0,0,0.35);position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle, ${isUnderThreshold ? 'rgba(0,240,255,0.18)' : 'rgba(245,158,11,0.18)'}, transparent 70%);pointer-events:none;"></div>
 
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <span style="font-size:1.6rem;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;">
-                            🤖
+                        <span style="font-size:1.6rem;background:${isUnderThreshold ? 'rgba(0,240,255,0.15)' : 'rgba(245,158,11,0.15)'};border:1px solid ${isUnderThreshold ? 'rgba(0,240,255,0.35)' : 'rgba(245,158,11,0.35)'};width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;">
+                            ${isUnderThreshold ? '🚀' : '🏆'}
                         </span>
                         <div>
-                            <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                 <h3 style="margin:0;font-size:1.08rem;font-weight:900;color:#ffffff;">
                                     AI Asistan Kasa Dağıtım & Katlama Sistemi
                                 </h3>
-                                <span style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#F59E0B;padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:900;">
-                                    📌 MAX 50 TL / KUPON
+                                <span style="background:${isUnderThreshold ? 'rgba(0,240,255,0.2)' : 'rgba(16,185,129,0.2)'};border:1px solid ${isUnderThreshold ? '#00F0FF' : '#10B981'};color:${isUnderThreshold ? '#00F0FF' : '#10B981'};padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:900;">
+                                    ${isUnderThreshold ? '🚀 2.000 TL\'YE KADAR TAM KATLAMA (%100 BÜTÇE)' : '🔒 2.000 TL BARAJI AŞILDI (%50 KÂR KİLİTLEME)'}
                                 </span>
                             </div>
-                            <span style="font-size:0.78rem;color:#cbd5e1;">
-                                Kazanılanın %50'si cebe kilitlenir, kalan %50'si asistan tarafından kuponların güvenine göre dağıtılır.
+                            <span style="font-size:0.78rem;color:#cbd5e1;display:block;margin-top:2px;">
+                                ${isUnderThreshold 
+                                    ? '📌 <strong>2.000 TL barajına kadar %50 cebe atma yok:</strong> Ne kazandıysak üstüne eklenerek bütün bakiye kuponlara dağıtılır.' 
+                                    : '📌 <strong>2.000 TL aşıldı:</strong> Kazanılanın %50\'si cebe kilitlenir, kalan %50\'si asistan tarafından kuponların güvenine göre dağıtılır.'}
                             </span>
                         </div>
                     </div>
@@ -1624,31 +1629,44 @@ const CouponPanel = {
                     </div>
                 </div>
 
+                <!-- 2.000 TL Katlama Barajı İlerleme Çubuğu -->
+                <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px 14px;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:var(--text-muted);font-weight:700;margin-bottom:4px;">
+                        <span>🎯 2.000 TL Kâr Kilitleme Barajı İlerlemesi:</span>
+                        <span style="color:${isUnderThreshold ? '#00F0FF' : '#10B981'};font-weight:900;">${baseAmount} TL / 2.000 TL (%${progressPct})</span>
+                    </div>
+                    <div style="width:100%;background:rgba(255,255,255,0.08);height:6px;border-radius:6px;overflow:hidden;">
+                        <div style="width:${progressPct}%;height:100%;background:${isUnderThreshold ? 'linear-gradient(90deg,#00F0FF,#3B82F6)' : 'linear-gradient(90deg,#10B981,#F59E0B)'};border-radius:6px;transition:width 0.4s ease;"></div>
+                    </div>
+                </div>
+
                 <!-- Bütçe Girişi & Kasa Özeti -->
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:14px;">
                     <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px;">
                         <label style="font-size:0.72rem;color:var(--text-muted);font-weight:700;display:block;margin-bottom:4px;">
-                            💵 ÖNCEKİ TUR KAZANCI VEYA ANA BÜTÇE:
+                            💵 ÖNCEKİ TUR KAZANCI VEYA GÜNCEL BAKİYE:
                         </label>
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <input type="number" id="input-assistant-budget" value="${baseAmount}" step="10" min="10" style="background:rgba(15,23,42,0.8);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:6px 12px;color:#facc15;font-weight:900;font-size:1.1rem;width:100%;outline:none;">
+                            <input type="number" id="input-assistant-budget" value="${baseAmount}" step="10" min="10" style="background:rgba(15,23,42,0.8);border:1px solid ${isUnderThreshold ? 'rgba(0,240,255,0.4)' : 'rgba(245,158,11,0.4)'};border-radius:8px;padding:6px 12px;color:#facc15;font-weight:900;font-size:1.1rem;width:100%;outline:none;">
                             <span style="color:#ffffff;font-weight:900;font-size:0.9rem;">TL</span>
                         </div>
                     </div>
 
-                    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:10px 14px;">
-                        <span style="font-size:0.72rem;color:#10B981;font-weight:800;display:block;text-transform:uppercase;">
-                            🔒 CEBE KİLİTLENEN NET KÂR (%50)
+                    <div style="background:${isUnderThreshold ? 'rgba(255,255,255,0.03)' : 'rgba(16,185,129,0.08)'};border:1px solid ${isUnderThreshold ? 'rgba(255,255,255,0.1)' : 'rgba(16,185,129,0.3)'};border-radius:12px;padding:10px 14px;">
+                        <span style="font-size:0.72rem;color:${isUnderThreshold ? '#94a3b8' : '#10B981'};font-weight:800;display:block;text-transform:uppercase;">
+                            🔒 CEBE KİLİTLENEN NET KÂR ${isUnderThreshold ? '(2.000 TL SONRASI)' : '(%50)'}
                         </span>
-                        <strong style="font-size:1.35rem;color:#10B981;font-weight:900;display:block;margin-top:2px;">
-                            +${alloc.pocketProfit} TL
+                        <strong style="font-size:1.35rem;color:${isUnderThreshold ? '#94a3b8' : '#10B981'};font-weight:900;display:block;margin-top:2px;">
+                            ${isUnderThreshold ? '0 TL' : `+${alloc.pocketProfit} TL`}
                         </strong>
-                        <span style="font-size:0.7rem;color:#94a3b8;">Garantili nakit kâr (asla riske edilmez)</span>
+                        <span style="font-size:0.7rem;color:#94a3b8;">
+                            ${isUnderThreshold ? '2.000 TL barajına kadar tam katlama aktif' : 'Garantili nakit kâr (asla riske edilmez)'}
+                        </span>
                     </div>
 
                     <div style="background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.3);border-radius:12px;padding:10px 14px;">
                         <span style="font-size:0.72rem;color:#00F0FF;font-weight:800;display:block;text-transform:uppercase;">
-                            🎯 KUPONLARA DAĞITILAN BÜTÇE (%50)
+                            🎯 KUPONLARA DAĞITILAN BÜTÇE ${isUnderThreshold ? '(%100 TAM BÜTÇE)' : '(%50)'}
                         </span>
                         <strong style="font-size:1.35rem;color:#00F0FF;font-weight:900;display:block;margin-top:2px;">
                             ${alloc.budgetToPlay} TL
