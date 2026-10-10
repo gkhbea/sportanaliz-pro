@@ -323,6 +323,27 @@ const CouponPanel = {
                         </div>
                     </div>
                 </div>
+
+                <!-- ======================================================== -->
+                <!-- 🔎 KUPON MAÇLARI RESMİ TEYİT MODALI                       -->
+                <!-- ======================================================== -->
+                <div class="modal-overlay" id="modal-coupon-verify">
+                    <div class="modal-container" style="max-width:780px;max-height:90vh;overflow-y:auto;">
+                        <div class="modal-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span style="font-size:1.4rem;">🔎</span>
+                                <div>
+                                    <h3 class="modal-title" id="modal-coupon-verify-title">Kupon Maçları Resmi Teyit Raporu</h3>
+                                    <span style="font-size:0.8rem;color:var(--text-muted);" id="modal-coupon-verify-subtitle">Resmi Maçkolik &amp; İddaa bülten skorlarıyla doğrudan karşılaştırma</span>
+                                </div>
+                            </div>
+                            <button class="modal-close" data-close="modal-coupon-verify">✕</button>
+                        </div>
+                        <div class="modal-body" id="modal-coupon-verify-body" style="padding:16px 20px;">
+                            <!-- Dinamik içerik buraya yüklenecek -->
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     },
@@ -446,12 +467,120 @@ const CouponPanel = {
                         <span style="font-size:0.72rem;color:var(--text-muted);display:block;">Canlı / Bekleyen</span>
                         <strong style="font-size:1.15rem;color:#F59E0B;">⏳ ${pending + live} Maç</strong>
                     </div>
-                    <div style="background:rgba(0,240,255,0.06);padding:8px 12px;border-radius:8px;border:1px solid rgba(0,240,255,0.2);">
+                    <div style="background:rgba(0,240,255,0.06);padding:8px 12px;border-radius:8px;border-line:1px solid rgba(0,240,255,0.2);">
                         <span style="font-size:0.72rem;color:var(--text-muted);display:block;">Doğruluk Oranı</span>
                         <strong style="font-size:1.15rem;color:#00F0FF;">🏆 %${rate}</strong>
                         <span style="font-size:0.65rem;color:#38BDF8;display:block;">${(won + lost) > 0 ? 'Resmi Başarı' : 'AI Model Güveni'}</span>
                     </div>
                 </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Kupon Maçları Detaylı Resmi Teyit Modalı İçeriğini Render Et
+     */
+    renderCouponVerifyModalBody(coupon) {
+        if (!coupon) return '<div class="empty-state">Kupon bulunamadı.</div>';
+
+        const matches = coupon.matches || coupon.picks || [];
+        const evalResult = window.MatchTracker ? window.MatchTracker.evaluateCoupon(coupon) : { status: coupon.resultStatus?.toUpperCase() || 'WON' };
+        const isWon = evalResult.status === 'WON' || coupon.resultStatus === 'won';
+        const isLost = evalResult.status === 'LOST' || coupon.resultStatus === 'lost';
+        const defaultStake = coupon.recommendedStake || 100;
+        const totalOdd = parseFloat(coupon.totalOdd || '1.00');
+        const potentialWin = coupon.potentialReturn || (defaultStake * totalOdd).toFixed(2);
+        const netProfit = coupon.netProfit !== undefined ? coupon.netProfit : (isWon ? +(potentialWin - defaultStake).toFixed(2) : -defaultStake);
+
+        return `
+            <div style="background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.85));border:1px solid rgba(0,240,255,0.25);border-radius:14px;padding:16px 20px;margin-bottom:18px;box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+                    <div>
+                        <div style="font-size:0.75rem;color:${coupon.themeColor || '#00F0FF'};font-weight:900;text-transform:uppercase;letter-spacing:0.5px;">${coupon.badge || 'KUPON'}</div>
+                        <h3 style="margin:2px 0 0;color:#ffffff;font-size:1.2rem;font-weight:800;">${coupon.title}</h3>
+                        ${coupon.subtitle ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">${coupon.subtitle}</div>` : ''}
+                    </div>
+                    <span style="display:inline-block;padding:6px 14px;border-radius:8px;font-size:0.85rem;font-weight:900;background:${isWon ? 'rgba(16,185,129,0.2)' : (isLost ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)')};color:${isWon ? '#10B981' : (isLost ? '#EF4444' : '#F59E0B')};border:1.5px solid ${isWon ? '#10B981' : (isLost ? '#EF4444' : '#F59E0B')};box-shadow:0 0 12px ${isWon ? 'rgba(16,185,129,0.3)' : (isLost ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)')};">
+                        ${isWon ? '🎉 KUPON TUTTU' : (isLost ? '❌ KUPON YATTI' : '⏳ BEKLİYOR')}
+                    </span>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 14px;text-align:center;">
+                    <div>
+                        <span style="font-size:0.72rem;color:var(--text-muted);display:block;font-weight:700;">Toplam Oran</span>
+                        <strong style="color:#00F0FF;font-size:1.1rem;font-weight:900;">${totalOdd.toFixed(2)}</strong>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;color:var(--text-muted);display:block;font-weight:700;">Yatırılan</span>
+                        <strong style="color:#ffffff;font-size:1.1rem;font-weight:900;">${defaultStake} TL</strong>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;color:var(--text-muted);display:block;font-weight:700;">${isWon ? 'Kazanılan' : 'Olası Kazanç'}</span>
+                        <strong style="color:#10B981;font-size:1.1rem;font-weight:900;">${potentialWin} TL</strong>
+                    </div>
+                    <div>
+                        <span style="font-size:0.72rem;color:var(--text-muted);display:block;font-weight:700;">Net Kâr / Durum</span>
+                        <strong style="color:${isWon ? '#10B981' : (isLost ? '#EF4444' : '#00F0FF')};font-size:1.1rem;font-weight:900;">
+                            ${isWon ? `+${netProfit} TL` : (isLost ? `-${defaultStake} TL` : `+${netProfit} TL`)}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size:0.9rem;font-weight:900;color:#ffffff;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                <span>📋</span> Kupondaki Maçların Resmi Maçkolik &amp; İddaa Teyit Dökümü (${matches.length} Maç)
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                ${matches.map((m, idx) => {
+                    const iddaaCode = m.iddaaCode || m.match?.iddaaCode || m.match?.code || '';
+                    const mackolikUrl = m.mackolikUrl || (iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar');
+                    const score = m.scoreText || m.scoreStr || (m.scoreData ? `${m.scoreData.homeScore} - ${m.scoreData.awayScore}` : '0 - 0');
+                    const isMwon = m.resultStatus === 'won' || m.evaluation?.status === 'WON' || m.isWon;
+                    const isMlost = m.resultStatus === 'lost' || m.evaluation?.status === 'LOST';
+                    const isMpending = !isMwon && !isMlost;
+                    const detail = m.detail || m.analysisReason || '';
+                    return `
+                        <div style="background:rgba(255,255,255,0.035);border:1px solid ${isMwon ? 'rgba(16,185,129,0.35)' : (isMlost ? 'rgba(239,68,68,0.35)' : 'rgba(0,240,255,0.2)')};border-radius:12px;padding:14px 18px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                    <span style="font-weight:900;color:var(--text-muted);font-size:0.85rem;">#${idx + 1}</span>
+                                    <span style="font-size:0.78rem;color:var(--text-muted);font-weight:700;">${m.league} · ⏰ ${m.timeStr}</span>
+                                    ${iddaaCode ? `<span style="background:rgba(234,179,8,0.2);border:1px solid rgba(234,179,8,0.5);color:#facc15;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:900;">🏷️ İddaa Kodu: ${iddaaCode}</span>` : ''}
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <strong style="font-family:monospace;font-size:1.25rem;color:#ffffff;background:rgba(0,0,0,0.5);padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);letter-spacing:1px;">${score}</strong>
+                                    <span style="padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:900;background:${isMwon ? 'rgba(16,185,129,0.2)' : (isMlost ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)')};color:${isMwon ? '#10B981' : (isMlost ? '#EF4444' : '#F59E0B')};">
+                                        ${isMwon ? '✅ TUTTU' : (isMlost ? '❌ YATTI' : '⏳ BEKLİYOR')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div style="font-weight:800;font-size:1.05rem;color:#ffffff;margin-bottom:8px;">
+                                ${m.homeTeam} <span style="color:var(--text-muted);font-size:0.9rem;font-weight:400;">vs</span> ${m.awayTeam}
+                            </div>
+
+                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:rgba(0,0,0,0.3);border-radius:8px;padding:8px 12px;border:1px solid rgba(255,255,255,0.05);">
+                                <div style="font-size:0.84rem;">
+                                    <span style="color:var(--text-muted);font-weight:700;">Oynanan Bahis:</span>
+                                    <strong style="color:#00F0FF;margin-left:6px;font-size:0.9rem;">${m.pickTitle}</strong>
+                                    <span style="color:#cbd5e1;margin-left:8px;">(Oran: <strong style="color:#ffffff;">${m.odd}</strong>)</span>
+                                </div>
+                                ${iddaaCode ? `
+                                    <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(234,179,8,0.25),rgba(202,138,4,0.35));border:1px solid #facc15;color:#facc15;padding:4px 12px;border-radius:6px;font-size:0.75rem;font-weight:900;text-decoration:none;transition:all 0.2s;" title="Resmi Maçkolik arşiv sayfasında maçı canlı/bitiş skoruyla teyit et">
+                                        🔗 Maçkolik Resmi Sayfası ↗
+                                    </a>
+                                ` : ''}
+                            </div>
+
+                            ${detail ? `
+                                <div style="font-size:0.78rem;color:#cbd5e1;margin-top:8px;background:rgba(16,185,129,0.06);border-left:3px solid #10B981;padding:6px 10px;border-radius:0 6px 6px 0;line-height:1.4;">
+                                    <strong style="color:#10B981;">Resmi Teyit Açıklaması:</strong> ${detail}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
     },
@@ -836,6 +965,9 @@ const CouponPanel = {
                         </div>
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                             ${statusBadgeHtml}
+                            <button class="btn btn-outline btn-xs btn-open-coupon-verify" data-coupon-id="${coupon.id}" style="background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.3);color:#00F0FF;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;" title="Bu kupondaki tüm maçların resmi Maçkolik &amp; İddaa skor teyidini incele">
+                                🔍 Maçları Teyit Et
+                            </button>
                         </div>
                     </div>
 
@@ -970,6 +1102,13 @@ const CouponPanel = {
         const iddaaBadge = iddaaCode ? `<span style="background:rgba(234,179,8,0.2);border:1px solid rgba(234,179,8,0.5);color:#facc15;padding:1px 5px;border-radius:4px;font-weight:900;font-size:0.7rem;">🏷️ Kod: ${iddaaCode}</span>` : '';
 
         const timeBadge = `<span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);color:#38BDF8;padding:1px 6px;border-radius:4px;font-weight:700;font-size:0.72rem;">⏰ ${timeStr}</span>`;
+        const detailStr = matchItem.detail || matchItem.evaluation?.detail || matchItem.analysisReason || '';
+        const mackolikUrl = matchItem.mackolikUrl || (iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar');
+        const mackolikLink = iddaaCode ? `
+            <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:3px;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);color:#facc15;padding:2px 7px;border-radius:4px;font-size:0.68rem;font-weight:800;text-decoration:none;margin-left:auto;transition:all 0.2s;" title="Resmi Maçkolik arşiv sayfasında maçı teyit et">
+                <span>🔗</span> Maçkolik Teyit
+            </a>
+        ` : '';
 
         return `
             <div class="coupon-match-row" style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -983,14 +1122,20 @@ const CouponPanel = {
                     <div style="font-weight:700;color:#ffffff;font-size:0.88rem;">
                         ${homeTeam} <span style="color:var(--text-muted);font-weight:400;">vs</span> ${awayTeam}
                     </div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
                         <span style="font-size:0.82rem;font-weight:800;color:#00F0FF;background:rgba(0,240,255,0.1);padding:2px 6px;border-radius:4px;">
                             ${pickTitle}
                         </span>
                         <span style="font-size:0.82rem;font-weight:800;color:#ffffff;">
                             ${odd}
                         </span>
+                        ${mackolikLink}
                     </div>
+                    ${detailStr ? `
+                        <div style="font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.3;">
+                            <span style="color:#10B981;font-weight:800;">✓ Teyit Özeti:</span> ${detailStr}
+                        </div>
+                    ` : ''}
                 </div>
                 <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
                     <div style="font-weight:800;font-size:1.05rem;color:#ffffff;font-family:monospace;letter-spacing:1px;">
@@ -1067,10 +1212,37 @@ const CouponPanel = {
             if (modal) modal.classList.add('active');
         });
 
-        // Modal Kapatma
+        // Modal Kapatma (Analiz Karnesi)
         document.querySelectorAll('[data-close="modal-daily-analysis-matches"]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const modal = document.getElementById('modal-daily-analysis-matches');
+                if (modal) modal.classList.remove('active');
+            });
+        });
+
+        // 🔎 Kupon Maçları Detaylı Teyit Modalı Açma
+        document.querySelectorAll('.btn-open-coupon-verify').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const couponId = btn.dataset.couponId;
+                const targetCoupon = coupons.find(c => c.id === couponId);
+                if (targetCoupon) {
+                    const modal = document.getElementById('modal-coupon-verify');
+                    const titleEl = document.getElementById('modal-coupon-verify-title');
+                    const subEl = document.getElementById('modal-coupon-verify-subtitle');
+                    const bodyEl = document.getElementById('modal-coupon-verify-body');
+                    if (titleEl) titleEl.textContent = `${targetCoupon.title} · Resmi Maç Teyit Raporu`;
+                    if (subEl) subEl.textContent = `Resmi Maçkolik & İddaa sonuçlarıyla ${targetCoupon.matches?.length || 0} maçın karşılaştırması`;
+                    if (bodyEl) bodyEl.innerHTML = this.renderCouponVerifyModalBody(targetCoupon);
+                    if (modal) modal.classList.add('active');
+                }
+            });
+        });
+
+        // Teyit Modalı Kapatma
+        document.querySelectorAll('[data-close="modal-coupon-verify"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = document.getElementById('modal-coupon-verify');
                 if (modal) modal.classList.remove('active');
             });
         });
