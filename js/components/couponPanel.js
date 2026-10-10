@@ -1606,14 +1606,17 @@ const CouponPanel = {
                                 <h3 style="margin:0;font-size:1.08rem;font-weight:900;color:#ffffff;">
                                     AI Asistan Kasa Dağıtım & Katlama Sistemi
                                 </h3>
+                                <span style="background:rgba(245,158,11,0.2);border:1px solid #f59e0b;color:#fcd34d;padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:900;">
+                                    📌 MİNİMUM 50 TL / KUPON
+                                </span>
                                 <span style="background:${isUnderThreshold ? 'rgba(0,240,255,0.2)' : 'rgba(16,185,129,0.2)'};border:1px solid ${isUnderThreshold ? '#00F0FF' : '#10B981'};color:${isUnderThreshold ? '#00F0FF' : '#10B981'};padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:900;">
                                     ${isUnderThreshold ? '🚀 2.000 TL\'YE KADAR TAM KATLAMA (%100 BÜTÇE)' : '🔒 2.000 TL BARAJI AŞILDI (%50 KÂR KİLİTLEME)'}
                                 </span>
                             </div>
                             <span style="font-size:0.78rem;color:#cbd5e1;display:block;margin-top:2px;">
                                 ${isUnderThreshold 
-                                    ? '📌 <strong>2.000 TL barajına kadar %50 cebe atma yok:</strong> Ne kazandıysak üstüne eklenerek bütün bakiye kuponlara dağıtılır.' 
-                                    : '📌 <strong>2.000 TL aşıldı:</strong> Kazanılanın %50\'si cebe kilitlenir, kalan %50\'si asistan tarafından kuponların güvenine göre dağıtılır.'}
+                                    ? '📌 <strong>Kupon başına en az 50 TL yatırılır.</strong> 2.000 TL barajına kadar cebe atma yok; ne kazandıysak üstüne eklenerek bütün bakiye kuponlara dağıtılır.' 
+                                    : '📌 <strong>Kupon başına en az 50 TL yatırılır.</strong> 2.000 TL barajı aşıldı: Kazanılanın %50\'si cebe kilitlenir, kalan %50\'si kuponlara güven ağırlıklı dağıtılır.'}
                             </span>
                         </div>
                     </div>
@@ -1733,8 +1736,9 @@ const CouponPanel = {
             btn.addEventListener('click', (e) => {
                 const mode = parseInt(btn.dataset.mode, 10);
                 this.assistantCouponCount = mode;
-                if (!this.assistantInputAmount) {
-                    this.assistantInputAmount = mode === 8 ? 400 : 250;
+                const minForMode = mode === 8 ? 400 : 250;
+                if (!this.assistantInputAmount || this.assistantInputAmount < minForMode) {
+                    this.assistantInputAmount = minForMode;
                 }
                 this._updateAssistantCalculations(app);
             });

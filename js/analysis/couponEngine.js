@@ -1528,15 +1528,17 @@ const CouponEngine = {
 
     /**
      * AI Asistan Kasa ve Bahis Dağıtım Motoru
-     * Kural: 2.000 TL'ye kadar %50 cebe kilitleme devre dışıdır; ne kazandıysak
+     * Kural 1: Her kupona EN AZ (MİNİMUM) 50 TL yatırılır (minStakePerCoupon = 50 TL).
+     * Kural 2: 2.000 TL'ye kadar %50 cebe kilitleme devre dışıdır; ne kazandıysak
      * üstüne koyarak bütün bakiye (%100) kuponlara paylaştırılır (tam katlama).
-     * Bakiye 2.000 TL'yi geçtikten sonra sistem devreye girer: Kazanılanın %50'si cebe kilitlenir, %50'si kuponlara dağıtılır.
+     * Kural 3: Bakiye 2.000 TL'yi geçtikten sonra sistem devreye girer: Kazanılanın %50'si cebe kilitlenir, %50'si kuponlara dağıtılır.
      */
-    calculateAssistantStakeAllocation(amount = 250, isWinnings = true, couponCount = 5, maxInitialPerCoupon = 50, profitLockThreshold = 2000) {
+    calculateAssistantStakeAllocation(amount = 250, isWinnings = true, couponCount = 5, minStakePerCoupon = 50, profitLockThreshold = 2000) {
         let budget = 0;
         let pocketProfit = 0;
 
-        const numAmount = Math.max(10, parseFloat(amount) || 250);
+        const minRequiredBudget = couponCount * minStakePerCoupon;
+        const numAmount = Math.max(minRequiredBudget, parseFloat(amount) || minRequiredBudget);
         const isAboveThreshold = numAmount > profitLockThreshold;
 
         if (isWinnings) {
@@ -1553,9 +1555,8 @@ const CouponEngine = {
             budget = numAmount;
         }
 
-        if (!isWinnings && budget > couponCount * maxInitialPerCoupon) {
-            budget = couponCount * maxInitialPerCoupon;
-        }
+        // Bütçe her zaman en az (kupon sayısı * 50 TL) olmalıdır
+        budget = Math.max(minRequiredBudget, budget);
 
         const weightsWeekday = [
             { id: 1, title: '🛡️ Garantör Banko', weight: 0.34, minOdds: 2.25, confidence: 95, role: 'Sermaye Sigortası' },
@@ -1578,9 +1579,13 @@ const CouponEngine = {
 
         const list = couponCount === 8 ? weightsWeekend : weightsWeekday;
 
+        // Her kupona taban olarak en az 50 TL verilir, 50 TL'nin üzerindeki bakiye ağırlıklara göre dağıtılır
+        const excessBudget = Math.max(0, budget - minRequiredBudget);
+
         let allocations = list.map(item => {
-            const raw = budget * item.weight;
-            const rounded = Math.max(5, Math.round(raw / 5) * 5);
+            const extra = excessBudget > 0 ? (excessBudget * item.weight) : 0;
+            const raw = minStakePerCoupon + extra;
+            const rounded = Math.max(minStakePerCoupon, Math.round(raw / 5) * 5);
             return {
                 ...item,
                 stake: rounded,
@@ -1605,9 +1610,9 @@ const CouponEngine = {
             pocketProfit,
             budgetToPlay: budget,
             couponCount,
+            minStakePerCoupon,
             allocations,
-            totalExpectedReturn,
-            maxInitialPerCoupon
+            totalExpectedReturn
         };
     }
 };
