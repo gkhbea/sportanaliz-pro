@@ -1047,10 +1047,10 @@ const MatchTracker = {
             return this._cumulativeStatsCache[startDate];
         }
 
-        const couponSets = (window.HistoricalCouponsService && typeof HistoricalCouponsService.getAllCouponSets === 'function')
-            ? HistoricalCouponsService.getAllCouponSets(startDate)
-            : (window.CouponEngine && typeof CouponEngine.getAllArchivedCouponSets === 'function')
-                ? CouponEngine.getAllArchivedCouponSets(startDate)
+        const couponSets = (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof window.HistoricalCouponsService.getAllCouponSets === 'function')
+            ? window.HistoricalCouponsService.getAllCouponSets(startDate)
+            : (typeof window !== 'undefined' && window.CouponEngine && typeof window.CouponEngine.getAllArchivedCouponSets === 'function')
+                ? window.CouponEngine.getAllArchivedCouponSets(startDate)
                 : [];
 
         let totalCoupons = 0;
@@ -1562,8 +1562,8 @@ const MatchTracker = {
         }
 
         // 3. Kuponları ve maçlarını hafızaya ve localStorage'a sonlanmış olarak kaydet
-        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
-            const finishedCoupons = HistoricalCouponsService.getCouponsByDate(todayStr);
+        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof window.HistoricalCouponsService.getCouponsByDate === 'function') {
+            const finishedCoupons = window.HistoricalCouponsService.getCouponsByDate(todayStr);
             if (finishedCoupons && finishedCoupons.length > 0) {
                 try {
                     finishedCoupons.forEach(c => {
