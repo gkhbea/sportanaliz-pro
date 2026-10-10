@@ -1738,13 +1738,15 @@ const App = {
             container.innerHTML = CouponPanel.render(coupons, [], currentFilter, chosenDate, totalAnalyzedCount);
             CouponPanel.bindEvents(this, coupons, [], chosenDate);
 
-            // 3) Eğer maçlar henüz hafızada yoksa arka planda bülteni çek ve bittiğinde canlı güncelle
+            // 3) Eğer maçlar henüz hafızada yoksa arka planda bülteni çek
             if (!this.matches || this.matches.length === 0) {
                 this.loadDashboard().then(() => {
-                    const freshCoupons = CouponEngine.generateDailyCoupons(this.matches, false) || [];
-                    if (freshCoupons && freshCoupons.length > 0) {
-                        container.innerHTML = CouponPanel.render(freshCoupons, [], currentFilter, chosenDate, totalAnalyzedCount);
-                        CouponPanel.bindEvents(this, freshCoupons, [], chosenDate);
+                    if (!coupons || coupons.length === 0) {
+                        const freshCoupons = CouponEngine.generateDailyCoupons(this.matches, false) || [];
+                        if (freshCoupons && freshCoupons.length > 0) {
+                            container.innerHTML = CouponPanel.render(freshCoupons, [], currentFilter, chosenDate, totalAnalyzedCount);
+                            CouponPanel.bindEvents(this, freshCoupons, [], chosenDate);
+                        }
                     }
                 }).catch(() => {});
             } else {

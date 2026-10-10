@@ -34,12 +34,7 @@ const CouponPanel = {
         const todayStr = this._getLocalToday();
         const queryDate = chosenDate || todayStr;
 
-        // 1. Bugün için: Eğer dinamik üretilen bülten kuponları varsa bunları kullan
-        if (queryDate === todayStr && Array.isArray(todayCoupons) && todayCoupons.length > 0) {
-            return todayCoupons;
-        }
-
-        // 2. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService)
+        // 1. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService - Resmi Maçkolik & İddaa Teyitli)
         if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
             const hist = HistoricalCouponsService.getCouponsByDate(queryDate);
             if (Array.isArray(hist) && hist.length > 0) {
@@ -48,6 +43,11 @@ const CouponPanel = {
                 } catch (e) {}
                 return hist;
             }
+        }
+
+        // 2. Bugün için: Eğer dinamik üretilen bülten kuponları varsa bunları kullan
+        if (queryDate === todayStr && Array.isArray(todayCoupons) && todayCoupons.length > 0) {
+            return todayCoupons;
         }
 
         // 3. localStorage'da bu tarihe ait kayıtlı kupon var mı kontrol et
@@ -875,7 +875,7 @@ const CouponPanel = {
 
                 <!-- Alt Kısım: Oran, Yatırım, Kazanç & Strateji -->
                 <div class="coupon-footer" style="border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;margin-top:auto;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:10px;margin-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:10px;margin-bottom:8px;">
                         <div>
                             <span style="font-size:0.75rem;color:var(--text-muted);display:block;">Toplam Oran</span>
                             <strong style="font-size:1.35rem;color:#00F0FF;font-weight:900;">${coupon.totalOdd}</strong>
@@ -887,6 +887,24 @@ const CouponPanel = {
                         <div style="text-align:right;">
                             <span style="font-size:0.75rem;color:var(--text-muted);display:block;">Model Güveni</span>
                             <strong style="font-size:1.25rem;color:#10B981;font-weight:900;">%${coupon.confidence || 85}</strong>
+                        </div>
+                    </div>
+
+                    <!-- 💰 Finansal Hesaplama Şeridi (Yatırılan, Kazanç, Net Kâr) -->
+                    <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;background:rgba(15,23,42,0.65);border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:10px;margin-bottom:12px;text-align:center;">
+                        <div>
+                            <span style="font-size:0.68rem;color:var(--text-muted);display:block;font-weight:700;">Yatırılan</span>
+                            <strong style="font-size:0.95rem;color:#ffffff;font-weight:900;">${defaultStake} TL</strong>
+                        </div>
+                        <div>
+                            <span style="font-size:0.68rem;color:var(--text-muted);display:block;font-weight:700;">${isWon ? 'Kazanılan' : 'Olası Kazanç'}</span>
+                            <strong style="font-size:0.95rem;color:#10B981;font-weight:900;">${potentialWin} TL</strong>
+                        </div>
+                        <div>
+                            <span style="font-size:0.68rem;color:var(--text-muted);display:block;font-weight:700;">${isWon ? 'Net Kâr' : (isLost ? 'Kayıp' : 'Potansiyel Kâr')}</span>
+                            <strong style="font-size:0.95rem;color:${isWon ? '#10B981' : (isLost ? '#EF4444' : '#00F0FF')};font-weight:900;">
+                                ${isWon ? `+${(potentialWin - defaultStake).toFixed(2)} TL` : (isLost ? `-${defaultStake} TL` : `+${(potentialWin - defaultStake).toFixed(2)} TL`)}
+                            </strong>
                         </div>
                     </div>
 

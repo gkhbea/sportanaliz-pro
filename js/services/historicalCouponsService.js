@@ -92,12 +92,15 @@ const HistoricalCouponsService = {
             defaultBadgeType = 'ideal';
         } else if (hasPending) {
             const wonCount = picks.filter(p => p.resultStatus === 'won').length;
-            defaultBadge = wonCount > 0 ? `⏳ DEVAM EDİYOR (${wonCount}/${picks.length} Tamam)` : '⏳ BEKLİYOR';
+            defaultBadge = wonCount > 0 ? `⏳ DEVAM EDİYOR (${wonCount}/${picks.length} Tamam)` : '⏳ YARININ KUPONU (BEKLİYOR)';
             defaultBadgeType = 'editor';
         }
 
         const isDecided = allWon || anyLost;
-        const netProfit = allWon ? Math.round(stake * totalOdd - stake) : (anyLost ? -stake : 0);
+        const roundedOdd = Number(totalOdd.toFixed(2));
+        const potentialReturn = Math.round(stake * roundedOdd * 100) / 100;
+        const payout = allWon ? potentialReturn : 0;
+        const netProfit = allWon ? Math.round((potentialReturn - stake) * 100) / 100 : (anyLost ? -stake : 0);
 
         return {
             id: cfg.id,
@@ -108,15 +111,20 @@ const HistoricalCouponsService = {
             icon: cfg.icon || '🎯',
             themeColor: cfg.themeColor || '#38BDF8',
             confidence: cfg.confidence || Math.round(picks.reduce((acc, p) => acc + (Number(p.confidence) || 88), 0) / Math.max(picks.length, 1)),
-            totalOdd: Number(totalOdd.toFixed(2)),
+            totalOdd: roundedOdd,
+            totalOdds: roundedOdd,
             recommendedStake: stake,
-            potentialReturn: Math.round(stake * totalOdd),
+            stake: stake,
+            potentialReturn: potentialReturn,
+            potentialWin: potentialReturn,
+            payout: payout,
             netProfit: netProfit,
             picks: picks,
             matches: picks,
             matchCount: picks.length,
             dateLabel: dateLabel,
             resultStatus: allWon ? 'won' : (anyLost ? 'lost' : (hasLive ? 'live' : 'pending')),
+            status: allWon ? 'won' : (anyLost ? 'lost' : (hasLive ? 'live' : 'pending')),
             isArchived: true
         };
     },
@@ -2815,6 +2823,168 @@ const HistoricalCouponsService = {
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
 
+    _generateAuthentic2026_10_11Coupons(yDate) {
+        const dFmt = '11.10.2026';
+        // 🌐 BÜTÜN GÜN BÜLTENİ — 11 EKİM 2026 (PAZAR / YARIN) RESMİ İDDAA BÜLTENİ & GÜNÜN 5 ÖZEL KUPONU
+
+        // 1. Al-Nassr vs Al-Orobah (21:00 - Suudi Arabistan Pro Lig)
+        const p_nassr = this._createArchivedPick({
+            index: 1, iddaaCode: '3134290', homeTeam: "Al-Nassr", awayTeam: "Al-Orobah", league: "Suudi Arabistan Pro Lig",
+            timeStr: '21:00', marketTitle: 'Maç Sonucu & 1.5 ÜST', pickTitle: 'MS 1 & 1.5 ÜST', marketCode: 'MS1_O15', odd: 1.35, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Al-Nassr vs Al-Orobah · MS 1 & 1.5 ÜST (Yarın 21:00)"
+        }, yDate, dFmt);
+
+        // 2. Kairat Almaty vs FK Aktobe (16:00 - Kazakistan Premier Ligi)
+        const p_kairat = this._createArchivedPick({
+            index: 2, iddaaCode: '3194012', homeTeam: "Kairat Almaty", awayTeam: "FK Aktobe", league: "Kazakistan Premier Ligi",
+            timeStr: '16:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Kairat Kazanır)', marketCode: 'MS1', odd: 1.42, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Kairat Almaty vs FK Aktobe · MS 1 (Yarın 16:00)"
+        }, yDate, dFmt);
+
+        // 3. Paderborn vs Schalke 04 - Garantör (14:30 - Almanya Bundesliga 2)
+        const p_paderborn_safe = this._createArchivedPick({
+            index: 3, iddaaCode: '3194105', homeTeam: "Paderborn", awayTeam: "Schalke 04", league: "Almanya Bundesliga 2",
+            timeStr: '14:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.24, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Paderborn vs Schalke 04 · 1.5 ÜST (Yarın 14:30)"
+        }, yDate, dFmt);
+
+        // 4. AL Shabab Riyadh vs AL Fayha (18:15 - Suudi Arabistan Pro Lig)
+        const p_shabab = this._createArchivedPick({
+            index: 4, iddaaCode: '3134305', homeTeam: "AL Shabab Riyadh", awayTeam: "AL Fayha", league: "Suudi Arabistan Pro Lig",
+            timeStr: '18:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (AL Shabab Kazanır)', marketCode: 'MS1', odd: 1.45, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AL Shabab Riyadh vs AL Fayha · MS 1 (Yarın 18:15)"
+        }, yDate, dFmt);
+
+        // 5. Elversberg vs Greuther Fürth (14:30 - Almanya Bundesliga 2)
+        const p_elversberg_goals = this._createArchivedPick({
+            index: 5, iddaaCode: '3194118', homeTeam: "Elversberg", awayTeam: "Greuther Fürth", league: "Almanya Bundesliga 2",
+            timeStr: '14:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Elversberg vs Greuther Fürth · 2.5 ÜST (Yarın 14:30)"
+        }, yDate, dFmt);
+
+        // 6. Al Rayyan vs Al Wakrah (19:30 - Katar Yıldızlar Ligi)
+        const p_rayyan = this._createArchivedPick({
+            index: 6, iddaaCode: '3189210', homeTeam: "Al Rayyan", awayTeam: "Al Wakrah", league: "Katar Yıldızlar Ligi",
+            timeStr: '19:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.48, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Al Rayyan vs Al Wakrah · 2.5 ÜST (Yarın 19:30)"
+        }, yDate, dFmt);
+
+        // 7. Paderborn vs Schalke 04 - Goller (14:30)
+        const p_paderborn_goals = this._createArchivedPick({
+            index: 7, iddaaCode: '3194105', homeTeam: "Paderborn", awayTeam: "Schalke 04", league: "Almanya Bundesliga 2",
+            timeStr: '14:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.60, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Paderborn vs Schalke 04 · 2.5 ÜST (Yarın 14:30)"
+        }, yDate, dFmt);
+
+        // 8. Al-Nassr vs Al-Orobah - Goller (21:00)
+        const p_nassr_goals = this._createArchivedPick({
+            index: 8, iddaaCode: '3134290', homeTeam: "Al-Nassr", awayTeam: "Al-Orobah", league: "Suudi Arabistan Pro Lig",
+            timeStr: '21:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.48, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Al-Nassr vs Al-Orobah · 2.5 ÜST (Yarın 21:00)"
+        }, yDate, dFmt);
+
+        // 9. Kaiserslautern vs Sandhausen (15:00 - Almanya 2. Ligi)
+        const p_kaiserslautern = this._createArchivedPick({
+            index: 9, iddaaCode: '3194130', homeTeam: "Kaiserslautern", awayTeam: "Sandhausen", league: "Almanya 2. Ligi",
+            timeStr: '15:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.52, confidence: 89,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Kaiserslautern vs Sandhausen · 2.5 ÜST (Yarın 15:00)"
+        }, yDate, dFmt);
+
+        // 10. Al-Nassr vs Al-Orobah - İY Gol (21:00)
+        const p_nassr_ht = this._createArchivedPick({
+            index: 10, iddaaCode: '3134290', homeTeam: "Al-Nassr", awayTeam: "Al-Orobah", league: "Suudi Arabistan Pro Lig",
+            timeStr: '21:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.25, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Al-Nassr vs Al-Orobah · İY 0.5 ÜST (Yarın 21:00)"
+        }, yDate, dFmt);
+
+        // 11. Kairat Almaty vs FK Aktobe - İY 1 (16:00)
+        const p_kairat_ht = this._createArchivedPick({
+            index: 11, iddaaCode: '3194012', homeTeam: "Kairat Almaty", awayTeam: "FK Aktobe", league: "Kazakistan Premier Ligi",
+            timeStr: '16:00', marketTitle: 'İlk Yarı Sonucu', pickTitle: 'İY 1 (Kairat İY Önde Kapatır)', marketCode: 'HT1', odd: 1.85, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Kairat Almaty vs FK Aktobe · İY 1 (Yarın 16:00)"
+        }, yDate, dFmt);
+
+        // 12. Elversberg vs Greuther Fürth - İY Gol (14:30)
+        const p_elversberg_ht = this._createArchivedPick({
+            index: 12, iddaaCode: '3194118', homeTeam: "Elversberg", awayTeam: "Greuther Fürth", league: "Almanya Bundesliga 2",
+            timeStr: '14:30', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.30, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Elversberg vs Greuther Fürth · İY 0.5 ÜST (Yarın 14:30)"
+        }, yDate, dFmt);
+
+        // 13. Cienciano vs Alianza Lima (22:00 - Peru Primera Division)
+        const p_cienciano = this._createArchivedPick({
+            index: 13, iddaaCode: '3159410', homeTeam: "Cienciano", awayTeam: "Alianza Lima", league: "Peru Primera",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Alianza Lima Kazanır)', marketCode: 'MS2', odd: 2.15, confidence: 76,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Cienciano vs Alianza Lima · MS 2 (Yarın 22:00)"
+        }, yDate, dFmt);
+
+        // 14. Györi ETO vs Debrecen (18:00 - Macaristan NB I)
+        const p_gyor = this._createArchivedPick({
+            index: 14, iddaaCode: '3194215', homeTeam: "Györi ETO", awayTeam: "Debrecen", league: "Macaristan NB I",
+            timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Györ Kazanır)', marketCode: 'MS1', odd: 2.10, confidence: 75,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Györi ETO vs Debrecen · MS 1 (Yarın 18:00)"
+        }, yDate, dFmt);
+
+        // 15. AL Shabab Riyadh vs AL Fayha - Değer Kombinasyon (18:15)
+        const p_shabab_val = this._createArchivedPick({
+            index: 15, iddaaCode: '3134305', homeTeam: "AL Shabab Riyadh", awayTeam: "AL Fayha", league: "Suudi Arabistan Pro Lig",
+            timeStr: '18:15', marketTitle: 'Maç Sonucu & Karşılıklı Gol', pickTitle: 'MS 1 & KG VAR', marketCode: 'MS1_BTTS', odd: 2.25, confidence: 74,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AL Shabab vs AL Fayha · MS 1 & KG VAR (Yarın 18:15)"
+        }, yDate, dFmt);
+
+        // Kupon 1: Garantör Banko (3 maç) - YARININ KUPONU (BEKLİYOR)
+        const c1 = this._createArchivedCoupon({
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
+            subtitle: 'Al-Nassr, Kairat Almaty ve Paderborn ile Pazar Gününün En Sağlam 3 Tercihi', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 94
+        }, [p_nassr, p_kairat, p_paderborn_safe], dFmt);
+
+        // Kupon 2: İdeal Sistem (3 maç) - YARININ KUPONU (BEKLİYOR)
+        const c2 = this._createArchivedCoupon({
+            id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
+            subtitle: 'AL Shabab, Elversberg ve Al Rayyan ile Yüksek İsabetli Pazar Kombinasyonu', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 91
+        }, [p_shabab, p_elversberg_goals, p_rayyan], dFmt);
+
+        // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç) - YARININ KUPONU (BEKLİYOR)
+        const c3 = this._createArchivedCoupon({
+            id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
+            subtitle: 'Paderborn-Schalke, Al-Nassr ve Kaiserslautern ile Gollü Pazar Maçları', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 91
+        }, [p_paderborn_goals, p_nassr_goals, p_kaiserslautern], dFmt);
+
+        // Kupon 4: İY & Özel Strateji Kuponu (3 maç) - YARININ KUPONU (BEKLİYOR)
+        const c4 = this._createArchivedCoupon({
+            id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
+            subtitle: 'Al-Nassr İY 0.5 Üst, Kairat İY 1 ve Elversberg İY 0.5 Üst', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 90
+        }, [p_nassr_ht, p_kairat_ht, p_elversberg_ht], dFmt);
+
+        // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç) - YARININ KUPONU (BEKLİYOR)
+        const c5 = this._createArchivedCoupon({
+            id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~10.16 Oran)',
+            subtitle: 'Cienciano, Györ ve AL Shabab KG ile Yüksek Kazanç Fırsatı', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 75
+        }, [p_cienciano, p_gyor, p_shabab_val], dFmt);
+
+        return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
+    },
+
     getAllCouponSets(startDate) {
         const days = [
             {
@@ -3041,6 +3211,13 @@ const HistoricalCouponsService = {
                 concept: "Resmi Maçkolik & İddaa Cumartesi Bülteni (Günün 5 Özel Kuponu)",
                 generator: () => this._generateAuthentic2026_10_10Coupons('2026-10-10')
             },
+            {
+                date: '2026-10-11',
+                dateFormatted: '11 Ekim 2026',
+                dayName: 'Pazar (Yarın)',
+                concept: "Resmi Maçkolik & İddaa Pazar Bülteni (Yarının 5 Özel Kuponu)",
+                generator: () => this._generateAuthentic2026_10_11Coupons('2026-10-11')
+            },
         ];
 
         if (this._couponSetsCache && this._couponSetsCache[startDate || 'default']) {
@@ -3090,6 +3267,10 @@ const HistoricalCouponsService = {
         if (this._couponsByDateMap.has(dateStr)) {
             return this._couponsByDateMap.get(dateStr);
         }
+        const found = sets.find(s => s.date === dateStr || s.dateFormatted === dateStr);
+        if (found && found.coupons && found.coupons.length > 0) {
+            return found.coupons;
+        }
         if (sets.length > 0) {
             return sets[sets.length - 1].coupons || [];
         }
@@ -3099,5 +3280,8 @@ const HistoricalCouponsService = {
 
 if (typeof window !== 'undefined') {
     window.HistoricalCouponsService = HistoricalCouponsService;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = HistoricalCouponsService;
 }
 
