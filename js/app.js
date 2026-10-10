@@ -224,19 +224,16 @@ const App = {
         // Güven %65+ butonuna tıklama (Dashboard filter bar)
         document.getElementById('btn-quick-high-conf')?.addEventListener('click', () => {
             this.navigate('analysis');
-            this.loadHighConfidenceShowcase('all');
         });
 
         // Güven %65+ stat kartına tıklama
         document.getElementById('stat-high-conf')?.addEventListener('click', () => {
             this.navigate('analysis');
-            this.loadHighConfidenceShowcase('all');
         });
 
         // Günün 4 Kuponu (Benim İçin Bahis Yap) butonuna tıklama
         document.getElementById('btn-quick-coupons')?.addEventListener('click', () => {
             this.navigate('coupons');
-            this.loadDailyCoupons(false, 'all', 'today');
         });
 
 
@@ -777,15 +774,15 @@ const App = {
         try {
             const result = await DataManager.fetchMatches(this.currentSport);
             this.matches = result.matches;
+            this._cachedHighConfidenceMatches = null;
+            if (window.MatchTracker?.clearScoreMemo) window.MatchTracker.clearScoreMemo();
             this.highConfidenceMatches = this.computeHighConfidenceMatches();
 
-            // Bülten maçlarını anında canlı skor beslemesiyle eşleştir
+            // Bülten maçlarını arka planda canlı skor beslemesiyle asenkron eşleştir (UI ve geçişleri asla bekletmez)
             if (window.LiveScoreService && typeof LiveScoreService.syncBulletinMatches === 'function') {
-                try {
-                    await LiveScoreService.syncBulletinMatches(this.matches);
-                } catch (syncErr) {
+                LiveScoreService.syncBulletinMatches(this.matches).catch(syncErr => {
                     console.warn('Dashboard canlı skor senkronizasyon uyarısı:', syncErr);
-                }
+                });
             }
             
             // Bülten maçları geldikçe anında bugünün analiz karnesini oluştur ve kaydet (%65+ güven analizleriyle senkronize)
@@ -1071,7 +1068,14 @@ const App = {
     /**
      * Güven Seviyesi %65 ve üzeri olan maçları hesapla ve sırala
      */
-    computeHighConfidenceMatches() {
+    computeHighConfidenceMatches(force = false) {
+        if (!force && this._cachedHighConfidenceMatches && this._cachedHighConfidenceMatches.length > 0) {
+            return this._cachedHighConfidenceMatches;
+        }
+        if (!force && this.highConfidenceMatches && this.highConfidenceMatches.length > 0) {
+            this._cachedHighConfidenceMatches = this.highConfidenceMatches;
+            return this.highConfidenceMatches;
+        }
         const list = [];
         (this.matches || []).forEach((match, idx) => {
             const an = this.getMatchAnalysis(match);
@@ -1097,6 +1101,7 @@ const App = {
 
         // Güven skoruna ve olasılığa göre azalan sırala
         list.sort((a, b) => (b.confidenceScore * 1.5 + b.probability) - (a.confidenceScore * 1.5 + a.probability));
+        this._cachedHighConfidenceMatches = list;
         this.highConfidenceMatches = list;
         return list;
     },
@@ -1111,13 +1116,23 @@ const App = {
         this.showingSingleMatchAnalysis = false;
 
         // State güncelle
-        if (filterType !== null) this.highConfFilter = filterType;
-        if (sortType !== null) this.highConfSort = sortType;
-        if (dateFilter !== null) this.highConfDate = dateFilter;
+        if (filterType !== null) {
+            this.highConfFilter = filterType;
+            this.highConfDisplayLimit = 40;
+        }
+        if (sortType !== null) {
+            this.highConfSort = sortType;
+            this.highConfDisplayLimit = 40;
+        }
+        if (dateFilter !== null) {
+            this.highConfDate = dateFilter;
+            this.highConfDisplayLimit = 40;
+        }
 
         const currentFilter = this.highConfFilter || 'all';
         const currentSort = this.highConfSort || 'date_asc';
         const currentDate = this.highConfDate || 'all';
+        const currentLimit = this.highConfDisplayLimit || 40;
 
         const container = document.getElementById('analysis-container');
         if (!container) return;
@@ -1290,6 +1305,8 @@ const App = {
             DbService.syncDailyAnalysesWithScores().catch(() => {});
         }
 
+        const pagedList = filteredList.slice(0, currentLimit);
+
         container.innerHTML = `
             <div class="high-conf-container animate-fade-in">
                 <!-- Üst Hero Başlık & AI Gün Sonu Doğruluk Karnesi -->
@@ -1299,7 +1316,7 @@ const App = {
                             <span>🎯 Güven %65+ Analiz Masası & Vitrini</span>
                         </div>
                         <span class="high-conf-counter-badge">
-                            🔥 Kümülatif Toplam: ${cumulativeTotal} Maç Analiz Edildi / Bugün: ${highConfList.length} Maç / Filtrelenen: ${filteredList.length} Tercih
+                            🔥 Kümülatif Toplam: ${cumulativeTotal} Maç Analiz Edildi / Bugün: ${highConfList.length} Maç / Gösterilen: ${pagedList.length} / ${filteredList.length} Tercih
                         </span>
                     </div>
                     <p class="high-conf-desc">
@@ -1417,7 +1434,7 @@ const App = {
                     </div>
                 ` : `
                     <div class="high-conf-grid">
-                        ${filteredList.map((item, i) => {
+                        ${pagedList.map((item, i) => {
                             const m = item.match;
                             const top = item.topPick || {};
                             const ed = item.editor;
@@ -1538,9 +1555,23 @@ const App = {
                             `;
                         }).join('')}
                     </div>
+
+                    ${filteredList.length > currentLimit ? `
+                        <div style="text-align:center;padding:26px 0 16px;">
+                            <button id="btn-more-high-conf" class="btn btn-outline" style="background:rgba(0,240,255,0.08);border:1px solid #00F0FF;color:#00F0FF;font-weight:800;border-radius:12px;padding:12px 28px;cursor:pointer;font-size:0.92rem;box-shadow:0 4px 15px rgba(0,240,255,0.2);">
+                                ⚡ Daha Fazla Maç Göster (${Math.min(filteredList.length, currentLimit)} / ${filteredList.length} Maç)
+                            </button>
+                        </div>
+                    ` : ''}
                 `}
             </div>
         `;
+
+        // Daha Fazla Göster Butonu Olayı (0ms anlık sayfalama)
+        container.querySelector('#btn-more-high-conf')?.addEventListener('click', () => {
+            this.highConfDisplayLimit = (this.highConfDisplayLimit || 40) + 40;
+            this.loadHighConfidenceShowcase();
+        });
 
         // Gerçek Canlı Skorları Çek & Analiz Karnesini Güncelle
         container.querySelector('#btn-conf-sync-live')?.addEventListener('click', async () => {
@@ -1611,8 +1642,8 @@ const App = {
         container.querySelectorAll('.high-conf-card, .high-conf-btn').forEach(el => {
             el.addEventListener('click', (e) => {
                 const idx = parseInt(el.dataset.confIndex);
-                if (!isNaN(idx) && filteredList[idx]) {
-                    this.openMatchAnalysis(filteredList[idx].match);
+                if (!isNaN(idx) && pagedList[idx]) {
+                    this.openMatchAnalysis(pagedList[idx].match);
                 }
             });
         });

@@ -256,68 +256,75 @@ const MatchTracker = {
         return str.replace(/[^a-z0-9]/g, '');
     },
 
+    _scoreMemo: new Map(),
+    _historicalIndexMap: null,
+    _cumulativeStatsCache: null,
+
+    clearScoreMemo() {
+        if (this._scoreMemo) this._scoreMemo.clear();
+        this._historicalIndexMap = null;
+        this._cumulativeStatsCache = null;
+    },
+
+    _getHistoricalScoresIndex() {
+        if (this._historicalIndexMap) return this._historicalIndexMap;
+        const map = new Map();
+        if (typeof window !== 'undefined' && window.HistoricalDailyArchives) {
+            for (const d of Object.keys(window.HistoricalDailyArchives)) {
+                const arch = window.HistoricalDailyArchives[d];
+                if (arch && Array.isArray(arch.matches)) {
+                    for (const am of arch.matches) {
+                        let hs = 0, as = 0;
+                        if (am.scoreStr && am.scoreStr.includes('-')) {
+                            const parts = am.scoreStr.split('-');
+                            hs = parseInt(parts[0].trim(), 10) || 0;
+                            as = parseInt(parts[1].trim(), 10) || 0;
+                        }
+                        const scoreObj = {
+                            homeScore: hs,
+                            awayScore: as,
+                            firstHalfHome: Math.floor(hs * 0.45),
+                            firstHalfAway: Math.floor(as * 0.45),
+                            status: 'FINISHED',
+                            minute: 'MS',
+                            isManual: false,
+                            mackolikUrl: am.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
+                        };
+                        if (am.iddaaCode) map.set('iddaa_' + String(am.iddaaCode), scoreObj);
+                        const hNorm = this.normalizeTeamKey(am.homeTeam);
+                        const aNorm = this.normalizeTeamKey(am.awayTeam);
+                        if (hNorm && aNorm) map.set(hNorm + '_' + aNorm, scoreObj);
+                    }
+                }
+            }
+        }
+        this._historicalIndexMap = map;
+        return map;
+    },
+
     getMatchScore(match) {
-        const key = this.getMatchKey(match);
-        if (this.data.matches && this.data.matches[key]) {
+        if (!match) {
             return {
-                ...this.data.matches[key],
-                mackolikUrl: this.data.matches[key].mackolikUrl || match?.mackolikUrl || match?.liveScore?.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
+                homeScore: 0,
+                awayScore: 0,
+                firstHalfHome: 0,
+                firstHalfAway: 0,
+                status: 'NOT_STARTED',
+                minute: '00:00',
+                mackolikUrl: 'https://arsiv.mackolik.com/Canli-Sonuclar'
             };
         }
 
-        // Geçmiş günlerin arşivinden kontrol et
-        if (this.data.history) {
-            for (const d of Object.keys(this.data.history)) {
-                const histMatches = this.data.history[d]?.matches;
-                if (histMatches && histMatches[key]) {
-                    return {
-                        ...histMatches[key],
-                        mackolikUrl: histMatches[key].mackolikUrl || match?.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
-                    };
-                }
-            }
+        const key = this.getMatchKey(match);
+        if (this._scoreMemo && this._scoreMemo.has(key)) {
+            return this._scoreMemo.get(key);
         }
 
-        // Geçmiş teyitli arşivlerden doğrudan eşleştir (19.09, 18.09, 17.09)
-        const matchHomeNorm = this.normalizeTeamKey ? this.normalizeTeamKey(match?.homeTeam) : '';
-        const matchAwayNorm = this.normalizeTeamKey ? this.normalizeTeamKey(match?.awayTeam) : '';
-
-        const checkDates = ['2026-09-19', '2026-09-18', '2026-09-17'];
-        for (const cd of checkDates) {
-            const arch = this._getHistoricalDailyArchive(cd);
-            if (arch && Array.isArray(arch.matches)) {
-                const found = arch.matches.find(am => {
-                    if (am.iddaaCode && match?.iddaaCode && String(am.iddaaCode) === String(match.iddaaCode)) return true;
-                    const hNorm = this.normalizeTeamKey ? this.normalizeTeamKey(am.homeTeam) : '';
-                    const aNorm = this.normalizeTeamKey ? this.normalizeTeamKey(am.awayTeam) : '';
-                    return (hNorm && aNorm && matchHomeNorm && matchAwayNorm && (hNorm === matchHomeNorm && aNorm === matchAwayNorm));
-                });
-                if (found) {
-                    let hs = 0, as = 0;
-                    if (found.scoreStr && found.scoreStr.includes('-')) {
-                        const parts = found.scoreStr.split('-');
-                        hs = parseInt(parts[0].trim(), 10) || 0;
-                        as = parseInt(parts[1].trim(), 10) || 0;
-                    }
-                    return {
-                        homeScore: hs,
-                        awayScore: as,
-                        firstHalfHome: 0,
-                        firstHalfAway: 0,
-                        status: 'FINISHED',
-                        minute: 'MS',
-                        isManual: false,
-                        mackolikUrl: found.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
-                    };
-                }
-            }
-        }
-
-        // Bültende zaten gerçek canlı/bitmiş skor varsa kullan
+        // 1. Bültende zaten gerçek canlı/bitmiş skor varsa ANINDA KULLAN (0ms)
         if (match?.liveScore && typeof match.liveScore.home === 'number' && (match.liveScore.status === 'FINISHED' || match.liveScore.isFinished || match.liveScore.status === 'LIVE' || match.liveScore.isLive)) {
             const isFin = match.liveScore.isFinished === true || match.liveScore.status === 'FINISHED';
             const isLiv = !isFin && (match.liveScore.isLive === true || match.liveScore.status === 'LIVE');
-            return {
+            const res = {
                 homeScore: match.liveScore.homeScore !== undefined ? match.liveScore.homeScore : match.liveScore.home,
                 awayScore: match.liveScore.awayScore !== undefined ? match.liveScore.awayScore : match.liveScore.away,
                 firstHalfHome: match.liveScore.firstHalfHome || 0,
@@ -327,66 +334,49 @@ const MatchTracker = {
                 isManual: false,
                 mackolikUrl: match.liveScore.mackolikUrl || match.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
             };
+            if (this._scoreMemo) this._scoreMemo.set(key, res);
+            return res;
         }
 
-        // HistoricalCouponsService veya _getHistoricalDailyArchive içinde bu takımların maçı var mı kontrol et
-        const hName = (match?.homeTeam || '').toLowerCase().trim();
-        const aName = (match?.awayTeam || '').toLowerCase().trim();
-        if (hName && aName) {
-            // 1. _getHistoricalDailyArchive tara (Tüm geçmiş arşivlere dinamik bak)
-            const recentDates = (typeof window !== 'undefined' && window.HistoricalDailyArchives) ? Object.keys(window.HistoricalDailyArchives).sort().reverse() : ['2026-09-20', '2026-09-19', '2026-09-18', '2026-09-17'];
-            for (const d of recentDates) {
-                const arch = this._getHistoricalDailyArchive(d);
-                if (arch && arch.matches) {
-                    const foundArch = arch.matches.find(m => 
-                        (m.homeTeam && m.homeTeam.toLowerCase().includes(hName) && m.awayTeam && m.awayTeam.toLowerCase().includes(aName)) ||
-                        (hName.includes((m.homeTeam || '').toLowerCase()) && aName.includes((m.awayTeam || '').toLowerCase()))
-                    );
-                    if (foundArch && foundArch.scoreStr && foundArch.scoreStr.includes('-')) {
-                        const [hs, as] = foundArch.scoreStr.split('-').map(s => parseInt(s.trim()) || 0);
-                        return {
-                            homeScore: hs,
-                            awayScore: as,
-                            firstHalfHome: Math.floor(hs * 0.45),
-                            firstHalfAway: Math.floor(as * 0.45),
-                            status: 'FINISHED',
-                            minute: 'MS',
-                            isManual: false,
-                            mackolikUrl: 'https://arsiv.mackolik.com/Canli-Sonuclar'
-                        };
-                    }
-                }
-            }
+        // 2. Takip veritabanındaki aktif maç skoru
+        if (this.data.matches && this.data.matches[key]) {
+            const res = {
+                ...this.data.matches[key],
+                mackolikUrl: this.data.matches[key].mackolikUrl || match?.mackolikUrl || match?.liveScore?.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
+            };
+            if (this._scoreMemo) this._scoreMemo.set(key, res);
+            return res;
+        }
 
-            // 2. HistoricalCouponsService kuponlarını tara
-            if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getAllCouponSets === 'function') {
-                const sets = HistoricalCouponsService.getAllCouponSets('2026-09-09');
-                for (const set of sets) {
-                    for (const c of set.allCoupons || []) {
-                        for (const mItem of c.matches || []) {
-                            const mh = (mItem.homeTeam || mItem.match?.homeTeam || '').toLowerCase();
-                            const ma = (mItem.awayTeam || mItem.match?.awayTeam || '').toLowerCase();
-                            if ((mh && mh.includes(hName) && ma && ma.includes(aName)) || (hName.includes(mh) && aName.includes(ma))) {
-                                const sc = mItem.scoreData || mItem.match?.liveScore;
-                                const hs = sc?.homeScore !== undefined ? sc.homeScore : (sc?.home !== undefined ? sc.home : (mItem.homeScore !== undefined ? mItem.homeScore : 1));
-                                const as = sc?.awayScore !== undefined ? sc.awayScore : (sc?.away !== undefined ? sc.away : (mItem.awayScore !== undefined ? mItem.awayScore : 0));
-                                const mStat = sc?.status || (mItem.resultStatus === 'live' ? 'LIVE' : (mItem.resultStatus === 'pending' ? 'NOT_STARTED' : 'FINISHED'));
-                                const mMin = sc?.minute || (mItem.resultStatus === 'live' ? (mItem.minuteStr || "76'") : (mItem.resultStatus === 'pending' ? (mItem.timeStr || 'Başlamadı') : 'MS'));
-                                return {
-                                    homeScore: hs,
-                                    awayScore: as,
-                                    firstHalfHome: mItem.firstHalfHome !== undefined ? mItem.firstHalfHome : Math.floor(hs * 0.45),
-                                    firstHalfAway: mItem.firstHalfAway !== undefined ? mItem.firstHalfAway : Math.floor(as * 0.45),
-                                    status: mStat,
-                                    minute: mMin,
-                                    isManual: false,
-                                    mackolikUrl: 'https://arsiv.mackolik.com/Canli-Sonuclar'
-                                };
-                            }
-                        }
-                    }
+        // 3. Geçmiş günlerin arşivinden kontrol et
+        if (this.data.history) {
+            for (const d of Object.keys(this.data.history)) {
+                const histMatches = this.data.history[d]?.matches;
+                if (histMatches && histMatches[key]) {
+                    const res = {
+                        ...histMatches[key],
+                        mackolikUrl: histMatches[key].mackolikUrl || match?.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
+                    };
+                    if (this._scoreMemo) this._scoreMemo.set(key, res);
+                    return res;
                 }
             }
+        }
+
+        // 4. Hızlı O(1) İndekslenmiş Geçmiş Teyitli Arşiv Kontrolü (Milyonlarca döngüyü sıfıra indirir)
+        const indexMap = this._getHistoricalScoresIndex();
+        if (match?.iddaaCode && indexMap.has('iddaa_' + String(match.iddaaCode))) {
+            const res = indexMap.get('iddaa_' + String(match.iddaaCode));
+            if (this._scoreMemo) this._scoreMemo.set(key, res);
+            return res;
+        }
+
+        const matchHomeNorm = this.normalizeTeamKey ? this.normalizeTeamKey(match?.homeTeam) : '';
+        const matchAwayNorm = this.normalizeTeamKey ? this.normalizeTeamKey(match?.awayTeam) : '';
+        if (matchHomeNorm && matchAwayNorm && indexMap.has(matchHomeNorm + '_' + matchAwayNorm)) {
+            const res = indexMap.get(matchHomeNorm + '_' + matchAwayNorm);
+            if (this._scoreMemo) this._scoreMemo.set(key, res);
+            return res;
         }
 
         // Maç geçmiş bir tarihe aitse (dün veya daha eski): KESİNLİKLE bitmiş kabul et ve istatistiksel Poisson skoru ata
@@ -1030,6 +1020,10 @@ const MatchTracker = {
      * @returns {Object} Kümülatif istatistik karnesi
      */
     calculateCumulativeCouponStats(startDate = '2026-09-09') {
+        if (this._cumulativeStatsCache && this._cumulativeStatsCache[startDate]) {
+            return this._cumulativeStatsCache[startDate];
+        }
+
         const couponSets = (window.HistoricalCouponsService && typeof HistoricalCouponsService.getAllCouponSets === 'function')
             ? HistoricalCouponsService.getAllCouponSets(startDate)
             : (window.CouponEngine && typeof CouponEngine.getAllArchivedCouponSets === 'function')
@@ -1200,6 +1194,9 @@ const MatchTracker = {
         } catch (e) {
             console.warn('cumulative storage save error:', e);
         }
+
+        this._cumulativeStatsCache = this._cumulativeStatsCache || {};
+        this._cumulativeStatsCache[startDate] = result;
 
         return result;
     },

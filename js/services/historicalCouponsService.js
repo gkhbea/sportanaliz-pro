@@ -3043,7 +3043,11 @@ const HistoricalCouponsService = {
             },
         ];
 
-        return days.map(function(d) {
+        if (this._couponSetsCache && this._couponSetsCache[startDate || 'default']) {
+            return this._couponSetsCache[startDate || 'default'];
+        }
+
+        const res = days.map(function(d) {
             const data = d.generator();
             const all = [].concat(data.coupons || [], data.euroCoupons || []);
             return {
@@ -3056,6 +3060,10 @@ const HistoricalCouponsService = {
                 allCoupons: all
             };
         });
+
+        this._couponSetsCache = this._couponSetsCache || {};
+        this._couponSetsCache[startDate || 'default'] = res;
+        return res;
     },
 
     getCouponsByDate(dateStr) {
@@ -3068,10 +3076,19 @@ const HistoricalCouponsService = {
                 dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
             }
         }
+        if (this._couponsByDateMap && this._couponsByDateMap.has(dateStr)) {
+            return this._couponsByDateMap.get(dateStr);
+        }
         const sets = this.getAllCouponSets('2026-09-09');
-        const found = sets.find(s => s.date === dateStr || s.dateFormatted === dateStr);
-        if (found && found.coupons && found.coupons.length > 0) {
-            return found.coupons;
+        if (!this._couponsByDateMap) {
+            this._couponsByDateMap = new Map();
+            sets.forEach(s => {
+                if (s.date) this._couponsByDateMap.set(s.date, s.coupons);
+                if (s.dateFormatted) this._couponsByDateMap.set(s.dateFormatted, s.coupons);
+            });
+        }
+        if (this._couponsByDateMap.has(dateStr)) {
+            return this._couponsByDateMap.get(dateStr);
         }
         if (sets.length > 0) {
             return sets[sets.length - 1].coupons || [];

@@ -339,7 +339,6 @@ const CouponPanel = {
         const todayActiveCount = Math.max(
             this._lastTotalAnalyzedCount || 0,
             window.app?.highConfidenceMatches?.length || 0,
-            (window.app?.computeHighConfidenceMatches ? window.app.computeHighConfidenceMatches().length : 0),
             (window.app?.matches?.length && window.app.matches.length > 5 ? window.app.matches.length : 0),
             177
         );
@@ -473,7 +472,6 @@ const CouponPanel = {
         const todayActiveCount = Math.max(
             this._lastTotalAnalyzedCount || 0,
             window.app?.highConfidenceMatches?.length || 0,
-            (window.app?.computeHighConfidenceMatches ? window.app.computeHighConfidenceMatches().length : 0),
             (window.app?.matches?.length && window.app.matches.length > 5 ? window.app.matches.length : 0),
             177
         );
@@ -501,7 +499,7 @@ const CouponPanel = {
 
         let filteredMatches = currentStats?.matches || [];
         if (isSelectedDateToday && filteredMatches.length <= 5) {
-            const highConf = window.app?.highConfidenceMatches || (window.app?.computeHighConfidenceMatches ? window.app.computeHighConfidenceMatches() : null);
+            const highConf = window.app?.highConfidenceMatches || null;
             if (highConf && highConf.length > 5) {
                 filteredMatches = highConf.map((item, idx) => {
                     const rawMatch = item.match || item;
