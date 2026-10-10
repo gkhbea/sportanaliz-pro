@@ -69770,7 +69770,7 @@ const HistoricalDailyArchives = {
                 "awayTeam": "AL Ittihad",
                 "league": "Suudi Arabistan Pro Lig",
                 "timeStr": "21:00",
-                "scoreStr": "3 - 1",
+                "scoreStr": "3 - 2",
                 "scoreStatus": "FINISHED",
                 "minuteStr": "MS",
                 "primaryPick": "MS 1 & 1.5 ÜST",
@@ -69781,7 +69781,7 @@ const HistoricalDailyArchives = {
                 "confidenceScore": 95,
                 "status": "WON",
                 "statusBadge": "✅ TUTTU",
-                "detail": "Al Hilal 3 - 1 AL Ittihad · MS 1 & 1.5 ÜST (✅ TUTTU)",
+                "detail": "Al Hilal 3 - 2 AL Ittihad · MS 1 & 1.5 ÜST (✅ TUTTU)",
                 "mackolikUrl": "https://arsiv.mackolik.com/Match/Default.aspx?id=3134152"
             },
             {
@@ -69791,7 +69791,7 @@ const HistoricalDailyArchives = {
                 "awayTeam": "NK Aluminij K.",
                 "league": "Slovenya Prva Liga",
                 "timeStr": "18:30",
-                "scoreStr": "2 - 0",
+                "scoreStr": "1 - 0",
                 "scoreStatus": "FINISHED",
                 "minuteStr": "MS",
                 "primaryPick": "MS 1 (Celje Kazanır)",
@@ -69802,7 +69802,7 @@ const HistoricalDailyArchives = {
                 "confidenceScore": 93,
                 "status": "WON",
                 "statusBadge": "✅ TUTTU",
-                "detail": "NK Celje 2 - 0 NK Aluminij K. · MS 1 (Celje Kazanır) (✅ TUTTU)",
+                "detail": "NK Celje 1 - 0 NK Aluminij K. · MS 1 (Celje Kazanır) (✅ TUTTU)",
                 "mackolikUrl": "https://arsiv.mackolik.com/Match/Default.aspx?id=3193641"
             },
             {
@@ -69812,7 +69812,7 @@ const HistoricalDailyArchives = {
                 "awayTeam": "Hannover 96",
                 "league": "Almanya Bundesliga 2",
                 "timeStr": "14:00",
-                "scoreStr": "2 - 2",
+                "scoreStr": "3 - 0",
                 "scoreStatus": "FINISHED",
                 "minuteStr": "MS",
                 "primaryPick": "1.5 ÜST",
@@ -69823,7 +69823,7 @@ const HistoricalDailyArchives = {
                 "confidenceScore": 95,
                 "status": "WON",
                 "statusBadge": "✅ TUTTU",
-                "detail": "Magdeburg 2 - 2 Hannover 96 · 1.5 ÜST (✅ TUTTU)",
+                "detail": "Magdeburg 3 - 0 Hannover 96 · 1.5 ÜST (✅ TUTTU)",
                 "mackolikUrl": "https://arsiv.mackolik.com/Match/Default.aspx?id=3193617"
             },
             {
@@ -69875,7 +69875,7 @@ const HistoricalDailyArchives = {
                 "awayTeam": "Al Sailiya",
                 "league": "Katar Yıldızlar Ligi",
                 "timeStr": "20:00",
-                "scoreStr": "2 - 2",
+                "scoreStr": "5 - 0",
                 "scoreStatus": "FINISHED",
                 "minuteStr": "MS",
                 "primaryPick": "2.5 ÜST",
@@ -69886,7 +69886,7 @@ const HistoricalDailyArchives = {
                 "confidenceScore": 90,
                 "status": "WON",
                 "statusBadge": "✅ TUTTU",
-                "detail": "AL Ahli Doha 2 - 2 Al Sailiya · 2.5 ÜST (✅ TUTTU)",
+                "detail": "AL Ahli Doha 5 - 0 Al Sailiya · 2.5 ÜST (✅ TUTTU)",
                 "mackolikUrl": "https://arsiv.mackolik.com/Match/Default.aspx?id=3189049"
             },
             {
@@ -69896,7 +69896,7 @@ const HistoricalDailyArchives = {
                 "awayTeam": "Mannheim 07",
                 "league": "Almanya Bölgesel Lig",
                 "timeStr": "15:00",
-                "scoreStr": "2 - 1",
+                "scoreStr": "1 - 5",
                 "scoreStatus": "FINISHED",
                 "minuteStr": "MS",
                 "primaryPick": "2.5 ÜST",
@@ -69907,7 +69907,7 @@ const HistoricalDailyArchives = {
                 "confidenceScore": 88,
                 "status": "WON",
                 "statusBadge": "✅ TUTTU",
-                "detail": "Grossaspach 2 - 1 Mannheim 07 · 2.5 ÜST (✅ TUTTU)",
+                "detail": "Grossaspach 1 - 5 Mannheim 07 · 2.5 ÜST (✅ TUTTU)",
                 "mackolikUrl": "https://arsiv.mackolik.com/Match/Default.aspx?id=3193618"
             },
             {

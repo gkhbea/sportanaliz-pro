@@ -2669,24 +2669,24 @@ const HistoricalCouponsService = {
         const p_hilal = this._createArchivedPick({
             index: 1, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'Maç Sonucu & 1.5 ÜST', pickTitle: 'MS 1 & 1.5 ÜST', marketCode: 'MS1_O15', odd: 1.38, confidence: 95,
-            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Al Hilal 3-1 AL Ittihad · MS 1 & 1.5 ÜST (KAZANDI)"
+            homeScore: 3, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Al Hilal 3-2 AL Ittihad · MS 1 & 1.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 2. NK Celje vs NK Aluminij (18:30 - Slovenya Prva Liga)
         const p_celje = this._createArchivedPick({
             index: 2, iddaaCode: '3193641', homeTeam: "NK Celje", awayTeam: "NK Aluminij K.", league: "Slovenya Prva Liga",
             timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Celje Kazanır)', marketCode: 'MS1', odd: 1.32, confidence: 93,
-            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "NK Celje 2-0 NK Aluminij · MS 1 (KAZANDI)"
+            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "NK Celje 1-0 NK Aluminij · MS 1 (KAZANDI)"
         }, yDate, dFmt);
 
         // 3. Magdeburg vs Hannover 96 - Garantör (14:00 - Almanya Bundesliga 2)
         const p_magdeburg_safe = this._createArchivedPick({
             index: 3, iddaaCode: '3193617', homeTeam: "Magdeburg", awayTeam: "Hannover 96", league: "Almanya Bundesliga 2",
             timeStr: '14:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.25, confidence: 95,
-            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "Magdeburg 2-2 Hannover 96 · 1.5 ÜST (KAZANDI)"
+            homeScore: 3, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Magdeburg 3-0 Hannover 96 · 1.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 4. AL Ettifaq vs AL Khaleej Saihat (17:55 - Suudi Arabistan Pro Lig)
@@ -2709,40 +2709,40 @@ const HistoricalCouponsService = {
         const p_doha_ideal = this._createArchivedPick({
             index: 6, iddaaCode: '3189049', homeTeam: "AL Ahli Doha", awayTeam: "Al Sailiya", league: "Katar Yıldızlar Ligi",
             timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.42, confidence: 90,
-            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "AL Ahli Doha 2-2 Al Sailiya · 2.5 ÜST (KAZANDI)"
+            homeScore: 5, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "AL Ahli Doha 5-0 Al Sailiya · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 7. Magdeburg vs Hannover 96 - Gol Yağmuru (14:00 - Almanya Bundesliga 2)
         const p_magdeburg_goals = this._createArchivedPick({
             index: 7, iddaaCode: '3193617', homeTeam: "Magdeburg", awayTeam: "Hannover 96", league: "Almanya Bundesliga 2",
             timeStr: '14:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.65, confidence: 90,
-            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "Magdeburg 2-2 Hannover 96 · 2.5 ÜST (KAZANDI)"
+            homeScore: 3, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Magdeburg 3-0 Hannover 96 · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 8. Al Hilal vs AL Ittihad - Goller (21:00)
         const p_hilal_goals = this._createArchivedPick({
             index: 8, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST (Süper Derbi Düellosu)', marketCode: 'OVER25', odd: 1.50, confidence: 92,
-            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Al Hilal 3-1 AL Ittihad · 2.5 ÜST (KAZANDI)"
+            homeScore: 3, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Al Hilal 3-2 AL Ittihad · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 9. Grossaspach vs Mannheim 07 (15:00 - Almanya Bölgesel Lig)
         const p_grossaspach = this._createArchivedPick({
             index: 9, iddaaCode: '3193618', homeTeam: "Grossaspach", awayTeam: "Mannheim 07", league: "Almanya Bölgesel Lig",
             timeStr: '15:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.45, confidence: 88,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Grossaspach 2-1 Mannheim 07 · 2.5 ÜST (KAZANDI)"
+            homeScore: 1, awayScore: 5, isWon: true, isPending: false, isLive: false,
+            detail: "Grossaspach 1-5 Mannheim 07 · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
         // 10. Al Hilal vs AL Ittihad - İY Gol (21:00)
         const p_hilal_ht = this._createArchivedPick({
             index: 10, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.28, confidence: 92,
-            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Al Hilal vs AL Ittihad · İY 1-0 (İY 0.5 ÜST KAZANDI)"
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Al Hilal vs AL Ittihad · İY 2-1 (İY 0.5 ÜST KAZANDI)"
         }, yDate, dFmt);
 
         // 11. NK Celje vs NK Aluminij - İY 1 (18:30)
@@ -2757,8 +2757,8 @@ const HistoricalCouponsService = {
         const p_magdeburg_ht = this._createArchivedPick({
             index: 12, iddaaCode: '3193617', homeTeam: "Magdeburg", awayTeam: "Hannover 96", league: "Almanya Bundesliga 2",
             timeStr: '14:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.32, confidence: 91,
-            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Magdeburg vs Hannover 96 · İY 1-1 (İY 0.5 ÜST KAZANDI)"
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Magdeburg vs Hannover 96 · İY 2-0 (İY 0.5 ÜST KAZANDI)"
         }, yDate, dFmt);
 
         // 13. Vasas vs Kisvarda (15:45 - Macaristan NB II)
