@@ -37,15 +37,28 @@ const MatchCard = {
         const isFin = ls && (ls.isFinished || ls.status === 'FINISHED' || ls.minute === 'MS' || match.status === 'FINISHED');
         const isLiv = ls && !isFin && (ls.isLive || ls.status === 'LIVE' || (typeof ls.minute === 'string' && (ls.minute.includes("'") || ls.minute.includes('İY'))));
 
+        const iddaaCode = match.iddaaCode || match.code || '';
+        const mackolikUrl = match.mackolikUrl || ls?.mackolikUrl || (iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar');
+
         if (isFin) {
             const h = typeof ls.home === 'number' ? ls.home : (typeof ls.homeScore === 'number' ? ls.homeScore : 0);
             const a = typeof ls.away === 'number' ? ls.away : (typeof ls.awayScore === 'number' ? ls.awayScore : 0);
-            scoreHtml = `<div class="match-finished-pill" style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.4);color:#4ade80;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;">🏁 BİTTİ (MS: ${h} - ${a})</div>`;
+            scoreHtml = `
+                <div style="margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+                    <div class="match-finished-pill" style="display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.4);color:#4ade80;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;">🏁 BİTTİ (MS: ${h} - ${a})</div>
+                    <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:3px;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.4);color:#facc15;font-size:0.7rem;font-weight:800;padding:2px 6px;border-radius:4px;text-decoration:none;" onclick="event.stopPropagation();" title="Resmi Maçkolik sayfasından maç sonucunu teyit et">🔗 Teyit ↗</a>
+                </div>
+            `;
         } else if (isLiv) {
             const h = typeof ls.home === 'number' ? ls.home : (typeof ls.homeScore === 'number' ? ls.homeScore : 0);
             const a = typeof ls.away === 'number' ? ls.away : (typeof ls.awayScore === 'number' ? ls.awayScore : 0);
             const min = ls.minute || 'Canlı';
-            scoreHtml = `<div class="match-live-pill" style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.4);color:#f87171;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;animation:pulse 2s infinite;">🔴 CANLI ${min} (${h} - ${a})</div>`;
+            scoreHtml = `
+                <div style="margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+                    <div class="match-live-pill" style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.4);color:#f87171;font-weight:800;font-size:0.82rem;padding:2px 8px;border-radius:6px;animation:pulse 2s infinite;">🔴 CANLI ${min} (${h} - ${a})</div>
+                    <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:3px;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.4);color:#facc15;font-size:0.7rem;font-weight:800;padding:2px 6px;border-radius:4px;text-decoration:none;" onclick="event.stopPropagation();" title="Maçkolik canlı skor sayfasından teyit et">🔗 Teyit ↗</a>
+                </div>
+            `;
         }
 
         return `

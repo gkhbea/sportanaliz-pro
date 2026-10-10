@@ -21,7 +21,7 @@ const AnalysisPanel = {
         const sport = analysisResult.sportType || 'football';
 
         let html = '';
-        html += this.renderHeader(analysisResult);
+        html += this.renderHeader(analysisResult, match);
 
         // 1. 🎯 En Güvenilen Bahis / Editör Seçimi (Üst Manşet)
         if (editorAnalysis && editorAnalysis.topPick) {
@@ -64,7 +64,48 @@ const AnalysisPanel = {
     /**
      * Header
      */
-    renderHeader(result) {
+    renderHeader(result, match) {
+        const m = match || result;
+        const ls = m?.liveScore || (window.MatchTracker ? window.MatchTracker.getMatchScore(m) : null);
+        const isFin = ls && (ls.isFinished || ls.status === 'FINISHED' || ls.minute === 'MS' || m.status === 'FINISHED');
+        const isLiv = ls && !isFin && (ls.isLive || ls.status === 'LIVE');
+        const iddaaCode = m?.iddaaCode || m?.code || result?.iddaaCode || '';
+        const mackolikUrl = m?.mackolikUrl || ls?.mackolikUrl || (iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar');
+
+        let scoreBadge = '';
+        if (isFin) {
+            const h = typeof ls.home === 'number' ? ls.home : (typeof ls.homeScore === 'number' ? ls.homeScore : 0);
+            const a = typeof ls.away === 'number' ? ls.away : (typeof ls.awayScore === 'number' ? ls.awayScore : 0);
+            scoreBadge = `
+                <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                    <span style="background:rgba(34,197,94,0.2);border:1px solid #22c55e;color:#4ade80;padding:3px 10px;border-radius:6px;font-weight:900;font-size:0.85rem;">🏁 RESMİ SONUÇ: ${h} - ${a}</span>
+                    <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,rgba(234,179,8,0.2),rgba(202,138,4,0.3));border:1px solid #facc15;color:#facc15;padding:3px 10px;border-radius:6px;font-weight:800;font-size:0.75rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Resmi Maçkolik sayfasından maç sonucunu teyit et">
+                        🔗 Maçkolik ile Teyit Et ↗
+                    </a>
+                </div>
+            `;
+        } else if (isLiv) {
+            const h = typeof ls.home === 'number' ? ls.home : (typeof ls.homeScore === 'number' ? ls.homeScore : 0);
+            const a = typeof ls.away === 'number' ? ls.away : (typeof ls.awayScore === 'number' ? ls.awayScore : 0);
+            const min = ls.minute || 'Canlı';
+            scoreBadge = `
+                <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                    <span style="background:rgba(239,68,68,0.2);border:1px solid #ef4444;color:#f87171;padding:3px 10px;border-radius:6px;font-weight:900;font-size:0.85rem;animation:pulse 2s infinite;">🔴 CANLI ${min}: ${h} - ${a}</span>
+                    <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,rgba(234,179,8,0.2),rgba(202,138,4,0.3));border:1px solid #facc15;color:#facc15;padding:3px 10px;border-radius:6px;font-weight:800;font-size:0.75rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Resmi Maçkolik sayfasından maçı teyit et">
+                        🔗 Maçkolik ile Teyit Et ↗
+                    </a>
+                </div>
+            `;
+        } else if (iddaaCode) {
+            scoreBadge = `
+                <div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                    <a href="${mackolikUrl}" target="_blank" rel="noopener noreferrer" style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.4);color:#facc15;padding:3px 10px;border-radius:6px;font-weight:800;font-size:0.75rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Resmi Maçkolik bülten sayfasından maçı teyit et">
+                        🔗 Maçkolik Maç Sayfası ↗
+                    </a>
+                </div>
+            `;
+        }
+
         return `
             <div class="analysis-header">
                 <div class="analysis-teams">
@@ -75,6 +116,7 @@ const AnalysisPanel = {
                 <div class="analysis-meta">
                     <div class="league-name">${Helpers.escapeHtml(result.league || '')}</div>
                     <div class="match-date-info">${result.matchDate ? Helpers.formatDate(result.matchDate, 'full') : ''}</div>
+                    ${scoreBadge}
                 </div>
             </div>
         `;
