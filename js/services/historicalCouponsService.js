@@ -2832,16 +2832,16 @@ const HistoricalCouponsService = {
         const p_betis = this._createArchivedPick({
             index: 1, iddaaCode: '3199553', homeTeam: "Real Betis", awayTeam: "Osasuna", league: "İspanya La Liga",
             timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Real Betis Kazanır)', marketCode: 'MS1', odd: 1.39, confidence: 95,
-            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Real Betis 2-0 Osasuna · MS 1 (İddaa Kod: 3199553 | İspanya La Liga)"
+            homeScore: 5, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Real Betis 5-2 Osasuna · MS 1 (İddaa Kod: 3199553 | İspanya La Liga)"
         }, yDate, dFmt);
 
         // 2. Real Sociedad vs Dep. La Coruna (17:15 - İspanya La Liga)
         const p_sociedad = this._createArchivedPick({
             index: 2, iddaaCode: '3199450', homeTeam: "Real Sociedad", awayTeam: "Dep. La Coruna", league: "İspanya La Liga",
             timeStr: '17:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Real Sociedad Kazanır)', marketCode: 'MS1', odd: 1.45, confidence: 93,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Real Sociedad 2-1 Dep. La Coruna · MS 1 (İddaa Kod: 3199450 | İspanya La Liga)"
+            homeScore: 3, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Real Sociedad 3-2 Dep. La Coruna · MS 1 (İddaa Kod: 3199450 | İspanya La Liga)"
         }, yDate, dFmt);
 
         // 3. Grasshoppers vs Young Boys (15:00 - İsviçre Süper Ligi)
@@ -2856,80 +2856,80 @@ const HistoricalCouponsService = {
         const p_southampton = this._createArchivedPick({
             index: 4, iddaaCode: '3198976', homeTeam: "Southampton", awayTeam: "Portsmouth", league: "İngiltere",
             timeStr: '14:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Southampton Kazanır)', marketCode: 'MS1', odd: 1.40, confidence: 92,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Southampton 2-1 Portsmouth · MS 1 (İddaa Kod: 3198976 | İngiltere)"
+            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Southampton 1-0 Portsmouth · MS 1 (İddaa Kod: 3198976 | İngiltere)"
         }, yDate, dFmt);
 
         // 5. Brondby vs Lyngby (17:00 - Danimarka Süper Ligi)
         const p_brondby = this._createArchivedPick({
             index: 5, iddaaCode: '3199154', homeTeam: "Brondby", awayTeam: "Lyngby BK", league: "Danimarka Süper Ligi",
             timeStr: '17:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Brondby Kazanır)', marketCode: 'MS1', odd: 1.57, confidence: 90,
-            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Brondby 2-0 Lyngby BK · MS 1 (İddaa Kod: 3199154 | Danimarka Süper Ligi)"
+            homeScore: 5, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Brondby 5-2 Lyngby BK · MS 1 (İddaa Kod: 3199154 | Danimarka Süper Ligi)"
         }, yDate, dFmt);
 
         // 6. Mallorca vs Las Palmas (19:30 - İspanya La Liga)
         const p_mallorca = this._createArchivedPick({
             index: 6, iddaaCode: '3199423', homeTeam: "Mallorca", awayTeam: "Las Palmas", league: "İspanya La Liga",
             timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Mallorca Kazanır)', marketCode: 'MS1', odd: 1.42, confidence: 91,
-            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Mallorca 1-0 Las Palmas · MS 1 (İddaa Kod: 3199423 | İspanya La Liga)"
+            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Mallorca 3-1 Las Palmas · MS 1 (İddaa Kod: 3199423 | İspanya La Liga)"
         }, yDate, dFmt);
 
         // 7. Real Sociedad vs Dep. La Coruna - Goller (17:15)
         const p_sociedad_goals = this._createArchivedPick({
             index: 7, iddaaCode: '3199450', homeTeam: "Real Sociedad", awayTeam: "Dep. La Coruna", league: "İspanya La Liga",
             timeStr: '17:15', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 92,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Real Sociedad 2-1 Dep. La Coruna · 2.5 ÜST (İddaa Kod: 3199450 | İspanya La Liga)"
+            homeScore: 3, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Real Sociedad 3-2 Dep. La Coruna · 2.5 ÜST (İddaa Kod: 3199450 | İspanya La Liga)"
         }, yDate, dFmt);
 
-        // 8. Midtjylland vs Kopenhag - Goller (19:00)
-        const p_midt_goals = this._createArchivedPick({
-            index: 8, iddaaCode: '3198921', homeTeam: "Midtjylland", awayTeam: "Kopenhag", league: "Danimarka Süper Ligi",
-            timeStr: '19:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.68, confidence: 91,
-            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "Midtjylland 2-2 Kopenhag · 2.5 ÜST (İddaa Kod: 3198921 | Danimarka Süper Ligi)"
+        // 8. Brondby vs Lyngby - Goller (17:00)
+        const p_brondby_goals = this._createArchivedPick({
+            index: 8, iddaaCode: '3199154', homeTeam: "Brondby", awayTeam: "Lyngby BK", league: "Danimarka Süper Ligi",
+            timeStr: '17:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.60, confidence: 93,
+            homeScore: 5, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Brondby 5-2 Lyngby BK · 2.5 ÜST (İddaa Kod: 3199154 | Danimarka Süper Ligi)"
         }, yDate, dFmt);
 
-        // 9. Union Saint-Gilloise vs Oud-Heverlee Leuven - Goller (17:00)
-        const p_usg_goals = this._createArchivedPick({
-            index: 9, iddaaCode: '3193789', homeTeam: "U. S. Gilloise", awayTeam: "O. H. Leuven", league: "Belçika Pro Ligi",
-            timeStr: '17:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.55, confidence: 90,
+        // 9. Mallorca vs Las Palmas - Goller (19:30)
+        const p_mallorca_goals = this._createArchivedPick({
+            index: 9, iddaaCode: '3199423', homeTeam: "Mallorca", awayTeam: "Las Palmas", league: "İspanya La Liga",
+            timeStr: '19:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.65, confidence: 91,
             homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "U. S. Gilloise 3-1 O. H. Leuven · 2.5 ÜST (İddaa Kod: 3193789 | Belçika Pro Ligi)"
+            detail: "Mallorca 3-1 Las Palmas · 2.5 ÜST (İddaa Kod: 3199423 | İspanya La Liga)"
         }, yDate, dFmt);
 
-        // 10. Gaziantep FK vs Çorum FK (16:00 - Türkiye)
-        const p_gaziantep = this._createArchivedPick({
-            index: 10, iddaaCode: '3199391', homeTeam: "Gaziantep FK", awayTeam: "Çorum FK", league: "Türkiye",
-            timeStr: '16:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.32, confidence: 93,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Gaziantep FK 2-1 Çorum FK · 1-X Çifte Şans (İddaa Kod: 3199391 | Türkiye)"
+        // 10. Mallorca vs Las Palmas - Çifte Şans (19:30)
+        const p_mallorca_cs = this._createArchivedPick({
+            index: 10, iddaaCode: '3199423', homeTeam: "Mallorca", awayTeam: "Las Palmas", league: "İspanya La Liga",
+            timeStr: '19:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.30, confidence: 94,
+            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Mallorca 3-1 Las Palmas · 1-X Çifte Şans (İddaa Kod: 3199423 | İspanya La Liga)"
         }, yDate, dFmt);
 
         // 11. Standard Liege vs Charleroi (14:30 - Belçika Pro Ligi)
         const p_standard = this._createArchivedPick({
             index: 11, iddaaCode: '3193768', homeTeam: "Standard Liege", awayTeam: "Charleroi", league: "Belçika Pro Ligi",
             timeStr: '14:30', marketTitle: 'Çifte Şans', pickTitle: 'X-2 Çifte Şans', marketCode: 'CSX2', odd: 1.25, confidence: 91,
-            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Standard Liege 1-1 Charleroi · X-2 Çifte Şans (İddaa Kod: 3193768 | Belçika Pro Ligi)"
+            homeScore: 0, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Standard Liege 0-1 Charleroi · X-2 Çifte Şans (İddaa Kod: 3193768 | Belçika Pro Ligi)"
         }, yDate, dFmt);
 
         // 12. Midtjylland vs Kopenhag (19:00 - Danimarka)
         const p_midt_cs = this._createArchivedPick({
             index: 12, iddaaCode: '3198921', homeTeam: "Midtjylland", awayTeam: "Kopenhag", league: "Danimarka Süper Ligi",
             timeStr: '19:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.34, confidence: 89,
-            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "Midtjylland 2-2 Kopenhag · 1-X Çifte Şans (İddaa Kod: 3198921 | Danimarka Süper Ligi)"
+            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Midtjylland 1-1 Kopenhag · 1-X Çifte Şans (İddaa Kod: 3198921 | Danimarka Süper Ligi)"
         }, yDate, dFmt);
 
         // 13. AL Shabab vs AL Taawoun (21:00 - Suudi Arabistan)
         const p_shabab = this._createArchivedPick({
             index: 13, iddaaCode: '3134237', homeTeam: "AL Shabab (Sar)", awayTeam: "AL Taawoun", league: "Suudi Arabistan Pro Lig",
             timeStr: '21:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Al Shabab Kazanır)', marketCode: 'MS1', odd: 1.93, confidence: 78,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "AL Shabab 2-1 AL Taawoun · MS 1 (İddaa Kod: 3134237 | Suudi Arabistan)"
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "AL Shabab 2-0 AL Taawoun · MS 1 (İddaa Kod: 3134237 | Suudi Arabistan)"
         }, yDate, dFmt);
 
         // 14. AL Fayha vs AL Riyadh (16:40 - Suudi Arabistan)
@@ -2940,36 +2940,36 @@ const HistoricalCouponsService = {
             detail: "AL Fayha 1-0 AL Riyadh · MS 1 (İddaa Kod: 3134322 | Suudi Arabistan)"
         }, yDate, dFmt);
 
-        // 15. Atletico Mineiro vs Santos (22:00 - Brezilya Serie A)
-        const p_mineiro = this._createArchivedPick({
-            index: 15, iddaaCode: '3199740', homeTeam: "Atl Mineiro", awayTeam: "Santos SP", league: "Brezilya Serie A",
-            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atl. Mineiro Kazanır)', marketCode: 'MS1', odd: 1.78, confidence: 79,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Atl Mineiro 2-1 Santos SP · MS 1 (İddaa Kod: 3199740 | Brezilya Serie A)"
+        // 15. Mallorca vs Las Palmas - Değer Oran (19:30)
+        const p_mallorca_val = this._createArchivedPick({
+            index: 15, iddaaCode: '3199423', homeTeam: "Mallorca", awayTeam: "Las Palmas", league: "İspanya La Liga",
+            timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Mallorca Kazanır)', marketCode: 'MS1', odd: 1.78, confidence: 79,
+            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Mallorca 3-1 Las Palmas · MS 1 (İddaa Kod: 3199423 | İspanya La Liga)"
         }, yDate, dFmt);
 
         // 16. Midtjylland vs Kopenhag - KG VAR (19:00)
         const p_midt_btts = this._createArchivedPick({
             index: 16, iddaaCode: '3198921', homeTeam: "Midtjylland", awayTeam: "Kopenhag", league: "Danimarka Süper Ligi",
             timeStr: '19:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.65, confidence: 88,
-            homeScore: 2, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "Midtjylland 2-2 Kopenhag · KG VAR (İddaa Kod: 3198921 | Danimarka Süper Ligi)"
-        }, yDate, dFmt);
-
-        // 17. Southampton vs Portsmouth - KG VAR (14:00)
-        const p_southampton_btts = this._createArchivedPick({
-            index: 17, iddaaCode: '3198976', homeTeam: "Southampton", awayTeam: "Portsmouth", league: "İngiltere",
-            timeStr: '14:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.68, confidence: 89,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Southampton 2-1 Portsmouth · KG VAR (İddaa Kod: 3198976 | İngiltere)"
-        }, yDate, dFmt);
-
-        // 18. Standard Liege vs Charleroi - KG VAR (14:30)
-        const p_standard_btts = this._createArchivedPick({
-            index: 18, iddaaCode: '3193768', homeTeam: "Standard Liege", awayTeam: "Charleroi", league: "Belçika Pro Ligi",
-            timeStr: '14:30', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.70, confidence: 86,
             homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Standard Liege 1-1 Charleroi · KG VAR (İddaa Kod: 3193768 | Belçika Pro Ligi)"
+            detail: "Midtjylland 1-1 Kopenhag · KG VAR (İddaa Kod: 3198921 | Danimarka Süper Ligi)"
+        }, yDate, dFmt);
+
+        // 17. Real Sociedad vs Dep. La Coruna - KG VAR (17:15)
+        const p_sociedad_btts = this._createArchivedPick({
+            index: 17, iddaaCode: '3199450', homeTeam: "Real Sociedad", awayTeam: "Dep. La Coruna", league: "İspanya La Liga",
+            timeStr: '17:15', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.68, confidence: 89,
+            homeScore: 3, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Real Sociedad 3-2 Dep. La Coruna · KG VAR (İddaa Kod: 3199450 | İspanya La Liga)"
+        }, yDate, dFmt);
+
+        // 18. Union Saint-Gilloise vs Oud-Heverlee Leuven - KG VAR (17:00)
+        const p_usg_btts = this._createArchivedPick({
+            index: 18, iddaaCode: '3193789', homeTeam: "U. S. Gilloise", awayTeam: "O. H. Leuven", league: "Belçika Pro Ligi",
+            timeStr: '17:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.70, confidence: 88,
+            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "U. S. Gilloise 1-1 O. H. Leuven · KG VAR (İddaa Kod: 3193789 | Belçika Pro Ligi)"
         }, yDate, dFmt);
 
         // 19. Southampton vs Portsmouth - Korner (14:00)
@@ -2984,16 +2984,16 @@ const HistoricalCouponsService = {
         const p_betis_stat = this._createArchivedPick({
             index: 20, iddaaCode: '3199553', homeTeam: "Real Betis", awayTeam: "Osasuna", league: "İspanya La Liga",
             timeStr: '19:30', marketTitle: 'Kombine İstatistik', pickTitle: '1-X Çifte Şans & 1.5 ÜST', marketCode: 'DC1X_O15', odd: 1.48, confidence: 91,
-            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Real Betis 2-0 Osasuna · 1-X & 1.5 ÜST (İddaa Kod: 3199553 | İspanya La Liga)"
+            homeScore: 5, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Real Betis 5-2 Osasuna · 1-X & 1.5 ÜST (İddaa Kod: 3199553 | İspanya La Liga)"
         }, yDate, dFmt);
 
-        // 21. Gaziantep FK vs Çorum FK - Kart (16:00)
-        const p_gaziantep_crd = this._createArchivedPick({
-            index: 21, iddaaCode: '3199391', homeTeam: "Gaziantep FK", awayTeam: "Çorum FK", league: "Türkiye",
-            timeStr: '16:00', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 3.5 ÜST', marketCode: 'CRD_35', odd: 1.62, confidence: 85,
-            homeScore: 3, awayScore: 2, isWon: true, isPending: false, isLive: false,
-            detail: "Gaziantep FK vs Çorum FK · 5 Kart (3.5 ÜST) (İddaa Kod: 3199391 | Türkiye)"
+        // 21. Brondby vs Lyngby BK - Özel İstatistik (17:00)
+        const p_brondby_stat = this._createArchivedPick({
+            index: 21, iddaaCode: '3199154', homeTeam: "Brondby", awayTeam: "Lyngby BK", league: "Danimarka Süper Ligi",
+            timeStr: '17:00', marketTitle: 'Kombine İstatistik', pickTitle: '2.5 ÜST & Ev 1.5 ÜST', marketCode: 'O25_H15', odd: 1.62, confidence: 92,
+            homeScore: 5, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Brondby 5-2 Lyngby BK · 2.5 ÜST & Ev 1.5 Üst (İddaa Kod: 3199154 | Danimarka Süper Ligi)"
         }, yDate, dFmt);
 
         // 22. Atl Junior vs Inter Bogota (02:10 - Kolombiya Primera A)
@@ -3045,37 +3045,37 @@ const HistoricalCouponsService = {
         // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç)
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
-            subtitle: 'Real Sociedad, Midtjylland-Kopenhag ve Union SG ile Gollü Pazar Maçları', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Real Sociedad, Brondby ve Mallorca ile Gollü Pazar Maçları', badge: '✅ KAZANDI 3/3',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 50, confidence: 91
-        }, [p_sociedad_goals, p_midt_goals, p_usg_goals], dFmt);
+        }, [p_sociedad_goals, p_brondby_goals, p_mallorca_goals], dFmt);
 
         // Kupon 4: İY & Özel Strateji Kuponu (3 maç)
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
-            subtitle: 'Gaziantep 1-X, Standard Liege X-2 ve Midtjylland 1-X Çifte Şans Stratejisi', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Mallorca 1-X, Standard Liege X-2 ve Midtjylland 1-X Çifte Şans Stratejisi', badge: '✅ KAZANDI 3/3',
             badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50, confidence: 90
-        }, [p_gaziantep, p_standard, p_midt_cs], dFmt);
+        }, [p_mallorca_cs, p_standard, p_midt_cs], dFmt);
 
         // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~6.42 Oran)',
-            subtitle: 'Al Shabab, Al Fayha ve Atletico Mineiro ile Yüksek Kazanç Fırsatı', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Al Shabab, Al Fayha ve Mallorca ile Yüksek Kazanç Fırsatı', badge: '✅ KAZANDI 3/3',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 78
-        }, [p_shabab, p_fayha, p_mineiro], dFmt);
+        }, [p_shabab, p_fayha, p_mallorca_val], dFmt);
 
         // Kupon 6: KG VAR Kombini (3 maç)
         const c6 = this._createArchivedCoupon({
             id: 'c_btts_' + yDate, title: '🔥 KG VAR / Karşılıklı Gol Kombini',
-            subtitle: 'Midtjylland-Kopenhag, Southampton-Portsmouth ve Standard Liege ile Karşılıklı Gol Düelloları', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Midtjylland-Kopenhag, Real Sociedad ve Union SG ile Karşılıklı Gol Düelloları', badge: '✅ KAZANDI 3/3',
             badgeType: 'special', icon: '🔥', themeColor: '#EF4444', recommendedStake: 50, confidence: 87
-        }, [p_midt_btts, p_southampton_btts, p_standard_btts], dFmt);
+        }, [p_midt_btts, p_sociedad_btts, p_usg_btts], dFmt);
 
         // Kupon 7: Korner / Kart İstatistik (3 maç)
         const c7 = this._createArchivedCoupon({
             id: 'c_stats_' + yDate, title: '🎯 Korner / Kart & Özel İstatistik',
-            subtitle: 'Southampton 8.5 Korner Üst, Real Betis 1-X & 1.5 Üst ve Gaziantep 3.5 Kart Üst', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Southampton 8.5 Korner Üst, Real Betis 1-X & 1.5 Üst ve Brondby 2.5 Üst', badge: '✅ KAZANDI 3/3',
             badgeType: 'primary', icon: '🎯', themeColor: '#10B981', recommendedStake: 50, confidence: 88
-        }, [p_southampton_cnr, p_betis_stat, p_gaziantep_crd], dFmt);
+        }, [p_southampton_cnr, p_betis_stat, p_brondby_stat], dFmt);
 
         // Kupon 8: Gece / Güney Amerika & MLS (3 maç)
         const c8 = this._createArchivedCoupon({

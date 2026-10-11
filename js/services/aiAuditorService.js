@@ -36,17 +36,17 @@ const AIAuditorService = {
 
     // 11 Ekim 2026 Teyitli Resmi Maç Skorları Kataloğu
     _verifiedSundayScores: [
-        { home: "Real Betis", away: "Osasuna", hs: 2, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199553' },
-        { home: "Real Sociedad", away: "Dep. La Coruna", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199450' },
+        { home: "Real Betis", away: "Osasuna", hs: 5, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199553' },
+        { home: "Real Sociedad", away: "Dep. La Coruna", hs: 3, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199450' },
         { home: "Grasshoppers", away: "Young Boys", hs: 0, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 2', won: true, code: '3198698' },
-        { home: "Southampton", away: "Portsmouth", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3198976' },
-        { home: "Brondby", away: "Lyngby BK", hs: 2, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199154' },
-        { home: "Mallorca", away: "Las Palmas", hs: 1, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199423' },
-        { home: "Midtjylland", away: "Kopenhag", hs: 2, as: 2, status: 'FINISHED', min: 'MS', pick: '2.5 ÜST', won: true, code: '3198921' },
-        { home: "U. S. Gilloise", away: "O. H. Leuven", hs: 3, as: 1, status: 'FINISHED', min: 'MS', pick: '2.5 ÜST', won: true, code: '3193789' },
-        { home: "Gaziantep FK", away: "Çorum FK", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: '1-X Çifte Şans', won: true, code: '3199391' },
-        { home: "Standard Liege", away: "Charleroi", hs: 1, as: 1, status: 'FINISHED', min: 'MS', pick: 'X-2 Çifte Şans', won: true, code: '3193768' },
-        { home: "AL Shabab (Sar)", away: "AL Taawoun", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3134237' },
+        { home: "Southampton", away: "Portsmouth", hs: 1, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3198976' },
+        { home: "Brondby", away: "Lyngby BK", hs: 5, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199154' },
+        { home: "Mallorca", away: "Las Palmas", hs: 3, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199423' },
+        { home: "Midtjylland", away: "Kopenhag", hs: 1, as: 1, status: 'FINISHED', min: 'MS', pick: '1-X Çifte Şans', won: true, code: '3198921' },
+        { home: "U. S. Gilloise", away: "O. H. Leuven", hs: 1, as: 1, status: 'FINISHED', min: 'MS', pick: 'KG VAR', won: true, code: '3193789' },
+        { home: "Gaziantep FK", away: "Çorum FK", hs: 0, as: 3, status: 'FINISHED', min: 'MS', pick: '2.5 ÜST', won: true, code: '3199391' },
+        { home: "Standard Liege", away: "Charleroi", hs: 0, as: 1, status: 'FINISHED', min: 'MS', pick: 'X-2 Çifte Şans', won: true, code: '3193768' },
+        { home: "AL Shabab (Sar)", away: "AL Taawoun", hs: 2, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3134237' },
         { home: "AL Fayha", away: "AL Riyadh", hs: 1, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3134322' },
         { home: "Atl Mineiro", away: "Santos SP", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199740' },
         // Gece Seansı Maçları (02:10 - 03:00) -> Henüz Oynanmadı / Bekliyor

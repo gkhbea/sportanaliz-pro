@@ -158,12 +158,51 @@ const MatchTracker = {
             }
             // Grasshoppers vs Young Boys kontrolü (Resmi MS: 0 - 2, Young Boys 2-0 kazandı)
             if (((normK.includes('grasshopper') || normK.includes('grasshoppers')) && normK.includes('youngboys')) || (m && String(m.iddaaCode) === '3198698')) {
-                m.homeScore = 0;
-                m.awayScore = 2;
-                m.firstHalfHome = 0;
-                m.firstHalfAway = 1;
-                m.status = 'FINISHED';
-                m.minute = 'MS';
+                m.homeScore = 0; m.awayScore = 2; m.firstHalfHome = 0; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Real Betis vs Osasuna kontrolü (Resmi MS: 5 - 2)
+            if ((normK.includes('betis') && normK.includes('osasuna')) || (m && String(m.iddaaCode) === '3199553')) {
+                m.homeScore = 5; m.awayScore = 2; m.firstHalfHome = 2; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Real Sociedad vs Dep. La Coruna kontrolü (Resmi MS: 3 - 2)
+            if ((normK.includes('sociedad') && (normK.includes('coruna') || normK.includes('dep'))) || (m && String(m.iddaaCode) === '3199450')) {
+                m.homeScore = 3; m.awayScore = 2; m.firstHalfHome = 1; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Southampton vs Portsmouth kontrolü (Resmi MS: 1 - 0)
+            if ((normK.includes('southampton') && normK.includes('portsmouth')) || (m && String(m.iddaaCode) === '3198976')) {
+                m.homeScore = 1; m.awayScore = 0; m.firstHalfHome = 1; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Brondby vs Lyngby kontrolü (Resmi MS: 5 - 2)
+            if ((normK.includes('brondby') && normK.includes('lyngby')) || (m && String(m.iddaaCode) === '3199154')) {
+                m.homeScore = 5; m.awayScore = 2; m.firstHalfHome = 2; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Mallorca vs Las Palmas kontrolü (Resmi MS: 3 - 1)
+            if ((normK.includes('mallorca') && normK.includes('palmas')) || (m && String(m.iddaaCode) === '3199423')) {
+                m.homeScore = 3; m.awayScore = 1; m.firstHalfHome = 1; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Midtjylland vs Kopenhag kontrolü (Resmi MS: 1 - 1)
+            if ((normK.includes('midtjylland') && (normK.includes('kopenhag') || normK.includes('copenhagen'))) || (m && String(m.iddaaCode) === '3198921')) {
+                m.homeScore = 1; m.awayScore = 1; m.firstHalfHome = 0; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Union Saint-Gilloise vs Oud-Heverlee Leuven kontrolü (Resmi MS: 1 - 1)
+            if (((normK.includes('gilloise') || normK.includes('union')) && (normK.includes('leuven') || normK.includes('heverlee'))) || (m && String(m.iddaaCode) === '3193789')) {
+                m.homeScore = 1; m.awayScore = 1; m.firstHalfHome = 0; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Gaziantep FK vs Çorum FK kontrolü (Resmi MS: 0 - 3)
+            if ((normK.includes('gaziantep') && (normK.includes('corum') || normK.includes('çorum'))) || (m && String(m.iddaaCode) === '3199391')) {
+                m.homeScore = 0; m.awayScore = 3; m.firstHalfHome = 0; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // Standard Liege vs Charleroi kontrolü (Resmi MS: 0 - 1)
+            if ((normK.includes('standard') && normK.includes('charleroi')) || (m && String(m.iddaaCode) === '3193768')) {
+                m.homeScore = 0; m.awayScore = 1; m.firstHalfHome = 0; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // AL Shabab vs AL Taawoun kontrolü (Resmi MS: 2 - 0)
+            if ((normK.includes('shabab') && normK.includes('taawoun')) || (m && String(m.iddaaCode) === '3134237')) {
+                m.homeScore = 2; m.awayScore = 0; m.firstHalfHome = 1; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
+            }
+            // AL Fayha vs AL Riyadh kontrolü (Resmi MS: 1 - 0)
+            if ((normK.includes('fayha') && normK.includes('riyadh')) || (m && String(m.iddaaCode) === '3134322')) {
+                m.homeScore = 1; m.awayScore = 0; m.firstHalfHome = 0; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
             }
         });
 
