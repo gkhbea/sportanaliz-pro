@@ -3000,24 +3000,24 @@ const HistoricalCouponsService = {
         const p_atljunior = this._createArchivedPick({
             index: 22, iddaaCode: '3195376', homeTeam: "Atl Junior", awayTeam: "Inter Bogota", league: "Kolombiya Primera A",
             timeStr: '02:10', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atl Junior Kazanır)', marketCode: 'MS1', odd: 1.34, confidence: 91,
-            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Atl Junior 2-0 Inter Bogota · MS 1 (İddaa Kod: 3195376 | Kolombiya)"
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Atl Junior vs Inter Bogota · MS 1 (Bu Gece 02:10 | İddaa Kod: 3195376)"
         }, yDate, dFmt);
 
         // 23. Inter Miami vs DC United (02:30 - ABD MLS)
         const p_intermiami = this._createArchivedPick({
             index: 23, iddaaCode: '3194599', homeTeam: "Inter Miami", awayTeam: "DC Utd", league: "ABD MLS",
             timeStr: '02:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Inter Miami Kazanır)', marketCode: 'MS1', odd: 1.29, confidence: 94,
-            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Inter Miami 3-1 DC Utd · MS 1 (İddaa Kod: 3194599 | ABD MLS)"
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Inter Miami vs DC Utd · MS 1 (Bu Gece 02:30 | İddaa Kod: 3194599)"
         }, yDate, dFmt);
 
         // 24. Sao Paulo vs Vitoria BA (03:00 - Brezilya Serie A)
         const p_saopaulo = this._createArchivedPick({
             index: 24, iddaaCode: '3199277', homeTeam: "Sao Paulo SP", awayTeam: "Vitoria BA", league: "Brezilya Serie A",
             timeStr: '03:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Sao Paulo Kazanır)', marketCode: 'MS1', odd: 1.48, confidence: 89,
-            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
-            detail: "Sao Paulo SP 2-0 Vitoria BA · MS 1 (İddaa Kod: 3199277 | Brezilya Serie A)"
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Sao Paulo SP vs Vitoria BA · MS 1 (Bu Gece 03:00 | İddaa Kod: 3199277)"
         }, yDate, dFmt);
 
         // 25. River Plate vs Estudiantes Río Cuarto (03:30 - Arjantin)
@@ -3032,28 +3032,28 @@ const HistoricalCouponsService = {
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
             subtitle: 'Real Betis, Real Sociedad ve Young Boys ile Pazar Gününün En Sağlam 3 Bankosu', badge: '✅ KAZANDI 3/3',
-            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 94
+            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 50, confidence: 94
         }, [p_betis, p_sociedad, p_yb_ms], dFmt);
 
         // Kupon 2: İdeal Sistem (3 maç)
         const c2 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
             subtitle: 'Southampton, Brondby ve Mallorca ile Yüksek İsabetli Pazar Kombinasyonu', badge: '✅ KAZANDI 3/3',
-            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 91
+            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 50, confidence: 91
         }, [p_southampton, p_brondby, p_mallorca], dFmt);
 
         // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç)
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
             subtitle: 'Young Boys, Midtjylland-Kopenhag ve Union SG ile Gollü Pazar Maçları', badge: '✅ KAZANDI 3/3',
-            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 91
+            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 50, confidence: 91
         }, [p_yb_goals, p_midt_goals, p_usg_goals], dFmt);
 
         // Kupon 4: İY & Özel Strateji Kuponu (3 maç)
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
             subtitle: 'Gaziantep 1-X, Standard Liege X-2 ve Midtjylland 1-X Çifte Şans Stratejisi', badge: '✅ KAZANDI 3/3',
-            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 90
+            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50, confidence: 90
         }, [p_gaziantep, p_standard, p_midt_cs], dFmt);
 
         // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç)
@@ -3080,9 +3080,12 @@ const HistoricalCouponsService = {
         // Kupon 8: Gece / Güney Amerika & MLS (3 maç)
         const c8 = this._createArchivedCoupon({
             id: 'c_night_' + yDate, title: '🌙 Gece / Güney Amerika & MLS Kuponu',
-            subtitle: 'Atl Junior, Inter Miami ve Sao Paulo ile Önümüzdeki 1-3 Saatin Gece Seansı Bankoları', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Atl Junior, Inter Miami ve Sao Paulo ile Önümüzdeki 1-3 Saatin Gece Seansı Bankoları', badge: '⏳ BEKLİYOR (Gece 02:10)',
             badgeType: 'special', icon: '🌙', themeColor: '#6366F1', recommendedStake: 50, confidence: 92
         }, [p_atljunior, p_intermiami, p_saopaulo], dFmt);
+        c8.isPending = true;
+        c8.isWon = false;
+        c8.resultStatus = 'pending';
 
         return { coupons: [c1, c2, c3, c4, c5, c6, c7, c8], euroCoupons: [] };
     },

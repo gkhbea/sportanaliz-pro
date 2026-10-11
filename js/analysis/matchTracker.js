@@ -280,14 +280,16 @@ const MatchTracker = {
                             hs = parseInt(parts[0].trim(), 10) || 0;
                             as = parseInt(parts[1].trim(), 10) || 0;
                         }
+                        const isPending = am.status === 'PENDING' || am.isPending || am.scoreStatus === 'PENDING';
                         const scoreObj = {
-                            homeScore: hs,
-                            awayScore: as,
-                            firstHalfHome: Math.floor(hs * 0.45),
-                            firstHalfAway: Math.floor(as * 0.45),
-                            status: 'FINISHED',
-                            minute: 'MS',
+                            homeScore: isPending ? 0 : hs,
+                            awayScore: isPending ? 0 : as,
+                            firstHalfHome: isPending ? 0 : Math.floor(hs * 0.45),
+                            firstHalfAway: isPending ? 0 : Math.floor(as * 0.45),
+                            status: isPending ? 'NOT_STARTED' : (am.scoreStatus || 'FINISHED'),
+                            minute: isPending ? (am.timeStr || am.minuteStr || 'Başlamadı') : (am.minuteStr || 'MS'),
                             isManual: false,
+                            isFinished: !isPending,
                             mackolikUrl: am.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
                         };
                         if (am.iddaaCode) map.set('iddaa_' + String(am.iddaaCode), scoreObj);
@@ -305,18 +307,20 @@ const MatchTracker = {
                     for (const c of (set.coupons || [])) {
                         for (const p of (c.matches || c.picks || [])) {
                             const sd = p.scoreData || {};
-                            const hs = sd.homeScore !== undefined ? sd.homeScore : 2;
-                            const as = sd.awayScore !== undefined ? sd.awayScore : 1;
-                            const fhH = sd.firstHalfHome !== undefined ? sd.firstHalfHome : Math.floor(hs * 0.45);
-                            const fhA = sd.firstHalfAway !== undefined ? sd.firstHalfAway : Math.floor(as * 0.45);
+                            const isPending = p.isPending === true || sd.isPending === true || p.status === 'PENDING' || sd.status === 'NOT_STARTED' || p.resultStatus === 'pending';
+                            const hs = isPending ? 0 : (sd.homeScore !== undefined ? sd.homeScore : (p.homeScore !== undefined ? p.homeScore : 0));
+                            const as = isPending ? 0 : (sd.awayScore !== undefined ? sd.awayScore : (p.awayScore !== undefined ? p.awayScore : 0));
+                            const fhH = isPending ? 0 : (sd.firstHalfHome !== undefined ? sd.firstHalfHome : Math.floor(hs * 0.45));
+                            const fhA = isPending ? 0 : (sd.firstHalfAway !== undefined ? sd.firstHalfAway : Math.floor(as * 0.45));
                             const scoreObj = {
                                 homeScore: hs,
                                 awayScore: as,
                                 firstHalfHome: fhH,
                                 firstHalfAway: fhA,
-                                status: 'FINISHED',
-                                minute: 'MS',
+                                status: isPending ? 'NOT_STARTED' : (sd.status || 'FINISHED'),
+                                minute: isPending ? (p.timeStr || sd.minute || 'Başlamadı') : (sd.minute || 'MS'),
                                 isManual: false,
+                                isFinished: !isPending,
                                 mackolikUrl: p.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar'
                             };
                             if (p.iddaaCode) map.set('iddaa_' + String(p.iddaaCode), scoreObj);
