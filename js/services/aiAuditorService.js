@@ -149,7 +149,7 @@ const AIAuditorService = {
             if (r5.fixedCount > 0 && this.app) {
                 console.log(`🛡️ AIAuditor: ${r5.fixedCount} maç ve kupon kaydına müdahale edildi. Arayüz senkronize edildi.`);
                 if (typeof this.app.loadDailyCoupons === 'function' && this.app.currentView === 'coupons') {
-                    const activeDate = this.app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null;
+                    const activeDate = this.app.getUserSelectedDate ? this.app.getUserSelectedDate() : (this.app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null);
                     this.app.loadDailyCoupons(true, this.app.activeCouponFilter || 'all', activeDate);
                 }
             }

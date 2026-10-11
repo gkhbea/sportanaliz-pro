@@ -1449,13 +1449,13 @@ const CouponEngine = {
     },
 
     /**
-     * Önümüzdeki N saat (varsayılan 4-5 saat) içinde başlayacak maçlardan
-     * en yüksek kazanma ihtimalli Yıldırım Kuponu üretir.
+     * Önümüzdeki 0-5 saat içinde (şu andan itibaren 0 ile 5 saat arası) başlayacak / oynanacak
+     * maçlardan en yüksek kazanma ihtimalli Yıldırım Kuponu üretir.
      */
     generateHourlyCoupon(matches = [], maxHours = 5) {
         let list = Array.isArray(matches) && matches.length > 0 ? matches : (typeof window !== 'undefined' ? (window.app?.matches || window.App?.matches || []) : []);
         
-        // Eğer maç listesi boşsa garantili resmi gece bülten maçlarını kullan
+        // Eğer maç listesi boşsa garantili resmi gece/sabah 0-5 saat bülten maçlarını kullan
         if (!Array.isArray(list) || list.length === 0) {
             list = [
                 { homeTeam: 'Atl Junior', awayTeam: 'Inter Bogota', timeStr: '02:10', league: 'Kolombiya Primera A', iddaaCode: '3195376', odds: { home: 1.34, cs1X: 1.05, over15: 1.25 } },
@@ -1506,13 +1506,13 @@ const CouponEngine = {
             };
         });
 
-        // Önümüzdeki 5 saat içinde başlayacak maçlar (-10 dk ile maxMs arası)
-        let targetMatches = available.filter(m => m._kickoffDiffMs >= -10 * 60 * 1000 && m._kickoffDiffMs <= maxMs);
+        // 0-5 saat arasında olacak maçlar (Canlı oynananlar ile en fazla 5 saat sonraya kadar başlayacaklar)
+        let targetMatches = available.filter(m => m._kickoffDiffMs >= -20 * 60 * 1000 && m._kickoffDiffMs <= maxMs);
 
         // Eğer bulunamazsa en yakın başlayacak ilk 15 maçı al
         if (targetMatches.length < 3) {
             targetMatches = available
-                .filter(m => m._kickoffDiffMs >= -10 * 60 * 1000)
+                .filter(m => m._kickoffDiffMs >= -20 * 60 * 1000)
                 .sort((a, b) => a._kickoffDiffMs - b._kickoffDiffMs)
                 .slice(0, 15);
         }
@@ -1526,12 +1526,12 @@ const CouponEngine = {
             const o = m.odds || m.commonOdds || {};
             const diffMins = Math.round((m._kickoffDiffMs || 0) / 60000);
             let timeBadge = '';
-            if (diffMins <= 0) timeBadge = '🟢 Canlı / Yeni Başladı';
-            else if (diffMins < 60) timeBadge = `⏰ ${diffMins} dk sonra`;
+            if (diffMins <= 0) timeBadge = '🟢 Canlı (0-5 sa arası)';
+            else if (diffMins < 60) timeBadge = `⏰ ${diffMins} dk sonra (0-5 sa)`;
             else {
                 const hrs = Math.floor(diffMins / 60);
                 const rm = diffMins % 60;
-                timeBadge = `⏰ ${hrs} sa ${rm > 0 ? rm + ' dk' : ''} sonra`;
+                timeBadge = `⏰ ${hrs} sa ${rm > 0 ? rm + ' dk' : ''} sonra (0-5 sa)`;
             }
 
             const league = (m.league || '').toLowerCase();
@@ -1653,7 +1653,7 @@ const CouponEngine = {
                 seenTeams.add(key);
 
                 const diffMins = Math.round((m._kickoffDiffMs || 0) / 60000);
-                let timeBadge = diffMins <= 0 ? '🟢 Canlı / Yeni Başladı' : (diffMins < 60 ? `⏰ ${diffMins} dk sonra` : `⏰ ${Math.floor(diffMins/60)} sa sonra`);
+                let timeBadge = diffMins <= 0 ? '🟢 Canlı (0-5 sa arası)' : (diffMins < 60 ? `⏰ ${diffMins} dk sonra (0-5 sa)` : `⏰ ${Math.floor(diffMins/60)} sa sonra (0-5 sa)`);
 
                 chosenPicks.push({
                     match: m,
@@ -1684,9 +1684,9 @@ const CouponEngine = {
 
         return {
             id: 'coupon_hourly_' + Date.now(),
-            title: '⚡ Önümüzdeki 4-5 Saat Yıldırım Banko Kuponu',
-            subtitle: `Önümüzdeki 4-5 saat içinde başlayacak maçlardan en yüksek kazanma ihtimalli ${chosenPicks.length} seçim`,
-            badge: '⚡ 4-5 SAAT YILDIRIM',
+            title: '⚡ 0 - 5 Saat Arası Banko Yıldırım Kuponu',
+            subtitle: `Şu andan itibaren 0 ile 5 saat arasında başlayacak/oynanacak en yüksek kazanma ihtimalli ${chosenPicks.length} seçim`,
+            badge: '⚡ 0-5 SAAT ARASI MAÇLAR',
             icon: '⏱️',
             themeColor: '#F59E0B',
             accentBg: 'rgba(245,158,11,0.15)',

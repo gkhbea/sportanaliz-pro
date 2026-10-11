@@ -459,7 +459,7 @@ const App = {
                 this.loadHighConfidenceShowcase('all');
             }
         } else if (view === 'coupons') {
-            const preservedDate = this.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null;
+            const preservedDate = this.getUserSelectedDate();
             this.loadDailyCoupons(false, this.activeCouponFilter || 'all', preservedDate);
         } else if (view === 'all-stats') {
             this.loadAllMatchesStats();
@@ -477,6 +477,9 @@ const App = {
         } else if (view === 'radar') {
             this.loadRadarPanel();
         } else if (view === 'daily-analysis') {
+            if (window.DailyAnalysisViewPanel) {
+                DailyAnalysisViewPanel.selectedDate = this.getUserSelectedDate();
+            }
             this.loadDailyAnalysisPanel();
         }
     },
@@ -490,6 +493,7 @@ const App = {
 
         // Anında render et (Kullanıcı tıkladığı an donmadan açılır)
         if (window.DailyAnalysisViewPanel) {
+            DailyAnalysisViewPanel.selectedDate = this.getUserSelectedDate();
             container.innerHTML = DailyAnalysisViewPanel.render(this);
             DailyAnalysisViewPanel.bindEvents(this);
         }
@@ -818,7 +822,7 @@ const App = {
 
             // Eğer kullanıcı kupon veya analiz sekmesindeyse bülten geldiğinde anında kuponları yükle
             if (this.currentView === 'coupons') {
-                const preservedDate = this.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null;
+                const preservedDate = this.getUserSelectedDate();
                 this.loadDailyCoupons(false, this.activeCouponFilter || 'all', preservedDate);
             } else if (this.currentView === 'analysis' && !this.showingSingleMatchAnalysis) {
                 this.loadHighConfidenceShowcase('all');
@@ -1700,6 +1704,42 @@ const App = {
     },
 
     /**
+     * Kullanıcının seçtiği tarihi kararlılıkla koruyan tek merkezli okuyucu
+     */
+    getUserSelectedDate() {
+        const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
+        if (this.selectedCouponDate && this.selectedCouponDate !== 'today' && this.selectedCouponDate !== 'preserve') {
+            return this.selectedCouponDate;
+        }
+        if (window.CouponPanel?.selectedAnalysisDate && window.CouponPanel.selectedAnalysisDate !== 'today' && window.CouponPanel.selectedAnalysisDate !== 'preserve') {
+            return window.CouponPanel.selectedAnalysisDate;
+        }
+        if (window.DailyAnalysisViewPanel?.selectedDate && window.DailyAnalysisViewPanel.selectedDate !== 'today' && window.DailyAnalysisViewPanel.selectedDate !== 'preserve') {
+            return window.DailyAnalysisViewPanel.selectedDate;
+        }
+        try {
+            const stored = localStorage.getItem('sportanaliz_user_chosen_date');
+            if (stored && stored !== 'today' && stored !== 'preserve') {
+                return stored;
+            }
+        } catch (e) {}
+        return todayStr;
+    },
+
+    /**
+     * Kullanıcının seçtiği tarihi sisteme ve tüm alt panellere kalıcı olarak yazar
+     */
+    setUserSelectedDate(dateStr) {
+        if (!dateStr || dateStr === 'preserve') return;
+        this.selectedCouponDate = dateStr;
+        if (window.CouponPanel) window.CouponPanel.selectedAnalysisDate = dateStr;
+        if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = dateStr;
+        try {
+            localStorage.setItem('sportanaliz_user_chosen_date', dateStr);
+        } catch (e) {}
+    },
+
+    /**
      * "Benim İçin Bahis Yap" / Günlük 5 Kuponu ve Günlük Analiz Takip Karnesini Yükle
      */
     async loadDailyCoupons(forceRefresh = false, activeFilter = null, targetDate = null) {
@@ -1714,31 +1754,17 @@ const App = {
 
         // Kullanıcının seçtiği tarihi kararlılıkla koru:
         // Eğer kullanıcı veya arayüz açık bir tarih (YYYY-MM-DD) seçtiyse onu al;
-        // targetDate verilmemişse veya 'today' / 'preserve' ise mevcut seçili tarihi koru
-        let chosenDate = todayStr;
+        // targetDate verilmemişse veya 'today' / 'preserve' ise mevcut seçili tarihi KORU, kullanıcı yeni tarih seçmeden asla dönme!
+        let chosenDate = this.getUserSelectedDate();
         if (targetDate && targetDate !== 'today' && targetDate !== 'preserve' && targetDate !== 'force-today') {
             chosenDate = targetDate;
+            this.setUserSelectedDate(chosenDate);
         } else if (targetDate === 'force-today') {
             chosenDate = todayStr;
-        } else if (this.selectedCouponDate && this.selectedCouponDate !== 'today') {
-            chosenDate = this.selectedCouponDate;
-        } else if (window.CouponPanel?.selectedAnalysisDate && window.CouponPanel.selectedAnalysisDate !== 'today') {
-            chosenDate = window.CouponPanel.selectedAnalysisDate;
-        } else if (window.DailyAnalysisViewPanel?.selectedDate && window.DailyAnalysisViewPanel.selectedDate !== 'today') {
-            chosenDate = window.DailyAnalysisViewPanel.selectedDate;
+            this.setUserSelectedDate(todayStr);
         } else {
-            try {
-                const stored = localStorage.getItem('sportanaliz_user_chosen_date');
-                if (stored && stored !== 'today') chosenDate = stored;
-            } catch (e) {}
-        }
-
-        this.selectedCouponDate = chosenDate;
-        if (window.CouponPanel) {
-            CouponPanel.selectedAnalysisDate = chosenDate;
-        }
-        if (window.DailyAnalysisViewPanel) {
-            DailyAnalysisViewPanel.selectedDate = chosenDate;
+            // targetDate verilmemiş veya arka plan teftişi ise mevcut seçili tarihi koru
+            this.setUserSelectedDate(chosenDate);
         }
 
         if (!window.CouponEngine || !window.CouponPanel) {

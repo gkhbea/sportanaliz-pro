@@ -509,19 +509,19 @@ const LiveMatchesPanel = {
         // 6. Üst Kısayol Butonları (Tüm Kuponlar, Tutan Kuponlar, Yatan Kuponlar, Dashboard)
         container.querySelector('#btn-jump-to-all-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            const preserved = app.getUserSelectedDate ? app.getUserSelectedDate() : (app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today');
             app.loadDailyCoupons(false, 'all', preserved);
         });
 
         container.querySelector('#btn-jump-to-won-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            const preserved = app.getUserSelectedDate ? app.getUserSelectedDate() : (app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today');
             app.loadDailyCoupons(false, 'tutan', preserved);
         });
 
         container.querySelector('#btn-jump-to-lost-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            const preserved = app.getUserSelectedDate ? app.getUserSelectedDate() : (app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today');
             app.loadDailyCoupons(false, 'yatan', preserved);
         });
 
@@ -531,7 +531,7 @@ const LiveMatchesPanel = {
 
         container.querySelector('#btn-empty-live-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            const preserved = app.getUserSelectedDate ? app.getUserSelectedDate() : (app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today');
             app.loadDailyCoupons(false, 'all', preserved);
         });
 

@@ -89,7 +89,7 @@ const AutoArchiveService = {
                 if (this.app.currentView === 'dashboard' && typeof this.app.applyFilters === 'function') {
                     this.app.applyFilters();
                 } else if (this.app.currentView === 'coupons' && typeof this.app.loadDailyCoupons === 'function') {
-                    const activeDate = this.app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null;
+                    const activeDate = this.app.getUserSelectedDate ? this.app.getUserSelectedDate() : (this.app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null);
                     this.app.loadDailyCoupons(false, this.app.activeCouponFilter || 'all', activeDate);
                 } else if (this.app.currentView === 'daily-analysis' && typeof this.app.loadDailyAnalysisPanel === 'function') {
                     this.app.loadDailyAnalysisPanel();

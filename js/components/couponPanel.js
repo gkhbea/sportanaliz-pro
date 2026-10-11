@@ -95,22 +95,20 @@ const CouponPanel = {
      */
     render(coupons = [], euroCoupons = [], activeFilter = 'all', activeDate = null, totalAnalyzedCount = 0) {
         const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
-        let chosenDate = todayStr;
-        if (activeDate && activeDate !== 'today' && activeDate !== 'preserve') {
+        let chosenDate = window.app?.getUserSelectedDate?.() || this.selectedAnalysisDate || todayStr;
+        if (activeDate && activeDate !== 'today' && activeDate !== 'preserve' && activeDate !== 'force-today') {
             chosenDate = activeDate;
-        } else if (this.selectedAnalysisDate && this.selectedAnalysisDate !== 'today') {
-            chosenDate = this.selectedAnalysisDate;
-        } else if (window.app?.selectedCouponDate && window.app.selectedCouponDate !== 'today') {
-            chosenDate = window.app.selectedCouponDate;
-        } else {
-            try {
-                const stored = localStorage.getItem('sportanaliz_user_chosen_date');
-                if (stored && stored !== 'today') chosenDate = stored;
-            } catch (e) {}
+        } else if (activeDate === 'force-today') {
+            chosenDate = todayStr;
         }
         this.selectedAnalysisDate = chosenDate;
-        if (window.app) window.app.selectedCouponDate = chosenDate;
-        if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = chosenDate;
+        if (window.app?.setUserSelectedDate) {
+            window.app.setUserSelectedDate(chosenDate);
+        } else {
+            if (window.app) window.app.selectedCouponDate = chosenDate;
+            if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = chosenDate;
+            try { localStorage.setItem('sportanaliz_user_chosen_date', chosenDate); } catch (e) {}
+        }
         this._lastTotalAnalyzedCount = totalAnalyzedCount; // bindEvents için sakla
 
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
@@ -281,8 +279,8 @@ const CouponPanel = {
                         </div>
                     </div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="btn btn-xs" id="btn-generate-hourly-coupon" style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(217,119,6,0.35));border:1px solid #f59e0b;color:#fcd34d;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;box-shadow:0 0 15px rgba(245,158,11,0.2);" title="Önümüzdeki 4-5 saat içerisinde başlayacak maçlardan en yüksek kazanma ihtimalli kuponu üret">
-                            ⏱️ Önümüzdeki 5 Saat İçin Kupon Yap
+                        <button class="btn btn-xs" id="btn-generate-hourly-coupon" style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(217,119,6,0.35));border:1px solid #f59e0b;color:#fcd34d;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;box-shadow:0 0 15px rgba(245,158,11,0.2);" title="Şu andan itibaren 0-5 saat arasında başlayacak/oynanacak maçlardan kupon üret">
+                            ⏱️ 0-5 Saat Arası Maçlar Kuponu
                         </button>
                         <button class="btn btn-outline btn-xs" id="btn-finish-all-pending-matches" style="background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,78,59,0.3));border:1px solid #10B981;color:#10B981;font-weight:800;border-radius:8px;padding:5px 12px;cursor:pointer;" title="Tüm canlı ve bekleyen karşılaşmaları resmi maç sonu (MS) olarak sonuçlandır">
                             🏁 Canlı/Bekleyenleri Sonlandır (MS)
@@ -293,7 +291,7 @@ const CouponPanel = {
                     </div>
                 </div>
 
-                <!-- ⚡ ÖNÜMÜZDEKİ 4-5 SAAT YILDIRIM BANKO KUPONU -->
+                <!-- ⚡ 0-5 SAAT ARASI YILDIRIM BANKO KUPONU -->
                 <div id="hourly-coupon-container">
                     ${this.hourlyCoupon ? this.renderHourlyCouponCard(this.hourlyCoupon) : ''}
                 </div>
@@ -1240,7 +1238,8 @@ const CouponPanel = {
             btn.addEventListener('click', (e) => {
                 const filter = btn.dataset.couponFilter;
                 app.activeCouponFilter = filter;
-                app.loadDailyCoupons(false, filter, this.selectedAnalysisDate || app.selectedCouponDate);
+                const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
+                app.loadDailyCoupons(false, filter, activeDate);
             });
         });
 
@@ -1250,17 +1249,19 @@ const CouponPanel = {
                 const res = window.MatchTracker.finishAllMatches();
                 window.Helpers?.showToast?.(`🏁 ${res.totalMatches || 'Tüm'} karşılaşma resmi maç sonu (MS) olarak sonuçlandırıldı! ✅`, 'success');
                 if (app && typeof app.loadDailyCoupons === 'function') {
-                    app.loadDailyCoupons(true, app.activeCouponFilter || 'all', this.selectedAnalysisDate || app.selectedCouponDate);
+                    const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
+                    app.loadDailyCoupons(true, app.activeCouponFilter || 'all', activeDate);
                 }
             }
         });
 
         // 5 Kuponu Yenile Butonu
         document.getElementById('btn-reload-5-coupons')?.addEventListener('click', () => {
-            app.loadDailyCoupons(true, app.activeCouponFilter || 'all', this.selectedAnalysisDate || app.selectedCouponDate);
+            const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
+            app.loadDailyCoupons(true, app.activeCouponFilter || 'all', activeDate);
         });
 
-        // ⏱️ Önümüzdeki 5 Saat İçin Kupon Yap Butonu
+        // ⏱️ 0-5 Saat Arası Maçlar Kuponu Yap Butonu
         document.getElementById('btn-generate-hourly-coupon')?.addEventListener('click', () => {
             if (!window.CouponEngine || typeof window.CouponEngine.generateHourlyCoupon !== 'function') {
                 window.Helpers?.showToast?.('Kupon motoru yükleniyor...', 'info');
@@ -1276,9 +1277,9 @@ const CouponPanel = {
                     this._bindHourlyClose(app);
                     container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
-                window.Helpers?.showToast?.(`⚡ Önümüzdeki 4-5 saatlik Yıldırım Kuponu hazırlandı! (${hCoupon.matches?.length || 3} Maç, Oran: ${hCoupon.totalOdd})`, 'success');
+                window.Helpers?.showToast?.(`⚡ 0-5 saat arasındaki maçlardan Yıldırım Kuponu hazırlandı! (${hCoupon.matches?.length || 3} Maç, Oran: ${hCoupon.totalOdd})`, 'success');
             } else {
-                window.Helpers?.showToast?.('Önümüzdeki 4-5 saat içinde başlayacak uygun maç bulunamadı.', 'warning');
+                window.Helpers?.showToast?.('0-5 saat içinde başlayacak uygun maç bulunamadı.', 'warning');
             }
         });
 
@@ -1330,11 +1331,13 @@ const CouponPanel = {
         const handleDateChange = (newDate) => {
             const isModalOpen = document.getElementById('modal-daily-analysis-matches')?.classList.contains('active');
             this.selectedAnalysisDate = newDate;
-            if (app) app.selectedCouponDate = newDate;
-            if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = newDate;
-            try {
-                localStorage.setItem('sportanaliz_user_chosen_date', newDate);
-            } catch (err) {}
+            if (app?.setUserSelectedDate) {
+                app.setUserSelectedDate(newDate);
+            } else {
+                if (app) app.selectedCouponDate = newDate;
+                if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = newDate;
+                try { localStorage.setItem('sportanaliz_user_chosen_date', newDate); } catch (err) {}
+            }
 
             if (app && typeof app.loadDailyCoupons === 'function') {
                 app.loadDailyCoupons(false, app.activeCouponFilter || 'all', newDate).then(() => {
@@ -1537,7 +1540,7 @@ const CouponPanel = {
         return `
             <div id="hourly-coupon-box" class="hourly-coupon-card animate-fade-in" style="background:linear-gradient(135deg, rgba(30,27,75,0.95) 0%, rgba(15,23,42,0.95) 100%);border:2px solid #F59E0B;border-radius:18px;padding:22px;margin-bottom:24px;box-shadow:0 0 30px rgba(245,158,11,0.25);position:relative;overflow:hidden;">
                 <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,#F59E0B,#D97706);color:#000;font-weight:900;font-size:0.75rem;padding:4px 16px;border-radius:0 0 0 12px;letter-spacing:0.5px;box-shadow:0 2px 10px rgba(0,0,0,0.3);">
-                    ⚡ ÖNÜMÜZDEKİ 4-5 SAAT İÇİNDE BAŞLAYACAK MAÇLAR
+                    ⚡ 0-5 SAAT ARASINDA BAŞLAYACAK / OYNANACAK MAÇLAR
                 </div>
 
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:14px;">
@@ -1604,7 +1607,7 @@ const CouponPanel = {
                         💰 Önerilen Başlangıç Bahsi: <strong style="color:#ffffff;">${defaultStake} TL</strong> · Olası Kazanç: <strong style="color:#10B981;">${potentialWin} TL</strong>
                     </div>
                     <span style="font-size:0.78rem;color:#94a3b8;">
-                        ⚡ En kısa sürede başlayacak ve kazanma ihtimali en yüksek 3 maçlık yapay zeka seçimidir.
+                        ⚡ 0 ile 5 saat aralığında başlayacak ve yapay zeka analizlerinde kazanma güveni en yüksek maçlardan oluşturulmuştur.
                     </span>
                 </div>
             </div>
