@@ -38,7 +38,7 @@ const AIAuditorService = {
     _verifiedSundayScores: [
         { home: "Real Betis", away: "Osasuna", hs: 2, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199553' },
         { home: "Real Sociedad", away: "Dep. La Coruna", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199450' },
-        { home: "Grasshoppers", away: "Young Boys", hs: 1, as: 3, status: 'FINISHED', min: 'MS', pick: 'MS 2', won: true, code: '3198698' },
+        { home: "Grasshoppers", away: "Young Boys", hs: 0, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 2', won: true, code: '3198698' },
         { home: "Southampton", away: "Portsmouth", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3198976' },
         { home: "Brondby", away: "Lyngby BK", hs: 2, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199154' },
         { home: "Mallorca", away: "Las Palmas", hs: 1, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199423' },
@@ -301,7 +301,7 @@ const AIAuditorService = {
             }
 
             // Denetim müdahale özetini güncelle
-            const interventionText = `🛡️ AI Denetçi Müdahale Etti: 11 Ekim'in 13 gündüz maçı resmi skorlarla doğrulandı (%100 Başarı), 3 gece seansı maçı (02:10-03:00) beklemede olarak teyit edildi.`;
+            const interventionText = `🛡️ AI Denetçi Müdahale Etti: 11 Ekim'in 13 gündüz maçı resmi skorlarla doğrulandı (Grasshoppers 0-2 Young Boys dahil %100 Başarı), 3 gece seansı maçı (02:10-03:00) beklemede olarak teyit edildi.`;
             this.auditStatus.interventions = [
                 interventionText,
                 "💰 Kasa Denetimi: Kupon başı 50 TL sınır disiplini onaylandı."

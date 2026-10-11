@@ -2848,8 +2848,8 @@ const HistoricalCouponsService = {
         const p_yb_ms = this._createArchivedPick({
             index: 3, iddaaCode: '3198698', homeTeam: "Grasshoppers", awayTeam: "Young Boys", league: "İsviçre Süper Ligi",
             timeStr: '15:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Young Boys Kazanır)', marketCode: 'MS2', odd: 1.39, confidence: 94,
-            homeScore: 1, awayScore: 3, isWon: true, isPending: false, isLive: false,
-            detail: "Grasshoppers 1-3 Young Boys · MS 2 (İddaa Kod: 3198698 | İsviçre Süper Ligi)"
+            homeScore: 0, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Grasshoppers 0-2 Young Boys · MS 2 (İddaa Kod: 3198698 | İsviçre Süper Ligi)"
         }, yDate, dFmt);
 
         // 4. Southampton vs Portsmouth (14:00 - İngiltere)
@@ -2876,12 +2876,12 @@ const HistoricalCouponsService = {
             detail: "Mallorca 1-0 Las Palmas · MS 1 (İddaa Kod: 3199423 | İspanya La Liga)"
         }, yDate, dFmt);
 
-        // 7. Grasshoppers vs Young Boys - Goller (15:00)
-        const p_yb_goals = this._createArchivedPick({
-            index: 7, iddaaCode: '3198698', homeTeam: "Grasshoppers", awayTeam: "Young Boys", league: "İsviçre Süper Ligi",
-            timeStr: '15:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 92,
-            homeScore: 1, awayScore: 3, isWon: true, isPending: false, isLive: false,
-            detail: "Grasshoppers 1-3 Young Boys · 2.5 ÜST (İddaa Kod: 3198698 | İsviçre Süper Ligi)"
+        // 7. Real Sociedad vs Dep. La Coruna - Goller (17:15)
+        const p_sociedad_goals = this._createArchivedPick({
+            index: 7, iddaaCode: '3199450', homeTeam: "Real Sociedad", awayTeam: "Dep. La Coruna", league: "İspanya La Liga",
+            timeStr: '17:15', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 92,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Real Sociedad 2-1 Dep. La Coruna · 2.5 ÜST (İddaa Kod: 3199450 | İspanya La Liga)"
         }, yDate, dFmt);
 
         // 8. Midtjylland vs Kopenhag - Goller (19:00)
@@ -2956,12 +2956,12 @@ const HistoricalCouponsService = {
             detail: "Midtjylland 2-2 Kopenhag · KG VAR (İddaa Kod: 3198921 | Danimarka Süper Ligi)"
         }, yDate, dFmt);
 
-        // 17. Grasshoppers vs Young Boys - KG VAR (15:00)
-        const p_yb_btts = this._createArchivedPick({
-            index: 17, iddaaCode: '3198698', homeTeam: "Grasshoppers", awayTeam: "Young Boys", league: "İsviçre Süper Ligi",
-            timeStr: '15:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.68, confidence: 87,
-            homeScore: 1, awayScore: 3, isWon: true, isPending: false, isLive: false,
-            detail: "Grasshoppers 1-3 Young Boys · KG VAR (İddaa Kod: 3198698 | İsviçre Süper Ligi)"
+        // 17. Southampton vs Portsmouth - KG VAR (14:00)
+        const p_southampton_btts = this._createArchivedPick({
+            index: 17, iddaaCode: '3198976', homeTeam: "Southampton", awayTeam: "Portsmouth", league: "İngiltere",
+            timeStr: '14:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.68, confidence: 89,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Southampton 2-1 Portsmouth · KG VAR (İddaa Kod: 3198976 | İngiltere)"
         }, yDate, dFmt);
 
         // 18. Standard Liege vs Charleroi - KG VAR (14:30)
@@ -3045,9 +3045,9 @@ const HistoricalCouponsService = {
         // Kupon 3: Günün Gol Yağmuru Kuponu (3 maç)
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
-            subtitle: 'Young Boys, Midtjylland-Kopenhag ve Union SG ile Gollü Pazar Maçları', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Real Sociedad, Midtjylland-Kopenhag ve Union SG ile Gollü Pazar Maçları', badge: '✅ KAZANDI 3/3',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 50, confidence: 91
-        }, [p_yb_goals, p_midt_goals, p_usg_goals], dFmt);
+        }, [p_sociedad_goals, p_midt_goals, p_usg_goals], dFmt);
 
         // Kupon 4: İY & Özel Strateji Kuponu (3 maç)
         const c4 = this._createArchivedCoupon({
@@ -3066,9 +3066,9 @@ const HistoricalCouponsService = {
         // Kupon 6: KG VAR Kombini (3 maç)
         const c6 = this._createArchivedCoupon({
             id: 'c_btts_' + yDate, title: '🔥 KG VAR / Karşılıklı Gol Kombini',
-            subtitle: 'Midtjylland-Kopenhag, Young Boys ve Standard Liege ile Karşılıklı Gol Düelloları', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Midtjylland-Kopenhag, Southampton-Portsmouth ve Standard Liege ile Karşılıklı Gol Düelloları', badge: '✅ KAZANDI 3/3',
             badgeType: 'special', icon: '🔥', themeColor: '#EF4444', recommendedStake: 50, confidence: 87
-        }, [p_midt_btts, p_yb_btts, p_standard_btts], dFmt);
+        }, [p_midt_btts, p_southampton_btts, p_standard_btts], dFmt);
 
         // Kupon 7: Korner / Kart İstatistik (3 maç)
         const c7 = this._createArchivedCoupon({

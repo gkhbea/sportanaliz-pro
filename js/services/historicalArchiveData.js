@@ -71068,7 +71068,7 @@ const HistoricalDailyArchives = {
             "awayTeam": "Young Boys",
             "league": "İsviçre Süper Ligi",
             "timeStr": "15:00",
-            "scoreStr": "1 - 3",
+            "scoreStr": "0 - 2",
             "scoreStatus": "FINISHED",
             "minuteStr": "MS",
             "primaryPick": "MS 2",
@@ -71079,7 +71079,7 @@ const HistoricalDailyArchives = {
             "confidenceScore": 94,
             "status": "WON",
             "statusBadge": "✅ TUTTU",
-            "detail": "Grasshoppers 1-3 Young Boys · MS 2 (✅ TUTTU)",
+            "detail": "Grasshoppers 0-2 Young Boys · MS 2 (✅ TUTTU)",
             "mackolikUrl": "https://arsiv.mackolik.com/Match/Default.aspx?id=3198698"
         },
         {

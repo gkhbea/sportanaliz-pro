@@ -156,6 +156,15 @@ const MatchTracker = {
                     m.minute = 'MS';
                 }
             }
+            // Grasshoppers vs Young Boys kontrolü (Resmi MS: 0 - 2, Young Boys 2-0 kazandı)
+            if (((normK.includes('grasshopper') || normK.includes('grasshoppers')) && normK.includes('youngboys')) || (m && String(m.iddaaCode) === '3198698')) {
+                m.homeScore = 0;
+                m.awayScore = 2;
+                m.firstHalfHome = 0;
+                m.firstHalfAway = 1;
+                m.status = 'FINISHED';
+                m.minute = 'MS';
+            }
         });
 
         if (dataObj.history) {
