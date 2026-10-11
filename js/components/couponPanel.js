@@ -93,10 +93,24 @@ const CouponPanel = {
      * @param {number} totalAnalyzedCount - Tüm günlerin kümülatif analiz sayısı
      * @returns {string} HTML string
      */
-    render(coupons = [], euroCoupons = [], activeFilter = 'all', activeDate = 'today', totalAnalyzedCount = 0) {
+    render(coupons = [], euroCoupons = [], activeFilter = 'all', activeDate = null, totalAnalyzedCount = 0) {
         const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
-        const chosenDate = (activeDate && activeDate !== 'today') ? activeDate : (this.selectedAnalysisDate || todayStr);
+        let chosenDate = todayStr;
+        if (activeDate && activeDate !== 'today' && activeDate !== 'preserve') {
+            chosenDate = activeDate;
+        } else if (this.selectedAnalysisDate && this.selectedAnalysisDate !== 'today') {
+            chosenDate = this.selectedAnalysisDate;
+        } else if (window.app?.selectedCouponDate && window.app.selectedCouponDate !== 'today') {
+            chosenDate = window.app.selectedCouponDate;
+        } else {
+            try {
+                const stored = localStorage.getItem('sportanaliz_user_chosen_date');
+                if (stored && stored !== 'today') chosenDate = stored;
+            } catch (e) {}
+        }
         this.selectedAnalysisDate = chosenDate;
+        if (window.app) window.app.selectedCouponDate = chosenDate;
+        if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = chosenDate;
         this._lastTotalAnalyzedCount = totalAnalyzedCount; // bindEvents için sakla
 
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
@@ -1226,7 +1240,7 @@ const CouponPanel = {
             btn.addEventListener('click', (e) => {
                 const filter = btn.dataset.couponFilter;
                 app.activeCouponFilter = filter;
-                app.loadDailyCoupons(false, filter, 'today');
+                app.loadDailyCoupons(false, filter, this.selectedAnalysisDate || app.selectedCouponDate);
             });
         });
 
@@ -1236,14 +1250,14 @@ const CouponPanel = {
                 const res = window.MatchTracker.finishAllMatches();
                 window.Helpers?.showToast?.(`🏁 ${res.totalMatches || 'Tüm'} karşılaşma resmi maç sonu (MS) olarak sonuçlandırıldı! ✅`, 'success');
                 if (app && typeof app.loadDailyCoupons === 'function') {
-                    app.loadDailyCoupons(true, app.activeCouponFilter || 'all', this.selectedAnalysisDate || 'today');
+                    app.loadDailyCoupons(true, app.activeCouponFilter || 'all', this.selectedAnalysisDate || app.selectedCouponDate);
                 }
             }
         });
 
         // 5 Kuponu Yenile Butonu
         document.getElementById('btn-reload-5-coupons')?.addEventListener('click', () => {
-            app.loadDailyCoupons(true, app.activeCouponFilter || 'all', 'today');
+            app.loadDailyCoupons(true, app.activeCouponFilter || 'all', this.selectedAnalysisDate || app.selectedCouponDate);
         });
 
         // ⏱️ Önümüzdeki 5 Saat İçin Kupon Yap Butonu
@@ -1314,9 +1328,21 @@ const CouponPanel = {
 
         // Tarih Seçici Dropdown Değişimi (Hem üst panel hem modal içi)
         const handleDateChange = (newDate) => {
+            const isModalOpen = document.getElementById('modal-daily-analysis-matches')?.classList.contains('active');
             this.selectedAnalysisDate = newDate;
+            if (app) app.selectedCouponDate = newDate;
+            if (window.DailyAnalysisViewPanel) window.DailyAnalysisViewPanel.selectedDate = newDate;
+            try {
+                localStorage.setItem('sportanaliz_user_chosen_date', newDate);
+            } catch (err) {}
+
             if (app && typeof app.loadDailyCoupons === 'function') {
-                app.loadDailyCoupons(false, app.activeCouponFilter || 'all', newDate);
+                app.loadDailyCoupons(false, app.activeCouponFilter || 'all', newDate).then(() => {
+                    if (isModalOpen) {
+                        const modal = document.getElementById('modal-daily-analysis-matches');
+                        if (modal) modal.classList.add('active');
+                    }
+                }).catch(() => {});
             } else {
                 const stats = window.MatchTracker 
                     ? window.MatchTracker.getDailyAnalysisStats(newDate) 
@@ -1490,7 +1516,7 @@ const CouponPanel = {
             if (app.currentView === 'analysis' || document.getElementById('view-analysis')?.classList.contains('active')) {
                 app.loadHighConfidenceShowcase();
             } else {
-                app.loadDailyCoupons(false, app.activeCouponFilter || 'all', 'today');
+                app.loadDailyCoupons(false, app.activeCouponFilter || 'all', this.selectedAnalysisDate || app.selectedCouponDate);
             }
             modalEl.classList.remove('active');
             window.Helpers?.showToast?.('Skorlar güncellendi ve AI isabet karnesi yenilendi! ✅', 'success');

@@ -136,9 +136,6 @@ const App = {
         document.querySelectorAll('.nav-btn, .m-nav-btn, .m-pill-btn, .m-drawer-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 const view = btn.dataset.view;
-                if (view === 'coupons') {
-                    this.selectedCouponDate = 'today';
-                }
                 this.navigate(view);
                 this.closeMobileDrawer();
             });
@@ -415,15 +412,12 @@ const App = {
     navigate(view) {
         // Hızlı Kupon Menü Kısayolları
         if (view === 'coupons-all') {
-            this.selectedCouponDate = 'today';
             this.activeCouponFilter = 'all';
             view = 'coupons';
         } else if (view === 'coupons-won') {
-            this.selectedCouponDate = 'today';
             this.activeCouponFilter = 'tutan';
             view = 'coupons';
         } else if (view === 'coupons-lost') {
-            this.selectedCouponDate = 'today';
             this.activeCouponFilter = 'yatan';
             view = 'coupons';
         }
@@ -465,7 +459,8 @@ const App = {
                 this.loadHighConfidenceShowcase('all');
             }
         } else if (view === 'coupons') {
-            this.loadDailyCoupons(false, this.activeCouponFilter || 'all', 'today');
+            const preservedDate = this.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null;
+            this.loadDailyCoupons(false, this.activeCouponFilter || 'all', preservedDate);
         } else if (view === 'all-stats') {
             this.loadAllMatchesStats();
         } else if (view === 'profit-loss') {
@@ -823,7 +818,8 @@ const App = {
 
             // Eğer kullanıcı kupon veya analiz sekmesindeyse bülten geldiğinde anında kuponları yükle
             if (this.currentView === 'coupons') {
-                this.loadDailyCoupons();
+                const preservedDate = this.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || null;
+                this.loadDailyCoupons(false, this.activeCouponFilter || 'all', preservedDate);
             } else if (this.currentView === 'analysis' && !this.showingSingleMatchAnalysis) {
                 this.loadHighConfidenceShowcase('all');
             }
@@ -1706,7 +1702,7 @@ const App = {
     /**
      * "Benim İçin Bahis Yap" / Günlük 5 Kuponu ve Günlük Analiz Takip Karnesini Yükle
      */
-    async loadDailyCoupons(forceRefresh = false, activeFilter = null, targetDate = 'today') {
+    async loadDailyCoupons(forceRefresh = false, activeFilter = null, targetDate = null) {
         const container = document.getElementById('coupons-container');
         if (!container) return;
 
@@ -1715,11 +1711,35 @@ const App = {
         }
         const currentFilter = this.activeCouponFilter || 'all';
         const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
-        const chosenDate = (targetDate && targetDate !== 'today') ? targetDate : todayStr;
+
+        // Kullanıcının seçtiği tarihi kararlılıkla koru:
+        // Eğer kullanıcı veya arayüz açık bir tarih (YYYY-MM-DD) seçtiyse onu al;
+        // targetDate verilmemişse veya 'today' / 'preserve' ise mevcut seçili tarihi koru
+        let chosenDate = todayStr;
+        if (targetDate && targetDate !== 'today' && targetDate !== 'preserve' && targetDate !== 'force-today') {
+            chosenDate = targetDate;
+        } else if (targetDate === 'force-today') {
+            chosenDate = todayStr;
+        } else if (this.selectedCouponDate && this.selectedCouponDate !== 'today') {
+            chosenDate = this.selectedCouponDate;
+        } else if (window.CouponPanel?.selectedAnalysisDate && window.CouponPanel.selectedAnalysisDate !== 'today') {
+            chosenDate = window.CouponPanel.selectedAnalysisDate;
+        } else if (window.DailyAnalysisViewPanel?.selectedDate && window.DailyAnalysisViewPanel.selectedDate !== 'today') {
+            chosenDate = window.DailyAnalysisViewPanel.selectedDate;
+        } else {
+            try {
+                const stored = localStorage.getItem('sportanaliz_user_chosen_date');
+                if (stored && stored !== 'today') chosenDate = stored;
+            } catch (e) {}
+        }
+
+        this.selectedCouponDate = chosenDate;
         if (window.CouponPanel) {
             CouponPanel.selectedAnalysisDate = chosenDate;
         }
-        this.selectedCouponDate = chosenDate;
+        if (window.DailyAnalysisViewPanel) {
+            DailyAnalysisViewPanel.selectedDate = chosenDate;
+        }
 
         if (!window.CouponEngine || !window.CouponPanel) {
             container.innerHTML = '<div class="empty-state"><h3>Kupon motoru yüklenemedi.</h3></div>';
@@ -1732,11 +1752,14 @@ const App = {
             const activeCount = Math.max(this.highConfidenceMatches?.length || 0, (this.matches?.length || 0), 177);
             const totalAnalyzedCount = Math.max(cumulativeTotals.totalAnalyzed, activeCount);
 
-            // 1) Öncelikle günün özenle seçilmiş elit kupon havuzunu al (Galatasaray, Al Nassr, Espanyol vs.)
+            // 1) Kupon havuzunu al
             const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
             const currentMode = window.CouponPanel?.assistantCouponCount || (isWeekend ? 8 : 5);
+            const isHistorical = (chosenDate !== todayStr);
             let coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
-            if ((!coupons || coupons.length === 0 || forceRefresh) && this.matches && this.matches.length > 0) {
+
+            // Eğer bugünse ve forceRefresh veya boşsa dinamik kupon üret
+            if (!isHistorical && (!coupons || coupons.length === 0 || forceRefresh) && this.matches && this.matches.length > 0) {
                 const generated = CouponEngine.generateDailyCoupons(this.matches, forceRefresh, currentMode) || [];
                 if (generated && generated.length > 0) coupons = generated;
             }
@@ -1751,7 +1774,7 @@ const App = {
             // 3) Eğer maçlar henüz hafızada yoksa arka planda bülteni çek
             if (!this.matches || this.matches.length === 0) {
                 this.loadDashboard().then(() => {
-                    if (!coupons || coupons.length === 0) {
+                    if (!isHistorical && (!coupons || coupons.length === 0)) {
                         const freshCoupons = CouponEngine.generateDailyCoupons(this.matches, false) || [];
                         if (freshCoupons && freshCoupons.length > 0) {
                             container.innerHTML = CouponPanel.render(freshCoupons, [], currentFilter, chosenDate, totalAnalyzedCount);

@@ -19,9 +19,10 @@ const DailyAnalysisViewPanel = {
             { date: todayStr, dateFormatted: 'Bugün', shortLabel: 'Bugün', isToday: true }
         ];
 
-        // Eğer seçili tarih yoksa veya listede yoksa ilk tarihi (Bugün) seç
+        // Eğer seçili tarih yoksa veya listede yoksa kullanıcının seçtiği tarihi veya Bugünü seç
         if (!this.selectedDate || !availableDates.some(d => d.date === this.selectedDate)) {
-            this.selectedDate = availableDates[0]?.date || todayStr;
+            const todayItem = availableDates.find(d => d.isToday);
+            this.selectedDate = app?.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || (todayItem ? todayItem.date : todayStr);
         }
 
         const stats = window.MatchTracker?.getDailyAnalysisStats?.(this.selectedDate) || {
@@ -337,6 +338,9 @@ const DailyAnalysisViewPanel = {
         // Tarih Dropdown Değişimi
         document.getElementById('select-daily-view-date')?.addEventListener('change', (e) => {
             this.selectedDate = e.target.value;
+            if (app) app.selectedCouponDate = e.target.value;
+            if (window.CouponPanel) window.CouponPanel.selectedAnalysisDate = e.target.value;
+            try { localStorage.setItem('sportanaliz_user_chosen_date', e.target.value); } catch(err) {}
             this.refreshView(app);
         });
 
@@ -346,6 +350,9 @@ const DailyAnalysisViewPanel = {
                 const targetDate = btn.dataset.date;
                 if (targetDate) {
                     this.selectedDate = targetDate;
+                    if (app) app.selectedCouponDate = targetDate;
+                    if (window.CouponPanel) window.CouponPanel.selectedAnalysisDate = targetDate;
+                    try { localStorage.setItem('sportanaliz_user_chosen_date', targetDate); } catch(err) {}
                     this.refreshView(app);
                 }
             });

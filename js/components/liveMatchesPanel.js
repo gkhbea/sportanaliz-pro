@@ -509,17 +509,20 @@ const LiveMatchesPanel = {
         // 6. Üst Kısayol Butonları (Tüm Kuponlar, Tutan Kuponlar, Yatan Kuponlar, Dashboard)
         container.querySelector('#btn-jump-to-all-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            app.loadDailyCoupons(false, 'all', 'today');
+            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            app.loadDailyCoupons(false, 'all', preserved);
         });
 
         container.querySelector('#btn-jump-to-won-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            app.loadDailyCoupons(false, 'tutan', 'today');
+            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            app.loadDailyCoupons(false, 'tutan', preserved);
         });
 
         container.querySelector('#btn-jump-to-lost-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            app.loadDailyCoupons(false, 'yatan', 'today');
+            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            app.loadDailyCoupons(false, 'yatan', preserved);
         });
 
         container.querySelector('#btn-jump-to-dashboard')?.addEventListener('click', () => {
@@ -528,7 +531,8 @@ const LiveMatchesPanel = {
 
         container.querySelector('#btn-empty-live-coupons')?.addEventListener('click', () => {
             app.navigate('coupons');
-            app.loadDailyCoupons(false, 'all', 'today');
+            const preserved = app.selectedCouponDate || window.CouponPanel?.selectedAnalysisDate || 'today';
+            app.loadDailyCoupons(false, 'all', preserved);
         });
 
         container.querySelector('#btn-empty-live-sync')?.addEventListener('click', () => {
