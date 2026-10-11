@@ -103,6 +103,11 @@ const App = {
                 AutoArchiveService.init(this);
             }
 
+            // Bağımsız AI Denetçisi & Otonom Teftiş Mekanizması (7/24)
+            if (window.AIAuditorService) {
+                AIAuditorService.init(this);
+            }
+
             // Canlı Radar Kenar Asistanını Başlat
             if (window.LiveRadarSidebar) {
                 LiveRadarSidebar.init();

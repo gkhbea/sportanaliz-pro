@@ -160,6 +160,11 @@ const CouponPanel = {
         return `
             <div class="coupons-view-container animate-fade-in">
                 <!-- ======================================================== -->
+                <!-- 🛡️ BAĞIMSIZ AI DENETÇİSİ & TEFTİŞ HEYETİ (7/24 OTONOM)   -->
+                <!-- ======================================================== -->
+                <div id="ai-auditor-widget-container"></div>
+
+                <!-- ======================================================== -->
                 <!-- 📊 GÜNLÜK MAÇ ANALİZ TAKİBİ & TARİH SEÇİCİ (ÜST PANEL)    -->
                 <!-- ======================================================== -->
                 <div id="daily-analysis-karne-wrapper">
@@ -1211,6 +1216,11 @@ const CouponPanel = {
      * Olay Dinleyicilerini Bağla
      */
     bindEvents(app, coupons = [], euroCoupons = [], activeDate = 'today') {
+        // 🛡️ Bağımsız AI Denetçisi Göstergesini Çiz
+        if (window.AIAuditorService && typeof window.AIAuditorService.updateAuditorWidgetUI === 'function') {
+            window.AIAuditorService.updateAuditorWidgetUI();
+        }
+
         // Kupon Filtre Butonları (Tüm Kuponlar, Tutan, Yatan, Devam Eden)
         document.querySelectorAll('[data-coupon-filter]').forEach(btn => {
             btn.addEventListener('click', (e) => {
