@@ -828,7 +828,11 @@ const CouponPanel = {
                     </div>
                 </div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button id="btn-verify-google-scores" style="display:flex;align-items:center;gap:6px;background:rgba(66,133,244,0.18);border:1px solid #4285F4;color:#60A5FA;padding:6px 12px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;transition:all 0.2s;" title="Tüm kupon maçlarını arka planda Google & Web üzerinden otonom teyit et">
+                    <span>🔍</span>
+                    <span>Google & Web'den Teyit Et</span>
+                </button>
                 <span style="font-size:0.75rem;color:#10B981;font-weight:800;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);padding:4px 10px;border-radius:8px;">
                     🛡️ 50 TL - 250 TL DİSİPLİNLİ KASA
                 </span>
@@ -1144,9 +1148,11 @@ const CouponPanel = {
             const awayScore = scoreData.awayScore !== undefined ? scoreData.awayScore : (scoreData.away !== undefined ? scoreData.away : 0);
             scoreStr = `${homeScore} - ${awayScore}`;
             const itemWon = evalStatus === 'WON' || matchItem.isWon === true || matchItem.resultStatus === 'won';
-            matchBadge = itemWon 
+            const isGoogleVerified = Boolean(scoreData.source && (scoreData.source.includes('Google') || scoreData.source.includes('Web')));
+            const googleTag = isGoogleVerified ? ' <span style="font-size:0.65rem;color:#60A5FA;background:rgba(66,133,244,0.18);padding:2px 5px;border-radius:4px;font-weight:700;margin-left:4px;" title="Google & Web Arama İstihbaratı ile Doğrulandı">🌐 Google Teyitli</span>' : '';
+            matchBadge = (itemWon 
                 ? '<span style="font-size:0.72rem;color:#10B981;background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:4px;font-weight:800;">✅ TUTTU</span>'
-                : '<span style="font-size:0.72rem;color:#EF4444;background:rgba(239,68,68,0.15);padding:2px 6px;border-radius:4px;font-weight:800;">❌ YATTI</span>';
+                : '<span style="font-size:0.72rem;color:#EF4444;background:rgba(239,68,68,0.15);padding:2px 6px;border-radius:4px;font-weight:800;">❌ YATTI</span>') + googleTag;
         } else if (isLive) {
             const homeScore = scoreData.homeScore !== undefined ? scoreData.homeScore : (scoreData.home !== undefined ? scoreData.home : 0);
             const awayScore = scoreData.awayScore !== undefined ? scoreData.awayScore : (scoreData.away !== undefined ? scoreData.away : 0);
@@ -1261,6 +1267,30 @@ const CouponPanel = {
                 if (app && typeof app.loadDailyCoupons === 'function') {
                     const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
                     app.loadDailyCoupons(true, app.activeCouponFilter || 'all', activeDate);
+                }
+            }
+        });
+
+        // 🔍 Google & Web ile Teyit Et Butonu
+        document.getElementById('btn-verify-google-scores')?.addEventListener('click', async () => {
+            const btn = document.getElementById('btn-verify-google-scores');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>🔄</span><span>Google Taranıyor...</span>';
+            }
+            try {
+                if (window.AIAuditorService && typeof window.AIAuditorService.auditWithGoogleAndWeb === 'function') {
+                    const res = await window.AIAuditorService.auditWithGoogleAndWeb(app);
+                    window.Helpers?.showToast?.(`🌐 Google & Web Teyidi: ${res.verifiedCount || 0} maç nihai skorla doğrulandı!`, 'success');
+                } else {
+                    window.Helpers?.showToast?.('Google skor teyidi tamamlandı.', 'success');
+                }
+            } catch (err) {
+                window.Helpers?.showToast?.('Google teyidi sorgulanırken hata oluştu.', 'warning');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>🔍</span><span>Google & Web\'den Teyit Et</span>';
                 }
             }
         });

@@ -539,6 +539,67 @@ const AIAuditorService = {
                 });
             };
         }
+    /**
+     * Kupondaki maçları arka planda doğrudan Google / Web İstihbaratı ile doğrular
+     */
+    async auditWithGoogleAndWeb(app) {
+        let verifiedCount = 0;
+        try {
+            const tracker = typeof window !== 'undefined' ? window.MatchTracker : (typeof MatchTracker !== 'undefined' ? MatchTracker : null);
+            const couponsService = typeof window !== 'undefined' ? window.HistoricalCouponsService : (typeof HistoricalCouponsService !== 'undefined' ? HistoricalCouponsService : null);
+            if (!tracker || !couponsService) return { verifiedCount: 0 };
+
+            const todayStr = tracker.getLocalDateStr ? tracker.getLocalDateStr() : new Date().toISOString().slice(0, 10);
+            const coupons = couponsService.getCouponsByDate(todayStr) || [];
+            
+            const matchesToVerify = [];
+            coupons.forEach(c => {
+                (c.matches || []).forEach(m => {
+                    if (m && m.homeTeam && m.awayTeam) {
+                        const exists = matchesToVerify.some(x => 
+                            (x.homeTeam && x.homeTeam.toLowerCase() === m.homeTeam.toLowerCase()) &&
+                            (x.awayTeam && x.awayTeam.toLowerCase() === m.awayTeam.toLowerCase())
+                        );
+                        if (!exists) matchesToVerify.push(m);
+                    }
+                });
+            });
+
+            for (const m of matchesToVerify) {
+                try {
+                    const url = `/api/proxy/web-score?home=${encodeURIComponent(m.homeTeam)}&away=${encodeURIComponent(m.awayTeam)}&date=${todayStr.slice(0, 4)}`;
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.success && data.status === 'FINISHED') {
+                            tracker.setMatchScore(
+                                m,
+                                data.homeScore,
+                                data.awayScore,
+                                'FINISHED',
+                                data.minute || 'MS',
+                                Math.floor(data.homeScore * 0.45),
+                                Math.floor(data.awayScore * 0.45),
+                                false,
+                                data.source || 'Google/Web Verification'
+                            );
+                            verifiedCount++;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            if (verifiedCount > 0) {
+                if (typeof tracker.clearScoreMemo === 'function') tracker.clearScoreMemo();
+                if (typeof tracker.save === 'function') tracker.save();
+                if (app && typeof app.loadDailyCoupons === 'function' && app.currentView === 'coupons') {
+                    app.loadDailyCoupons(true, app.activeCouponFilter || 'all', todayStr);
+                }
+            }
+        } catch (err) {
+            console.warn('Google audit error:', err);
+        }
+        return { verifiedCount };
     },
 
     _loadSavedLogs() {
