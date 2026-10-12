@@ -100,19 +100,29 @@ const CouponEngine = {
         if (pool.length === 0) return [];
 
         const usedMatchKeys = new Set();
+        const usedPicksByMatch = new Map(); // matchKey -> Set of { marketCode, shortPick }
+        const usedCategoriesByMatch = new Map(); // matchKey -> Set of categories
         const getMatchKey = m => (m.id || (m.homeTeam + '_' + m.awayTeam));
 
         // Kullanıcı Kuralı: "Bülteni gece gündüz diye ayırma, bütün gün olarak hazırla kuponları en garanti maçlardan"
-        // Gece/Gündüz ayrımı yapmadan tüm günün en yüksek güven ve garanti oranına sahip maçlarını seç
-
-        // Yardımcı seçim fonksiyonu (Aynı kuponda ve kuponlar arasında maç tekrarını KESİNLİKLE önler)
+        // Kullanıcı Kuralı: "Aynı maçları ms veya alt üst olarak veya korner sarı kart oyna, aynı sonuçla oynama"
         const selectPicksForCoupon = (filterFn, sortFn, count = 3, allowReuse = false) => {
             const candidates = [];
             pool.forEach(item => {
                 const key = getMatchKey(item.match);
+                const prevPicks = usedPicksByMatch.get(key) || new Set();
+                const prevCats = usedCategoriesByMatch.get(key) || new Set();
+
                 if (!allowReuse && usedMatchKeys.has(key)) return;
 
                 item.candidates.forEach(c => {
+                    // AYNI SONUÇLA / TERCİHLE OYNAMA KURALI:
+                    // Eğer maç başka kuponda kullanılmışsa, aynı marketi (MS, Alt/Üst vb.) tekrar seçme!
+                    if (prevPicks.has(c.marketCode) || prevPicks.has(c.shortPick)) return;
+                    if (prevCats.has(c.category) && item.candidates.some(alt => !prevCats.has(alt.category))) {
+                        return; // Farklı bir kategori varsa (örn. MS yerine Korner/Kart veya Alt/Üst) onu tercih et
+                    }
+
                     if (filterFn(c, item)) {
                         candidates.push({ item, pick: c });
                     }
@@ -133,8 +143,17 @@ const CouponEngine = {
                 }
             }
 
-            // Seçilen maçları global olarak kullanıldı işaretle
-            selected.forEach(s => usedMatchKeys.add(getMatchKey(s.item.match)));
+            // Seçilen maçları ve marketleri kaydet
+            selected.forEach(s => {
+                const key = getMatchKey(s.item.match);
+                usedMatchKeys.add(key);
+                if (!usedPicksByMatch.has(key)) usedPicksByMatch.set(key, new Set());
+                usedPicksByMatch.get(key).add(s.pick.marketCode);
+                usedPicksByMatch.get(key).add(s.pick.shortPick);
+
+                if (!usedCategoriesByMatch.has(key)) usedCategoriesByMatch.set(key, new Set());
+                usedCategoriesByMatch.get(key).add(s.pick.category);
+            });
             return selected;
         };
 

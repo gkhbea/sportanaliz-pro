@@ -369,6 +369,34 @@ const EditorEngine = {
             }
         }
 
+        // ---- Özel İstatistik: Korner & Sarı Kart Marketleri ----
+        // Kullanıcı Kuralı: "aynı maçları ms veya alt üst olarak veya korner sarı kart oyna, aynı sonuçla oynama"
+        const leagueLower = (match.league || analysis.league || '').toLowerCase();
+        const isHighTempoLeague = leagueLower.includes('premier') || leagueLower.includes('almanya') || leagueLower.includes('bundesliga') || leagueLower.includes('hollanda') || leagueLower.includes('isviçre') || leagueLower.includes('avusturya') || totalXg >= 2.6;
+        const isFoulHeavyLeague = leagueLower.includes('süper lig') || leagueLower.includes('la liga') || leagueLower.includes('serie a') || leagueLower.includes('brezilya') || leagueLower.includes('arjantin') || leagueLower.includes('kolombiya') || leagueLower.includes('polonya');
+
+        // Korner Tahmini (8.5 ve 9.5 Üst)
+        const cornerProb85 = isHighTempoLeague ? 82 : (totalXg >= 2.4 ? 76 : 68);
+        const cornerOdd85 = odds.cornersOver85 || +(100 / (cornerProb85 * 0.72)).toFixed(2);
+        addCandidate('CNR_85_OVER', 'Toplam Korner 8.5 Üst', 'Korner 8.5 ÜST', cornerProb85, Math.min(1.85, Math.max(1.42, cornerOdd85)), 'korner');
+
+        if (isHighTempoLeague || totalXg >= 2.8) {
+            const cornerProb95 = isHighTempoLeague ? 74 : 66;
+            const cornerOdd95 = odds.cornersOver95 || +(100 / (cornerProb95 * 0.70)).toFixed(2);
+            addCandidate('CNR_95_OVER', 'Toplam Korner 9.5 Üst', 'Korner 9.5 ÜST', cornerProb95, Math.min(2.15, Math.max(1.65, cornerOdd95)), 'korner');
+        }
+
+        // Sarı Kart Tahmini (3.5 ve 4.5 Üst)
+        const cardProb35 = isFoulHeavyLeague ? 84 : 72;
+        const cardOdd35 = odds.cardsOver35 || +(100 / (cardProb35 * 0.75)).toFixed(2);
+        addCandidate('CRD_35_OVER', 'Toplam Kart 3.5 Üst', 'Kart 3.5 ÜST', cardProb35, Math.min(1.82, Math.max(1.40, cardOdd35)), 'kart');
+
+        if (isFoulHeavyLeague) {
+            const cardProb45 = 75;
+            const cardOdd45 = odds.cardsOver45 || +(100 / (cardProb45 * 0.72)).toFixed(2);
+            addCandidate('CRD_45_OVER', 'Toplam Kart 4.5 Üst', 'Kart 4.5 ÜST', cardProb45, Math.min(2.10, Math.max(1.68, cardOdd45)), 'kart');
+        }
+
         // Sırala: Güven puanı en yüksek olan başa
         candidates.sort((a, b) => b.confidenceScore - a.confidenceScore);
 

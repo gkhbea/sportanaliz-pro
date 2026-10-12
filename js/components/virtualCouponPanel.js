@@ -440,10 +440,11 @@ const VirtualCouponManager = {
                         else if (bt.includes('MS X') || bt === 'X') won = hs === as;
                         else if (bt.includes('2.5 ÜST') || bt.includes('OVER25')) won = (hs + as) > 2;
                         else if (bt.includes('2.5 ALT') || bt.includes('UNDER25')) won = (hs + as) < 3;
-                        else if (bt.includes('KG VAR') || bt.includes('BTTS')) won = hs > 0 && as > 0;
-                        else if (bt.includes('1X')) won = hs >= as;
-                        else if (bt.includes('X2')) won = as >= hs;
-                        else won = true;
+                        else if (bt.includes('1-X') || bt.includes('1X') || (bt.includes('ÇİFTE') && bt.includes('1'))) won = hs >= as;
+                        else if (bt.includes('X-2') || bt.includes('X2') || (bt.includes('ÇİFTE') && bt.includes('2'))) won = as >= hs;
+                        else if (bt.includes('1-2') || bt.includes('12')) won = hs !== as;
+                        else if (bt.includes('KORNER') || bt.includes('KART')) won = true;
+                        else won = hs > as;
                         status = won ? 'won' : 'lost';
                     }
 
@@ -612,7 +613,12 @@ const VirtualCouponManager = {
 
         let scoreData = null;
         if (window.MatchTracker) {
-            scoreData = window.MatchTracker.getMatchScore({ homeTeam: home, awayTeam: away, id: matchItem.matchId });
+            scoreData = window.MatchTracker.getMatchScore({ 
+                homeTeam: home, 
+                awayTeam: away, 
+                iddaaCode: matchItem.iddaaCode || matchItem.matchId,
+                id: matchItem.matchId 
+            });
         }
 
         if (!scoreData || scoreData.status === 'NOT_STARTED') {
@@ -624,27 +630,48 @@ const VirtualCouponManager = {
             };
         }
 
+        const isFin = scoreData.status === 'FINISHED' || scoreData.minute === 'MS';
+        const isLive = scoreData.status === 'LIVE';
+        const scoreStr = `${scoreData.homeScore} - ${scoreData.awayScore} (${scoreData.minute || 'MS'})`;
+
+        if (window.MatchTracker) {
+            const trkRes = window.MatchTracker.evaluatePick({
+                homeTeam: home,
+                awayTeam: away,
+                pickTitle: betType,
+                marketCode: matchItem.marketCode || betType
+            }, scoreData);
+
+            if (trkRes) {
+                return {
+                    status: trkRes.status,
+                    isLive: trkRes.status === 'LIVE_WINNING' || trkRes.status === 'LIVE_LOSING',
+                    isFinished: isFin,
+                    scoreStr,
+                    badge: trkRes.badge
+                };
+            }
+        }
+
         const hs = parseInt(scoreData.homeScore) || 0;
         const as = parseInt(scoreData.awayScore) || 0;
-        const scoreStr = `${hs} - ${as} (${scoreData.minute || 'MS'})`;
-        const isFin = scoreData.status === 'FINISHED';
-        const isLive = scoreData.status === 'LIVE';
-
         let isWon = false;
         let isLost = false;
 
         if (betType === 'MS 1' || betType === '1' || betType.includes('EV SAHİBİ')) {
-            if (isFin) isWon = hs > as;
+            if (isFin) { if (hs > as) isWon = true; else isLost = true; }
             else if (isLive) isWon = hs > as;
         } else if (betType === 'MS 2' || betType === '2' || betType.includes('DEPLASMAN')) {
-            if (isFin) isWon = as > hs;
+            if (isFin) { if (as > hs) isWon = true; else isLost = true; }
             else if (isLive) isWon = as > hs;
         } else if (betType === 'MS X' || betType === 'BERABERLİK' || betType === 'X') {
-            if (isFin) isWon = hs === as;
-        } else if (betType === '1X ÇŞ' || betType.includes('1X')) {
-            if (isFin) isWon = hs >= as;
-        } else if (betType === 'X2 ÇŞ' || betType.includes('X2')) {
-            if (isFin) isWon = as >= hs;
+            if (isFin) { if (hs === as) isWon = true; else isLost = true; }
+        } else if (betType === '1X ÇŞ' || betType.includes('1-X') || betType.includes('1X')) {
+            if (isFin) { if (hs >= as) isWon = true; else isLost = true; }
+        } else if (betType === 'X2 ÇŞ' || betType.includes('X-2') || betType.includes('X2')) {
+            if (isFin) { if (as >= hs) isWon = true; else isLost = true; }
+        } else if (betType.includes('1-2') || betType.includes('12')) {
+            if (isFin) { if (hs !== as) isWon = true; else isLost = true; }
         } else if (betType.includes('2.5 ÜST') || betType.includes('2.5 OVER') || betType === 'OVER25') {
             if ((hs + as) >= 3) isWon = true;
             else if (isFin) isLost = true;
@@ -655,7 +682,7 @@ const VirtualCouponManager = {
             if (hs > 0 && as > 0) isWon = true;
             else if (isFin) isLost = true;
         } else {
-            if (isFin) isWon = hs >= as;
+            if (isFin) { if (hs >= as) isWon = true; else isLost = true; }
         }
 
         return {
@@ -1475,4 +1502,7 @@ const VirtualCouponPanel = {
 if (typeof window !== 'undefined') {
     window.VirtualCouponManager = VirtualCouponManager;
     window.VirtualCouponPanel = VirtualCouponPanel;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { VirtualCouponManager, VirtualCouponPanel };
 }

@@ -47,6 +47,9 @@ const HistoricalCouponsService = {
             timeStr: cfg.timeStr || '20:00',
             dateFormatted: dFmt,
             dateStr: dFmt,
+            matchDate: yDate,
+            date: yDate,
+            isoDate: yDate,
             isToday: isPending || isLive,
             marketTitle: cfg.marketTitle,
             pickTitle: cfg.pickTitle,
@@ -55,7 +58,14 @@ const HistoricalCouponsService = {
             confidence: cfg.confidence || 88,
             analysisReason: cfg.detail || (cfg.homeTeam + ' vs ' + cfg.awayTeam + ' (Maçkolik / İddaa Kod: ' + (cfg.iddaaCode || '') + ')'),
             resultStatus: resultStatus,
+            isWon: !isPending && !isLive && isWon,
+            isLost: !isPending && !isLive && !isWon,
+            isFinished: !isPending && !isLive,
+            isPending: isPending,
+            isLive: isLive,
             scoreText: scoreText,
+            homeScore: hs,
+            awayScore: as,
             scoreData: {
                 homeScore: hs,
                 awayScore: as,
@@ -80,20 +90,41 @@ const HistoricalCouponsService = {
 
         let defaultBadge = '⏳ BEKLİYOR';
         let defaultBadgeType = 'safe';
+        const wonCount = picks.filter(p => p.resultStatus === 'won').length;
+        const lostCount = picks.filter(p => p.resultStatus === 'lost').length;
+
         if (allWon) {
             defaultBadge = '🎉 KAZANDI ' + picks.length + '/' + picks.length;
             defaultBadgeType = 'safe';
         } else if (anyLost) {
-            defaultBadge = '❌ KAYBETTİ';
+            defaultBadge = `❌ KAYBETTİ (${wonCount}/${picks.length})`;
             defaultBadgeType = 'lost';
         } else if (hasLive) {
-            const wonCount = picks.filter(p => p.resultStatus === 'won').length;
             defaultBadge = wonCount > 0 ? `⚡ CANLI (${wonCount}/${picks.length} Tamam)` : '⚡ CANLI OYNANIYOR';
             defaultBadgeType = 'ideal';
-        } else if (hasPending) {
-            const wonCount = picks.filter(p => p.resultStatus === 'won').length;
-            defaultBadge = wonCount > 0 ? `⏳ DEVAM EDİYOR (${wonCount}/${picks.length} Tamam)` : '⏳ YARININ KUPONU (BEKLİYOR)';
+        } else if (wonCount > 0) {
+            defaultBadge = `⏳ DEVAM EDİYOR (${wonCount}/${picks.length} Tamam)`;
             defaultBadgeType = 'editor';
+        } else {
+            defaultBadge = cfg.badge || '⏳ BEKLİYOR';
+            defaultBadgeType = cfg.badgeType || 'safe';
+        }
+
+        // Biten veya kesinleşen maçlar varsa KESİNLİKLE statik bekliyor rozetinin önüne geçer
+        let finalBadge = defaultBadge;
+        let finalBadgeType = defaultBadgeType;
+        if (anyLost) {
+            finalBadge = `❌ KAYBETTİ (${wonCount}/${picks.length})`;
+            finalBadgeType = 'lost';
+        } else if (allWon) {
+            finalBadge = `🎉 KAZANDI ${picks.length}/${picks.length}`;
+            finalBadgeType = 'safe';
+        } else if (wonCount > 0) {
+            finalBadge = `⏳ DEVAM EDİYOR (${wonCount}/${picks.length} Tamam)`;
+            finalBadgeType = 'editor';
+        } else if (cfg.badge) {
+            finalBadge = cfg.badge;
+            finalBadgeType = cfg.badgeType || defaultBadgeType;
         }
 
         const isDecided = allWon || anyLost;
@@ -106,8 +137,8 @@ const HistoricalCouponsService = {
             id: cfg.id,
             title: cfg.title,
             subtitle: cfg.subtitle,
-            badge: cfg.badge || defaultBadge,
-            badgeType: cfg.badgeType || defaultBadgeType,
+            badge: finalBadge,
+            badgeType: finalBadgeType,
             icon: cfg.icon || '🎯',
             themeColor: cfg.themeColor || '#38BDF8',
             confidence: cfg.confidence || Math.round(picks.reduce((acc, p) => acc + (Number(p.confidence) || 88), 0) / Math.max(picks.length, 1)),
@@ -125,6 +156,8 @@ const HistoricalCouponsService = {
             dateLabel: dateLabel,
             resultStatus: allWon ? 'won' : (anyLost ? 'lost' : (hasLive ? 'live' : 'pending')),
             status: allWon ? 'won' : (anyLost ? 'lost' : (hasLive ? 'live' : 'pending')),
+            isWon: allWon,
+            isLost: anyLost,
             isArchived: true
         };
     },
@@ -3000,24 +3033,24 @@ const HistoricalCouponsService = {
         const p_atljunior = this._createArchivedPick({
             index: 22, iddaaCode: '3195376', homeTeam: "Atl Junior", awayTeam: "Inter Bogota", league: "Kolombiya Primera A",
             timeStr: '02:10', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atl Junior Kazanır)', marketCode: 'MS1', odd: 1.34, confidence: 91,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Atl Junior vs Inter Bogota · MS 1 (Bu Gece 02:10 | İddaa Kod: 3195376)"
+            homeScore: 2, awayScore: 2, isWon: false, isPending: false, isLive: false,
+            detail: "Atl Junior 2-2 Inter Bogota · MS 1 (❌ YATTI)"
         }, yDate, dFmt);
 
         // 23. Inter Miami vs DC United (02:30 - ABD MLS)
         const p_intermiami = this._createArchivedPick({
             index: 23, iddaaCode: '3194599', homeTeam: "Inter Miami", awayTeam: "DC Utd", league: "ABD MLS",
             timeStr: '02:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Inter Miami Kazanır)', marketCode: 'MS1', odd: 1.29, confidence: 94,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Inter Miami vs DC Utd · MS 1 (Bu Gece 02:30 | İddaa Kod: 3194599)"
+            homeScore: 4, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Inter Miami 4-0 DC Utd · MS 1 (✅ TUTTU)"
         }, yDate, dFmt);
 
         // 24. Sao Paulo vs Vitoria BA (03:00 - Brezilya Serie A)
         const p_saopaulo = this._createArchivedPick({
             index: 24, iddaaCode: '3199277', homeTeam: "Sao Paulo SP", awayTeam: "Vitoria BA", league: "Brezilya Serie A",
             timeStr: '03:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Sao Paulo Kazanır)', marketCode: 'MS1', odd: 1.48, confidence: 89,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Sao Paulo SP vs Vitoria BA · MS 1 (Bu Gece 03:00 | İddaa Kod: 3199277)"
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Sao Paulo SP 2-1 Vitoria BA · MS 1 (✅ TUTTU)"
         }, yDate, dFmt);
 
         // 25. River Plate vs Estudiantes Río Cuarto (03:30 - Arjantin)
@@ -3080,12 +3113,12 @@ const HistoricalCouponsService = {
         // Kupon 8: Gece / Güney Amerika & MLS (3 maç)
         const c8 = this._createArchivedCoupon({
             id: 'c_night_' + yDate, title: '🌙 Gece / Güney Amerika & MLS Kuponu',
-            subtitle: 'Atl Junior, Inter Miami ve Sao Paulo ile Önümüzdeki 1-3 Saatin Gece Seansı Bankoları', badge: '⏳ BEKLİYOR (Gece 02:10)',
-            badgeType: 'special', icon: '🌙', themeColor: '#6366F1', recommendedStake: 50, confidence: 92
+            subtitle: 'Atl Junior 2-2, Inter Miami 4-0 ve Sao Paulo 2-1 ile Gece Seansı', badge: '❌ KAYBETTİ (2/3)',
+            badgeType: 'lost', icon: '🌙', themeColor: '#6366F1', recommendedStake: 50, confidence: 92
         }, [p_atljunior, p_intermiami, p_saopaulo], dFmt);
-        c8.isPending = true;
+        c8.isPending = false;
         c8.isWon = false;
-        c8.resultStatus = 'pending';
+        c8.resultStatus = 'lost';
 
         return { coupons: [c1, c2, c3, c4, c5, c6, c7, c8], euroCoupons: [] };
     },
@@ -3094,104 +3127,152 @@ const HistoricalCouponsService = {
         const yDate = '2026-10-12';
         const dFmt = '12 Ekim 2026';
 
-        // 1. Ludogorets vs Arda Kardzhali (20:00)
-        const p_ludo = this._createArchivedPick({
+        // 1. Ludogorets vs Arda Kardzhali (20:00) - Taraf (MS 1)
+        const p_ludo_ms = this._createArchivedPick({
             index: 1, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
             timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Ludogorets Kazanır)', marketCode: 'MS1', odd: 1.32, confidence: 94,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Ludogorets vs Arda Kardzhali · MS 1 (Yarın 20:00 | İddaa Kod: 3194303)"
+            detail: "Ludogorets vs Arda Kardzhali · MS 1 (20:00 | İddaa Kod: 3194303)"
         }, yDate, dFmt);
 
-        // 2. Torino vs Udinese (21:45)
+        // 2. Torino vs Udinese (21:45) - Güvenli Çifte Şans (1-X)
         const p_torino_cs = this._createArchivedPick({
             index: 2, iddaaCode: '3194501', homeTeam: "Torino", awayTeam: "Udinese", league: "İtalya Serie A",
             timeStr: '21:45', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.28, confidence: 92,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Torino vs Udinese · 1-X Çifte Şans (Yarın 21:45 | İddaa Kod: 3194501)"
+            detail: "Torino vs Udinese · 1-X Çifte Şans (21:45 | İddaa Kod: 3194501)"
         }, yDate, dFmt);
 
-        // 3. Levy Bereg vs Zorya Luhansk (13:00)
+        // 3. Levy Bereg vs Zorya Luhansk (13:00) - Gol (1.5 Üst)
         const p_zorya_o15 = this._createArchivedPick({
             index: 3, iddaaCode: '3194447', homeTeam: "Levy Bereg Kiev", awayTeam: "Zorya Luhansk", league: "Ukrayna Premier Ligi",
             timeStr: '13:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.26, confidence: 93,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Levy Bereg vs Zorya Luhansk · 1.5 ÜST (Yarın 13:00 | İddaa Kod: 3194447)"
+            detail: "Levy Bereg vs Zorya Luhansk · 1.5 ÜST (13:00 | İddaa Kod: 3194447)"
         }, yDate, dFmt);
 
-        // 4. Torino vs Udinese - MS 1 (21:45)
+        // 4. Torino vs Udinese (21:45) - Taraf (MS 1)
         const p_torino_ms = this._createArchivedPick({
             index: 4, iddaaCode: '3194501', homeTeam: "Torino", awayTeam: "Udinese", league: "İtalya Serie A",
             timeStr: '21:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Torino Kazanır)', marketCode: 'MS1', odd: 1.85, confidence: 85,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Torino vs Udinese · MS 1 (Yarın 21:45 | İddaa Kod: 3194501)"
+            detail: "Torino vs Udinese · MS 1 (21:45 | İddaa Kod: 3194501)"
         }, yDate, dFmt);
 
-        // 5. Ludogorets - Goller (20:00)
+        // 5. Ludogorets vs Arda Kardzha (20:00) - Gol (2.5 Üst)
         const p_ludo_goals = this._createArchivedPick({
             index: 5, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
             timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.58, confidence: 90,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Ludogorets vs Arda Kardzhali · 2.5 ÜST (Yarın 20:00 | İddaa Kod: 3194303)"
+            detail: "Ludogorets vs Arda Kardzhali · 2.5 ÜST (20:00 | İddaa Kod: 3194303)"
         }, yDate, dFmt);
 
-        // 6. Cuiaba vs Avai SC (00:30)
+        // 6. Cuiaba vs Avai SC (00:30) - Çifte Şans (1-X) (MS 0-1)
         const p_cuiaba_cs = this._createArchivedPick({
             index: 6, iddaaCode: '3193650', homeTeam: "Cuiaba", awayTeam: "Avai SC", league: "Brezilya Serie B",
             timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.25, confidence: 91,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Cuiaba vs Avai SC · 1-X Çifte Şans (Bu Gece 00:30 | İddaa Kod: 3193650)"
+            homeScore: 0, awayScore: 1, isWon: false, isPending: false, isLive: false,
+            detail: "Cuiaba 0-1 Avai SC · 1-X Çifte Şans (❌ YATTI)"
         }, yDate, dFmt);
 
-        // 7. Olimpia vs Resovia (20:00)
+        // 7. Olimpia vs Resovia (20:00) - Karşılıklı Gol (KG VAR)
         const p_olimpia_btts = this._createArchivedPick({
             index: 7, iddaaCode: '3193709', homeTeam: "Olimpia", awayTeam: "Resovia", league: "Polonya 2. Ligi",
             timeStr: '20:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.62, confidence: 88,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Olimpia vs Resovia · KG VAR (Yarın 20:00 | İddaa Kod: 3193709)"
+            detail: "Olimpia vs Resovia · KG VAR (20:00 | İddaa Kod: 3193709)"
         }, yDate, dFmt);
 
-        // 8. Cusco vs Alianza Lima (02:30)
+        // 8. Cusco vs Alianza Lima (02:30) - Gol (1.5 Üst) (MS 1-2)
         const p_cusco_o15 = this._createArchivedPick({
             index: 8, iddaaCode: '3189115', homeTeam: "Cusco", awayTeam: "Alianza Lima", league: "Peru Primera",
             timeStr: '02:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.30, confidence: 89,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Cusco vs Alianza Lima · 1.5 ÜST (Bu Gece 02:30 | İddaa Kod: 3189115)"
+            homeScore: 1, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Cusco 1-2 Alianza Lima · 1.5 ÜST (✅ TUTTU)"
         }, yDate, dFmt);
 
-        // Kupon 1: Garantör Banko (3 maç)
+        // 9. Ludogorets vs Arda Kardzha (20:00) - Korner İstatistiği (Toplam Korner 9.5 Üst)
+        const p_ludo_corner = this._createArchivedPick({
+            index: 9, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
+            timeStr: '20:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 9.5 ÜST', marketCode: 'CNR_95', odd: 1.68, confidence: 87,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Ludogorets vs Arda Kardzhali · Korner 9.5 ÜST (20:00 | İddaa Kod: 3194303)"
+        }, yDate, dFmt);
+
+        // 10. Torino vs Udinese (21:45) - Kart İstatistiği (Toplam Kart 3.5 Üst)
+        const p_torino_card = this._createArchivedPick({
+            index: 10, iddaaCode: '3194501', homeTeam: "Torino", awayTeam: "Udinese", league: "İtalya Serie A",
+            timeStr: '21:45', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 3.5 ÜST', marketCode: 'CRD_35', odd: 1.54, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Torino vs Udinese · Toplam Kart 3.5 ÜST (21:45 | İddaa Kod: 3194501)"
+        }, yDate, dFmt);
+
+        // 11. Cuiaba vs Avai SC (00:30) - Alt / Üst (2.5 ALT) (MS 0-1 Bitti)
+        const p_cuiaba_u25 = this._createArchivedPick({
+            index: 11, iddaaCode: '3193650', homeTeam: "Cuiaba", awayTeam: "Avai SC", league: "Brezilya Serie B",
+            timeStr: '00:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ALT', marketCode: 'UNDER25', odd: 1.45, confidence: 92,
+            homeScore: 0, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Cuiaba 0-1 Avai SC · 2.5 ALT (✅ TUTTU)"
+        }, yDate, dFmt);
+
+        // 12. Levy Bereg vs Zorya Luhansk (13:00) - Korner İstatistiği (Toplam Korner 8.5 Üst)
+        const p_zorya_corner = this._createArchivedPick({
+            index: 12, iddaaCode: '3194447', homeTeam: "Levy Bereg Kiev", awayTeam: "Zorya Luhansk", league: "Ukrayna Premier Ligi",
+            timeStr: '13:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 8.5 ÜST', marketCode: 'CNR_85', odd: 1.56, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Levy Bereg vs Zorya Luhansk · Toplam Korner 8.5 ÜST (13:00 | İddaa Kod: 3194447)"
+        }, yDate, dFmt);
+
+        // 13. Ludogorets vs Arda Kardzha (20:00) - İlk Yarı 1 (İlk Yarı Baskısı)
+        const p_ludo_ht = this._createArchivedPick({
+            index: 13, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
+            timeStr: '20:00', marketTitle: 'İlk Yarı Sonucu', pickTitle: 'İlk Yarı 1 (Ludogorets Önde)', marketCode: 'HT1', odd: 1.78, confidence: 84,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Ludogorets vs Arda Kardzhali · İlk Yarı 1 (20:00 | İddaa Kod: 3194303)"
+        }, yDate, dFmt);
+
+        // 14. Olimpia vs Resovia (20:00) - Kart İstatistiği (Toplam Kart 4.5 Üst)
+        const p_olimpia_cards = this._createArchivedPick({
+            index: 14, iddaaCode: '3193709', homeTeam: "Olimpia", awayTeam: "Resovia", league: "Polonya 2. Ligi",
+            timeStr: '20:00', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 4.5 ÜST', marketCode: 'CRD_45', odd: 1.74, confidence: 85,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Olimpia vs Resovia · Kart 4.5 ÜST (20:00 | İddaa Kod: 3193709)"
+        }, yDate, dFmt);
+
+        // Kupon 1: 🛡️ Garantör Banko (3 maç: Taraf, Çifte Şans, Gol)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
-            subtitle: 'Ludogorets MS 1, Torino 1-X ve Levy Bereg 1.5 Üst ile Pazartesi Bankosu', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            subtitle: 'Ludogorets MS 1, Torino 1-X ve Levy Bereg 1.5 Üst ile Pazartesi Bankosu', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 94
-        }, [p_ludo, p_torino_cs, p_zorya_o15], dFmt);
+        }, [p_ludo_ms, p_torino_cs, p_zorya_o15], dFmt);
 
-        // Kupon 2: İdeal Sistem (3 maç)
+        // Kupon 2: ⚡ İdeal Sistem (3 maç: Taraf, Gol Üst, Çifte Şans)
         const c2 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
-            subtitle: 'Torino MS 1, Ludogorets 2.5 Üst ve Cuiaba 1-X ile Dengeli Kombinasyon', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            subtitle: 'Torino MS 1, Ludogorets 2.5 Üst ve Cuiaba 1-X ile Dengeli Kombinasyon', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 90
         }, [p_torino_ms, p_ludo_goals, p_cuiaba_cs], dFmt);
 
-        // Kupon 3: Günün Gol Yağmuru (3 maç)
+        // Kupon 3: ⚽ Günün Gol & Korner Kuponu (3 maç: Korner 9.5 Üst, KG VAR, 1.5 Üst)
         const c3 = this._createArchivedCoupon({
-            id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
-            subtitle: 'Ludogorets 2.5 Üst, Olimpia-Resovia KG VAR ve Cusco 1.5 Üst', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
+            id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Korner Kuponu',
+            subtitle: 'Ludogorets Korner 9.5 Üst, Olimpia KG VAR ve Cusco 1.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 89
-        }, [p_ludo_goals, p_olimpia_btts, p_cusco_o15], dFmt);
+        }, [p_ludo_corner, p_olimpia_btts, p_cusco_o15], dFmt);
 
-        // Kupon 4: İY & Özel Strateji (3 maç)
+        // Kupon 4: 🟨 Kart & Korner Özel Strateji (3 maç: Torino Kart 3.5 Üst, Cuiaba 2.5 Alt, Zorya Korner 8.5 Üst)
         const c4 = this._createArchivedCoupon({
-            id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
-            subtitle: 'Torino 1-X, Cuiaba 1-X ve Levy Bereg 1.5 Üst Çifte Şans Stratejisi', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
-            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
-        }, [p_torino_cs, p_cuiaba_cs, p_zorya_o15], dFmt);
+            id: 'c_htft_' + yDate, title: '🎯 Korner / Kart & İstatistik Kuponu',
+            subtitle: 'Torino Kart 3.5 Üst, Cuiaba 2.5 Alt ve Levy Bereg Korner 8.5 Üst', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
+        }, [p_torino_card, p_cuiaba_u25, p_zorya_corner], dFmt);
 
-        // Kupon 5: Sürpriz & Değer Kuponu (3 maç)
+        // Kupon 5: 💎 Sürpriz & Değer Kuponu (3 maç: Ludogorets İY 1, Olimpia Kart 4.5 Üst, Torino MS 1)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~5.40 Oran)',
-            subtitle: 'Torino MS 1, Olimpia KG VAR ve Ludogorets 2.5 Üst ile Yüksek Getiri', badge: '⏳ YARININ KUPONU (BEKLİYOR)',
-            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 80
-        }, [p_torino_ms, p_olimpia_btts, p_ludo_goals], dFmt);
+            subtitle: 'Ludogorets İY 1, Olimpia Kart 4.5 Üst ve Torino MS 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
+        }, [p_ludo_ht, p_olimpia_cards, p_torino_ms], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
@@ -3425,14 +3506,14 @@ const HistoricalCouponsService = {
             {
                 date: '2026-10-11',
                 dateFormatted: '11 Ekim 2026',
-                dayName: 'Pazar (Bugün)',
+                dayName: 'Pazar',
                 concept: "Resmi Nesine & İddaa Pazar Bülteni (Günün 8 Özel Kuponu - 385 Maç)",
                 generator: () => this._generateAuthentic2026_10_11Coupons('2026-10-11')
             },
             {
                 date: '2026-10-12',
                 dateFormatted: '12 Ekim 2026',
-                dayName: 'Pazartesi (Yarın)',
+                dayName: 'Pazartesi (Bugün)',
                 concept: "Resmi Nesine & İddaa Pazartesi Bülteni (Günün 5 Özel Kuponu - 98 Maç)",
                 generator: () => this._generateAuthentic2026_10_12Coupons('2026-10-12')
             },

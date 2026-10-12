@@ -924,9 +924,9 @@ const CouponPanel = {
             evaluatedMatches: coupon.matches || []
         };
 
-        const isWon = evalResult.status === 'WON';
-        const isLost = evalResult.status === 'LOST';
-        const isLive = evalResult.status === 'LIVE' && evalResult.liveCount > 0;
+        const isWon = evalResult.status === 'WON' || coupon.resultStatus === 'won' || coupon.status === 'won';
+        const isLost = evalResult.status === 'LOST' || coupon.resultStatus === 'lost' || coupon.status === 'lost' || evalResult.lostCount > 0;
+        const isLive = !isLost && !isWon && (evalResult.status === 'LIVE' && evalResult.liveCount > 0);
 
         let statusBorder = 'border: 1px solid rgba(255,255,255,0.1);';
         let statusBadgeHtml = '<span class="status-badge pending" style="background:rgba(255,255,255,0.1);color:#cbd5e1;padding:4px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;">⏳ BEKLİYOR</span>';
@@ -939,8 +939,10 @@ const CouponPanel = {
         } else if (isLive) {
             statusBorder = 'border: 1px solid #00F0FF; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);';
             statusBadgeHtml = `<span class="status-badge live" style="background:rgba(0,240,255,0.2);color:#00F0FF;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:800;">⚡ CANLI (${evalResult.liveCount} Maç)</span>`;
-        } else if (evalResult.wonCount > 0) {
-            statusBadgeHtml = `<span class="status-badge pending" style="background:rgba(245,158,11,0.2);color:#F59E0B;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:800;">⏳ KISMEN TUTTU (${evalResult.wonCount}/${evalResult.totalCount})</span>`;
+        } else if (evalResult.wonCount > 0 || (coupon.badge && coupon.badge.includes('DEVAM EDİYOR'))) {
+            const wonCnt = evalResult.wonCount || (coupon.matches || []).filter(m => m.resultStatus === 'won' || m.isWon).length;
+            const totCnt = evalResult.totalCount || coupon.matches?.length || 3;
+            statusBadgeHtml = `<span class="status-badge pending" style="background:rgba(245,158,11,0.2);color:#F59E0B;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:800;">⏳ KISMEN TUTTU (${wonCnt}/${totCnt})</span>`;
         }
 
         const matches = evalResult.evaluatedMatches || coupon.matches || [];
@@ -996,8 +998,8 @@ const CouponPanel = {
                             </span>
                             <div>
                                 <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                                    <span style="font-size:0.72rem;font-weight:800;color:${coupon.themeColor || '#00F0FF'};text-transform:uppercase;letter-spacing:0.5px;">
-                                        ${index + 1}. KUPON · ${coupon.badge || 'ÖZEL KOMBİNE'}
+                                    <span style="font-size:0.72rem;font-weight:800;color:${isLost ? '#EF4444' : (isWon ? '#10B981' : (coupon.themeColor || '#00F0FF'))};text-transform:uppercase;letter-spacing:0.5px;">
+                                        ${index + 1}. KUPON · ${isLost ? `❌ KAYBETTİ (${evalResult.wonCount}/${evalResult.totalCount})` : (isWon ? `🎉 KAZANDI (${evalResult.wonCount}/${evalResult.totalCount})` : (evalResult.wonCount > 0 ? `⏳ DEVAM EDİYOR (${evalResult.wonCount}/${evalResult.totalCount} Tamam)` : (coupon.badge || 'ÖZEL KOMBİNE')))}
                                     </span>
                                     ${currentAlloc ? `
                                         <span style="background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.45);color:#F59E0B;padding:1px 6px;border-radius:4px;font-size:0.68rem;font-weight:900;">
@@ -1120,11 +1122,18 @@ const CouponPanel = {
         const pickTitle = matchItem.pickTitle || 'Maç Bahsi';
         const odd = matchItem.odd || '1.50';
 
-        // Skor ve durum
-        const scoreData = matchItem.scoreData || matchItem.match?.liveScore || (window.MatchTracker ? window.MatchTracker.getMatchScore(matchItem.match || matchItem) : null) || {};
-        const evalStatus = matchItem.evaluation?.status || 'PENDING';
+        // Skor ve durum (Önce canlı / teyitli MatchTracker skorunu al)
+        const trackerScore = window.MatchTracker ? window.MatchTracker.getMatchScore(matchItem.match || matchItem) : null;
+        const scoreData = (trackerScore && (trackerScore.status === 'FINISHED' || trackerScore.status === 'LIVE' || trackerScore.isFinished))
+            ? trackerScore
+            : (matchItem.scoreData || matchItem.match?.liveScore || trackerScore || {});
 
-        const isFinished = evalStatus === 'WON' || evalStatus === 'LOST' || scoreData.status === 'FINISHED' || scoreData.minute === 'MS';
+        const dynamicEval = window.MatchTracker ? window.MatchTracker.evaluatePick(matchItem, scoreData) : null;
+        const evalStatus = (dynamicEval && dynamicEval.status !== 'PENDING')
+            ? dynamicEval.status
+            : (matchItem.evaluation?.status || matchItem.resultStatus?.toUpperCase() || (dynamicEval ? dynamicEval.status : 'PENDING'));
+
+        const isFinished = evalStatus === 'WON' || evalStatus === 'LOST' || scoreData.status === 'FINISHED' || scoreData.minute === 'MS' || scoreData.isFinished === true;
         const isLive = !isFinished && (evalStatus === 'LIVE_WINNING' || evalStatus === 'LIVE_LOSING' || scoreData.status === 'LIVE' || (typeof scoreData.minute === 'string' && (scoreData.minute.includes("'") || scoreData.minute.includes('İY')) && scoreData.minute !== 'Başlamadı'));
 
         let scoreStr = 'v';
@@ -1134,7 +1143,8 @@ const CouponPanel = {
             const homeScore = scoreData.homeScore !== undefined ? scoreData.homeScore : (scoreData.home !== undefined ? scoreData.home : 0);
             const awayScore = scoreData.awayScore !== undefined ? scoreData.awayScore : (scoreData.away !== undefined ? scoreData.away : 0);
             scoreStr = `${homeScore} - ${awayScore}`;
-            matchBadge = evalStatus === 'WON' 
+            const itemWon = evalStatus === 'WON' || matchItem.isWon === true || matchItem.resultStatus === 'won';
+            matchBadge = itemWon 
                 ? '<span style="font-size:0.72rem;color:#10B981;background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:4px;font-weight:800;">✅ TUTTU</span>'
                 : '<span style="font-size:0.72rem;color:#EF4444;background:rgba(239,68,68,0.15);padding:2px 6px;border-radius:4px;font-weight:800;">❌ YATTI</span>';
         } else if (isLive) {
@@ -1826,4 +1836,7 @@ const CouponPanel = {
 // Global dışa aktarım
 if (typeof window !== 'undefined') {
     window.CouponPanel = CouponPanel;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CouponPanel;
 }
