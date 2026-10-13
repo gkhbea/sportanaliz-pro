@@ -37,7 +37,6 @@ const MatchCard = {
         const isFin = ls && (ls.isFinished || ls.status === 'FINISHED' || ls.minute === 'MS' || match.status === 'FINISHED');
         const isLiv = ls && !isFin && (ls.isLive || ls.status === 'LIVE' || (typeof ls.minute === 'string' && (ls.minute.includes("'") || ls.minute.includes('İY'))));
 
-        const iddaaCode = match.iddaaCode || match.code || '';
         const mackolikUrl = match.mackolikUrl || ls?.mackolikUrl || (iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar');
 
         if (isFin) {

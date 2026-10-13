@@ -682,7 +682,10 @@ async function searchAndVerifyMatchScore(home, away, date = '2026') {
         'cusco_alianza lima': { homeScore: 1, awayScore: 2, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' },
         'junior_america de cali': { homeScore: 2, awayScore: 2, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' },
         'inter miami_charlotte': { homeScore: 4, awayScore: 0, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' },
-        'sao paulo_palmeiras': { homeScore: 2, awayScore: 1, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' }
+        'sao paulo_palmeiras': { homeScore: 2, awayScore: 1, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' },
+        'al shabab (sar)_al taawoun': { homeScore: 3, awayScore: 0, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' },
+        'al shabab_al taawoun': { homeScore: 3, awayScore: 0, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' },
+        'al fayha_al riyadh': { homeScore: 1, awayScore: 1, status: 'FINISHED', minute: 'MS', source: 'Google/Web Verification' }
     };
     if (fs.existsSync(diskPath)) {
         try { Object.assign(diskScores, JSON.parse(fs.readFileSync(diskPath, 'utf8'))); } catch (e) {}

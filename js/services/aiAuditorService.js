@@ -42,12 +42,12 @@ const AIAuditorService = {
         { home: "Southampton", away: "Portsmouth", hs: 1, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3198976' },
         { home: "Brondby", away: "Lyngby BK", hs: 5, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199154' },
         { home: "Mallorca", away: "Las Palmas", hs: 3, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199423' },
-        { home: "Midtjylland", away: "Kopenhag", hs: 1, as: 1, status: 'FINISHED', min: 'MS', pick: '1-X Çifte Şans', won: true, code: '3198921' },
+        { home: "Midtjylland", away: "Kopenhag", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: '1-X Çifte Şans', won: true, code: '3198921' },
         { home: "U. S. Gilloise", away: "O. H. Leuven", hs: 1, as: 1, status: 'FINISHED', min: 'MS', pick: 'KG VAR', won: true, code: '3193789' },
         { home: "Gaziantep FK", away: "Çorum FK", hs: 0, as: 3, status: 'FINISHED', min: 'MS', pick: '2.5 ÜST', won: true, code: '3199391' },
         { home: "Standard Liege", away: "Charleroi", hs: 0, as: 1, status: 'FINISHED', min: 'MS', pick: 'X-2 Çifte Şans', won: true, code: '3193768' },
-        { home: "AL Shabab (Sar)", away: "AL Taawoun", hs: 2, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3134237' },
-        { home: "AL Fayha", away: "AL Riyadh", hs: 1, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3134322' },
+        { home: "AL Shabab (Sar)", away: "AL Taawoun", hs: 3, as: 0, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3134237' },
+        { home: "AL Fayha", away: "AL Riyadh", hs: 1, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: false, code: '3134322' },
         { home: "Atl Mineiro", away: "Santos SP", hs: 2, as: 1, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: true, code: '3199740' },
         // Gece Seansı Maçları (Resmi Sonuçlandı)
         { home: "Atl Junior", away: "Inter Bogota", hs: 2, as: 2, status: 'FINISHED', min: 'MS', pick: 'MS 1', won: false, isPending: false, code: '3195376' },
@@ -304,7 +304,7 @@ const AIAuditorService = {
 
             // 2. HistoricalCouponsService içindeki kuponları teftiş et ve biten maçları dinamik hesapla
             if (couponsService && typeof couponsService.getCouponsByDate === 'function') {
-                const datesToCheck = ['2026-10-11', '2026-10-12'];
+                const datesToCheck = ['2026-10-11', '2026-10-12', '2026-10-13'];
                 const allVerifiedMap = new Map();
                 const cleanStr = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(sc|fc|sk|fk|mt|sp|ba)$/g, '');
                 
@@ -382,6 +382,10 @@ const AIAuditorService = {
                         }
                     });
                 });
+
+                if (typeof couponsService.invalidateCache === 'function') {
+                    couponsService.invalidateCache();
+                }
             }
 
             // Denetim müdahale özetini güncelle
@@ -539,6 +543,8 @@ const AIAuditorService = {
                 });
             };
         }
+    },
+
     /**
      * Kupondaki maçları arka planda doğrudan Google / Web İstihbaratı ile doğrular
      */

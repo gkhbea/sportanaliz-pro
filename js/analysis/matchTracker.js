@@ -129,7 +129,8 @@ const MatchTracker = {
             { code: '3194599', home: 'Inter Miami', away: 'DC Utd', hs: 4, as: 0, min: 'MS' },
             { code: '3199277', home: 'Sao Paulo SP', away: 'Vitoria BA', hs: 2, as: 1, min: 'MS' },
             { code: '3199740', home: 'Atl Mineiro', away: 'Santos SP', hs: 2, as: 1, min: 'MS' },
-            { code: '3134322', home: 'AL Fayha', away: 'AL Riyadh', hs: 1, as: 0, min: 'MS' }
+            { code: '3134322', home: 'AL Fayha', away: 'AL Riyadh', hs: 1, as: 1, min: 'MS' },
+            { code: '3134237', home: 'AL Shabab', away: 'AL Taawoun', hs: 3, as: 0, min: 'MS' }
         ];
 
         verifiedCatalog.forEach(v => {
@@ -256,13 +257,13 @@ const MatchTracker = {
             if ((normK.includes('standard') && normK.includes('charleroi')) || (m && String(m.iddaaCode) === '3193768')) {
                 m.homeScore = 0; m.awayScore = 1; m.firstHalfHome = 0; m.firstHalfAway = 1; m.status = 'FINISHED'; m.minute = 'MS';
             }
-            // AL Shabab vs AL Taawoun kontrolü (Resmi MS: 2 - 0)
+            // AL Shabab vs AL Taawoun kontrolü (Resmi MS: 3 - 0)
             if ((normK.includes('shabab') && normK.includes('taawoun')) || (m && String(m.iddaaCode) === '3134237')) {
-                m.homeScore = 2; m.awayScore = 0; m.firstHalfHome = 1; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
+                m.homeScore = 3; m.awayScore = 0; m.firstHalfHome = 1; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
             }
-            // AL Fayha vs AL Riyadh kontrolü (Resmi MS: 1 - 0)
+            // AL Fayha vs AL Riyadh kontrolü (Resmi MS: 1 - 1)
             if ((normK.includes('fayha') && normK.includes('riyadh')) || (m && String(m.iddaaCode) === '3134322')) {
-                m.homeScore = 1; m.awayScore = 0; m.firstHalfHome = 0; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
+                m.homeScore = 1; m.awayScore = 1; m.firstHalfHome = 0; m.firstHalfAway = 0; m.status = 'FINISHED'; m.minute = 'MS';
             }
         });
 
@@ -389,7 +390,8 @@ const MatchTracker = {
             { iddaaCode: '3194599', homeTeam: 'Inter Miami', awayTeam: 'DC Utd', homeScore: 4, awayScore: 0, fhH: 2, fhA: 0 },
             { iddaaCode: '3199277', homeTeam: 'Sao Paulo SP', awayTeam: 'Vitoria BA', homeScore: 2, awayScore: 1, fhH: 1, fhA: 0 },
             { iddaaCode: '3199740', homeTeam: 'Atl Mineiro', awayTeam: 'Santos SP', homeScore: 2, awayScore: 1, fhH: 1, fhA: 0 },
-            { iddaaCode: '3134322', homeTeam: 'AL Fayha', awayTeam: 'AL Riyadh', homeScore: 1, awayScore: 0, fhH: 0, fhA: 0 }
+            { iddaaCode: '3134322', homeTeam: 'AL Fayha', awayTeam: 'AL Riyadh', homeScore: 1, awayScore: 1, fhH: 0, fhA: 0 },
+            { iddaaCode: '3134237', homeTeam: 'AL Shabab', awayTeam: 'AL Taawoun', homeScore: 3, awayScore: 0, fhH: 1, fhA: 0 }
         ];
 
         verifiedCatalog.forEach(vc => {

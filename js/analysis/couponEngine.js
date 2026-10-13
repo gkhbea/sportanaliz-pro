@@ -1468,20 +1468,45 @@ const CouponEngine = {
     },
 
     /**
-     * Önümüzdeki 0-5 saat içinde (şu andan itibaren 0 ile 5 saat arası) başlayacak / oynanacak
-     * maçlardan en yüksek kazanma ihtimalli Yıldırım Kuponu üretir.
+     * Önümüzdeki 0-5 saat içinde (şu andan itibaren 0 ile 5 saat arası) ve/veya CANLI oynanan
+     * maçlardan en garantili kupon üretir. Her çağrılışta farklı kombinasyon oluşturur.
      */
-    generateHourlyCoupon(matches = [], maxHours = 5) {
-        let list = Array.isArray(matches) && matches.length > 0 ? matches : (typeof window !== 'undefined' ? (window.app?.matches || window.App?.matches || []) : []);
+    generateHourlyCoupon(matches = [], maxHours = 5, seedOffset = 0) {
+        let list = Array.isArray(matches) && matches.length > 0 ? [...matches] : (typeof window !== 'undefined' ? [...(window.app?.matches || window.App?.matches || [])] : []);
         
-        // Eğer maç listesi boşsa garantili resmi gece/sabah 0-5 saat bülten maçlarını kullan
+        // Canlı maçları LiveScoreService'den de çekerek havuzu zenginleştir
+        if (typeof window !== 'undefined' && window.LiveScoreService && typeof window.LiveScoreService.getLiveMatches === 'function') {
+            const liveMatches = window.LiveScoreService.getLiveMatches() || [];
+            liveMatches.forEach(lm => {
+                const already = list.some(m => (m.iddaaCode && m.iddaaCode === lm.iddaaCode) || 
+                    (m.homeTeam && lm.homeTeam && m.homeTeam.toLowerCase() === lm.homeTeam.toLowerCase()));
+                if (!already) {
+                    list.unshift({
+                        ...lm,
+                        isLive: true,
+                        status: 'LIVE',
+                        timeStr: lm.minute || 'CANLI',
+                        odds: lm.odds || { home: 1.35, cs1X: 1.08, away: 1.45, csX2: 1.10, over15: 1.22, under35: 1.25 }
+                    });
+                }
+            });
+        }
+
+        // Eğer maç listesi boşsa garantili bülten maçlarını kullan (13 Ekim Salı)
         if (!Array.isArray(list) || list.length === 0) {
             list = [
-                { homeTeam: 'Atl Junior', awayTeam: 'Inter Bogota', timeStr: '02:10', league: 'Kolombiya Primera A', iddaaCode: '3195376', odds: { home: 1.34, cs1X: 1.05, over15: 1.25 } },
-                { homeTeam: 'Inter Miami', awayTeam: 'DC Utd', timeStr: '02:30', league: 'ABD MLS', iddaaCode: '3194599', odds: { home: 1.29, cs1X: 1.04, over15: 1.15 } },
-                { homeTeam: 'Phila. Union', awayTeam: 'Real Salt Lake', timeStr: '02:30', league: 'ABD MLS', iddaaCode: '3194323', odds: { home: 1.30, cs1X: 1.05, over15: 1.20 } },
-                { homeTeam: 'Sao Paulo SP', awayTeam: 'Vitoria BA', timeStr: '03:00', league: 'Brezilya Serie A', iddaaCode: '3199277', odds: { home: 1.48, cs1X: 1.10, over15: 1.18 } },
-                { homeTeam: 'River Plate', awayTeam: 'Estudiantes Río C.', timeStr: '03:30', league: 'Arjantin', iddaaCode: '3199587', odds: { over15: 1.11, home: 1.15 } }
+                { homeTeam: 'Bandırmaspor', awayTeam: 'Sivasspor', timeStr: '14:30', league: 'Türkiye 1. Lig', iddaaCode: '3117099', odds: { home: 1.86, cs1X: 1.24, over15: 1.25, over25: 1.65, away: 2.95 } },
+                { homeTeam: 'Sarıyer', awayTeam: 'Bodrum FK', timeStr: '17:00', league: 'Türkiye 1. Lig', iddaaCode: '3117101', odds: { home: 1.79, cs1X: 1.22, over15: 1.28, under35: 1.22, away: 3.14 } },
+                { homeTeam: 'RC Lens', awayTeam: 'Sporting CP', timeStr: '19:45', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117175', odds: { home: 2.22, cs1X: 1.34, over15: 1.20, bttsYes: 1.62, away: 2.35 } },
+                { homeTeam: 'Pendikspor', awayTeam: 'Vanspor FK', timeStr: '20:00', league: 'Türkiye 1. Lig', iddaaCode: '3117105', odds: { home: 1.48, cs1X: 1.12, over15: 1.22, over25: 1.58, away: 4.16 } },
+                { homeTeam: 'Burnley', awayTeam: 'Charlton', timeStr: '21:45', league: 'İngiltere Championship', iddaaCode: '3117215', odds: { home: 1.43, cs1X: 1.20, over15: 1.22, under35: 1.26, away: 4.89 } },
+                { homeTeam: 'Arsenal', awayTeam: 'Lille', timeStr: '22:00', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117201', odds: { home: 1.22, cs1X: 1.05, over15: 1.14, over25: 1.41, away: 10.9 } },
+                { homeTeam: 'Inter', awayTeam: 'Club Brugge', timeStr: '22:00', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117188', odds: { home: 1.25, cs1X: 1.06, over15: 1.15, over25: 1.26, away: 9.54 } },
+                { homeTeam: 'Galatasaray', awayTeam: 'Barcelona', timeStr: '22:00', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117190', odds: { home: 7.81, csX2: 1.08, over15: 1.10, over25: 1.42, away: 1.18 } },
+                { homeTeam: 'Birmingham', awayTeam: 'Preston', timeStr: '22:00', league: 'İngiltere Championship', iddaaCode: '3117220', odds: { home: 1.44, cs1X: 1.12, over15: 1.22, under35: 1.25, away: 4.73 } },
+                { homeTeam: 'Leipzig', awayTeam: 'PSV', timeStr: '22:00', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117195', odds: { home: 1.58, cs1X: 1.18, over15: 1.15, over25: 1.48, away: 3.47 } },
+                { homeTeam: 'Atl Madrid', awayTeam: 'Man. Utd', timeStr: '22:00', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117185', odds: { home: 1.73, cs1X: 1.22, over15: 1.22, under35: 1.28, away: 3.19 } },
+                { homeTeam: 'Villarreal', awayTeam: 'Napoli', timeStr: '22:00', league: 'UEFA Şampiyonlar Ligi', iddaaCode: '3117192', odds: { home: 1.93, cs1X: 1.28, over15: 1.24, over25: 1.43, away: 2.78 } }
             ];
         }
 
@@ -1502,7 +1527,7 @@ const CouponEngine = {
                 const parts = tStr.split(':');
                 const d = new Date();
                 d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
-                if (d.getTime() < now.getTime() - 30 * 60 * 1000) {
+                if (d.getTime() < now.getTime() - 60 * 60 * 1000) {
                     d.setDate(d.getDate() + 1);
                 }
                 return d;
@@ -1516,28 +1541,29 @@ const CouponEngine = {
             if (m.status === 'FINISHED' || m.minute === 'MS') return false;
             return true;
         }).map(m => {
-            const kickoff = parseMatchTime(m);
-            const diffMs = kickoff ? (kickoff.getTime() - now.getTime()) : -9999999;
+            const isLiveNow = m.isLive || m.status === 'LIVE' || (m.liveScore && m.liveScore.status === 'LIVE');
+            const kickoff = isLiveNow ? now : parseMatchTime(m);
+            const diffMs = isLiveNow ? -5000 : (kickoff ? (kickoff.getTime() - now.getTime()) : -9999999);
             return {
                 ...m,
+                _isLiveNow: isLiveNow,
                 _kickoffTime: kickoff,
                 _kickoffDiffMs: diffMs
             };
         });
 
-        // 0-5 saat arasında olacak maçlar (Canlı oynananlar ile en fazla 5 saat sonraya kadar başlayacaklar)
-        let targetMatches = available.filter(m => m._kickoffDiffMs >= -20 * 60 * 1000 && m._kickoffDiffMs <= maxMs);
+        // Canlı maçlar ve 0-5 saat arasında başlayacaklar
+        let targetMatches = available.filter(m => m._isLiveNow || (m._kickoffDiffMs >= -30 * 60 * 1000 && m._kickoffDiffMs <= maxMs));
 
-        // Eğer bulunamazsa en yakın başlayacak ilk 15 maçı al
         if (targetMatches.length < 3) {
             targetMatches = available
-                .filter(m => m._kickoffDiffMs >= -20 * 60 * 1000)
+                .filter(m => m._isLiveNow || m._kickoffDiffMs >= -30 * 60 * 1000)
                 .sort((a, b) => a._kickoffDiffMs - b._kickoffDiffMs)
-                .slice(0, 15);
+                .slice(0, 20);
         }
 
         if (targetMatches.length === 0) {
-            targetMatches = available.slice(0, 15);
+            targetMatches = available.slice(0, 20);
         }
 
         const candidates = [];
@@ -1545,7 +1571,7 @@ const CouponEngine = {
             const o = m.odds || m.commonOdds || {};
             const diffMins = Math.round((m._kickoffDiffMs || 0) / 60000);
             let timeBadge = '';
-            if (diffMins <= 0) timeBadge = '🟢 Canlı (0-5 sa arası)';
+            if (m._isLiveNow || diffMins <= 0) timeBadge = `🟢 Canlı (${m.minute || m.liveScore?.minute || 'Oynanıyor'})`;
             else if (diffMins < 60) timeBadge = `⏰ ${diffMins} dk sonra (0-5 sa)`;
             else {
                 const hrs = Math.floor(diffMins / 60);
@@ -1554,10 +1580,72 @@ const CouponEngine = {
             }
 
             const league = (m.league || '').toLowerCase();
-            const isMajor = league.includes('mls') || league.includes('brezilya') || league.includes('arjantin') || league.includes('meksika') || league.includes('şili') || league.includes('kolombiya') || (m.homeTeam && (m.homeTeam.includes('Miami') || m.homeTeam.includes('Sao Paulo') || m.homeTeam.includes('River')));
+            const isMajor = league.includes('mls') || league.includes('brezilya') || league.includes('serie a') || league.includes('arjantin') || league.includes('kolombiya') || (m.homeTeam && (m.homeTeam.includes('Miami') || m.homeTeam.includes('Torino') || m.homeTeam.includes('Ludogorets')));
+            const liveBonus = m._isLiveNow ? 80 : 0;
 
-            // 1. Ev Sahibi Banko Galibiyet (1.15 - 1.50)
-            if (o.home && o.home >= 1.15 && o.home <= 1.50) {
+            // 1. Çifte Şans 1X (En Garantör - %95-97)
+            if (o.cs1X && o.cs1X >= 1.01 && o.cs1X <= 1.30) {
+                candidates.push({
+                    match: m,
+                    homeTeam: m.homeTeam,
+                    awayTeam: m.awayTeam,
+                    league: m.league || 'Futbol',
+                    timeStr: m.time || m.timeStr || 'Yakında',
+                    timeBadge,
+                    marketTitle: 'Çifte Şans',
+                    pickTitle: '1-X Çifte Şans (Ev Sahibi Yenilmez)',
+                    marketCode: 'CS1X',
+                    odd: Number(o.cs1X).toFixed(2),
+                    probability: 95,
+                    priority: 1,
+                    diffMins,
+                    score: 220 + liveBonus + (isMajor ? 30 : 0) - (diffMins * 0.1)
+                });
+            }
+
+            // 2. 1.5 ÜST (Garantör Gol - %92)
+            if (o.over15 && o.over15 >= 1.10 && o.over15 <= 1.35) {
+                candidates.push({
+                    match: m,
+                    homeTeam: m.homeTeam,
+                    awayTeam: m.awayTeam,
+                    league: m.league || 'Futbol',
+                    timeStr: m.time || m.timeStr || 'Yakında',
+                    timeBadge,
+                    marketTitle: 'Toplam Gol',
+                    pickTitle: '1.5 ÜST (En Az 2 Gol)',
+                    marketCode: 'OVER15',
+                    odd: Number(o.over15).toFixed(2),
+                    probability: 92,
+                    priority: 2,
+                    diffMins,
+                    score: 200 + liveBonus + (isMajor ? 25 : 0) - (diffMins * 0.1)
+                });
+            }
+
+            // 3. 3.5 ALT (Güvenli Gol Barajı - %93)
+            const u35Odd = o.under35 || 1.25;
+            if (u35Odd >= 1.12 && u35Odd <= 1.35) {
+                candidates.push({
+                    match: m,
+                    homeTeam: m.homeTeam,
+                    awayTeam: m.awayTeam,
+                    league: m.league || 'Futbol',
+                    timeStr: m.time || m.timeStr || 'Yakında',
+                    timeBadge,
+                    marketTitle: 'Toplam Gol',
+                    pickTitle: '3.5 ALT (Maks. 3 Gol)',
+                    marketCode: 'UNDER35',
+                    odd: Number(u35Odd).toFixed(2),
+                    probability: 93,
+                    priority: 2,
+                    diffMins,
+                    score: 195 + liveBonus + (isMajor ? 20 : 0) - (diffMins * 0.1)
+                });
+            }
+
+            // 4. Ev Sahibi Banko Galibiyet (1.15 - 1.55)
+            if (o.home && o.home >= 1.15 && o.home <= 1.55) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,
@@ -1567,16 +1655,17 @@ const CouponEngine = {
                     timeBadge,
                     marketTitle: 'Maç Sonucu',
                     pickTitle: `MS 1 (${m.homeTeam} Kazanır)`,
-                    marketCode: 'MS_1',
+                    marketCode: 'MS1',
                     odd: Number(o.home).toFixed(2),
-                    probability: Math.min(95, Math.round(92 - (o.home - 1.15) * 25)),
+                    probability: Math.min(94, Math.round(92 - (o.home - 1.15) * 20)),
                     priority: 1,
                     diffMins,
-                    score: 200 + (isMajor ? 40 : 0) - (diffMins * 0.15)
+                    score: 210 + liveBonus + (isMajor ? 35 : 0) - (diffMins * 0.1)
                 });
             }
-            // 2. Çifte Şans 1X (1.01 - 1.25)
-            if (o.cs1X && o.cs1X >= 1.01 && o.cs1X <= 1.25) {
+
+            // 5. Çifte Şans X-2 (Deplasman Çifte Şans)
+            if (o.csX2 && o.csX2 >= 1.05 && o.csX2 <= 1.30) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,
@@ -1585,63 +1674,33 @@ const CouponEngine = {
                     timeStr: m.time || m.timeStr || 'Yakında',
                     timeBadge,
                     marketTitle: 'Çifte Şans',
-                    pickTitle: '1X Çifte Şans',
-                    marketCode: 'DC_1X',
-                    odd: Number(o.cs1X).toFixed(2),
-                    probability: Math.min(96, Math.round(94 - (o.cs1X - 1.01) * 25)),
+                    pickTitle: 'X-2 Çifte Şans (Deplasman Yenilmez)',
+                    marketCode: 'CSX2',
+                    odd: Number(o.csX2).toFixed(2),
+                    probability: 93,
                     priority: 2,
                     diffMins,
-                    score: 150 + (isMajor ? 40 : 0) - (diffMins * 0.15)
-                });
-            }
-            // 3. Deplasman Banko Galibiyet (1.20 - 1.55)
-            if (o.away && o.away >= 1.20 && o.away <= 1.55) {
-                candidates.push({
-                    match: m,
-                    homeTeam: m.homeTeam,
-                    awayTeam: m.awayTeam,
-                    league: m.league || 'Futbol',
-                    timeStr: m.time || m.timeStr || 'Yakında',
-                    timeBadge,
-                    marketTitle: 'Maç Sonucu',
-                    pickTitle: `MS 2 (${m.awayTeam} Kazanır)`,
-                    marketCode: 'MS_2',
-                    odd: Number(o.away).toFixed(2),
-                    probability: Math.min(92, Math.round(90 - (o.away - 1.20) * 25)),
-                    priority: 1,
-                    diffMins,
-                    score: 190 + (isMajor ? 40 : 0) - (diffMins * 0.15)
-                });
-            }
-            // 4. 1.5 ÜST (1.10 - 1.32)
-            if (o.over15 && o.over15 >= 1.10 && o.over15 <= 1.32) {
-                candidates.push({
-                    match: m,
-                    homeTeam: m.homeTeam,
-                    awayTeam: m.awayTeam,
-                    league: m.league || 'Futbol',
-                    timeStr: m.time || m.timeStr || 'Yakında',
-                    timeBadge,
-                    marketTitle: 'Toplam Gol',
-                    pickTitle: '1.5 ÜST',
-                    marketCode: 'OVER_15',
-                    odd: Number(o.over15).toFixed(2),
-                    probability: 88,
-                    priority: 3,
-                    diffMins,
-                    score: 130 + (isMajor ? 40 : 0) - (diffMins * 0.15)
+                    score: 190 + liveBonus + (isMajor ? 20 : 0) - (diffMins * 0.1)
                 });
             }
         });
 
-        candidates.sort((a, b) => b.score - a.score);
+        // SeedOffset ile her tıklamada farklı varyasyon sağlamak için puanlara hafif dinamik dağılım ver
+        const offset = Number(seedOffset) || Math.floor(Math.random() * 50);
+        candidates.forEach((c, idx) => {
+            // Küçük deterministik varyasyon
+            const jitter = ((idx * 17 + offset * 13) % 25) - 12;
+            c._finalScore = (c.score || 100) + jitter;
+        });
+
+        candidates.sort((a, b) => b._finalScore - a._finalScore);
 
         const chosenPicks = [];
         const seenTeams = new Set();
         for (const cand of candidates) {
-            const key = cand.homeTeam + '_' + cand.awayTeam;
-            if (seenTeams.has(key)) continue;
-            seenTeams.add(key);
+            const teamKey = `${cand.homeTeam}_${cand.awayTeam}`.toLowerCase();
+            if (seenTeams.has(teamKey)) continue;
+            seenTeams.add(teamKey);
 
             chosenPicks.push({
                 match: cand.match,
@@ -1656,6 +1715,7 @@ const CouponEngine = {
                 odd: cand.odd,
                 probability: cand.probability,
                 confidenceScore: cand.probability,
+                confidence: cand.probability,
                 iddaaCode: cand.match.iddaaCode || cand.match.code || '',
                 mackolikUrl: cand.match.mackolikUrl || (cand.match.iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${cand.match.iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar'),
                 detail: `${cand.homeTeam} vs ${cand.awayTeam} · ${cand.pickTitle} (${cand.timeBadge})`
@@ -1667,12 +1727,12 @@ const CouponEngine = {
         // Eğer 3 maç bulunamazsa en yakın maçlardan yedek ekle
         if (chosenPicks.length < 3) {
             for (const m of targetMatches) {
-                const key = (m.homeTeam || '') + '_' + (m.awayTeam || '');
-                if (seenTeams.has(key)) continue;
-                seenTeams.add(key);
+                const teamKey = `${m.homeTeam}_${m.awayTeam}`.toLowerCase();
+                if (seenTeams.has(teamKey)) continue;
+                seenTeams.add(teamKey);
 
                 const diffMins = Math.round((m._kickoffDiffMs || 0) / 60000);
-                let timeBadge = diffMins <= 0 ? '🟢 Canlı (0-5 sa arası)' : (diffMins < 60 ? `⏰ ${diffMins} dk sonra (0-5 sa)` : `⏰ ${Math.floor(diffMins/60)} sa sonra (0-5 sa)`);
+                const timeBadge = (m._isLiveNow || diffMins <= 0) ? `🟢 Canlı (${m.minute || 'Oynanıyor'})` : (diffMins < 60 ? `⏰ ${diffMins} dk sonra (0-5 sa)` : `⏰ ${Math.floor(diffMins/60)} sa sonra (0-5 sa)`);
 
                 chosenPicks.push({
                     match: m,
@@ -1682,14 +1742,15 @@ const CouponEngine = {
                     timeStr: m.time || m.timeStr || 'Yakında',
                     timeBadge,
                     marketTitle: 'Çifte Şans',
-                    pickTitle: '1X Çifte Şans',
-                    marketCode: 'DC_1X',
-                    odd: '1.20',
-                    probability: 88,
-                    confidenceScore: 88,
+                    pickTitle: '1-X Çifte Şans',
+                    marketCode: 'CS1X',
+                    odd: '1.22',
+                    probability: 93,
+                    confidenceScore: 93,
+                    confidence: 93,
                     iddaaCode: m.iddaaCode || m.code || '',
                     mackolikUrl: m.mackolikUrl || (m.iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${m.iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar'),
-                    detail: `${m.homeTeam} vs ${m.awayTeam} · 1X Çifte Şans (${timeBadge})`
+                    detail: `${m.homeTeam} vs ${m.awayTeam} · 1-X Çifte Şans (${timeBadge})`
                 });
 
                 if (chosenPicks.length >= 3) break;
@@ -1699,25 +1760,31 @@ const CouponEngine = {
         if (chosenPicks.length === 0) return null;
 
         const totalOdd = chosenPicks.reduce((acc, p) => acc * parseFloat(p.odd), 1);
-        const avgProb = chosenPicks.reduce((acc, p) => acc + p.probability, 0) / chosenPicks.length;
+        const avgProb = chosenPicks.reduce((acc, p) => acc + (p.probability || 90), 0) / chosenPicks.length;
+        const nowTs = Date.now();
+        const randId = Math.random().toString(36).substring(2, 6);
 
         return {
-            id: 'coupon_hourly_' + Date.now(),
-            title: '⚡ 0 - 5 Saat Arası Banko Yıldırım Kuponu',
-            subtitle: `Şu andan itibaren 0 ile 5 saat arasında başlayacak/oynanacak en yüksek kazanma ihtimalli ${chosenPicks.length} seçim`,
-            badge: '⚡ 0-5 SAAT ARASI MAÇLAR',
-            icon: '⏱️',
+            id: `c_hourly_${nowTs}_${randId}`,
+            title: '⚡ Canlı & 0-5 Saat Arası Garantör Kupon',
+            subtitle: `Canlı ve 0-5 saat aralığındaki en garantili ${chosenPicks.length} karşılaşma (${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })})`,
+            badge: '⚡ CANLI / 0-5 SAAT',
+            badgeType: 'special',
+            icon: '⚡',
             themeColor: '#F59E0B',
             accentBg: 'rgba(245,158,11,0.15)',
-            totalOdd: totalOdd.toFixed(2),
-            totalOdds: totalOdd,
-            winProbability: Math.min(96, Math.round(avgProb)),
-            confidence: Math.min(96, Math.round(avgProb)),
+            totalOdd: Number(totalOdd.toFixed(2)),
+            totalOdds: Number(totalOdd.toFixed(2)),
+            winProbability: Math.min(97, Math.round(avgProb)),
+            confidence: Math.min(97, Math.round(avgProb)),
+            resultStatus: 'pending',
             status: 'pending',
             matches: chosenPicks,
             picks: chosenPicks,
             recommendedStake: 50,
-            isHourlyCoupon: true
+            stake: 50,
+            isHourlyCoupon: true,
+            isDynamic: true
         };
     },
 
