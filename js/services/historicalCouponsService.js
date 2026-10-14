@@ -3216,12 +3216,12 @@ const HistoricalCouponsService = {
             detail: "Cuiaba 0-1 Avai SC · 2.5 ALT (✅ TUTTU)"
         }, yDate, dFmt);
 
-        // 12. Levy Bereg vs Zorya Luhansk (13:00) - Toplam Gol 1.5 Üst
-        const p_zorya_o15 = this._createArchivedPick({
+        // 12. Levy Bereg vs Zorya Luhansk (13:00) - Toplam Gol 3.5 Alt
+        const p_zorya_u35 = this._createArchivedPick({
             index: 12, iddaaCode: '3194447', homeTeam: "Levy Bereg Kiev", awayTeam: "Zorya Luhansk", league: "Ukrayna Premier Ligi",
-            timeStr: '13:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.35, confidence: 88,
+            timeStr: '13:00', marketTitle: 'Toplam Gol', pickTitle: '3.5 ALT', marketCode: 'UNDER35', odd: 1.32, confidence: 88,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Levy Bereg vs Zorya Luhansk · 1.5 ÜST (13:00 | İddaa Kod: 3194447)"
+            detail: "Levy Bereg vs Zorya Luhansk · 3.5 ALT (13:00 | İddaa Kod: 3194447)"
         }, yDate, dFmt);
 
         // 13. Ludogorets vs Arda Kardzha (20:00) - İlk Yarı 1 (İlk Yarı Baskısı)
@@ -3264,9 +3264,9 @@ const HistoricalCouponsService = {
         // Kupon 4: 🎯 Günün Çifte Şans & İddaa Kombine Kuponu
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & İddaa Kombine Kuponu',
-            subtitle: 'Torino KG VAR, Cuiaba 2.5 Alt ve Levy Bereg 1.5 Üst', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Torino KG VAR, Cuiaba 2.5 Alt ve Levy Bereg 3.5 Alt', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
-        }, [p_torino_btts, p_cuiaba_u25, p_zorya_o15], dFmt);
+        }, [p_torino_btts, p_cuiaba_u25, p_zorya_u35], dFmt);
 
         // Kupon 5: 💎 Sürpriz & Değer Kuponu
         const c5 = this._createArchivedCoupon({
