@@ -369,32 +369,21 @@ const EditorEngine = {
             }
         }
 
-        // ---- Özel İstatistik: Korner & Sarı Kart Marketleri ----
-        // Kullanıcı Kuralı: "aynı maçları ms veya alt üst olarak veya korner sarı kart oyna, aynı sonuçla oynama"
+        // ---- Resmi İddaa Marketleri (Nesine & Bilyoner Programına Uygun) ----
+        // Kullanıcı Kuralı: İddaa programında korner ve sarı kart bulunmadığından İlk Yarı, 1.5 Üst ve Çifte Şans üretilir
         const leagueLower = (match.league || analysis.league || '').toLowerCase();
         const isHighTempoLeague = leagueLower.includes('premier') || leagueLower.includes('almanya') || leagueLower.includes('bundesliga') || leagueLower.includes('hollanda') || leagueLower.includes('isviçre') || leagueLower.includes('avusturya') || totalXg >= 2.6;
-        const isFoulHeavyLeague = leagueLower.includes('süper lig') || leagueLower.includes('la liga') || leagueLower.includes('serie a') || leagueLower.includes('brezilya') || leagueLower.includes('arjantin') || leagueLower.includes('kolombiya') || leagueLower.includes('polonya');
 
-        // Korner Tahmini (8.5 ve 9.5 Üst)
-        const cornerProb85 = isHighTempoLeague ? 82 : (totalXg >= 2.4 ? 76 : 68);
-        const cornerOdd85 = odds.cornersOver85 || +(100 / (cornerProb85 * 0.72)).toFixed(2);
-        addCandidate('CNR_85_OVER', 'Toplam Korner 8.5 Üst', 'Korner 8.5 ÜST', cornerProb85, Math.min(1.85, Math.max(1.42, cornerOdd85)), 'korner');
+        // İlk Yarı 0.5 Üst Tahmini
+        const ht05Prob = isHighTempoLeague ? 84 : (totalXg >= 2.4 ? 78 : 72);
+        const ht05Odd = +(100 / (ht05Prob * 0.72)).toFixed(2);
+        addCandidate('HT_05_OVER', 'İlk Yarı 0.5 Üst', 'İY 0.5 ÜST', ht05Prob, Math.min(1.55, Math.max(1.22, ht05Odd)), 'gol');
 
-        if (isHighTempoLeague || totalXg >= 2.8) {
-            const cornerProb95 = isHighTempoLeague ? 74 : 66;
-            const cornerOdd95 = odds.cornersOver95 || +(100 / (cornerProb95 * 0.70)).toFixed(2);
-            addCandidate('CNR_95_OVER', 'Toplam Korner 9.5 Üst', 'Korner 9.5 ÜST', cornerProb95, Math.min(2.15, Math.max(1.65, cornerOdd95)), 'korner');
-        }
-
-        // Sarı Kart Tahmini (3.5 ve 4.5 Üst)
-        const cardProb35 = isFoulHeavyLeague ? 84 : 72;
-        const cardOdd35 = odds.cardsOver35 || +(100 / (cardProb35 * 0.75)).toFixed(2);
-        addCandidate('CRD_35_OVER', 'Toplam Kart 3.5 Üst', 'Kart 3.5 ÜST', cardProb35, Math.min(1.82, Math.max(1.40, cardOdd35)), 'kart');
-
-        if (isFoulHeavyLeague) {
-            const cardProb45 = 75;
-            const cardOdd45 = odds.cardsOver45 || +(100 / (cardProb45 * 0.72)).toFixed(2);
-            addCandidate('CRD_45_OVER', 'Toplam Kart 4.5 Üst', 'Kart 4.5 ÜST', cardProb45, Math.min(2.10, Math.max(1.68, cardOdd45)), 'kart');
+        // 1.5 Gol Üstü Tahmini
+        if (totalXg >= 2.2) {
+            const ov15Prob = Math.min(92, Math.round(75 + totalXg * 5));
+            const ov15Odd = +(100 / (ov15Prob * 0.74)).toFixed(2);
+            addCandidate('OVER_15', 'Toplam Gol 1.5 Üst', '1.5 ÜST', ov15Prob, Math.min(1.45, Math.max(1.18, ov15Odd)), 'gol');
         }
 
         // Sırala: Güven puanı en yüksek olan başa

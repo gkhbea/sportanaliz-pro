@@ -517,11 +517,11 @@ const CouponEngine = {
             });
         }
 
-        // 7. KUPON: 🎯 Korner & Kart İstatistik Kuponu
+        // 7. KUPON: 🎯 İlk Yarı & İkinci Yarı Kombine Kuponu
         if (list.length < 7) {
-            const p1 = allPicks[2] ? { ...allPicks[2], pickTitle: 'Toplam Korner 8.5 ÜST', marketCode: 'CNR_85', odd: '1.58', marketTitle: 'Korner İstatistik' } : null;
-            const p2 = allPicks[4] ? { ...allPicks[4], pickTitle: 'Çifte Şans 1X & 1.5 ÜST', marketCode: 'DC1X_OV15', odd: '1.62', marketTitle: 'Kombine İstatistik' } : null;
-            const p3 = allPicks[7] || allPicks[0] ? { ...(allPicks[7] || allPicks[0]), pickTitle: 'Toplam Kart 3.5 ÜST', marketCode: 'CRD_35', odd: '1.65', marketTitle: 'Kart İstatistik' } : null;
+            const p1 = allPicks[2] ? { ...allPicks[2], pickTitle: 'İlk Yarı 0.5 ÜST', marketCode: 'HT_OV05', odd: '1.38', marketTitle: 'İlk Yarı Gol' } : null;
+            const p2 = allPicks[4] ? { ...allPicks[4], pickTitle: 'Çifte Şans 1X & 1.5 ÜST', marketCode: 'DC1X_OV15', odd: '1.62', marketTitle: 'Kombine İddaa' } : null;
+            const p3 = allPicks[7] || allPicks[0] ? { ...(allPicks[7] || allPicks[0]), pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.55', marketTitle: 'Toplam Gol' } : null;
             const statsPicks = [p1, p2, p3].filter(Boolean);
             const totalOdd = statsPicks.reduce((acc, p) => acc * (parseFloat(p.odd) || 1), 1).toFixed(2);
             const allWon = statsPicks.every(p => p.resultStatus === 'won');
@@ -530,9 +530,9 @@ const CouponEngine = {
 
             list.push({
                 id: 'coupon-stats-' + (dateStr || 'day'),
-                title: '🎯 Korner / Kart & Özel İstatistik',
-                subtitle: 'Yüksek tempo, kanat bindirmeleri ve hakem kart ortalamaları odaklı analiz',
-                badge: allWon ? '🎉 KAZANDI 3/3' : (anyLost ? '❌ KAYBETTİ' : '🎯 ÖZEL İSTATİSTİK · KORNER'),
+                title: '🎯 İlk Yarı & İkinci Yarı Kombinesi',
+                subtitle: 'Nesine & Bilyoner bültenine tam uyumlu ilk yarı ve maç sonu kombinasyonları',
+                badge: allWon ? '🎉 KAZANDI 3/3' : (anyLost ? '❌ KAYBETTİ' : '🎯 İLK YARI & MAÇ SONU'),
                 badgeType: allWon ? 'safe' : (anyLost ? 'lost' : 'primary'),
                 icon: '🎯',
                 themeColor: '#10B981',
@@ -547,7 +547,7 @@ const CouponEngine = {
                 matches: statsPicks,
                 picks: statsPicks,
                 matchCount: statsPicks.length,
-                strategy: 'Hücum baskısı ve faul/kart yoğunluğu yüksek maçlardan özel istatistik tercihleri.'
+                strategy: 'Resmi İddaa programında yer alan popüler ilk yarı gol ve çifte şans kombinasyonları.'
             });
         }
 
@@ -1834,7 +1834,7 @@ const CouponEngine = {
             { id: 3, title: '⚽ Gol Yağmuru', weight: 0.16, minOdds: 3.60, confidence: 88, role: 'Yüksek İsabet' },
             { id: 4, title: '⏱️ İlk Yarı Strateji', weight: 0.12, minOdds: 2.90, confidence: 86, role: 'Hızlı Kasa' },
             { id: 5, title: '🔥 KG VAR Kombini', weight: 0.10, minOdds: 3.25, confidence: 86, role: 'Karşılıklı Gol' },
-            { id: 6, title: '🎯 Korner / Kart İstatistik', weight: 0.08, minOdds: 3.75, confidence: 84, role: 'Özel İstatistik' },
+            { id: 6, title: '🎯 İlk Yarı & Maç Sonu Kombini', weight: 0.08, minOdds: 3.75, confidence: 84, role: 'İddaa İkili Kombin' },
             { id: 7, title: '🌙 Gece / Güney Amerika', weight: 0.07, minOdds: 4.50, confidence: 82, role: 'Gece Bülteni' },
             { id: 8, title: '💎 Günün Bombası / Değer', weight: 0.05, minOdds: 10.00, confidence: 72, role: 'Mega Çarpan' }
         ];

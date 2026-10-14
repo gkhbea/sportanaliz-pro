@@ -1,5 +1,5 @@
 // sw.js — Service Worker for SportAnaliz Pro (Network First & Cache Purging)
-const CACHE_NAME = 'sportanaliz-v4';
+const CACHE_NAME = 'sportanaliz-v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

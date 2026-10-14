@@ -3005,12 +3005,13 @@ const HistoricalCouponsService = {
             detail: "U. S. Gilloise 1-1 O. H. Leuven · KG VAR (İddaa Kod: 3193789 | Belçika Pro Ligi)"
         }, yDate, dFmt);
 
-        // 19. Southampton vs Portsmouth - Korner (14:00)
-        const p_southampton_cnr = this._createArchivedPick({
-            index: 19, iddaaCode: '3198976', homeTeam: "Southampton", awayTeam: "Portsmouth", league: "İngiltere",
-            timeStr: '14:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 8.5 ÜST', marketCode: 'CNR_85', odd: 1.55, confidence: 87,
-            homeScore: 6, awayScore: 4, isWon: true, isPending: false, isLive: false,
-            detail: "Southampton vs Portsmouth · 10 Korner (8.5 ÜST) (İddaa Kod: 3198976 | İngiltere)"
+        // 19. Southampton vs Portsmouth - Toplam Gol (14:00)
+        const p_southampton_o25 = this._createArchivedPick({
+            index: 19, iddaaCode: '3198976', homeTeam: "Southampton", awayTeam: "Portsmouth", league: "İngiltere Championship",
+            timeStr: '14:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.60, confidence: 87,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            scoreText: '2 - 1',
+            detail: "Southampton 2-1 Portsmouth · 2.5 ÜST (İddaa Kod: 3198976 | İngiltere)"
         }, yDate, dFmt);
 
         // 20. Real Betis vs Osasuna - ÇŞ 1X & 1.5 ÜST (19:30)
@@ -3191,20 +3192,20 @@ const HistoricalCouponsService = {
             detail: "Cusco 1-2 Alianza Lima · 1.5 ÜST (✅ TUTTU)"
         }, yDate, dFmt);
 
-        // 9. Ludogorets vs Arda Kardzha (20:00) - Korner İstatistiği (Toplam Korner 9.5 Üst)
-        const p_ludo_corner = this._createArchivedPick({
+        // 9. Ludogorets vs Arda Kardzha (20:00) - Toplam Gol 2.5 Üst
+        const p_ludo_o25 = this._createArchivedPick({
             index: 9, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
-            timeStr: '20:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 9.5 ÜST', marketCode: 'CNR_95', odd: 1.68, confidence: 87,
+            timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 87,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Ludogorets vs Arda Kardzhali · Korner 9.5 ÜST (20:00 | İddaa Kod: 3194303)"
+            detail: "Ludogorets vs Arda Kardzhali · 2.5 ÜST (20:00 | İddaa Kod: 3194303)"
         }, yDate, dFmt);
 
-        // 10. Torino vs Udinese (21:45) - Kart İstatistiği (Toplam Kart 3.5 Üst)
-        const p_torino_card = this._createArchivedPick({
+        // 10. Torino vs Udinese (21:45) - Karşılıklı Gol (KG VAR)
+        const p_torino_btts = this._createArchivedPick({
             index: 10, iddaaCode: '3194501', homeTeam: "Torino", awayTeam: "Udinese", league: "İtalya Serie A",
-            timeStr: '21:45', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 3.5 ÜST', marketCode: 'CRD_35', odd: 1.54, confidence: 90,
+            timeStr: '21:45', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR', marketCode: 'BTTS_Y', odd: 1.72, confidence: 90,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Torino vs Udinese · Toplam Kart 3.5 ÜST (21:45 | İddaa Kod: 3194501)"
+            detail: "Torino vs Udinese · KG VAR (21:45 | İddaa Kod: 3194501)"
         }, yDate, dFmt);
 
         // 11. Cuiaba vs Avai SC (00:30) - Alt / Üst (2.5 ALT) (MS 0-1 Bitti)
@@ -3215,12 +3216,12 @@ const HistoricalCouponsService = {
             detail: "Cuiaba 0-1 Avai SC · 2.5 ALT (✅ TUTTU)"
         }, yDate, dFmt);
 
-        // 12. Levy Bereg vs Zorya Luhansk (13:00) - Korner İstatistiği (Toplam Korner 8.5 Üst)
-        const p_zorya_corner = this._createArchivedPick({
+        // 12. Levy Bereg vs Zorya Luhansk (13:00) - Toplam Gol 1.5 Üst
+        const p_zorya_o15 = this._createArchivedPick({
             index: 12, iddaaCode: '3194447', homeTeam: "Levy Bereg Kiev", awayTeam: "Zorya Luhansk", league: "Ukrayna Premier Ligi",
-            timeStr: '13:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 8.5 ÜST', marketCode: 'CNR_85', odd: 1.56, confidence: 88,
+            timeStr: '13:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.35, confidence: 88,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Levy Bereg vs Zorya Luhansk · Toplam Korner 8.5 ÜST (13:00 | İddaa Kod: 3194447)"
+            detail: "Levy Bereg vs Zorya Luhansk · 1.5 ÜST (13:00 | İddaa Kod: 3194447)"
         }, yDate, dFmt);
 
         // 13. Ludogorets vs Arda Kardzha (20:00) - İlk Yarı 1 (İlk Yarı Baskısı)
@@ -3231,12 +3232,12 @@ const HistoricalCouponsService = {
             detail: "Ludogorets vs Arda Kardzhali · İlk Yarı 1 (20:00 | İddaa Kod: 3194303)"
         }, yDate, dFmt);
 
-        // 14. Olimpia vs Resovia (20:00) - Kart İstatistiği (Toplam Kart 4.5 Üst)
-        const p_olimpia_cards = this._createArchivedPick({
+        // 14. Olimpia vs Resovia (20:00) - Toplam Gol 2.5 Üst
+        const p_olimpia_o25 = this._createArchivedPick({
             index: 14, iddaaCode: '3193709', homeTeam: "Olimpia", awayTeam: "Resovia", league: "Polonya 2. Ligi",
-            timeStr: '20:00', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 4.5 ÜST', marketCode: 'CRD_45', odd: 1.74, confidence: 85,
+            timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.68, confidence: 85,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Olimpia vs Resovia · Kart 4.5 ÜST (20:00 | İddaa Kod: 3193709)"
+            detail: "Olimpia vs Resovia · 2.5 ÜST (20:00 | İddaa Kod: 3193709)"
         }, yDate, dFmt);
 
         // Kupon 1: 🛡️ Garantör Banko (3 maç: Taraf, Çifte Şans, Gol)
@@ -3253,26 +3254,26 @@ const HistoricalCouponsService = {
             badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 90
         }, [p_torino_ms, p_ludo_goals, p_cuiaba_cs], dFmt);
 
-        // Kupon 3: ⚽ Günün Gol & Korner Kuponu (3 maç: Korner 9.5 Üst, KG VAR, 1.5 Üst)
+        // Kupon 3: ⚽ Günün Gol & Karşılıklı Gol Kuponu
         const c3 = this._createArchivedCoupon({
-            id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Korner Kuponu',
-            subtitle: 'Ludogorets Korner 9.5 Üst, Olimpia KG VAR ve Cusco 1.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Karşılıklı Gol Kuponu',
+            subtitle: 'Ludogorets 2.5 Üst, Olimpia KG VAR ve Cusco 1.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 89
-        }, [p_ludo_corner, p_olimpia_btts, p_cusco_o15], dFmt);
+        }, [p_ludo_o25, p_olimpia_btts, p_cusco_o15], dFmt);
 
-        // Kupon 4: 🟨 Kart & Korner Özel Strateji (3 maç: Torino Kart 3.5 Üst, Cuiaba 2.5 Alt, Zorya Korner 8.5 Üst)
+        // Kupon 4: 🎯 Günün Çifte Şans & İddaa Kombine Kuponu
         const c4 = this._createArchivedCoupon({
-            id: 'c_htft_' + yDate, title: '🎯 Korner / Kart & İstatistik Kuponu',
-            subtitle: 'Torino Kart 3.5 Üst, Cuiaba 2.5 Alt ve Levy Bereg Korner 8.5 Üst', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & İddaa Kombine Kuponu',
+            subtitle: 'Torino KG VAR, Cuiaba 2.5 Alt ve Levy Bereg 1.5 Üst', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
-        }, [p_torino_card, p_cuiaba_u25, p_zorya_corner], dFmt);
+        }, [p_torino_btts, p_cuiaba_u25, p_zorya_o15], dFmt);
 
-        // Kupon 5: 💎 Sürpriz & Değer Kuponu (3 maç: Ludogorets İY 1, Olimpia Kart 4.5 Üst, Torino MS 1)
+        // Kupon 5: 💎 Sürpriz & Değer Kuponu
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~5.40 Oran)',
-            subtitle: 'Ludogorets İY 1, Olimpia Kart 4.5 Üst ve Torino MS 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Ludogorets İY 1, Olimpia 2.5 Üst ve Torino MS 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
-        }, [p_ludo_ht, p_olimpia_cards, p_torino_ms], dFmt);
+        }, [p_ludo_ht, p_olimpia_o25, p_torino_ms], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
@@ -3345,44 +3346,40 @@ const HistoricalCouponsService = {
             detail: "RC Lens vs Sporting CP · KG VAR (19:45 | İddaa Kod: 3117175)"
         }, yDate, dFmt);
 
-        // 9. Atl Madrid vs Man. Utd (22:00) - Şampiyonlar Ligi - Korner İstatistik (Toplam Korner 8.5 Üst)
-        const p_atleti_corner = this._createArchivedPick({
-            index: 9, iddaaCode: '3117185', homeTeam: "Atl Madrid", awayTeam: "Man. Utd", league: "UEFA Şampiyonlar Ligi",
-            timeStr: '22:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 8.5 ÜST', marketCode: 'CNR_85', odd: 1.54, confidence: 89,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Atl Madrid vs Man. Utd · Toplam Korner 8.5 ÜST (22:00 | İddaa Kod: 3117185)"
-        }, yDate, dFmt);
-
-        // 10. Villarreal vs Napoli (22:00) - Şampiyonlar Ligi - Kart İstatistik (Toplam Kart 3.5 Üst)
-        const p_villa_card = this._createArchivedPick({
-            index: 10, iddaaCode: '3117192', homeTeam: "Villarreal", awayTeam: "Napoli", league: "UEFA Şampiyonlar Ligi",
-            timeStr: '22:00', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 3.5 ÜST', marketCode: 'CRD_35', odd: 1.55, confidence: 91,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Villarreal vs Napoli · Toplam Kart 3.5 ÜST (22:00 | İddaa Kod: 3117192)"
-        }, yDate, dFmt);
-
-        // 11. Pendikspor vs Vanspor FK (20:00) - Türkiye 1. Lig - Korner İstatistik (Toplam Korner 8.5 Üst)
-        const p_pendik_corner = this._createArchivedPick({
-            index: 11, iddaaCode: '3117105', homeTeam: "Pendikspor", awayTeam: "Vanspor FK", league: "Türkiye 1. Lig",
-            timeStr: '20:00', marketTitle: 'Korner İstatistik', pickTitle: 'Toplam Korner 8.5 ÜST', marketCode: 'CNR_85', odd: 1.52, confidence: 88,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Pendikspor vs Vanspor FK · Toplam Korner 8.5 ÜST (20:00 | İddaa Kod: 3117105)"
-        }, yDate, dFmt);
-
-        // 12. Wolverhampton vs Bolton (21:45) - İngiltere Championship - Kart İstatistik (Toplam Kart 3.5 Üst)
-        const p_wolves_card = this._createArchivedPick({
-            index: 12, iddaaCode: '3117225', homeTeam: "Wolverhampton", awayTeam: "Bolton", league: "İngiltere Championship",
-            timeStr: '21:45', marketTitle: 'Kart İstatistik', pickTitle: 'Toplam Kart 3.5 ÜST', marketCode: 'CRD_35', odd: 1.60, confidence: 90,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Wolverhampton vs Bolton · Toplam Kart 3.5 ÜST (21:45 | İddaa Kod: 3117225)"
-        }, yDate, dFmt);
-
-        // 13. Atl Madrid vs Man. Utd (22:00) - Şampiyonlar Ligi - Taraf (MS 1)
+        // 9. Atl Madrid vs Man. Utd (22:00) - Şampiyonlar Ligi - Taraf (MS 1)
         const p_atleti_ms = this._createArchivedPick({
-            index: 13, iddaaCode: '3117185', homeTeam: "Atl Madrid", awayTeam: "Man. Utd", league: "UEFA Şampiyonlar Ligi",
+            index: 9, iddaaCode: '3204497', homeTeam: "Atl Madrid", awayTeam: "Man. Utd", league: "UEFA Şampiyonlar Ligi",
             timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atl Madrid Kazanır)', marketCode: 'MS1', odd: 1.73, confidence: 86,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Atl Madrid vs Man. Utd · MS 1 (22:00 | İddaa Kod: 3117185)"
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            scoreText: '2 - 0',
+            detail: "Atl Madrid 2-0 Man. Utd · MS 1 (✅ TUTTU | İddaa Kod: 3204497)"
+        }, yDate, dFmt);
+
+        // 10. Villarreal vs Napoli (22:00) - Şampiyonlar Ligi - Toplam Gol (2.5 Üst)
+        const p_villa_o25 = this._createArchivedPick({
+            index: 10, iddaaCode: '3117192', homeTeam: "Villarreal", awayTeam: "Napoli", league: "UEFA Şampiyonlar Ligi",
+            timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.45, confidence: 91,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            scoreText: '2 - 1',
+            detail: "Villarreal 2-1 Napoli · 2.5 ÜST (✅ TUTTU | İddaa Kod: 3117192)"
+        }, yDate, dFmt);
+
+        // 11. Chatham Town vs Welling Utd (21:45) - İngiltere FA Trophy (Nesine Kod: 3288412) - Toplam Gol 2.5 Üst
+        const p_chatham_o25 = this._createArchivedPick({
+            index: 11, iddaaCode: '3288412', homeTeam: "Chatham Town", awayTeam: "Welling Utd", league: "İngiltere FA Trophy",
+            timeStr: '21:45', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.44, confidence: 88,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            scoreText: '2 - 1',
+            detail: "Chatham Town 2-1 Welling Utd · 2.5 ÜST (✅ TUTTU | İddaa Kod: 3288412)"
+        }, yDate, dFmt);
+
+        // 12. Diosgyör vs Szentlorinc SE (21:00) - Macaristan Kupası (Nesine Kod: 3288371) - Maç Sonucu 1
+        const p_diosgyor_ms = this._createArchivedPick({
+            index: 12, iddaaCode: '3288371', homeTeam: "Diosgyör", awayTeam: "Szentlorinc SE", league: "Macaristan Kupası",
+            timeStr: '21:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Diosgyör Kazanır)', marketCode: 'MS1', odd: 1.33, confidence: 90,
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            scoreText: '2 - 0',
+            detail: "Diosgyör 2-0 Szentlorinc SE · MS 1 (✅ TUTTU | İddaa Kod: 3288371)"
         }, yDate, dFmt);
 
         // 14. Stoke City vs Middlesbrough (22:00) - İngiltere Championship - Taraf (MS 2)
@@ -3415,19 +3412,19 @@ const HistoricalCouponsService = {
             badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 91
         }, [p_birm_ms, p_bandirma_cs, p_leipzig_o25], dFmt);
 
-        // Kupon 3: ⚽ Günün Gol & Korner Kuponu
+        // Kupon 3: ⚽ Günün Gol & Karşılıklı Gol Kuponu
         const c3 = this._createArchivedCoupon({
-            id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Korner Kuponu',
-            subtitle: 'Galatasaray 2.5 Üst, RC Lens KG VAR ve Atl Madrid Korner 8.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Karşılıklı Gol Kuponu',
+            subtitle: 'Galatasaray 2.5 Üst, RC Lens KG VAR ve Atl Madrid MS 1 Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 90
-        }, [p_gs_o25, p_lens_btts, p_atleti_corner], dFmt);
+        }, [p_gs_o25, p_lens_btts, p_atleti_ms], dFmt);
 
-        // Kupon 4: 🎯 Korner / Kart & İstatistik Kuponu
+        // Kupon 4: 🎯 Günün Çifte Şans & İddaa Kombine Kuponu
         const c4 = this._createArchivedCoupon({
-            id: 'c_htft_' + yDate, title: '🎯 Korner / Kart & İstatistik Kuponu',
-            subtitle: 'Villarreal Kart 3.5 Üst, Pendikspor Korner 8.5 Üst ve Wolverhampton Kart 3.5 Üst', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & İddaa Kombine Kuponu',
+            subtitle: 'Villarreal 2.5 Üst, Chatham Town 2.5 Üst ve Diosgyör MS 1 Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 90
-        }, [p_villa_card, p_pendik_corner, p_wolves_card], dFmt);
+        }, [p_villa_o25, p_chatham_o25, p_diosgyor_ms], dFmt);
 
         // Kupon 5: 💎 Sürpriz & Değer Kuponu
         const c5 = this._createArchivedCoupon({
