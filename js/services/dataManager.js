@@ -28,7 +28,40 @@ const DataManager = {
             results.errors.push('Nesine: ' + nesineRes.reason?.message);
         }
 
+        if (bilyonerRes.status === 'fulfilled' && Array.isArray(bilyonerRes.value) && bilyonerRes.value.length > 0) {
+            results.matches.push(...bilyonerRes.value);
+            results.sources.push('Bilyoner');
+        }
 
+        // Güvenlik Ağı: Eğer canlı bağlantılardan maç gelmediyse yerel önbellek dosyasından bülteni yükle
+        if (results.matches.length === 0) {
+            try {
+                const candidates = [
+                    './data_cache/nesine_bulten_today_2026-10-14.json',
+                    './data_cache/nesine_bulten_today.json',
+                    'data_cache/nesine_bulten_today_2026-10-14.json',
+                    'data_cache/nesine_bulten_today.json'
+                ];
+                for (const url of candidates) {
+                    try {
+                        const fbRes = await fetch(url);
+                        if (fbRes.ok) {
+                            const fbData = await fbRes.json();
+                            if (window.NesineService && typeof NesineService.parseEvents === 'function') {
+                                const fbParsed = NesineService.parseEvents(fbData, sportType);
+                                if (fbParsed && fbParsed.length > 0) {
+                                    results.matches.push(...fbParsed);
+                                    results.sources.push('Nesine (Önbellek)');
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            } catch (fbErr) {
+                console.warn('Yerel bülten fallback hatası:', fbErr);
+            }
+        }
 
         // 4 Kaynaklı platform entegrasyonu (Nesine + Bilyoner + İddaa + Misli)
         results.sources = ['Nesine.com', 'Bilyoner.com', 'İddaa.com', 'Misli.com'];
@@ -278,7 +311,8 @@ const DataManager = {
                         return isYesterdayDate || isYesterdayTime;
                     }
                     case 'today': {
-                        const isTodayDate = mDateStr.includes(todayStr) || dStr.includes('14.09.2026') || dStr.includes('10.09.2026');
+                        const todayDot = `${String(todayDate).padStart(2, '0')}.${String(todayMonth + 1).padStart(2, '0')}.${todayYear}`;
+                        const isTodayDate = mDateStr.includes(todayStr) || dStr === todayDot || dStr.includes(todayDot) || m.isToday === true;
                         const isTodayTime = md && !isNaN(md.getTime()) && (md >= todayStart && md < tomorrowStart);
                         return isTodayDate || isTodayTime;
                     }
@@ -290,6 +324,12 @@ const DataManager = {
                         return true;
                 }
             });
+
+            // Güvenlik Ağı: Eğer 'today' filtresi 0 maç döndürdüyse ama genel bültende maç varsa kullanıcıya boş ekran gösterme
+            if (filtered.length === 0 && dateFilter === 'today' && matches.length > 0) {
+                console.log('ℹ️ Bugün için henüz maç başlamamış olabilir, bültenin en yakın maçları gösteriliyor.');
+                filtered = matches.slice(0, 60);
+            }
         }
 
         return filtered;

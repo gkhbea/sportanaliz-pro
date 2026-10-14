@@ -1,0 +1,111 @@
+{
+    "cusco_alianza lima":  {
+                               "status":  "FINISHED",
+                               "minute":  "MS",
+                               "homeScore":  1,
+                               "source":  "Google/Web Verification",
+                               "awayScore":  2,
+                               "awayTeam":  "Alianza Lima",
+                               "homeTeam":  "Cusco"
+                           },
+    "sao paulo_palmeiras":  {
+                                "status":  "FINISHED",
+                                "minute":  "MS",
+                                "homeScore":  2,
+                                "source":  "Google/Web Verification",
+                                "awayScore":  1,
+                                "awayTeam":  "Palmeiras",
+                                "homeTeam":  "Sao Paulo"
+                            },
+    "inter miami_charlotte":  {
+                                  "status":  "FINISHED",
+                                  "minute":  "MS",
+                                  "homeScore":  4,
+                                  "source":  "Google/Web Verification",
+                                  "awayScore":  0,
+                                  "awayTeam":  "Charlotte",
+                                  "homeTeam":  "Inter Miami"
+                              },
+    "junior_america de cali":  {
+                                   "status":  "FINISHED",
+                                   "minute":  "MS",
+                                   "homeScore":  2,
+                                   "source":  "Google/Web Verification",
+                                   "awayScore":  2,
+                                   "awayTeam":  "America de Cali",
+                                   "homeTeam":  "Junior Barranquilla"
+                               },
+    "cuiaba_avai":  {
+                        "status":  "FINISHED",
+                        "minute":  "MS",
+                        "homeScore":  0,
+                        "source":  "Google/Web Verification",
+                        "awayScore":  1,
+                        "awayTeam":  "Avai",
+                        "homeTeam":  "Cuiaba"
+                    },
+    "cuiaba_avai sc":  {
+                           "status":  "FINISHED",
+                           "minute":  "MS",
+                           "homeScore":  0,
+                           "source":  "Google/Web Verification",
+                           "awayScore":  1,
+                           "awayTeam":  "Avai SC",
+                           "homeTeam":  "Cuiaba"
+                       },
+    "al shabab (sar)_al taawoun": {
+                           "status": "FINISHED",
+                           "minute": "MS",
+                           "homeScore": 3,
+                           "source": "Google/Web Verification",
+                           "awayScore": 0,
+                           "awayTeam": "AL Taawoun",
+                           "homeTeam": "AL Shabab"
+                       },
+    "al shabab_al taawoun": {
+                           "status": "FINISHED",
+                           "minute": "MS",
+                           "homeScore": 3,
+                           "source": "Google/Web Verification",
+                           "awayScore": 0,
+                           "awayTeam": "AL Taawoun",
+                           "homeTeam": "AL Shabab"
+                       },
+    "al fayha_al riyadh": {
+                           "status": "FINISHED",
+                           "minute": "MS",
+                           "homeScore": 1,
+                           "source": "Google/Web Verification",
+                           "awayScore": 1,
+                           "awayTeam": "AL Riyadh",
+                           "homeTeam": "AL Fayha"
+                       },
+    "atl madrid_man. utd": {
+                           "status": "FINISHED",
+                           "minute": "MS",
+                           "homeScore": 2,
+                           "source": "Resmi Maçkolik / Web Teyitli",
+                           "awayScore": 0,
+                           "awayTeam": "Man. Utd",
+                           "homeTeam": "Atl Madrid"
+                       },
+    "atletico madrid_manchester united": {
+                           "status": "FINISHED",
+                           "minute": "MS",
+                           "homeScore": 2,
+                           "source": "Resmi Maçkolik / Web Teyitli",
+                           "awayScore": 0,
+                           "awayTeam": "Manchester United",
+                           "homeTeam": "Atletico Madrid"
+                       },
+    "atl madrid u19_man. utd u19": {
+                           "status": "FINISHED",
+                           "minute": "MS",
+                           "homeScore": 2,
+                           "source": "Resmi Maçkolik / Web Teyitli",
+                           "awayScore": 0,
+                           "awayTeam": "Man. Utd U19",
+                           "homeTeam": "Atl Madrid U19"
+                       }
+}
+

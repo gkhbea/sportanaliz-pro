@@ -461,10 +461,9 @@ const App = {
                 this.loadHighConfidenceShowcase('all');
             }
         } else if (view === 'coupons') {
-            this.activeCouponFilter = 'all';
-            const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
-            this.setUserSelectedDate(todayStr);
-            this.loadDailyCoupons(false, 'all', todayStr);
+            const currentFilter = this.activeCouponFilter || 'all';
+            const selectedDate = this.getUserSelectedDate();
+            this.loadDailyCoupons(false, currentFilter, selectedDate);
         } else if (view === 'all-stats') {
             this.loadAllMatchesStats();
         } else if (view === 'profit-loss') {
@@ -1816,16 +1815,28 @@ const App = {
             const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
             const currentMode = window.CouponPanel?.assistantCouponCount || (isWeekend ? 8 : 5);
             const isHistorical = (chosenDate !== todayStr);
-            let coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
+            let coupons = [];
+            if (window.CouponPanel?.getCouponsForDate) {
+                coupons = window.CouponPanel.getCouponsForDate(chosenDate, currentMode) || [];
+            }
+            if (!coupons || coupons.length === 0) {
+                coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
+            }
 
-            // Eğer bugünse ve forceRefresh veya boşsa dinamik kupon üret veya teyitli kuponları al
-            if (!isHistorical && (!coupons || coupons.length === 0 || forceRefresh) && this.matches && this.matches.length > 0) {
+            // Eğer bugünse ve forceRefresh varsa veya boşsa dinamik kupon üret veya teyitli kuponları al
+            if (!isHistorical && (!coupons || coupons.length === 0 || forceRefresh) && this.matches && this.matches.length > 0 && window.CouponEngine) {
                 const generated = CouponEngine.generateDailyCoupons(this.matches, forceRefresh, currentMode) || [];
                 if (generated && generated.length > 0) coupons = generated;
             }
-            if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_13Coupons) {
-                const aut = window.HistoricalCouponsService._generateAuthentic2026_10_13Coupons('2026-10-13');
-                if (aut && aut.coupons && aut.coupons.length > 0) coupons = aut.coupons;
+            if (!coupons || coupons.length === 0) {
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_14Coupons) {
+                    const aut14 = window.HistoricalCouponsService._generateAuthentic2026_10_14Coupons('2026-10-14');
+                    if (aut14 && aut14.coupons && aut14.coupons.length > 0) coupons = aut14.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_13Coupons) {
+                    const aut13 = window.HistoricalCouponsService._generateAuthentic2026_10_13Coupons('2026-10-13');
+                    if (aut13 && aut13.coupons && aut13.coupons.length > 0) coupons = aut13.coupons;
+                }
             }
             if (currentMode === 8 && coupons.length < 8 && window.CouponEngine?.expandTo8Coupons) {
                 coupons = window.CouponEngine.expandTo8Coupons(coupons, this.matches, chosenDate);
@@ -2156,6 +2167,8 @@ const App = {
             const allSets = HistoricalCouponsService.getAllCouponSets('2026-09-09');
             const found = allSets.find(s => s.date === chosenDate);
             if (found) dayCoupons = found.coupons || [];
+        if (dayCoupons.length === 0 && window.CouponPanel?.getCouponsForDate) {
+            dayCoupons = window.CouponPanel.getCouponsForDate(chosenDate) || [];
         }
         if (dayCoupons.length === 0 && chosenDate === todayStr && window.CouponEngine && this.matches?.length > 0) {
             dayCoupons = CouponEngine.generateDailyCoupons(this.matches);

@@ -76,7 +76,7 @@ const CouponEngine = {
      * @param {boolean} forceNew - Önbelleği temizleyip yeniden üret
      * @returns {Array} 4 adet kupon nesnesi
      */
-    generateDailyCoupons(matches = [], forceNew = false) {
+    generateDailyCoupons(matches = [], forceNew = false, maxCoupons = null) {
         const todayStr = new Date().toISOString().slice(0, 10);
 
         if (!forceNew && this.cachedCoupons && Array.isArray(this.cachedCoupons) && this.cachedCoupons.length > 0 && this.cachedCoupons.length <= 5) {
@@ -444,7 +444,8 @@ const CouponEngine = {
 
         // Tavan sınır: Hafta içi 5 kupon, Hafta sonu veya talep halinde 8 kupon
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
-        const targetMax = maxCoupons || (isWeekend ? 8 : 5);
+        const parsedMax = parseInt(maxCoupons, 10);
+        const targetMax = (!isNaN(parsedMax) && parsedMax > 0) ? parsedMax : (isWeekend ? 8 : 5);
         let coupons = qualifiedCoupons.slice(0, targetMax);
 
         if (targetMax >= 8 && coupons.length < 8) {

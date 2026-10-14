@@ -74,12 +74,20 @@ const CouponPanel = {
             result = [...todayCoupons];
         }
 
-        // 5. Kesin Güvenlik Ağı: Eğer hiçbir kaynaktan kupon gelmediyse otantik 13 Ekim kuponlarını getir
+        // 5. Kesin Güvenlik Ağı: Eğer hiçbir kaynaktan kupon gelmediyse otantik güncel kuponları getir
         if (result.length === 0) {
-            if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService._generateAuthentic2026_10_13Coupons === 'function') {
-                const aut = HistoricalCouponsService._generateAuthentic2026_10_13Coupons('2026-10-13');
-                if (aut && Array.isArray(aut.coupons) && aut.coupons.length > 0) {
-                    result = [...aut.coupons];
+            if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
+                if (typeof HistoricalCouponsService._generateAuthentic2026_10_14Coupons === 'function') {
+                    const aut14 = HistoricalCouponsService._generateAuthentic2026_10_14Coupons('2026-10-14');
+                    if (aut14 && Array.isArray(aut14.coupons) && aut14.coupons.length > 0) {
+                        result = [...aut14.coupons];
+                    }
+                }
+                if (result.length === 0 && typeof HistoricalCouponsService._generateAuthentic2026_10_13Coupons === 'function') {
+                    const aut13 = HistoricalCouponsService._generateAuthentic2026_10_13Coupons('2026-10-13');
+                    if (aut13 && Array.isArray(aut13.coupons) && aut13.coupons.length > 0) {
+                        result = [...aut13.coupons];
+                    }
                 }
             }
         }

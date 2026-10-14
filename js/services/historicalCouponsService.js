@@ -3104,12 +3104,12 @@ const HistoricalCouponsService = {
             badgeType: 'special', icon: '🔥', themeColor: '#EF4444', recommendedStake: 50, confidence: 87
         }, [p_midt_btts, p_sociedad_btts, p_usg_btts], dFmt);
 
-        // Kupon 7: Korner / Kart İstatistik (3 maç)
+        // Kupon 7: İlk Yarı & İkinci Yarı Kombinesi (3 maç)
         const c7 = this._createArchivedCoupon({
-            id: 'c_stats_' + yDate, title: '🎯 Korner / Kart & Özel İstatistik',
-            subtitle: 'Southampton 8.5 Korner Üst, Real Betis 1-X & 1.5 Üst ve Brondby 2.5 Üst', badge: '✅ KAZANDI 3/3',
+            id: 'c_stats_' + yDate, title: '🎯 İlk Yarı & İkinci Yarı Kombinesi',
+            subtitle: 'Southampton 2.5 Üst, Real Betis 1-X & 1.5 Üst ve Brondby 2.5 Üst', badge: '✅ KAZANDI 3/3',
             badgeType: 'primary', icon: '🎯', themeColor: '#10B981', recommendedStake: 50, confidence: 88
-        }, [p_southampton_cnr, p_betis_stat, p_brondby_stat], dFmt);
+        }, [p_southampton_o25, p_betis_stat, p_brondby_stat], dFmt);
 
         // Kupon 8: Gece / Güney Amerika & MLS (3 maç)
         const c8 = this._createArchivedCoupon({
@@ -3436,6 +3436,160 @@ const HistoricalCouponsService = {
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
 
+    _generateAuthentic2026_10_14Coupons() {
+        const yDate = '2026-10-14';
+        const dFmt = '14 Ekim 2026';
+
+        // 1. Dyn. Makhachkala vs Zenit (18:30) - Rusya Kupası - Taraf (MS 2)
+        const p_zenit_ms = this._createArchivedPick({
+            index: 1, iddaaCode: '3204454', homeTeam: "Dyn. Makhachkala", awayTeam: "Zenit", league: "Rusya Kupası",
+            timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Zenit Kazanır)', marketCode: 'MS2', odd: 1.39, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Dyn. Makhachkala vs Zenit · MS 2 (18:30 | İddaa Kod: 3204454)"
+        }, yDate, dFmt);
+
+        // 2. Viktoria Köln vs Grossaspach (20:00) - Almanya 3. Lig - Taraf (MS 1)
+        const p_viktoria_ms = this._createArchivedPick({
+            index: 2, iddaaCode: '3204229', homeTeam: "Viktoria Köln", awayTeam: "Grossaspach", league: "Almanya 3. Lig",
+            timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Viktoria Köln Kazanır)', marketCode: 'MS1', odd: 1.35, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Viktoria Köln vs Grossaspach · MS 1 (20:00 | İddaa Kod: 3204229)"
+        }, yDate, dFmt);
+
+        // 3. CSKA Moskova vs FK Rostov (20:45) - Rusya Kupası - Çifte Şans (1-X)
+        const p_cska_cs = this._createArchivedPick({
+            index: 3, iddaaCode: '3204189', homeTeam: "CSKA Moskova", awayTeam: "FK Rostov", league: "Rusya Kupası",
+            timeStr: '20:45', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.15, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "CSKA Moskova vs FK Rostov · 1-X Çifte Şans (20:45 | İddaa Kod: 3204189)"
+        }, yDate, dFmt);
+
+        // 4. QPR vs Derby County (21:45) - İngiltere Championship - Taraf (MS 1)
+        const p_qpr_ms = this._createArchivedPick({
+            index: 4, iddaaCode: '3206457', homeTeam: "QPR", awayTeam: "Derby County", league: "İngiltere Championship",
+            timeStr: '21:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (QPR Kazanır)', marketCode: 'MS1', odd: 1.51, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "QPR vs Derby County · MS 1 (21:45 | İddaa Kod: 3206457)"
+        }, yDate, dFmt);
+
+        // 5. CSKA Moskova vs FK Rostov (20:45) - Rusya Kupası - Taraf (MS 1)
+        const p_cska_ms = this._createArchivedPick({
+            index: 5, iddaaCode: '3204189', homeTeam: "CSKA Moskova", awayTeam: "FK Rostov", league: "Rusya Kupası",
+            timeStr: '20:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (CSKA Moskova Kazanır)', marketCode: 'MS1', odd: 1.41, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "CSKA Moskova vs FK Rostov · MS 1 (20:45 | İddaa Kod: 3204189)"
+        }, yDate, dFmt);
+
+        // 6. AL Raed vs Jeddah Club (20:00) - Suudi Arabistan 1. Lig - Taraf (MS 1)
+        const p_raed_ms = this._createArchivedPick({
+            index: 6, iddaaCode: '3202025', homeTeam: "AL Raed", awayTeam: "Jeddah Club", league: "Suudi Arabistan 1. Lig",
+            timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (AL Raed Kazanır)', marketCode: 'MS1', odd: 1.39, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AL Raed vs Jeddah Club · MS 1 (20:00 | İddaa Kod: 3202025)"
+        }, yDate, dFmt);
+
+        // 7. Verl vs Regensburg (20:00) - Almanya 3. Lig - Toplam Gol (2.5 ÜST)
+        const p_verl_o25 = this._createArchivedPick({
+            index: 7, iddaaCode: '3204256', homeTeam: "Verl", awayTeam: "Regensburg", league: "Almanya 3. Lig",
+            timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.24, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Verl vs Regensburg · 2.5 ÜST (20:00 | İddaa Kod: 3204256)"
+        }, yDate, dFmt);
+
+        // 8. Mannheim 07 vs Ingolstadt (20:00) - Almanya 3. Lig - Karşılıklı Gol (KG VAR)
+        const p_mannheim_btts = this._createArchivedPick({
+            index: 8, iddaaCode: '3204160', homeTeam: "Mannheim 07", awayTeam: "Ingolstadt", league: "Almanya 3. Lig",
+            timeStr: '20:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.30, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Mannheim 07 vs Ingolstadt · KG VAR (20:00 | İddaa Kod: 3204160)"
+        }, yDate, dFmt);
+
+        // 9. AS Roma vs Real Madrid (22:00) - UEFA Şampiyonlar Ligi - Toplam Gol (2.5 ÜST)
+        const p_roma_o25 = this._createArchivedPick({
+            index: 9, iddaaCode: '3206455', homeTeam: "AS Roma", awayTeam: "Real Madrid", league: "UEFA Şampiyonlar Ligi",
+            timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.29, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AS Roma vs Real Madrid · 2.5 ÜST (22:00 | İddaa Kod: 3206455)"
+        }, yDate, dFmt);
+
+        // 10. AS Roma vs Real Madrid (22:00) - UEFA Şampiyonlar Ligi - Çifte Şans (X-2)
+        const p_roma_cs = this._createArchivedPick({
+            index: 10, iddaaCode: '3206455', homeTeam: "AS Roma", awayTeam: "Real Madrid", league: "UEFA Şampiyonlar Ligi",
+            timeStr: '22:00', marketTitle: 'Çifte Şans', pickTitle: 'X-2 Çifte Şans', marketCode: 'CSX2', odd: 1.22, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AS Roma vs Real Madrid · X-2 Çifte Şans (22:00 | İddaa Kod: 3206455)"
+        }, yDate, dFmt);
+
+        // 11. W. Wiesbaden vs A. Aachen (20:00) - Almanya 3. Lig - Toplam Gol (1.5 ÜST)
+        const p_wiesbaden_o15 = this._createArchivedPick({
+            index: 11, iddaaCode: '3204204', homeTeam: "W. Wiesbaden", awayTeam: "A. Aachen", league: "Almanya 3. Lig",
+            timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.22, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "W. Wiesbaden vs A. Aachen · 1.5 ÜST (20:00 | İddaa Kod: 3204204)"
+        }, yDate, dFmt);
+
+        // 12. Stromsgodset vs Kongsvinger (20:00) - Norveç 1. Lig - Taraf (MS 1)
+        const p_strom_ms = this._createArchivedPick({
+            index: 12, iddaaCode: '3206479', homeTeam: "Stromsgodset", awayTeam: "Kongsvinger", league: "Norveç 1. Lig",
+            timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Stromsgodset Kazanır)', marketCode: 'MS1', odd: 1.60, confidence: 87,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Stromsgodset vs Kongsvinger · MS 1 (20:00 | İddaa Kod: 3206479)"
+        }, yDate, dFmt);
+
+        // 13. AS Roma vs Real Madrid (22:00) - UEFA Şampiyonlar Ligi - Taraf (MS 2)
+        const p_roma_ms2 = this._createArchivedPick({
+            index: 13, iddaaCode: '3206455', homeTeam: "AS Roma", awayTeam: "Real Madrid", league: "UEFA Şampiyonlar Ligi",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Real Madrid Kazanır)', marketCode: 'MS2', odd: 1.75, confidence: 86,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "AS Roma vs Real Madrid · MS 2 (22:00 | İddaa Kod: 3206455)"
+        }, yDate, dFmt);
+
+        // 14. CSKA Moskova vs FK Rostov (20:45) - Rusya Kupası - İlk Yarı 1
+        const p_cska_ht = this._createArchivedPick({
+            index: 14, iddaaCode: '3204189', homeTeam: "CSKA Moskova", awayTeam: "FK Rostov", league: "Rusya Kupası",
+            timeStr: '20:45', marketTitle: 'İlk Yarı Sonucu', pickTitle: 'İlk Yarı 1 (CSKA Önde)', marketCode: 'HT1', odd: 1.95, confidence: 84,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "CSKA Moskova vs FK Rostov · İlk Yarı 1 (20:45 | İddaa Kod: 3204189)"
+        }, yDate, dFmt);
+
+        // Kupon 1: 🛡️ Garantör Banko (Zenit MS 2, Viktoria Köln MS 1, CSKA Moskova 1-X)
+        const c1 = this._createArchivedCoupon({
+            id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
+            subtitle: 'Zenit MS 2, Viktoria Köln MS 1 ve CSKA Moskova 1-X ile Çarşamba Bankosu', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 95
+        }, [p_zenit_ms, p_viktoria_ms, p_cska_cs], dFmt);
+
+        // Kupon 2: ⚡ İdeal Sistem (QPR MS 1, CSKA Moskova MS 1, AL Raed MS 1)
+        const c2 = this._createArchivedCoupon({
+            id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
+            subtitle: 'QPR MS 1, CSKA Moskova MS 1 ve AL Raed MS 1 ile Dengeli Kombinasyon', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 91
+        }, [p_qpr_ms, p_cska_ms, p_raed_ms], dFmt);
+
+        // Kupon 3: ⚽ Gol Yağmuru (Verl 2.5 Üst, Mannheim KG VAR, Roma-Real 2.5 Üst)
+        const c3 = this._createArchivedCoupon({
+            id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Karşılıklı Gol Kuponu',
+            subtitle: 'Verl 2.5 Üst, Mannheim 07 KG VAR ve Roma-Real Madrid 2.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 90
+        }, [p_verl_o25, p_mannheim_btts, p_roma_o25], dFmt);
+
+        // Kupon 4: 🎯 Günün Çifte Şans & İddaa Kombine Kuponu (Roma X-2, Wiesbaden 1.5 Üst, Stromsgodset MS 1)
+        const c4 = this._createArchivedCoupon({
+            id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & İddaa Kombine Kuponu',
+            subtitle: 'Real Madrid X-2 ÇŞ, W. Wiesbaden 1.5 Üst ve Stromsgodset MS 1 Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 90
+        }, [p_roma_cs, p_wiesbaden_o15, p_strom_ms], dFmt);
+
+        // Kupon 5: 💎 Sürpriz & Değer Kuponu (Real Madrid MS 2, QPR MS 1, CSKA Moskova İY 1)
+        const c5 = this._createArchivedCoupon({
+            id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~5.20 Oran)',
+            subtitle: 'Real Madrid MS 2, QPR MS 1 ve CSKA Moskova İY 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
+        }, [p_roma_ms2, p_qpr_ms, p_cska_ht], dFmt);
+
+        return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
+    },
+
     getAllCouponSets(startDate) {
         const days = [
             {
@@ -3679,9 +3833,16 @@ const HistoricalCouponsService = {
             {
                 date: '2026-10-13',
                 dateFormatted: '13 Ekim 2026',
-                dayName: 'Salı (Bugün)',
+                dayName: 'Salı (Dün)',
                 concept: "Resmi Nesine & İddaa Salı Bülteni (Günün 5 Özel Kuponu - 94 Maç)",
                 generator: () => this._generateAuthentic2026_10_13Coupons('2026-10-13')
+            },
+            {
+                date: '2026-10-14',
+                dateFormatted: '14 Ekim 2026',
+                dayName: 'Çarşamba (Bugün)',
+                concept: "Resmi Nesine & İddaa Çarşamba Bülteni (Günün 5 Özel Kuponu - 95 Maç)",
+                generator: () => this._generateAuthentic2026_10_14Coupons('2026-10-14')
             },
         ];
 
@@ -3722,11 +3883,18 @@ const HistoricalCouponsService = {
                 dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
             }
         }
-        // Bugün (13 Ekim 2026) için doğrudan otantik bülten kuponlarını dön
-        if (dateStr === '2026-10-13' || dateStr === '13 Ekim 2026') {
-            const todayData = this._generateAuthentic2026_10_13Coupons('2026-10-13');
+        // Bugün (14 Ekim 2026) için doğrudan otantik bülten kuponlarını dön
+        if (dateStr === '2026-10-14' || dateStr === '14 Ekim 2026') {
+            const todayData = this._generateAuthentic2026_10_14Coupons('2026-10-14');
             if (todayData && Array.isArray(todayData.coupons) && todayData.coupons.length > 0) {
                 return todayData.coupons;
+            }
+        }
+        // Dün (13 Ekim 2026) için doğrudan otantik bülten kuponlarını dön
+        if (dateStr === '2026-10-13' || dateStr === '13 Ekim 2026') {
+            const yesterdayData = this._generateAuthentic2026_10_13Coupons('2026-10-13');
+            if (yesterdayData && Array.isArray(yesterdayData.coupons) && yesterdayData.coupons.length > 0) {
+                return yesterdayData.coupons;
             }
         }
         if (this._couponsByDateMap && this._couponsByDateMap.has(dateStr)) {
@@ -3747,8 +3915,8 @@ const HistoricalCouponsService = {
         if (found && found.coupons && found.coupons.length > 0) {
             return found.coupons;
         }
-        // Güvenlik Ağı: Boş dönmek yerine 13 Ekim garantör kuponlarını sun
-        const fallback = this._generateAuthentic2026_10_13Coupons('2026-10-13');
+        // Güvenlik Ağı: Boş dönmek yerine 14 Ekim garantör kuponlarını sun
+        const fallback = this._generateAuthentic2026_10_14Coupons('2026-10-14');
         return (fallback && fallback.coupons) ? fallback.coupons : [];
     },
 

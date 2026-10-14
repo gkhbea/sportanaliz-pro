@@ -7,7 +7,7 @@ const NesineService = {
         if (typeof window !== 'undefined') {
             const custom = window.ENV_API_URL || (typeof Helpers !== 'undefined' && Helpers.storage ? Helpers.storage.get('sa_api_base_url') : null);
             if (custom) return `${custom.replace(/\/$/, '')}/api/proxy/nesine`;
-            if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001')) {
+            if (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001') || window.location.hostname.includes('github.io')) {
                 return 'http://localhost:3001/api/proxy/nesine';
             }
         }
@@ -30,19 +30,47 @@ const NesineService = {
         try {
             // Nesine'de tek endpoint tüm bülteni döndürür
             const response = await fetch(`${this.BASE_URL}/bulten`);
-            if (!response.ok) {
-                // Alternatif endpoint dene
-                const altResponse = await fetch(`${this.BASE_URL}/events/1`);
-                if (!altResponse.ok) throw new Error(`HTTP ${response.status}`);
-                const altData = await altResponse.json();
-                return this.parseEvents(altData, sportType);
+            if (response.ok) {
+                const data = await response.json();
+                const events = this.parseEvents(data, sportType);
+                if (events && events.length > 0) return events;
             }
-            const data = await response.json();
-            return this.parseEvents(data, sportType);
         } catch (err) {
-            console.warn('Nesine veri çekme hatası:', err.message);
-            return [];
+            console.warn('Nesine canlı proxy uyarısı:', err.message);
         }
+
+        try {
+            // Alternatif endpoint dene
+            const altResponse = await fetch(`${this.BASE_URL}/events/1`);
+            if (altResponse.ok) {
+                const altData = await altResponse.json();
+                const altEvents = this.parseEvents(altData, sportType);
+                if (altEvents && altEvents.length > 0) return altEvents;
+            }
+        } catch (e) {}
+
+        // Statik & Çevrimdışı Güvenlik Ağı: data_cache içindeki bugünün resmi bültenini yükle
+        const staticFallbacks = [
+            './data_cache/nesine_bulten_today_2026-10-14.json',
+            './data_cache/nesine_bulten_today.json',
+            'data_cache/nesine_bulten_today_2026-10-14.json',
+            'data_cache/nesine_bulten_today.json'
+        ];
+        for (const url of staticFallbacks) {
+            try {
+                const fbRes = await fetch(url);
+                if (fbRes.ok) {
+                    const fbData = await fbRes.json();
+                    const fbEvents = this.parseEvents(fbData, sportType);
+                    if (fbEvents && fbEvents.length > 0) {
+                        console.log(`✅ [GÜVENLİK AĞI] Nesine bülteni yerel önbellekten başarıyla yüklendi: ${url} (${fbEvents.length} maç)`);
+                        return fbEvents;
+                    }
+                }
+            } catch (e) {}
+        }
+
+        return [];
     },
 
     /**
