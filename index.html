@@ -58,13 +58,18 @@
                         <span class="hamburger-line"></span>
                         <span class="hamburger-line"></span>
                     </button>
-                    <div class="logo" id="logo-home">
+                    <div class="logo" id="logo-home" onclick="App.navigate('dashboard')" style="cursor:pointer;" title="Ana Sayfa (Bülten Maçları)">
                         <span class="logo-icon">⚡</span>
                         <span class="logo-text">Sport<span class="accent">Analiz</span> Pro</span>
                     </div>
                 </div>
 
                 <nav class="header-nav" id="main-nav">
+                    <button class="nav-btn active" data-view="dashboard" id="nav-dashboard" title="Tüm Maçlar & İddaa Bülteni">
+                        <span class="nav-icon">⚽</span>
+                        <span>Bülten (Tüm Maçlar)</span>
+                    </button>
+
                     <!-- Canlı & Value Analiz Ana Menü Dropdown (Birleşik Sekme) -->
                     <div class="nav-dropdown-wrapper" id="nav-dropdown-live-hub">
                         <button class="nav-live-master-btn" id="btn-master-live-hub" onclick="App.navigate('live')" title="Canlı Maçlar, Value Analiz ve Canlı Radar">

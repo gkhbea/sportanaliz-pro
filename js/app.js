@@ -1817,7 +1817,7 @@ const App = {
             const isHistorical = (chosenDate !== todayStr);
             let coupons = [];
             if (window.CouponPanel?.getCouponsForDate) {
-                coupons = window.CouponPanel.getCouponsForDate(chosenDate, currentMode) || [];
+                coupons = window.CouponPanel.getCouponsForDate(chosenDate, [], currentMode) || [];
             }
             if (!coupons || coupons.length === 0) {
                 coupons = window.HistoricalCouponsService?.getCouponsByDate?.(chosenDate) || [];
