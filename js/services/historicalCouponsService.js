@@ -2535,7 +2535,7 @@ const HistoricalCouponsService = {
             id: 'c_consensus_' + yDate, title: '🎯 4 Platform Yazar Konsensüs Kuponu',
             subtitle: 'Nesine, Misli, Bilyoner ve İddaa Ortak Tercihleri', badge: '✅ TUTTU (KAZANDI)',
             badgeType: 'consensus', icon: '🎯', themeColor: '#A855F7', recommendedStake: 100
-        }, [p_vitoria, p_denizli, p_orduspor], dFmt);
+        }, [p_vitoria, p_denizli, p_shamrock], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
@@ -2770,12 +2770,20 @@ const HistoricalCouponsService = {
             detail: "Grossaspach 1-5 Mannheim 07 · 2.5 ÜST (KAZANDI)"
         }, yDate, dFmt);
 
-        // 10. Al Hilal vs AL Ittihad - İY Gol (21:00)
-        const p_hilal_ht = this._createArchivedPick({
-            index: 10, iddaaCode: '3134152', homeTeam: "Al Hilal", awayTeam: "AL Ittihad", league: "Suudi Arabistan Pro Lig",
-            timeStr: '21:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.28, confidence: 92,
-            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
-            detail: "Al Hilal vs AL Ittihad · İY 2-1 (İY 0.5 ÜST KAZANDI)"
+        // 10. AL Ahli Doha vs Al Sailiya - İY Gol (20:00)
+        const p_doha_ht = this._createArchivedPick({
+            index: 10, iddaaCode: '3189049', homeTeam: "AL Ahli Doha", awayTeam: "Al Sailiya", league: "Katar Yıldızlar Ligi",
+            timeStr: '20:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.26, confidence: 92,
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "AL Ahli Doha vs Al Sailiya · İY 2-0 (İY 0.5 ÜST KAZANDI)"
+        }, yDate, dFmt);
+
+        // 10b. Grossaspach vs Mannheim 07 - İY Gol (15:00)
+        const p_grossaspach_ht = this._createArchivedPick({
+            index: 10, iddaaCode: '3193618', homeTeam: "Grossaspach", awayTeam: "Mannheim 07", league: "Almanya Bölgesel Lig",
+            timeStr: '15:00', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'FH_OVER05', odd: 1.25, confidence: 91,
+            homeScore: 1, awayScore: 2, isWon: true, isPending: false, isLive: false,
+            detail: "Grossaspach vs Mannheim 07 · İY 1-2 (İY 0.5 ÜST KAZANDI)"
         }, yDate, dFmt);
 
         // 11. NK Celje vs NK Aluminij - İY 1 (18:30)
@@ -2842,9 +2850,9 @@ const HistoricalCouponsService = {
         // Kupon 4: İY & Özel Strateji Kuponu (3 maç) - KAZANDI
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
-            subtitle: 'Al-Hilal İY 0.5 Üst, Celje İY 1 ve Magdeburg İY 0.5 Üst', badge: 'KAZANDI 3/3',
+            subtitle: 'Ahli Doha İY 0.5 Üst, Celje İY 1 ve Grossaspach İY 0.5 Üst', badge: 'KAZANDI 3/3',
             badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 89
-        }, [p_hilal_ht, p_celje_ht, p_magdeburg_ht], dFmt);
+        }, [p_doha_ht, p_celje_ht, p_grossaspach_ht], dFmt);
 
         // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç) - KAZANDI
         const c5 = this._createArchivedCoupon({
@@ -3062,6 +3070,22 @@ const HistoricalCouponsService = {
             detail: "River Plate vs Estudiantes Río C. · MS 1 (Bugün 03:30 | İddaa Kod: 3199587)"
         }, yDate, dFmt);
 
+        // 26. Gaziantep FK vs Çorum FK (16:00 - Türkiye Kupası)
+        const p_gaziantep_o25 = this._createArchivedPick({
+            index: 26, iddaaCode: '3199391', homeTeam: "Gaziantep FK", awayTeam: "Çorum FK", league: "Türkiye Kupası",
+            timeStr: '16:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 92,
+            homeScore: 0, awayScore: 3, isWon: true, isPending: false, isLive: false,
+            detail: "Gaziantep FK 0-3 Çorum FK · 2.5 ÜST (✅ TUTTU)"
+        }, yDate, dFmt);
+
+        // 27. Atl Mineiro vs Santos SP (22:00 - Brezilya Serie A)
+        const p_mineiro_ms = this._createArchivedPick({
+            index: 27, iddaaCode: '3199740', homeTeam: "Atl Mineiro", awayTeam: "Santos SP", league: "Brezilya Serie A",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atl Mineiro Kazanır)', marketCode: 'MS1', odd: 1.78, confidence: 89,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Atl Mineiro 2-1 Santos SP · MS 1 (✅ TUTTU)"
+        }, yDate, dFmt);
+
         // Kupon 1: Garantör Banko (3 maç)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
@@ -3086,30 +3110,30 @@ const HistoricalCouponsService = {
         // Kupon 4: İY & Özel Strateji Kuponu (3 maç)
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '⚡ İlk Yarı & Özel Strateji Kuponu',
-            subtitle: 'Mallorca 1-X, Standard Liege X-2 ve Midtjylland 1-X Çifte Şans Stratejisi', badge: '✅ KAZANDI 3/3',
+            subtitle: 'River Plate MS 1, Standard Liege X-2 ve Midtjylland 1-X Çifte Şans Stratejisi', badge: '✅ KAZANDI 3/3',
             badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50, confidence: 90
-        }, [p_mallorca_cs, p_standard, p_midt_cs], dFmt);
+        }, [p_river, p_standard, p_midt_cs], dFmt);
 
         // Kupon 5: Sürpriz & Değer (Value) Kuponu (3 maç)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~6.42 Oran)',
-            subtitle: 'Al Shabab ve Mallorca kazandı, Al Fayha 1-1 berabere kalarak yattı', badge: '❌ KAYBETTİ (2/3)',
+            subtitle: 'Al Shabab ve Atl Mineiro kazandı, Al Fayha 1-1 berabere kalarak yattı', badge: '❌ KAYBETTİ (2/3)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 78
-        }, [p_shabab, p_fayha, p_mallorca_val], dFmt);
+        }, [p_shabab, p_fayha, p_mineiro_ms], dFmt);
 
         // Kupon 6: KG VAR Kombini (3 maç)
         const c6 = this._createArchivedCoupon({
             id: 'c_btts_' + yDate, title: '🔥 KG VAR / Karşılıklı Gol Kombini',
-            subtitle: 'Midtjylland-Kopenhag, Real Sociedad ve Union SG ile Karşılıklı Gol Düelloları', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Midtjylland-Kopenhag, Gaziantep 2.5 Üst ve Union SG ile Gol Düelloları', badge: '✅ KAZANDI 3/3',
             badgeType: 'special', icon: '🔥', themeColor: '#EF4444', recommendedStake: 50, confidence: 87
-        }, [p_midt_btts, p_sociedad_btts, p_usg_btts], dFmt);
+        }, [p_midt_btts, p_gaziantep_o25, p_usg_btts], dFmt);
 
         // Kupon 7: İlk Yarı & İkinci Yarı Kombinesi (3 maç)
         const c7 = this._createArchivedCoupon({
             id: 'c_stats_' + yDate, title: '🎯 İlk Yarı & İkinci Yarı Kombinesi',
-            subtitle: 'Southampton 2.5 Üst, Real Betis 1-X & 1.5 Üst ve Brondby 2.5 Üst', badge: '✅ KAZANDI 3/3',
+            subtitle: 'Southampton 2.5 Üst, Real Betis 1-X & 1.5 Üst ve Gaziantep 2.5 Üst', badge: '✅ KAZANDI 3/3',
             badgeType: 'primary', icon: '🎯', themeColor: '#10B981', recommendedStake: 50, confidence: 88
-        }, [p_southampton_o25, p_betis_stat, p_brondby_stat], dFmt);
+        }, [p_southampton_o25, p_betis_stat, p_gaziantep_o25], dFmt);
 
         // Kupon 8: Gece / Güney Amerika & MLS (3 maç)
         const c8 = this._createArchivedCoupon({
@@ -3192,20 +3216,20 @@ const HistoricalCouponsService = {
             detail: "Cusco 1-2 Alianza Lima · 1.5 ÜST (✅ TUTTU)"
         }, yDate, dFmt);
 
-        // 9. Ludogorets vs Arda Kardzha (20:00) - Toplam Gol 2.5 Üst
-        const p_ludo_o25 = this._createArchivedPick({
-            index: 9, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
-            timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.62, confidence: 87,
+        // 9. Atalanta vs Venezia (19:30) - İtalya Serie A - Taraf (MS 1)
+        const p_atalanta_ms = this._createArchivedPick({
+            index: 9, iddaaCode: '3194874', homeTeam: "Atalanta", awayTeam: "Venezia", league: "İtalya Serie A",
+            timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atalanta Kazanır)', marketCode: 'MS1', odd: 1.42, confidence: 91,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Ludogorets vs Arda Kardzhali · 2.5 ÜST (20:00 | İddaa Kod: 3194303)"
+            detail: "Atalanta vs Venezia · MS 1 (19:30 | İddaa Kod: 3194874)"
         }, yDate, dFmt);
 
-        // 10. Torino vs Udinese (21:45) - Karşılıklı Gol (KG VAR)
-        const p_torino_btts = this._createArchivedPick({
-            index: 10, iddaaCode: '3194501', homeTeam: "Torino", awayTeam: "Udinese", league: "İtalya Serie A",
-            timeStr: '21:45', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR', marketCode: 'BTTS_Y', odd: 1.72, confidence: 90,
+        // 10. Shamrock R. vs Bohemians (22:00) - İrlanda Premier Ligi - Toplam Gol 1.5 Üst
+        const p_shamrock_o15 = this._createArchivedPick({
+            index: 10, iddaaCode: '3206648', homeTeam: "Shamrock R.", awayTeam: "Bohemians", league: "İrlanda Premier Ligi",
+            timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.28, confidence: 90,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Torino vs Udinese · KG VAR (21:45 | İddaa Kod: 3194501)"
+            detail: "Shamrock R. vs Bohemians · 1.5 ÜST (22:00 | İddaa Kod: 3206648)"
         }, yDate, dFmt);
 
         // 11. Cuiaba vs Avai SC (00:30) - Alt / Üst (2.5 ALT) (MS 0-1 Bitti)
@@ -3224,12 +3248,20 @@ const HistoricalCouponsService = {
             detail: "Levy Bereg vs Zorya Luhansk · 3.5 ALT (13:00 | İddaa Kod: 3194447)"
         }, yDate, dFmt);
 
-        // 13. Ludogorets vs Arda Kardzha (20:00) - İlk Yarı 1 (İlk Yarı Baskısı)
-        const p_ludo_ht = this._createArchivedPick({
-            index: 13, iddaaCode: '3194303', homeTeam: "Ludogorets", awayTeam: "Arda Kardzha", league: "Bulgaristan Ligi",
-            timeStr: '20:00', marketTitle: 'İlk Yarı Sonucu', pickTitle: 'İlk Yarı 1 (Ludogorets Önde)', marketCode: 'HT1', odd: 1.78, confidence: 84,
+        // 13. Levante vs Sevilla (22:00) - İspanya La Liga - Toplam Gol 2.5 Üst
+        const p_levante_o25 = this._createArchivedPick({
+            index: 13, iddaaCode: '3199575', homeTeam: "Levante", awayTeam: "Sevilla", league: "İspanya La Liga",
+            timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.68, confidence: 86,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Ludogorets vs Arda Kardzhali · İlk Yarı 1 (20:00 | İddaa Kod: 3194303)"
+            detail: "Levante vs Sevilla · 2.5 ÜST (22:00 | İddaa Kod: 3199575)"
+        }, yDate, dFmt);
+
+        // 15. Malmö vs Kalmar (20:00) - İsveç Allsvenskan - Taraf (MS 1)
+        const p_malmo_ms = this._createArchivedPick({
+            index: 15, iddaaCode: '3201960', homeTeam: "Malmö", awayTeam: "Kalmar", league: "İsveç Allsvenskan",
+            timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Malmö Kazanır)', marketCode: 'MS1', odd: 1.35, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Malmö vs Kalmar · MS 1 (20:00 | İddaa Kod: 3201960)"
         }, yDate, dFmt);
 
         // 14. Olimpia vs Resovia (20:00) - Toplam Gol 2.5 Üst
@@ -3257,23 +3289,23 @@ const HistoricalCouponsService = {
         // Kupon 3: ⚽ Günün Gol & Karşılıklı Gol Kuponu
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol & Karşılıklı Gol Kuponu',
-            subtitle: 'Ludogorets 2.5 Üst, Olimpia KG VAR ve Cusco 1.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Atalanta MS 1, Olimpia KG VAR ve Cusco 1.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 89
-        }, [p_ludo_o25, p_olimpia_btts, p_cusco_o15], dFmt);
+        }, [p_atalanta_ms, p_olimpia_btts, p_cusco_o15], dFmt);
 
         // Kupon 4: 🎯 Günün Çifte Şans & İddaa Kombine Kuponu
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & İddaa Kombine Kuponu',
-            subtitle: 'Torino KG VAR, Cuiaba 2.5 Alt ve Levy Bereg 3.5 Alt', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Shamrock 1.5 Üst, Cuiaba 2.5 Alt ve Levy Bereg 3.5 Alt', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
-        }, [p_torino_btts, p_cuiaba_u25, p_zorya_u35], dFmt);
+        }, [p_shamrock_o15, p_cuiaba_u25, p_zorya_u35], dFmt);
 
         // Kupon 5: 💎 Sürpriz & Değer Kuponu
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~5.40 Oran)',
-            subtitle: 'Ludogorets İY 1, Olimpia 2.5 Üst ve Torino MS 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Levante 2.5 Üst, Olimpia 2.5 Üst ve Malmö MS 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
-        }, [p_ludo_ht, p_olimpia_o25, p_torino_ms], dFmt);
+        }, [p_levante_o25, p_olimpia_o25, p_malmo_ms], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
@@ -3585,6 +3617,14 @@ const HistoricalCouponsService = {
             detail: "Freiburg vs Jablonec · 2.5 ÜST (22:00 | İddaa Kod: 3208325)"
         }, yDate, dFmt);
 
+        // 19. Celta Vigo vs Juventus (22:00) - UEFA Avrupa Ligi - Taraf (MS 2)
+        const p_juve_ms2 = this._createArchivedPick({
+            index: 19, iddaaCode: '3208259', homeTeam: "Celta Vigo", awayTeam: "Juventus", league: "UEFA Avrupa Ligi",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Juventus Kazanır)', marketCode: 'MS2', odd: 1.98, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Celta Vigo vs Juventus · MS 2 (22:00 | İddaa Kod: 3208259)"
+        }, yDate, dFmt);
+
         // Kupon 0 (Özel): 🏆 UEFA Avrupa & Konferans Ligi Özel Kombinesi
         const c_uefa = this._createArchivedCoupon({
             id: 'c_uefa_' + yDate, title: '🏆 UEFA Avrupa & Konferans Ligi Özel Kombinesi',
@@ -3620,12 +3660,13 @@ const HistoricalCouponsService = {
             badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
         }, [p_erok_cs, p_khaleej_cs, p_bursa_cs], dFmt);
 
-        // Kupon 5: 💎 Günün Bomba / Değer Kuponu
+        // Kupon 5: 💎 Günün Bomba / Değer Kuponu (~7.30 Oran)
+        // Kural: Bir maç en fazla 2 kuponda yer alabilir (Esenler Erokspor yerine Celta Vigo vs Juventus MS 2 eklendi)
         const c5 = this._createArchivedCoupon({
-            id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~6.70 Oran)',
-            subtitle: 'Esenler Erokspor MS 2, Cincinnati MS 1 ve Mardin 1969 İY 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~7.30 Oran)',
+            subtitle: 'Juventus MS 2, Cincinnati MS 1 ve Mardin 1969 İY 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
-        }, [p_erok_ms2, p_cincinnati_ms, p_mardin_ht], dFmt);
+        }, [p_juve_ms2, p_cincinnati_ms, p_mardin_ht], dFmt);
 
         return { coupons: [c_uefa, c1, c2, c3, c4, c5], euroCoupons: [] };
     },
@@ -3776,9 +3817,9 @@ const HistoricalCouponsService = {
         // Kupon 5: 💎 Sürpriz & Değer Kuponu (Real Madrid MS 2, QPR MS 1, CSKA Moskova İY 1)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~5.20 Oran)',
-            subtitle: 'Real Madrid MS 2, QPR MS 1 ve CSKA Moskova İY 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Zenit MS 2, QPR MS 1 ve Stromsgodset MS 1 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
-        }, [p_roma_ms2, p_qpr_ms, p_cska_ht], dFmt);
+        }, [p_zenit_ms, p_qpr_ms, p_strom_ms], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },

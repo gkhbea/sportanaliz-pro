@@ -102,8 +102,10 @@ const CouponEngine = {
         const usedMatchKeys = new Set();
         const usedPicksByMatch = new Map(); // matchKey -> Set of { marketCode, shortPick }
         const usedCategoriesByMatch = new Map(); // matchKey -> Set of categories
+        const matchUsageCount = new Map(); // matchKey -> number of coupons containing this match
         const getMatchKey = m => (m.id || (m.homeTeam + '_' + m.awayTeam));
 
+        // Kullanıcı Kuralı: "Aynı maçlardan en fazla 2 tane kuponda maç olsun"
         // Kullanıcı Kuralı: "Bülteni gece gündüz diye ayırma, bütün gün olarak hazırla kuponları en garanti maçlardan"
         // Kullanıcı Kuralı: "Aynı maçları ms veya alt üst olarak veya korner sarı kart oyna, aynı sonuçla oynama"
         const selectPicksForCoupon = (filterFn, sortFn, count = 3, allowReuse = false) => {
@@ -112,8 +114,11 @@ const CouponEngine = {
                 const key = getMatchKey(item.match);
                 const prevPicks = usedPicksByMatch.get(key) || new Set();
                 const prevCats = usedCategoriesByMatch.get(key) || new Set();
+                const currentUsage = matchUsageCount.get(key) || 0;
 
-                if (!allowReuse && usedMatchKeys.has(key)) return;
+                // KULLANICI KURALI: Aynı maçtan EN FAZLA 2 TANE kuponda maç olabilir!
+                if (currentUsage >= 2) return;
+                if (!allowReuse && currentUsage >= 1) return;
 
                 item.candidates.forEach(c => {
                     // AYNI SONUÇLA / TERCİHLE OYNAMA KURALI:
@@ -147,6 +152,7 @@ const CouponEngine = {
             selected.forEach(s => {
                 const key = getMatchKey(s.item.match);
                 usedMatchKeys.add(key);
+                matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                 if (!usedPicksByMatch.has(key)) usedPicksByMatch.set(key, new Set());
                 usedPicksByMatch.get(key).add(s.pick.marketCode);
                 usedPicksByMatch.get(key).add(s.pick.shortPick);
@@ -298,6 +304,8 @@ const CouponEngine = {
         if (!htftPicks || htftPicks.length < 2) {
             pool.forEach(item => {
                 if (htftPicks.length >= 2) return;
+                const key = getMatchKey(item.match);
+                if ((matchUsageCount.get(key) || 0) >= 2) return;
                 const p = item.result?.poisson;
                 const htft = p?.halfTimeFullTime;
                 if (!htft) return;
@@ -317,6 +325,8 @@ const CouponEngine = {
                                 category: 'iy_ms'
                             }
                         });
+                        usedMatchKeys.add(key);
+                        matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                     }
                 } else if (htft['X/2'] >= 14) {
                     const exists = htftPicks.some(hp => hp.item.match.id === item.match.id);
@@ -333,6 +343,8 @@ const CouponEngine = {
                                 category: 'iy_ms'
                             }
                         });
+                        usedMatchKeys.add(key);
+                        matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                     }
                 }
             });
@@ -543,21 +555,51 @@ const CouponEngine = {
         const list = Array.isArray(baseCoupons) ? [...baseCoupons] : [];
         if (list.length >= 8) return list.slice(0, 8);
 
+        // KULLANICI KURALI: "Aynı maçlardan en fazla 2 tane kuponda maç olsun"
+        // Mevcut maç kullanım sıklığını say
+        const matchUsage = new Map();
+        const getPKey = p => (p.matchCode || p.iddaaCode || (p.homeTeam + '_' + p.awayTeam));
+        list.forEach(c => {
+            (c.matches || c.picks || []).forEach(p => {
+                const k = getPKey(p);
+                matchUsage.set(k, (matchUsage.get(k) || 0) + 1);
+            });
+        });
+
         // Mevcut maç havuzunu topla (baseCoupons içindeki maçlar ve harici bülten)
         const allPicks = [];
         list.forEach(c => {
             (c.matches || c.picks || []).forEach(p => allPicks.push(p));
         });
 
+        // 2 kupon sınırını aşmayan uygun bir seçim bulan yardımcı fonksiyon
+        const pickWithMax2Limit = (candidates, transformFn) => {
+            for (const cand of candidates) {
+                if (!cand) continue;
+                const k = getPKey(cand);
+                if ((matchUsage.get(k) || 0) < 2) {
+                    matchUsage.set(k, (matchUsage.get(k) || 0) + 1);
+                    return transformFn ? transformFn(cand) : cand;
+                }
+            }
+            return null;
+        };
+
         // 6. KUPON: 🔥 Karşılıklı Gol (KG VAR) Özel Kombini
         if (list.length < 6) {
-            const p1 = allPicks[1] ? { ...allPicks[1], pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: '1.68', marketTitle: 'Karşılıklı Gol' } : null;
-            const p2 = allPicks[3] ? { ...allPicks[3], pickTitle: '2.5 Gol Üstü', marketCode: 'OVER_25', odd: '1.75', marketTitle: 'Toplam Gol' } : null;
-            const p3 = allPicks[6] ? { ...allPicks[6], pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: '1.65', marketTitle: 'Karşılıklı Gol' } : null;
+            const pick1 = allPicks.find(p => (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick1) matchUsage.set(getPKey(pick1), (matchUsage.get(getPKey(pick1)) || 0) + 1);
+            const p1 = pick1 ? { ...pick1, pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: '1.68', marketTitle: 'Karşılıklı Gol' } : null;
+
+            const pick2 = allPicks.find(p => getPKey(p) !== (p1 ? getPKey(p1) : '') && (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick2) matchUsage.set(getPKey(pick2), (matchUsage.get(getPKey(pick2)) || 0) + 1);
+            const p2 = pick2 ? { ...pick2, pickTitle: '2.5 Gol Üstü', marketCode: 'OVER_25', odd: '1.75', marketTitle: 'Toplam Gol' } : null;
+
+            const pick3 = allPicks.find(p => getPKey(p) !== (p1 ? getPKey(p1) : '') && getPKey(p) !== (p2 ? getPKey(p2) : '') && (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick3) matchUsage.set(getPKey(pick3), (matchUsage.get(getPKey(pick3)) || 0) + 1);
+            const p3 = pick3 ? { ...pick3, pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: '1.65', marketTitle: 'Karşılıklı Gol' } : null;
+
             const bttsPicks = [p1, p2, p3].filter(Boolean);
-            if (bttsPicks.length < 3 && allPicks.length >= 3) {
-                bttsPicks.push({ ...allPicks[0], pickTitle: 'KG VAR', odd: '1.70', marketTitle: 'Karşılıklı Gol' });
-            }
             const totalOdd = bttsPicks.reduce((acc, p) => acc * (parseFloat(p.odd) || 1), 1).toFixed(2);
             const allWon = bttsPicks.every(p => p.resultStatus === 'won');
             const anyLost = bttsPicks.some(p => p.resultStatus === 'lost');
@@ -588,9 +630,18 @@ const CouponEngine = {
 
         // 7. KUPON: 🎯 İlk Yarı & İkinci Yarı Kombine Kuponu
         if (list.length < 7) {
-            const p1 = allPicks[2] ? { ...allPicks[2], pickTitle: 'İlk Yarı 0.5 ÜST', marketCode: 'HT_OV05', odd: '1.38', marketTitle: 'İlk Yarı Gol' } : null;
-            const p2 = allPicks[4] ? { ...allPicks[4], pickTitle: 'Çifte Şans 1X & 1.5 ÜST', marketCode: 'DC1X_OV15', odd: '1.62', marketTitle: 'Kombine İddaa' } : null;
-            const p3 = allPicks[7] || allPicks[0] ? { ...(allPicks[7] || allPicks[0]), pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.55', marketTitle: 'Toplam Gol' } : null;
+            const pick1 = allPicks.find(p => (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick1) matchUsage.set(getPKey(pick1), (matchUsage.get(getPKey(pick1)) || 0) + 1);
+            const p1 = pick1 ? { ...pick1, pickTitle: 'İlk Yarı 0.5 ÜST', marketCode: 'HT_OV05', odd: '1.38', marketTitle: 'İlk Yarı Gol' } : null;
+
+            const pick2 = allPicks.find(p => getPKey(p) !== (p1 ? getPKey(p1) : '') && (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick2) matchUsage.set(getPKey(pick2), (matchUsage.get(getPKey(pick2)) || 0) + 1);
+            const p2 = pick2 ? { ...pick2, pickTitle: 'Çifte Şans 1X & 1.5 ÜST', marketCode: 'DC1X_OV15', odd: '1.62', marketTitle: 'Kombine İddaa' } : null;
+
+            const pick3 = allPicks.find(p => getPKey(p) !== (p1 ? getPKey(p1) : '') && getPKey(p) !== (p2 ? getPKey(p2) : '') && (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick3) matchUsage.set(getPKey(pick3), (matchUsage.get(getPKey(pick3)) || 0) + 1);
+            const p3 = pick3 ? { ...pick3, pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.55', marketTitle: 'Toplam Gol' } : null;
+
             const statsPicks = [p1, p2, p3].filter(Boolean);
             const totalOdd = statsPicks.reduce((acc, p) => acc * (parseFloat(p.odd) || 1), 1).toFixed(2);
             const allWon = statsPicks.every(p => p.resultStatus === 'won');
@@ -622,9 +673,18 @@ const CouponEngine = {
 
         // 8. KUPON: 🌙 Gece / Güney Amerika & Özel Ligler Kuponu
         if (list.length < 8) {
-            const p1 = allPicks[5] ? { ...allPicks[5], pickTitle: 'MS 1 (Ev Sahibi)', marketCode: 'MS_1', odd: '1.72', marketTitle: 'Gece Seansı' } : null;
-            const p2 = allPicks[8] || allPicks[1] ? { ...(allPicks[8] || allPicks[1]), pickTitle: '1.5 Gol Üstü', marketCode: 'OVER_15', odd: '1.35', marketTitle: 'Latin Bülteni' } : null;
-            const p3 = allPicks[9] || allPicks[2] ? { ...(allPicks[9] || allPicks[2]), pickTitle: 'Çifte Şans X2', marketCode: 'DC_X2', odd: '1.55', marketTitle: 'Gece Seansı' } : null;
+            const pick1 = allPicks.find(p => (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick1) matchUsage.set(getPKey(pick1), (matchUsage.get(getPKey(pick1)) || 0) + 1);
+            const p1 = pick1 ? { ...pick1, pickTitle: 'MS 1 (Ev Sahibi)', marketCode: 'MS_1', odd: '1.72', marketTitle: 'Gece Seansı' } : null;
+
+            const pick2 = allPicks.find(p => getPKey(p) !== (p1 ? getPKey(p1) : '') && (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick2) matchUsage.set(getPKey(pick2), (matchUsage.get(getPKey(pick2)) || 0) + 1);
+            const p2 = pick2 ? { ...pick2, pickTitle: '1.5 Gol Üstü', marketCode: 'OVER_15', odd: '1.35', marketTitle: 'Latin Bülteni' } : null;
+
+            const pick3 = allPicks.find(p => getPKey(p) !== (p1 ? getPKey(p1) : '') && getPKey(p) !== (p2 ? getPKey(p2) : '') && (matchUsage.get(getPKey(p)) || 0) < 2);
+            if (pick3) matchUsage.set(getPKey(pick3), (matchUsage.get(getPKey(pick3)) || 0) + 1);
+            const p3 = pick3 ? { ...pick3, pickTitle: 'Çifte Şans X2', marketCode: 'DC_X2', odd: '1.55', marketTitle: 'Gece Seansı' } : null;
+
             const nightPicks = [p1, p2, p3].filter(Boolean);
             const totalOdd = nightPicks.reduce((acc, p) => acc * (parseFloat(p.odd) || 1), 1).toFixed(2);
             const allWon = nightPicks.every(p => p.resultStatus === 'won');
