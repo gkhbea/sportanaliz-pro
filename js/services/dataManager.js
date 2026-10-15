@@ -37,9 +37,10 @@ const DataManager = {
         if (results.matches.length === 0) {
             try {
                 const candidates = [
-                    './data_cache/nesine_bulten_today_2026-10-14.json',
+                    './data_cache/nesine_bulten_today_2026-10-15.json',
                     './data_cache/nesine_bulten_today.json',
-                    'data_cache/nesine_bulten_today_2026-10-14.json',
+                    'data_cache/nesine_bulten_today_2026-10-15.json',
+                    './data_cache/nesine_bulten_today_2026-10-14.json',
                     'data_cache/nesine_bulten_today.json'
                 ];
                 for (const url of candidates) {
@@ -248,11 +249,25 @@ const DataManager = {
     /**
      * Maçları filtrele
      */
-    filterMatches(matches, { search = '', league = '', dateFilter = 'all' } = {}) {
+    filterMatches(matches, filterOptions = {}, leagueArg = '', dateFilterArg = 'all') {
+        let search = '';
+        let league = '';
+        let dateFilter = 'all';
+
+        if (filterOptions && typeof filterOptions === 'object') {
+            search = filterOptions.search || '';
+            league = filterOptions.league || '';
+            dateFilter = filterOptions.dateFilter || 'all';
+        } else if (typeof filterOptions === 'string') {
+            search = filterOptions;
+            league = leagueArg || '';
+            dateFilter = dateFilterArg || 'all';
+        }
+
         let filtered = [...matches];
 
         // Arama filtresi (takım veya lig)
-        if (search) {
+        if (search && typeof search === 'string') {
             const q = search.toLowerCase().trim();
             filtered = filtered.filter(m =>
                 (m.homeTeam || '').toLowerCase().includes(q) ||

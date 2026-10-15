@@ -1829,7 +1829,11 @@ const App = {
                 if (generated && generated.length > 0) coupons = generated;
             }
             if (!coupons || coupons.length === 0) {
-                if (window.HistoricalCouponsService?._generateAuthentic2026_10_14Coupons) {
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_15Coupons) {
+                    const aut15 = window.HistoricalCouponsService._generateAuthentic2026_10_15Coupons('2026-10-15');
+                    if (aut15 && aut15.coupons && aut15.coupons.length > 0) coupons = aut15.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_14Coupons) {
                     const aut14 = window.HistoricalCouponsService._generateAuthentic2026_10_14Coupons('2026-10-14');
                     if (aut14 && aut14.coupons && aut14.coupons.length > 0) coupons = aut14.coupons;
                 }
