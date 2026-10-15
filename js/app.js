@@ -2171,6 +2171,7 @@ const App = {
             const allSets = HistoricalCouponsService.getAllCouponSets('2026-09-09');
             const found = allSets.find(s => s.date === chosenDate);
             if (found) dayCoupons = found.coupons || [];
+        }
         if (dayCoupons.length === 0 && window.CouponPanel?.getCouponsForDate) {
             dayCoupons = window.CouponPanel.getCouponsForDate(chosenDate) || [];
         }
