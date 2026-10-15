@@ -339,11 +339,77 @@ const CouponEngine = {
         }
 
         // ============================================================
-        // 🎯 KULLANICI KURALI: GARANTİN NEYSE O, MAKSİMUM 5 KUPON
-        // Her gün zorla 5 kupon yapılmaz. Sadece güven kriterlerini
-        // tam olarak sağlayan kuponlar paketlenir (1 ile 5 arası).
+        // 🏆 ÖZEL KUPON: 🏆 UEFA & ŞAMPİYONLAR LİGİ ÖZEL KOMBİNESİ
+        // (Bültende UEFA Şampiyonlar Ligi, Avrupa Ligi, Konferans Ligi veya Uluslar Ligi maçları olduğunda otomatik devreye girer)
+        // ============================================================
+        const isUefaLeague = (l) => {
+            const str = (l || '').toLowerCase();
+            return (
+                str.includes('uefa') ||
+                str.includes('şampiyonlar') ||
+                str.includes('champions') ||
+                str.includes('avrupa ligi') ||
+                str.includes('europa') ||
+                str.includes('konferans') ||
+                str.includes('conference') ||
+                str.includes('uluslar ligi') ||
+                str.includes('nations league')
+            ) && !str.includes('fiba') && !str.includes('basket');
+        };
+
+        const uefaPool = pool.filter(item => isUefaLeague(item.match?.league));
+        let uefaPicks = [];
+
+        if (uefaPool.length >= 2) {
+            uefaPicks = selectPicksForCoupon(
+                (c, item) => isUefaLeague(item.match?.league) && c.probability >= 66 && c.odd >= 1.15 && c.odd <= 2.25,
+                (a, b) => (b.pick.probability * 1.5 + b.pick.confidenceScore) - (a.pick.probability * 1.5 + a.pick.confidenceScore),
+                3,
+                true // UEFA özel kupon olduğu için güvenli maçları kullanabilir
+            );
+
+            if (uefaPicks.length < 3) {
+                const needed = 3 - uefaPicks.length;
+                const extra = selectPicksForCoupon(
+                    (c, item) => isUefaLeague(item.match?.league) && c.probability >= 56 && c.odd >= 1.12 && c.odd <= 2.50,
+                    (a, b) => (b.pick.probability * 1.2 + b.pick.confidenceScore) - (a.pick.probability * 1.2 + a.pick.confidenceScore),
+                    needed,
+                    true
+                );
+                uefaPicks = [...uefaPicks, ...extra];
+            }
+        }
+
+        // ============================================================
+        // 🎯 KULLANICI KURALI: GARANTİN NEYSE O, MAKSİMUM 5 KUPON (+ UEFA GÜNLERİNDE 6 KUPON)
+        // Her gün zorla kupon yapılmaz. Sadece güven kriterlerini
+        // tam olarak sağlayan kuponlar paketlenir.
         // ============================================================
         const qualifiedCoupons = [];
+
+        // 🏆 Bültende UEFA Maçları varsa en önde UEFA Özel Kuponu yer alır
+        if (uefaPicks && uefaPicks.length >= 2) {
+            const hasUCL = uefaPicks.some(p => {
+                const l = (p.item.match.league || '').toLowerCase();
+                return l.includes('şampiyonlar') || l.includes('champions');
+            });
+            const couponTitle = hasUCL ? '🏆 UEFA Şampiyonlar Ligi Özel Kombinesi' : '🏆 UEFA Avrupa & Konferans Ligi Özel Kombinesi';
+            const badgeTitle = hasUCL ? '🏆 DEVLER LİGİ · UEFA ÖZEL' : '🏆 UEFA ÖZEL · AVRUPA GECESİ';
+
+            qualifiedCoupons.push(this._formatCoupon({
+                id: 'coupon-uefa',
+                title: couponTitle,
+                subtitle: `Avrupa kupalarında haftanın en yüksek güvenli ${uefaPicks.length} maçı`,
+                badge: badgeTitle,
+                badgeType: 'special',
+                icon: '🏆',
+                themeColor: '#3B82F6',
+                accentBg: 'rgba(59, 130, 246, 0.15)',
+                picks: uefaPicks,
+                strategy: 'Şampiyonlar Ligi, Avrupa Ligi ve Konferans Ligi bültenlerindeki en formda takımlar ve en yüksek isabet ihtimalli Avrupa tahminleri.',
+                recommendedStake: 200
+            }));
+        }
 
         if (safePicks && safePicks.length >= 2) {
             qualifiedCoupons.push(this._formatCoupon({
@@ -442,10 +508,12 @@ const CouponEngine = {
             }));
         }
 
-        // Tavan sınır: Hafta içi 5 kupon, Hafta sonu veya talep halinde 8 kupon
+        // Tavan sınır: Hafta içi normalde 5 kupon; UEFA maçları varsa 6 kupon, Hafta sonu veya talep halinde 8 kupon
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
         const parsedMax = parseInt(maxCoupons, 10);
-        const targetMax = (!isNaN(parsedMax) && parsedMax > 0) ? parsedMax : (isWeekend ? 8 : 5);
+        const hasUefa = qualifiedCoupons.some(c => c.id === 'coupon-uefa' || (c.id && c.id.includes('uefa')));
+        const defaultMax = isWeekend ? 8 : (hasUefa ? 6 : 5);
+        const targetMax = (!isNaN(parsedMax) && parsedMax > 0) ? parsedMax : defaultMax;
         let coupons = qualifiedCoupons.slice(0, targetMax);
 
         if (targetMax >= 8 && coupons.length < 8) {
@@ -1829,6 +1897,15 @@ const CouponEngine = {
             { id: 5, title: '💎 Bomba / Değer', weight: 0.08, minOdds: 9.50, confidence: 74, role: 'Yüksek Çarpan' }
         ];
 
+        const weightsUefaWeekday = [
+            { id: 1, title: '🏆 UEFA & ŞL Özel Kombinesi', weight: 0.28, minOdds: 2.30, confidence: 94, role: 'Avrupa Arenası' },
+            { id: 2, title: '🛡️ Garantör Banko', weight: 0.24, minOdds: 2.25, confidence: 95, role: 'Sermaye Sigortası' },
+            { id: 3, title: '⚡ İdeal Sistem', weight: 0.18, minOdds: 3.35, confidence: 90, role: 'Dengeli Büyüme' },
+            { id: 4, title: '⚽ Gol Yağmuru', weight: 0.14, minOdds: 3.60, confidence: 88, role: 'Yüksek İsabet' },
+            { id: 5, title: '⏱️ İlk Yarı Strateji', weight: 0.10, minOdds: 2.90, confidence: 86, role: 'Hızlı Kasa' },
+            { id: 6, title: '💎 Bomba / Değer', weight: 0.06, minOdds: 9.50, confidence: 74, role: 'Yüksek Çarpan' }
+        ];
+
         const weightsWeekend = [
             { id: 1, title: '🛡️ Garantör Banko', weight: 0.24, minOdds: 2.25, confidence: 95, role: 'Sermaye Sigortası' },
             { id: 2, title: '⚡ İdeal Sistem', weight: 0.18, minOdds: 3.35, confidence: 90, role: 'Dengeli Büyüme' },
@@ -1840,7 +1917,7 @@ const CouponEngine = {
             { id: 8, title: '💎 Günün Bombası / Değer', weight: 0.05, minOdds: 10.00, confidence: 72, role: 'Mega Çarpan' }
         ];
 
-        const list = couponCount === 8 ? weightsWeekend : weightsWeekday;
+        const list = couponCount === 8 ? weightsWeekend : (couponCount === 6 ? weightsUefaWeekday : weightsWeekday);
 
         // Her kupona taban olarak en az 50 TL verilir, 50 TL'nin üzerindeki bakiye ağırlıklara göre dağıtılır
         const excessBudget = Math.max(0, budget - minRequiredBudget);

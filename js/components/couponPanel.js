@@ -103,10 +103,12 @@ const CouponPanel = {
         }
 
         // Eğer 8 kupon modu aktifse ve 8'den az kupon varsa expandTo8Coupons ile 8'e tamamla
+        const hasUefa = result.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
+        const maxLimit = hasUefa ? 6 : 5;
         if (mode === 8 && result.length < 8 && window.CouponEngine?.expandTo8Coupons) {
             result = window.CouponEngine.expandTo8Coupons(result, window.app?.matches || [], queryDate);
-        } else if (mode === 5 && result.length > 5) {
-            result = result.slice(0, 5);
+        } else if (mode <= 6 && result.length > maxLimit) {
+            result = result.slice(0, maxLimit);
         }
 
         return result;
@@ -147,15 +149,20 @@ const CouponPanel = {
         this._lastTotalAnalyzedCount = totalAnalyzedCount; // bindEvents için sakla
 
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
-        const currentMode = this.assistantCouponCount || (isWeekend ? 8 : 5);
-        this.assistantCouponCount = currentMode;
+        let currentMode = this.assistantCouponCount || (isWeekend ? 8 : 5);
 
         let couponList = this.getCouponsForDate(chosenDate, coupons, currentMode);
+        const hasUefaInList = couponList.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
+        const maxRenderLimit = hasUefaInList ? 6 : 5;
         if (currentMode === 8 && couponList.length < 8 && window.CouponEngine?.expandTo8Coupons) {
             couponList = window.CouponEngine.expandTo8Coupons(couponList, window.app?.matches || [], chosenDate);
-        } else if (currentMode === 5 && couponList.length > 5) {
-            couponList = couponList.slice(0, 5);
+        } else if (currentMode <= 6 && couponList.length > maxRenderLimit) {
+            couponList = couponList.slice(0, maxRenderLimit);
         }
+        if (hasUefaInList && currentMode === 5) {
+            currentMode = 6;
+        }
+        this.assistantCouponCount = currentMode;
         if (window.app) window.app.coupons = couponList;
         this.lastDisplayedCoupons = couponList;
 
@@ -1030,8 +1037,11 @@ const CouponPanel = {
      * Tekil Kupon Kartını Render Et
      */
     renderCouponCard(coupon, index) {
-        const currentMode = this.assistantCouponCount || (new Date().getDay() === 0 || new Date().getDay() === 6 ? 8 : 5);
-        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : 250);
+        const currentCoupons = this.lastDisplayedCoupons || [];
+        const hasUefaCoupon = currentCoupons.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
+        const defaultMode = (new Date().getDay() === 0 || new Date().getDay() === 6) ? 8 : (hasUefaCoupon ? 6 : 5);
+        const currentMode = this.assistantCouponCount || defaultMode;
+        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : (currentMode === 6 ? 300 : 250));
         const alloc = window.CouponEngine?.calculateAssistantStakeAllocation
             ? window.CouponEngine.calculateAssistantStakeAllocation(baseAmount, true, currentMode, 50)
             : null;
@@ -1916,9 +1926,10 @@ const CouponPanel = {
      */
     renderAssistantStakingCard() {
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
-        const defaultMode = isWeekend ? 8 : 5;
+        const hasUefa = (this.lastDisplayedCoupons || []).some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
+        const defaultMode = isWeekend ? 8 : (hasUefa ? 6 : 5);
         const currentMode = this.assistantCouponCount || defaultMode;
-        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : 250);
+        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : (currentMode === 6 ? 300 : 250));
         const isWinningsMode = this.assistantIsWinnings !== undefined ? this.assistantIsWinnings : true;
 
         const alloc = window.CouponEngine?.calculateAssistantStakeAllocation
@@ -1963,10 +1974,10 @@ const CouponPanel = {
                         </div>
                     </div>
 
-                    <!-- Hafta İçi (5) / Hafta Sonu (8) Geçiş Butonları -->
+                    <!-- Hafta İçi (5 veya 6) / Hafta Sonu (8) Geçiş Butonları -->
                     <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.4);padding:4px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);">
-                        <button type="button" class="btn btn-xs btn-mode-toggle ${currentMode === 5 ? 'active' : ''}" data-mode="5" style="border:none;border-radius:6px;padding:5px 12px;font-size:0.75rem;font-weight:800;cursor:pointer;background:${currentMode === 5 ? 'linear-gradient(135deg,#00F0FF,#3B82F6)' : 'transparent'};color:${currentMode === 5 ? '#000' : '#94a3b8'};">
-                            📅 Hafta İçi (5 Kupon)
+                        <button type="button" class="btn btn-xs btn-mode-toggle ${currentMode <= 6 ? 'active' : ''}" data-mode="${hasUefa ? 6 : 5}" style="border:none;border-radius:6px;padding:5px 12px;font-size:0.75rem;font-weight:800;cursor:pointer;background:${currentMode <= 6 ? 'linear-gradient(135deg,#00F0FF,#3B82F6)' : 'transparent'};color:${currentMode <= 6 ? '#000' : '#94a3b8'};">
+                            📅 Hafta İçi (${hasUefa ? '6 Kupon · 🏆 UEFA Özel' : '5 Kupon'})
                         </button>
                         <button type="button" class="btn btn-xs btn-mode-toggle ${currentMode === 8 ? 'active' : ''}" data-mode="8" style="border:none;border-radius:6px;padding:5px 12px;font-size:0.75rem;font-weight:800;cursor:pointer;background:${currentMode === 8 ? 'linear-gradient(135deg,#F59E0B,#EF4444)' : 'transparent'};color:${currentMode === 8 ? '#000' : '#94a3b8'};">
                             🎉 Hafta Sonu (8 Kupon Max)
@@ -2043,7 +2054,9 @@ const CouponPanel = {
     },
 
     _updateAssistantCalculations(app) {
-        const mode = this.assistantCouponCount || (new Date().getDay() === 0 || new Date().getDay() === 6 ? 8 : 5);
+        const hasUefa = (this.lastDisplayedCoupons || []).some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
+        const defaultMode = (new Date().getDay() === 0 || new Date().getDay() === 6) ? 8 : (hasUefa ? 6 : 5);
+        const mode = this.assistantCouponCount || defaultMode;
         this.assistantCouponCount = mode;
 
         // 1. Asistan kartını güncelle
@@ -2053,12 +2066,14 @@ const CouponPanel = {
             this.bindAssistantEvents(app);
         }
 
-        // 2. Mod (5 veya 8) doğrultusunda kupon listesini dinamik güncelle
+        // 2. Mod (5, 6 veya 8) doğrultusunda kupon listesini dinamik güncelle
         let targetCoupons = this.getCouponsForDate(this.selectedAnalysisDate, app?.coupons || [], mode);
+        const hasUefaInTarget = targetCoupons.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
+        const maxLimit = hasUefaInTarget ? 6 : 5;
         if (mode === 8 && targetCoupons.length < 8 && window.CouponEngine?.expandTo8Coupons) {
             targetCoupons = window.CouponEngine.expandTo8Coupons(targetCoupons, app?.matches || [], this.selectedAnalysisDate);
-        } else if (mode === 5 && targetCoupons.length > 5) {
-            targetCoupons = targetCoupons.slice(0, 5);
+        } else if (mode <= 6 && targetCoupons.length > maxLimit) {
+            targetCoupons = targetCoupons.slice(0, maxLimit);
         }
 
         if (app) app.coupons = targetCoupons;

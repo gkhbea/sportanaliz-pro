@@ -3553,6 +3553,45 @@ const HistoricalCouponsService = {
             detail: "Mardin 1969 vs F. Karagümrük · İlk Yarı 1 (17:00 | İddaa Kod: 3206487)"
         }, yDate, dFmt);
 
+        // 15. Hoffenheim vs Beşiktaş (22:00) - UEFA Avrupa Ligi - Karşılıklı Gol (KG VAR)
+        const p_bjk_btts = this._createArchivedPick({
+            index: 15, iddaaCode: '3208283', homeTeam: "Hoffenheim", awayTeam: "Beşiktaş", league: "UEFA Avrupa Ligi",
+            timeStr: '22:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR (Karşılıklı Gol)', marketCode: 'BTTS_Y', odd: 1.32, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Hoffenheim vs Beşiktaş · KG VAR (22:00 | İddaa Kod: 3208283)"
+        }, yDate, dFmt);
+
+        // 16. Lech Poznan vs B. Leverkusen (19:45) - UEFA Avrupa Ligi - Taraf (MS 2)
+        const p_leverkusen_ms2 = this._createArchivedPick({
+            index: 16, iddaaCode: '3208300', homeTeam: "Lech Poznan", awayTeam: "B. Leverkusen", league: "UEFA Avrupa Ligi",
+            timeStr: '19:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (B. Leverkusen Kazanır)', marketCode: 'MS2', odd: 1.37, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Lech Poznan vs B. Leverkusen · MS 2 (19:45 | İddaa Kod: 3208300)"
+        }, yDate, dFmt);
+
+        // 17. Atalanta vs Pafos (22:00) - UEFA Konferans Ligi - Taraf (MS 1)
+        const p_atalanta_ms1 = this._createArchivedPick({
+            index: 17, iddaaCode: '3208321', homeTeam: "Atalanta", awayTeam: "Pafos", league: "UEFA Konferans Ligi",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atalanta Kazanır)', marketCode: 'MS1', odd: 1.16, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Atalanta vs Pafos · MS 1 (22:00 | İddaa Kod: 3208321)"
+        }, yDate, dFmt);
+
+        // 18. Freiburg vs Jablonec (22:00) - UEFA Konferans Ligi - Toplam Gol (2.5 ÜST)
+        const p_freiburg_o25 = this._createArchivedPick({
+            index: 18, iddaaCode: '3208325', homeTeam: "Freiburg", awayTeam: "Jablonec", league: "UEFA Konferans Ligi",
+            timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.30, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Freiburg vs Jablonec · 2.5 ÜST (22:00 | İddaa Kod: 3208325)"
+        }, yDate, dFmt);
+
+        // Kupon 0 (Özel): 🏆 UEFA Avrupa & Konferans Ligi Özel Kombinesi
+        const c_uefa = this._createArchivedCoupon({
+            id: 'c_uefa_' + yDate, title: '🏆 UEFA Avrupa & Konferans Ligi Özel Kombinesi',
+            subtitle: 'Hoffenheim-Beşiktaş KG VAR, Leverkusen MS 2, Atalanta MS 1 ve Freiburg 2.5 Üst', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'special', icon: '🏆', themeColor: '#3B82F6', recommendedStake: 200, confidence: 94
+        }, [p_bjk_btts, p_leverkusen_ms2, p_atalanta_ms1, p_freiburg_o25], dFmt);
+
         // Kupon 1: 🛡️ Garantör Banko
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / En Güvenilir Kupon',
@@ -3588,7 +3627,7 @@ const HistoricalCouponsService = {
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 85
         }, [p_erok_ms2, p_cincinnati_ms, p_mardin_ht], dFmt);
 
-        return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
+        return { coupons: [c_uefa, c1, c2, c3, c4, c5], euroCoupons: [] };
     },
     _generateAuthentic2026_10_14Coupons() {
         const yDate = '2026-10-14';
