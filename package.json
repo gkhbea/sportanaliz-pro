@@ -7,6 +7,7 @@
     "start": "node main.js",
     "dev": "node proxy-server.js",
     "desktop": "electron .",
+    "build:exe": "electron-builder --win",
     "build": "echo 'Build successful'"
   },
   "build": {
