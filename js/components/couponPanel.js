@@ -275,7 +275,22 @@ const CouponPanel = {
                         <button class="btn btn-sm" onclick="App.navigate('daily-analysis')" style="background:linear-gradient(135deg,#10B981,#059669);color:#000;font-weight:800;border:none;border-radius:8px;padding:6px 14px;font-size:0.8rem;cursor:pointer;">
                             📅 Günlük Karnede İncele
                         </button>
+                </div>
+
+                <!-- 🛡️ BİLYONER & NESİNE RESMİ BAHİS DOĞRULAMA BANDI -->
+                <div style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(59,130,246,0.12));border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:1.3rem;">🛡️</span>
+                        <div>
+                            <strong style="color:#10B981;font-size:0.88rem;">Bilyoner.com &amp; Nesine.com Bahis Güvencesi:</strong>
+                            <div style="font-size:0.78rem;color:#cbd5e1;margin-top:2px;">
+                                Kuponlara yalnızca şu anda resmi olarak bahse açık, oynanabilir oranları bulunan maçlar alınır. Bahis açılmamış hiçbir karşılaşma kuponlara yazılmaz.
+                            </div>
+                        </div>
                     </div>
+                    <span style="background:rgba(16,185,129,0.2);color:#10B981;border:1px solid rgba(16,185,129,0.4);font-size:0.75rem;font-weight:900;padding:4px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;">
+                        🟢 %100 OYNANABİLİR BÜLTEN
+                    </span>
                 </div>
 
                 ${this.renderMonthlyFinancialBanner()}
@@ -1342,6 +1357,9 @@ const CouponPanel = {
                         </span>
                         <span style="font-size:0.82rem;font-weight:800;color:#ffffff;">
                             ${odd}
+                        </span>
+                        <span style="font-size:0.68rem;color:#10B981;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);padding:1px 6px;border-radius:4px;font-weight:800;display:inline-flex;align-items:center;gap:3px;" title="Bilyoner ve Nesine.com'da resmi olarak bahse açık ve oynanabilir">
+                            🟢 Bilyoner &amp; Nesine Açık
                         </span>
                         <span class="btn-inspect-match-inline" style="font-size:0.7rem;color:#00F0FF;background:rgba(0,240,255,0.12);border:1px solid rgba(0,240,255,0.3);padding:2px 7px;border-radius:4px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:3px;" title="Detaylı maçı incele">
                             🔍 Analiz

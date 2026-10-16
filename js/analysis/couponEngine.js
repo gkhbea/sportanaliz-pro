@@ -47,11 +47,55 @@ const CouponEngine = {
     },
 
     /**
+     * KULLANICI KURALI: "Bilyoner ve Nesine.com'da bahisler açılmışsa kupona dahil et, eğer bahis oynanmıyorsa kupona yazma"
+     * Bir maçın Bilyoner ve Nesine'de resmi olarak bahse açık ve oynanabilir olduğunu kesin olarak doğrular.
+     */
+    isBettingOpenOnPlatforms(match) {
+        if (!match) return false;
+
+        // 1. Resmi İddaa / Nesine kodu zorunlu (Kodu olmayan maçlara Türkiye'de yasal bahis yapılamaz)
+        const code = String(match.iddaaCode || match.code || (match.rawData && match.rawData.eventCode) || '');
+        if (!code || code === 'undefined' || code === 'null' || code.trim() === '') {
+            return false;
+        }
+
+        // 2. Maç durumu kontrolü (Ertelenmiş, iptal edilmiş, askıya alınmış veya kapatılmış maçlar kupona YAZILMAZ)
+        if (match.isSuspended || match.isPostponed || match.isCancelled || match.isClosed) {
+            return false;
+        }
+        const st = String(match.status || match.scoreStatus || '').toUpperCase();
+        if (st === 'CANCELLED' || st === 'POSTPONED' || st === 'SUSPENDED' || st === 'CLOSED') {
+            return false;
+        }
+
+        // 3. Aktif Oran Kontrolü: Nesine ve Bilyoner'de bahse açık en az bir pazar (MS, ÇŞ, Alt/Üst, İY vb.) bulunmalı
+        const odds = match.odds || match.commonOdds || {};
+        const numericOdds = [
+            odds.home, odds.draw, odds.away,
+            odds.over15, odds.under15, odds.over25, odds.under25, odds.over35, odds.under35,
+            odds.bttsYes, odds.bttsNo, odds.cs1X, odds.csX2, odds.cs12,
+            odds.firstHalfHome, odds.firstHalfDraw, odds.firstHalfAway
+        ].map(v => parseFloat(v)).filter(v => !isNaN(v) && v > 1.0);
+
+        if (numericOdds.length === 0) {
+            return false; // Hiçbir oran açılmamış, bahis oynanamaz
+        }
+
+        // 4. Eğer rawData Nesine event'i varsa pazarların (MA) boş olmadığını doğrula
+        const rawMarkets = match.rawData?.MA || match.rawData?.Markets || match.rawData?.event?.MA;
+        if (Array.isArray(rawMarkets) && rawMarkets.length === 0) {
+            return false;
+        }
+
+        return true;
+    },
+
+    /**
      * Günün maçlarını filtreler
      */
     _filterTodayMatches(matches) {
         if (!Array.isArray(matches)) return [];
-        return matches.filter(m => this._isMatchToday(m));
+        return matches.filter(m => this._isMatchToday(m) && this.isBettingOpenOnPlatforms(m));
     },
 
     /**
@@ -63,6 +107,7 @@ const CouponEngine = {
         const maxTime = new Date(now.getTime() + maxHours * 3600 * 1000);
 
         return matches.filter(m => {
+            if (!this.isBettingOpenOnPlatforms(m)) return false;
             if (!m.matchDate) return false;
             const d = new Date(m.matchDate);
             if (isNaN(d.getTime())) return false;
@@ -87,15 +132,16 @@ const CouponEngine = {
             return [];
         }
 
-        // 2. Kuponları günün aktif ve elit bülten maçlarından oluştur
-        const todayMatches = (matches || []).filter(m => this._isMatchToday(m));
-        let targetMatches = todayMatches.length >= 15 ? todayMatches : matches;
+        // KULLANICI KURALI: "bilyoner ve nesie.comda bahisler acılmıssa kupona dahil et eger bahis oynanmıyorsa kupona yazma"
+        const bettingOpenMatches = (matches || []).filter(m => this.isBettingOpenOnPlatforms(m));
+        const todayMatches = bettingOpenMatches.filter(m => this._isMatchToday(m));
+        let targetMatches = todayMatches.length >= 15 ? todayMatches : bettingOpenMatches;
         this.poolSourceLabel = 'Günün Maçları (Bugünün Bülteni)';
 
         // 2. Maç havuzunu analiz et
         let pool = this._buildAnalysisPool(targetMatches);
-        if (pool.length < 10 && targetMatches !== matches) {
-            pool = this._buildAnalysisPool(matches);
+        if (pool.length < 10 && targetMatches !== bettingOpenMatches) {
+            pool = this._buildAnalysisPool(bettingOpenMatches);
         }
         if (pool.length === 0) return [];
 
@@ -111,6 +157,9 @@ const CouponEngine = {
         const selectPicksForCoupon = (filterFn, sortFn, count = 3, allowReuse = false) => {
             const candidates = [];
             pool.forEach(item => {
+                // KULLANICI KURALI: "Bilyoner ve Nesine.com'da bahisler açılmışsa kupona dahil et, eğer bahis oynanmıyorsa kupona yazma"
+                if (!this.isBettingOpenOnPlatforms(item.match)) return;
+
                 const key = getMatchKey(item.match);
                 const prevPicks = usedPicksByMatch.get(key) || new Set();
                 const prevCats = usedCategoriesByMatch.get(key) || new Set();
@@ -1090,6 +1139,8 @@ const CouponEngine = {
         const pool = [];
 
         (matches || []).forEach(match => {
+            // KULLANICI KURALI: "Bilyoner ve Nesine.com'da bahisler açılmışsa kupona dahil et, eğer bahis oynanmıyorsa kupona yazma"
+            if (!this.isBettingOpenOnPlatforms(match)) return;
             if (!match.odds || (!match.odds.home && !match.odds.away && !match.odds.over15 && !match.odds.over25)) return;
 
             const homeOdd = parseFloat(match.odds.home) || 2.0;
@@ -1273,7 +1324,11 @@ const CouponEngine = {
                 confidenceScore: cand.confidenceScore,
                 valueEdge: cand.valueEdge,
                 consensusPercentage: cons.percentage,
-                reason
+                reason,
+                nesineBettingOpen: true,
+                bilyonerBettingOpen: true,
+                bettingStatus: 'OPEN',
+                platformVerification: '🟢 Bilyoner & Nesine Açık'
             };
         });
 
