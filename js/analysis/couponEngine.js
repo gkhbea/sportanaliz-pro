@@ -121,6 +121,10 @@ const CouponEngine = {
                 if (!allowReuse && currentUsage >= 1) return;
 
                 item.candidates.forEach(c => {
+                    // KULLANICI KURALI: "1.20 nin altında oranlara kupon yapma" (Minimum Oran 1.20)
+                    const oddVal = parseFloat(c.odd) || 0;
+                    if (oddVal < 1.20) return;
+
                     // AYNI SONUÇLA / TERCİHLE OYNAMA KURALI:
                     // Eğer maç başka kuponda kullanılmışsa, aynı marketi (MS, Alt/Üst vb.) tekrar seçme!
                     if (prevPicks.has(c.marketCode) || prevPicks.has(c.shortPick)) return;
@@ -167,17 +171,18 @@ const CouponEngine = {
         // 1. KUPON: 🛡️ KASA KATLAMA / EN GARANTÖR KUPON (Ultra Güven & Maksimum İsabet)
         // ============================================================
         // KULLANICI KURALI: 1.5 Üst çok olmuyor! 0-0 ve 1-0 riski nedeniyle Kasa Katlama kuponuna 1.5 Üst ALINMAZ!
+        // KULLANICI KURALI: 1.20 nin altında oranlara kupon yapma!
         let safePicks = selectPicksForCoupon(
-            (c, item) => (c.probability >= 75 && c.odd >= 1.15 && c.odd <= 1.68 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
+            (c, item) => (c.probability >= 75 && c.odd >= 1.20 && c.odd <= 1.68 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
             (a, b) => (b.pick.probability * 1.6 + b.pick.confidenceScore * 1.4) - (a.pick.probability * 1.6 + a.pick.confidenceScore * 1.4),
             3,
             false
         );
-        // Eğer 3 maç bulunamadıysa kriteri kontrollü esnet ama YİNE DE YENİ/BENZERSİZ MAÇLARDAN SEÇ
+        // Eğer 3 maç bulunamadıysa kriteri kontrollü esnet ama YİNE DE YENİ/BENZERSİZ MAÇLARDAN SEÇ (Min 1.20 Oran)
         if (safePicks.length < 3) {
             const needed = 3 - safePicks.length;
             const extra = selectPicksForCoupon(
-                (c, item) => (c.probability >= 68 && c.odd >= 1.10 && c.odd <= 1.75 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
+                (c, item) => (c.probability >= 68 && c.odd >= 1.20 && c.odd <= 1.75 && c.shortPick !== '1.5 ÜST' && c.marketCode !== '1.5UST'),
                 (a, b) => (b.pick.probability * 1.5 + b.pick.confidenceScore) - (a.pick.probability * 1.5 + a.pick.confidenceScore),
                 needed,
                 false
@@ -229,7 +234,7 @@ const CouponEngine = {
         if (goalPicks.length < 3) {
             const needed = 3 - goalPicks.length;
             const extra = selectPicksForCoupon(
-                (c, item) => isGoalMarket(c) && c.probability >= 60 && c.odd >= 1.18 && c.odd <= 2.30,
+                (c, item) => isGoalMarket(c) && c.probability >= 60 && c.odd >= 1.20 && c.odd <= 2.30,
                 (a, b) => b.pick.probability - a.pick.probability,
                 needed,
                 false
@@ -275,7 +280,7 @@ const CouponEngine = {
         if (starPicks.length < 3) {
             const needed = 3 - starPicks.length;
             const extra = selectPicksForCoupon(
-                (c, item) => (c.probability >= 62 && c.odd >= 1.18 && c.odd <= 2.30 && c.marketCode !== '1.5UST'),
+                (c, item) => (c.probability >= 62 && c.odd >= 1.20 && c.odd <= 2.30 && c.marketCode !== '1.5UST'),
                 (a, b) => (b.pick.confidenceScore + b.pick.probability) - (a.pick.confidenceScore + a.pick.probability),
                 needed,
                 false
@@ -374,7 +379,7 @@ const CouponEngine = {
 
         if (uefaPool.length >= 2) {
             uefaPicks = selectPicksForCoupon(
-                (c, item) => isUefaLeague(item.match?.league) && c.probability >= 66 && c.odd >= 1.15 && c.odd <= 2.25,
+                (c, item) => isUefaLeague(item.match?.league) && c.probability >= 66 && c.odd >= 1.20 && c.odd <= 2.25,
                 (a, b) => (b.pick.probability * 1.5 + b.pick.confidenceScore) - (a.pick.probability * 1.5 + a.pick.confidenceScore),
                 3,
                 true // UEFA özel kupon olduğu için güvenli maçları kullanabilir
@@ -383,7 +388,7 @@ const CouponEngine = {
             if (uefaPicks.length < 3) {
                 const needed = 3 - uefaPicks.length;
                 const extra = selectPicksForCoupon(
-                    (c, item) => isUefaLeague(item.match?.league) && c.probability >= 56 && c.odd >= 1.12 && c.odd <= 2.50,
+                    (c, item) => isUefaLeague(item.match?.league) && c.probability >= 56 && c.odd >= 1.20 && c.odd <= 2.50,
                     (a, b) => (b.pick.probability * 1.2 + b.pick.confidenceScore) - (a.pick.probability * 1.2 + a.pick.confidenceScore),
                     needed,
                     true
@@ -1713,7 +1718,7 @@ const CouponEngine = {
             const liveBonus = m._isLiveNow ? 80 : 0;
 
             // 1. Çifte Şans 1X (En Garantör - %95-97)
-            if (o.cs1X && o.cs1X >= 1.01 && o.cs1X <= 1.30) {
+            if (o.cs1X && o.cs1X >= 1.20 && o.cs1X <= 1.45) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,
@@ -1733,7 +1738,7 @@ const CouponEngine = {
             }
 
             // 2. 1.5 ÜST (Garantör Gol - %92)
-            if (o.over15 && o.over15 >= 1.10 && o.over15 <= 1.35) {
+            if (o.over15 && o.over15 >= 1.20 && o.over15 <= 1.45) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,
@@ -1754,7 +1759,7 @@ const CouponEngine = {
 
             // 3. 3.5 ALT (Güvenli Gol Barajı - %93)
             const u35Odd = o.under35 || 1.25;
-            if (u35Odd >= 1.12 && u35Odd <= 1.35) {
+            if (u35Odd >= 1.20 && u35Odd <= 1.45) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,
@@ -1773,8 +1778,8 @@ const CouponEngine = {
                 });
             }
 
-            // 4. Ev Sahibi Banko Galibiyet (1.15 - 1.55)
-            if (o.home && o.home >= 1.15 && o.home <= 1.55) {
+            // 4. Ev Sahibi Banko Galibiyet (1.20 - 1.65)
+            if (o.home && o.home >= 1.20 && o.home <= 1.65) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,
@@ -1786,7 +1791,7 @@ const CouponEngine = {
                     pickTitle: `MS 1 (${m.homeTeam} Kazanır)`,
                     marketCode: 'MS1',
                     odd: Number(o.home).toFixed(2),
-                    probability: Math.min(94, Math.round(92 - (o.home - 1.15) * 20)),
+                    probability: Math.min(94, Math.round(92 - (o.home - 1.20) * 20)),
                     priority: 1,
                     diffMins,
                     score: 210 + liveBonus + (isMajor ? 35 : 0) - (diffMins * 0.1)
@@ -1794,7 +1799,7 @@ const CouponEngine = {
             }
 
             // 5. Çifte Şans X-2 (Deplasman Çifte Şans)
-            if (o.csX2 && o.csX2 >= 1.05 && o.csX2 <= 1.30) {
+            if (o.csX2 && o.csX2 >= 1.20 && o.csX2 <= 1.45) {
                 candidates.push({
                     match: m,
                     homeTeam: m.homeTeam,

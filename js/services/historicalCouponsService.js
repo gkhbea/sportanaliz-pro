@@ -3473,7 +3473,7 @@ const HistoricalCouponsService = {
         const yDate = '2026-10-16';
         const dFmt = '16 Ekim 2026';
 
-        // 1. Standard Liege vs FCV Dender EH (22:00) - Belçika Kupası - Taraf (MS 1)
+        // 1. Standard Liege vs FCV Dender EH (22:00) - Belçika Kupası - Taraf (MS 1) (Oran: 1.44)
         const p_standard_ms = this._createArchivedPick({
             index: 1, iddaaCode: '3273974', homeTeam: "Standard Liege", awayTeam: "FCV Dender EH", league: "Belçika Kupası",
             timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Standard Liege Kazanır)', marketCode: 'MS1', odd: 1.44, confidence: 96,
@@ -3481,7 +3481,7 @@ const HistoricalCouponsService = {
             detail: "Standard Liege vs FCV Dender EH · MS 1 (22:00 | İddaa Kod: 3273974)"
         }, yDate, dFmt);
 
-        // 2. Westerlo vs Patro M. (21:30) - Belçika Kupası - Taraf (MS 1)
+        // 2. Westerlo vs Patro M. (21:30) - Belçika Kupası - Taraf (MS 1) (Oran: 1.29)
         const p_westerlo_ms = this._createArchivedPick({
             index: 2, iddaaCode: '3273984', homeTeam: "Westerlo", awayTeam: "Patro M.", league: "Belçika Kupası",
             timeStr: '21:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Westerlo Kazanır)', marketCode: 'MS1', odd: 1.29, confidence: 95,
@@ -3489,39 +3489,39 @@ const HistoricalCouponsService = {
             detail: "Westerlo vs Patro M. · MS 1 (21:30 | İddaa Kod: 3273984)"
         }, yDate, dFmt);
 
-        // 3. Chaves vs Os Marialvas (22:00) - Portekiz Kupası - Taraf (MS 1)
-        const p_chaves_ms = this._createArchivedPick({
-            index: 3, iddaaCode: '3264518', homeTeam: "Chaves", awayTeam: "Os Marialvas", league: "Portekiz Kupası",
-            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Chaves Kazanır)', marketCode: 'MS1', odd: 1.15, confidence: 97,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Chaves vs Os Marialvas · MS 1 (22:00 | İddaa Kod: 3264518)"
-        }, yDate, dFmt);
-
-        // 4. Çorum FK vs Rizespor (20:00) - Türkiye Süper Ligi - Çifte Şans (1-X)
-        const p_corum_cs = this._createArchivedPick({
-            index: 4, iddaaCode: '3218413', homeTeam: "Çorum FK", awayTeam: "Rizespor", league: "Türkiye Süper Ligi",
-            timeStr: '20:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.13, confidence: 95,
-            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Çorum FK vs Rizespor · 1-X Çifte Şans (20:00 | İddaa Kod: 3218413)"
-        }, yDate, dFmt);
-
-        // 5. D. Bükreş vs Botosani (21:00) - Romanya 1. Lig - Taraf (MS 1)
+        // 3. D. Bükreş vs Botosani (21:00) - Romanya 1. Lig - Taraf (MS 1) (Oran: 1.31)
         const p_bukres_ms = this._createArchivedPick({
-            index: 5, iddaaCode: '3219736', homeTeam: "D. Bükreş", awayTeam: "Botosani", league: "Romanya 1. Lig",
+            index: 3, iddaaCode: '3219736', homeTeam: "D. Bükreş", awayTeam: "Botosani", league: "Romanya 1. Lig",
             timeStr: '21:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (D. Bükreş Kazanır)', marketCode: 'MS1', odd: 1.31, confidence: 94,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
             detail: "D. Bükreş vs Botosani · MS 1 (21:00 | İddaa Kod: 3219736)"
         }, yDate, dFmt);
 
-        // 6. Sporting Hasselt vs Cercle Brugge (21:30) - Belçika Kupası - Çifte Şans (X-2)
-        const p_cercle_cs = this._createArchivedPick({
-            index: 6, iddaaCode: '3273994', homeTeam: "Sporting Hasselt", awayTeam: "Cercle Brugge", league: "Belçika Kupası",
-            timeStr: '21:30', marketTitle: 'Çifte Şans', pickTitle: 'X-2 Çifte Şans (Cercle Kaybetmez)', marketCode: 'CSX2', odd: 1.06, confidence: 96,
+        // 4. NK Rudes vs Rijeka (19:00) - Hırvatistan 1. HNL - Taraf (MS 2) (Oran: 1.22)
+        const p_rijeka_ms = this._createArchivedPick({
+            index: 4, iddaaCode: '3220099', homeTeam: "NK Rudes", awayTeam: "Rijeka", league: "Hırvatistan 1. HNL",
+            timeStr: '19:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Rijeka Kazanır)', marketCode: 'MS2', odd: 1.22, confidence: 94,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Sporting Hasselt vs Cercle Brugge · X-2 ÇŞ (21:30 | İddaa Kod: 3273994)"
+            detail: "NK Rudes vs Rijeka · MS 2 (19:00 | İddaa Kod: 3220099)"
         }, yDate, dFmt);
 
-        // 7. E. Cottbus vs Nürnberg (19:30) - Almanya Bundesliga 2 - Toplam Gol (2.5 ÜST)
+        // 5. Guingamp vs Pau (21:00) - Fransa Ligue 2 - Çifte Şans (1-X) (Oran: 1.22)
+        const p_guingamp_cs = this._createArchivedPick({
+            index: 5, iddaaCode: '3210717', homeTeam: "Guingamp", awayTeam: "Pau", league: "Fransa Ligue 2",
+            timeStr: '21:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Guingamp Kaybetmez)', marketCode: 'CS1X', odd: 1.22, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Guingamp vs Pau · 1-X Çifte Şans (21:00 | İddaa Kod: 3210717)"
+        }, yDate, dFmt);
+
+        // 6. Widzew Lodz vs Wisla Krakow (21:30) - Polonya Ekstraklasa - Çifte Şans (1-X) (Oran: 1.21)
+        const p_widzew_cs = this._createArchivedPick({
+            index: 6, iddaaCode: '3216616', homeTeam: "Widzew Lodz", awayTeam: "Wisla Krakow", league: "Polonya Ekstraklasa",
+            timeStr: '21:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Widzew Kaybetmez)', marketCode: 'CS1X', odd: 1.21, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Widzew Lodz vs Wisla Krakow · 1-X Çifte Şans (21:30 | İddaa Kod: 3216616)"
+        }, yDate, dFmt);
+
+        // 7. E. Cottbus vs Nürnberg (19:30) - Almanya Bundesliga 2 - Toplam Gol (2.5 ÜST) (Oran: 1.21)
         const p_cottbus_o25 = this._createArchivedPick({
             index: 7, iddaaCode: '3218030', homeTeam: "E. Cottbus", awayTeam: "Nürnberg", league: "Almanya Bundesliga 2",
             timeStr: '19:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.21, confidence: 94,
@@ -3529,7 +3529,7 @@ const HistoricalCouponsService = {
             detail: "E. Cottbus vs Nürnberg · 2.5 ÜST (19:30 | İddaa Kod: 3218030)"
         }, yDate, dFmt);
 
-        // 8. Baniyas vs Al Wasl (18:45) - BAE - Arap Körfez Ligi - Toplam Gol (2.5 ÜST)
+        // 8. Baniyas vs Al Wasl (18:45) - BAE - Arap Körfez Ligi - Toplam Gol (2.5 ÜST) (Oran: 1.26)
         const p_wasl_o25 = this._createArchivedPick({
             index: 8, iddaaCode: '3229835', homeTeam: "Baniyas", awayTeam: "Al Wasl", league: "BAE - Arap Körfez Ligi",
             timeStr: '18:45', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.26, confidence: 93,
@@ -3537,47 +3537,47 @@ const HistoricalCouponsService = {
             detail: "Baniyas vs Al Wasl · 2.5 ÜST (18:45 | İddaa Kod: 3229835)"
         }, yDate, dFmt);
 
-        // 9. Breidablik vs Vikingur Reykjavik (22:15) - İzlanda Efsta Deild - Toplam Gol (2.5 ÜST)
-        const p_breidablik_o25 = this._createArchivedPick({
-            index: 9, iddaaCode: '3221858', homeTeam: "Breidablik", awayTeam: "Vikingur Reykjavik", league: "İzlanda Efsta Deild",
-            timeStr: '22:15', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.13, confidence: 95,
+        // 9. Helmond vs NAC Breda (21:00) - Hollanda 1. Lig - Toplam Gol (2.5 ÜST) (Oran: 1.23)
+        const p_helmond_o25 = this._createArchivedPick({
+            index: 9, iddaaCode: '3210706', homeTeam: "Helmond", awayTeam: "NAC Breda", league: "Hollanda 1. Lig",
+            timeStr: '21:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.23, confidence: 93,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Breidablik vs Vikingur Reykjavik · 2.5 ÜST (22:15 | İddaa Kod: 3221858)"
+            detail: "Helmond vs NAC Breda · 2.5 ÜST (21:00 | İddaa Kod: 3210706)"
         }, yDate, dFmt);
 
-        // 10. Cartagena vs Europa (20:00) - İspanya Primera RFEF - Çifte Şans (1-X)
-        const p_cartagena_cs = this._createArchivedPick({
-            index: 10, iddaaCode: '3218481', homeTeam: "Cartagena", awayTeam: "Europa", league: "İspanya Primera RFEF",
-            timeStr: '20:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.12, confidence: 94,
+        // 10. MTK Budapeşte vs Vasas (21:00) - Macaristan 1. Ligi - Çifte Şans (1-X) (Oran: 1.22)
+        const p_mtk_cs = this._createArchivedPick({
+            index: 10, iddaaCode: '3210984', homeTeam: "MTK Budapeşte", awayTeam: "Vasas", league: "Macaristan 1. Ligi",
+            timeStr: '21:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.22, confidence: 94,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Cartagena vs Europa · 1-X Çifte Şans (20:00 | İddaa Kod: 3218481)"
+            detail: "MTK Budapeşte vs Vasas · 1-X Çifte Şans (21:00 | İddaa Kod: 3210984)"
         }, yDate, dFmt);
 
-        // 11. Alcorcon vs Huesca (22:15) - İspanya Primera RFEF - Çifte Şans (1-X)
-        const p_alcorcon_cs = this._createArchivedPick({
-            index: 11, iddaaCode: '3217910', homeTeam: "Alcorcon", awayTeam: "Huesca", league: "İspanya Primera RFEF",
-            timeStr: '22:15', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.10, confidence: 93,
+        // 11. Larne vs Coleraine (21:45) - Kuzey İrlanda Premiership - Çifte Şans (1-X) (Oran: 1.21)
+        const p_larne_cs = this._createArchivedPick({
+            index: 11, iddaaCode: '3217924', homeTeam: "Larne", awayTeam: "Coleraine", league: "Kuzey İrlanda Premiership",
+            timeStr: '21:45', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.21, confidence: 93,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Alcorcon vs Huesca · 1-X Çifte Şans (22:15 | İddaa Kod: 3217910)"
+            detail: "Larne vs Coleraine · 1-X Çifte Şans (21:45 | İddaa Kod: 3217924)"
         }, yDate, dFmt);
 
-        // 12. Ruch Chorzow vs Odra Opole (21:30) - Polonya 1. Lig - Çifte Şans (1-X)
-        const p_chorzow_cs = this._createArchivedPick({
-            index: 12, iddaaCode: '3219278', homeTeam: "Ruch Chorzow", awayTeam: "Odra Opole", league: "Polonya 1. Lig",
-            timeStr: '21:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.08, confidence: 95,
+        // 12. Aarhus Fremad vs Esbjerg (20:00) - Danimarka 1. Lig - Çifte Şans (1-X) (Oran: 1.21)
+        const p_aarhus_cs = this._createArchivedPick({
+            index: 12, iddaaCode: '3210777', homeTeam: "Aarhus Fremad", awayTeam: "Esbjerg", league: "Danimarka 1. Lig",
+            timeStr: '20:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.21, confidence: 93,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "Ruch Chorzow vs Odra Opole · 1-X Çifte Şans (21:30 | İddaa Kod: 3219278)"
+            detail: "Aarhus Fremad vs Esbjerg · 1-X Çifte Şans (20:00 | İddaa Kod: 3210777)"
         }, yDate, dFmt);
 
-        // 13. St. Patricks vs Shelbourne (22:00) - İrlanda Premier Lig - Çifte Şans (1-X)
-        const p_patricks_cs = this._createArchivedPick({
-            index: 13, iddaaCode: '3211009', homeTeam: "St. Patricks", awayTeam: "Shelbourne", league: "İrlanda Premier Lig",
-            timeStr: '22:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.08, confidence: 93,
+        // 13. Sandhausen vs Offenbacher (20:00) - Almanya Bölgesel Lig - Çifte Şans (1-X) (Oran: 1.21)
+        const p_sandhausen_cs = this._createArchivedPick({
+            index: 13, iddaaCode: '3216783', homeTeam: "Sandhausen", awayTeam: "Offenbacher", league: "Almanya Böl. Lig, Güney Batı",
+            timeStr: '20:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.21, confidence: 93,
             homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
-            detail: "St. Patricks vs Shelbourne · 1-X Çifte Şans (22:00 | İddaa Kod: 3211009)"
+            detail: "Sandhausen vs Offenbacher · 1-X Çifte Şans (20:00 | İddaa Kod: 3216783)"
         }, yDate, dFmt);
 
-        // 14. Cartagena vs Europa (20:00) - İspanya Primera RFEF - Taraf (MS 1)
+        // 14. Cartagena vs Europa (20:00) - İspanya Primera RFEF - Taraf (MS 1) (Oran: 1.44)
         const p_cartagena_ms = this._createArchivedPick({
             index: 14, iddaaCode: '3218481', homeTeam: "Cartagena", awayTeam: "Europa", league: "İspanya Primera RFEF",
             timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Cartagena Kazanır)', marketCode: 'MS1', odd: 1.44, confidence: 92,
@@ -3585,7 +3585,7 @@ const HistoricalCouponsService = {
             detail: "Cartagena vs Europa · MS 1 (20:00 | İddaa Kod: 3218481)"
         }, yDate, dFmt);
 
-        // 15. Ruch Chorzow vs Odra Opole (21:30) - Polonya 1. Lig - Taraf (MS 1)
+        // 15. Ruch Chorzow vs Odra Opole (21:30) - Polonya 1. Lig - Taraf (MS 1) (Oran: 1.61)
         const p_chorzow_ms = this._createArchivedPick({
             index: 15, iddaaCode: '3219278', homeTeam: "Ruch Chorzow", awayTeam: "Odra Opole", league: "Polonya 1. Lig",
             timeStr: '21:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Ruch Chorzow Kazanır)', marketCode: 'MS1', odd: 1.61, confidence: 90,
@@ -3593,7 +3593,7 @@ const HistoricalCouponsService = {
             detail: "Ruch Chorzow vs Odra Opole · MS 1 (21:30 | İddaa Kod: 3219278)"
         }, yDate, dFmt);
 
-        // 16. Ayr Utd vs P. Thistle (21:30) - İskoçya Championship - Taraf (MS 2)
+        // 16. Ayr Utd vs P. Thistle (21:30) - İskoçya Championship - Taraf (MS 2) (Oran: 1.51)
         const p_ayr_ms2 = this._createArchivedPick({
             index: 16, iddaaCode: '3217726', homeTeam: "Ayr Utd", awayTeam: "P. Thistle", league: "İskoçya Championship",
             timeStr: '21:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (P. Thistle Kazanır)', marketCode: 'MS2', odd: 1.51, confidence: 89,
@@ -3601,40 +3601,38 @@ const HistoricalCouponsService = {
             detail: "Ayr Utd vs P. Thistle · MS 2 (21:30 | İddaa Kod: 3217726)"
         }, yDate, dFmt);
 
-        // Kupon 1: 🛡️ Garantör Banko / Ultra Güvenilir Kupon (~2.14 Oran)
-        // Kural: Yüksek isabet odaklı, kupa favorileri ve ev sahibi bankoları
+        // Kupon 1: 🛡️ Garantör Banko / Ultra Güvenilir Kupon (~2.43 Oran, Min Oran: 1.29)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / Ultra Güven Kuponu',
-            subtitle: 'Standard Liege MS 1, Westerlo MS 1 ve Chaves MS 1 ile Cuma Bankosu', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Standard Liege MS 1 (1.44), Westerlo MS 1 (1.29) ve D. Bükreş MS 1 (1.31) ile Cuma Bankosu', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 250, confidence: 96
-        }, [p_standard_ms, p_westerlo_ms, p_chaves_ms], dFmt);
+        }, [p_standard_ms, p_westerlo_ms, p_bukres_ms], dFmt);
 
-        // Kupon 2: ⚡ İdeal Sistem Kuponu (Editör Seçimi) (~1.57 Oran)
-        // Kural: Çifte Şans korumalı, tek maçtan yatma riskini önleyen dengeli kombinasyon
+        // Kupon 2: ⚡ İdeal Sistem Kuponu (Editör Seçimi) (~1.80 Oran, Min Oran: 1.21)
         const c2 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
-            subtitle: 'Çorum FK 1-X ÇŞ, D. Bükreş MS 1 ve Cercle Brugge X-2 ÇŞ Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Rijeka MS 2 (1.22), Guingamp 1-X ÇŞ (1.22) ve Widzew 1-X ÇŞ (1.21) Dengeli Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'ideal', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 150, confidence: 94
-        }, [p_corum_cs, p_bukres_ms, p_cercle_cs], dFmt);
+        }, [p_rijeka_ms, p_guingamp_cs, p_widzew_cs], dFmt);
 
-        // Kupon 3: ⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST) (~1.72 Oran)
+        // Kupon 3: ⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST) (~1.87 Oran, Min Oran: 1.21)
         const c3 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (2.5 ÜST)',
-            subtitle: 'E. Cottbus-Nürnberg, Baniyas-Al Wasl ve Breidablik-Vikingur 2.5 Üst Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'E. Cottbus 2.5Ü (1.21), Baniyas 2.5Ü (1.26) ve Helmond 2.5Ü (1.23) Gol Kombini', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 93
-        }, [p_cottbus_o25, p_wasl_o25, p_breidablik_o25], dFmt);
+        }, [p_cottbus_o25, p_wasl_o25, p_helmond_o25], dFmt);
 
-        // Kupon 4: 🎯 Günün Çifte Şans & İddaa Kombine Kuponu (Sigortalı Kombinasyon) (~1.44 Oran)
+        // Kupon 4: 🎯 Günün Çifte Şans & Sigortalı Kuponu (~2.16 Oran, Min Oran: 1.21)
         const c4 = this._createArchivedCoupon({
             id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & Sigortalı Kuponu',
-            subtitle: 'Cartagena 1-X, Alcorcon 1-X, Ruch Chorzow 1-X ve St. Patricks 1-X Çifte Şans', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'MTK 1-X (1.22), Larne 1-X (1.21), Aarhus 1-X (1.21) ve Sandhausen 1-X (1.21) ÇŞ', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 95
-        }, [p_cartagena_cs, p_alcorcon_cs, p_chorzow_cs, p_patricks_cs], dFmt);
+        }, [p_mtk_cs, p_larne_cs, p_aarhus_cs, p_sandhausen_cs], dFmt);
 
-        // Kupon 5: 💎 Günün Bomba / Değer Kuponu (~3.50 Oran)
+        // Kupon 5: 💎 Günün Bomba / Değer Kuponu (~3.50 Oran, Min Oran: 1.44)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~3.50 Oran)',
-            subtitle: 'Cartagena MS 1, Ruch Chorzow MS 1 ve Partick Thistle MS 2 ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            subtitle: 'Cartagena MS 1 (1.44), Ruch Chorzow MS 1 (1.61) ve Partick Thistle MS 2 (1.51) ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 88
         }, [p_cartagena_ms, p_chorzow_ms, p_ayr_ms2], dFmt);
 
