@@ -37,6 +37,8 @@ const DataManager = {
         if (results.matches.length === 0) {
             try {
                 const candidates = [
+                    './data_cache/nesine_bulten_today_2026-10-16.json',
+                    'data_cache/nesine_bulten_today_2026-10-16.json',
                     './data_cache/nesine_bulten_today_2026-10-15.json',
                     './data_cache/nesine_bulten_today.json',
                     'data_cache/nesine_bulten_today_2026-10-15.json',
