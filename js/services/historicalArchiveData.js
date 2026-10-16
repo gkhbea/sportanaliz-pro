@@ -74103,16 +74103,16 @@ const HistoricalDailyArchives = {
     "2026-10-16": {
     "date": "2026-10-16",
     "dateFormatted": "16 Ekim 2026 (Cuma / Bugün)",
-    "concept": "Resmi Nesine Bülteni & Ultra Güvenli Analiz Karnesi (16 Maç - Min 1.20 Oran)",
-    "totalAnalyzed": 16,
+    "concept": "Resmi Nesine Bülteni & Ultra Güvenli Analiz Karnesi (19 Maç - Min 1.20 Oran & İY/MS Dahil)",
+    "totalAnalyzed": 19,
     "wonAnalyzed": 0,
     "lostAnalyzed": 0,
     "liveAnalyzed": 0,
-    "pendingAnalyzed": 16,
+    "pendingAnalyzed": 19,
     "decidedAnalyzed": 0,
     "winRate": 0,
     "actualWinRate": 0,
-    "expectedAccuracy": 90.5,
+    "expectedAccuracy": 90.8,
     "isDecided": false,
     "matches": [
         {
@@ -74297,6 +74297,66 @@ const HistoricalDailyArchives = {
         },
         {
             "id": "h_2026-10-16_10",
+            "iddaaCode": "3264518",
+            "homeTeam": "Chaves",
+            "awayTeam": "Os Marialvas",
+            "league": "Portekiz Kupası",
+            "timeStr": "22:00",
+            "scoreStr": "0 - 0",
+            "scoreStatus": "NOT_STARTED",
+            "minuteStr": "22:00",
+            "primaryPick": "İY 1 / MS 1",
+            "marketTitle": "İlk Yarı / Maç Sonu",
+            "odd": 1.85,
+            "probability": 92,
+            "accuracyRate": 92,
+            "confidenceScore": 92,
+            "status": "PENDING",
+            "statusBadge": "⏳ BEKLİYOR",
+            "detail": "Chaves vs Os Marialvas · İY 1 / MS 1 (22:00 | İddaa Kod: 3264518)"
+        },
+        {
+            "id": "h_2026-10-16_11",
+            "iddaaCode": "3273974",
+            "homeTeam": "Standard Liege",
+            "awayTeam": "FCV Dender EH",
+            "league": "Belçika Kupası",
+            "timeStr": "22:00",
+            "scoreStr": "0 - 0",
+            "scoreStatus": "NOT_STARTED",
+            "minuteStr": "22:00",
+            "primaryPick": "İY 1 / MS 1",
+            "marketTitle": "İlk Yarı / Maç Sonu",
+            "odd": 2.15,
+            "probability": 91,
+            "accuracyRate": 91,
+            "confidenceScore": 91,
+            "status": "PENDING",
+            "statusBadge": "⏳ BEKLİYOR",
+            "detail": "Standard Liege vs FCV Dender EH · İY 1 / MS 1 (22:00 | İddaa Kod: 3273974)"
+        },
+        {
+            "id": "h_2026-10-16_12",
+            "iddaaCode": "3210717",
+            "homeTeam": "Guingamp",
+            "awayTeam": "Pau",
+            "league": "Fransa Ligue 2",
+            "timeStr": "21:00",
+            "scoreStr": "0 - 0",
+            "scoreStatus": "NOT_STARTED",
+            "minuteStr": "21:00",
+            "primaryPick": "İY 0 / MS 1",
+            "marketTitle": "İlk Yarı / Maç Sonu",
+            "odd": 4.4,
+            "probability": 84,
+            "accuracyRate": 84,
+            "confidenceScore": 84,
+            "status": "PENDING",
+            "statusBadge": "⏳ BEKLİYOR",
+            "detail": "Guingamp vs Pau · İY 0 / MS 1 (21:00 | İddaa Kod: 3210717)"
+        },
+        {
+            "id": "h_2026-10-16_13",
             "iddaaCode": "3210984",
             "homeTeam": "MTK Budapeşte",
             "awayTeam": "Vasas",
@@ -74316,7 +74376,7 @@ const HistoricalDailyArchives = {
             "detail": "MTK Budapeşte vs Vasas · 1-X Çifte Şans (21:00 | İddaa Kod: 3210984)"
         },
         {
-            "id": "h_2026-10-16_11",
+            "id": "h_2026-10-16_14",
             "iddaaCode": "3217924",
             "homeTeam": "Larne",
             "awayTeam": "Coleraine",
@@ -74336,7 +74396,7 @@ const HistoricalDailyArchives = {
             "detail": "Larne vs Coleraine · 1-X Çifte Şans (21:45 | İddaa Kod: 3217924)"
         },
         {
-            "id": "h_2026-10-16_12",
+            "id": "h_2026-10-16_15",
             "iddaaCode": "3210777",
             "homeTeam": "Aarhus Fremad",
             "awayTeam": "Esbjerg",
@@ -74356,7 +74416,7 @@ const HistoricalDailyArchives = {
             "detail": "Aarhus Fremad vs Esbjerg · 1-X Çifte Şans (20:00 | İddaa Kod: 3210777)"
         },
         {
-            "id": "h_2026-10-16_13",
+            "id": "h_2026-10-16_16",
             "iddaaCode": "3216783",
             "homeTeam": "Sandhausen",
             "awayTeam": "Offenbacher",
@@ -74376,7 +74436,7 @@ const HistoricalDailyArchives = {
             "detail": "Sandhausen vs Offenbacher · 1-X Çifte Şans (20:00 | İddaa Kod: 3216783)"
         },
         {
-            "id": "h_2026-10-16_14",
+            "id": "h_2026-10-16_17",
             "iddaaCode": "3218481",
             "homeTeam": "Cartagena",
             "awayTeam": "Europa",
@@ -74396,7 +74456,7 @@ const HistoricalDailyArchives = {
             "detail": "Cartagena vs Europa · MS 1 (Cartagena Kazanır) (20:00 | İddaa Kod: 3218481)"
         },
         {
-            "id": "h_2026-10-16_15",
+            "id": "h_2026-10-16_18",
             "iddaaCode": "3219278",
             "homeTeam": "Ruch Chorzow",
             "awayTeam": "Odra Opole",
@@ -74416,7 +74476,7 @@ const HistoricalDailyArchives = {
             "detail": "Ruch Chorzow vs Odra Opole · MS 1 (Ruch Chorzow Kazanır) (21:30 | İddaa Kod: 3219278)"
         },
         {
-            "id": "h_2026-10-16_16",
+            "id": "h_2026-10-16_19",
             "iddaaCode": "3217726",
             "homeTeam": "Ayr Utd",
             "awayTeam": "P. Thistle",

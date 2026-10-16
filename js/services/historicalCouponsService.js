@@ -3601,6 +3601,31 @@ const HistoricalCouponsService = {
             detail: "Ayr Utd vs P. Thistle · MS 2 (21:30 | İddaa Kod: 3217726)"
         }, yDate, dFmt);
 
+        // ---- ⚡ KULLANICI TALEBİ: İY/MS ÖZEL ANALİZ TERCİHLERİ ----
+        // 17. Chaves vs Os Marialvas (22:00) - Portekiz Kupası - İY 1 / MS 1 (Oran: 1.85)
+        const p_chaves_htft = this._createArchivedPick({
+            index: 17, iddaaCode: '3264518', homeTeam: "Chaves", awayTeam: "Os Marialvas", league: "Portekiz Kupası",
+            timeStr: '22:00', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 1 / MS 1', marketCode: 'HT1_FT1', odd: 1.85, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Chaves vs Os Marialvas · İY 1 / MS 1 (22:00 | İddaa Kod: 3264518)"
+        }, yDate, dFmt);
+
+        // 18. Standard Liege vs FCV Dender EH (22:00) - Belçika Kupası - İY 1 / MS 1 (Oran: 2.15)
+        const p_standard_htft = this._createArchivedPick({
+            index: 18, iddaaCode: '3273974', homeTeam: "Standard Liege", awayTeam: "FCV Dender EH", league: "Belçika Kupası",
+            timeStr: '22:00', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 1 / MS 1', marketCode: 'HT1_FT1', odd: 2.15, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Standard Liege vs FCV Dender EH · İY 1 / MS 1 (22:00 | İddaa Kod: 3273974)"
+        }, yDate, dFmt);
+
+        // 19. Guingamp vs Pau (21:00) - Fransa Ligue 2 - İY 0 / MS 1 (Oran: 4.40)
+        const p_guingamp_htft = this._createArchivedPick({
+            index: 19, iddaaCode: '3210717', homeTeam: "Guingamp", awayTeam: "Pau", league: "Fransa Ligue 2",
+            timeStr: '21:00', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 0 / MS 1', marketCode: 'HTX_FT1', odd: 4.40, confidence: 84,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Guingamp vs Pau · İY 0 / MS 1 (21:00 | İddaa Kod: 3210717)"
+        }, yDate, dFmt);
+
         // Kupon 1: 🛡️ Garantör Banko / Ultra Güvenilir Kupon (~2.43 Oran, Min Oran: 1.29)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / Ultra Güven Kuponu',
@@ -3622,21 +3647,28 @@ const HistoricalCouponsService = {
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 93
         }, [p_cottbus_o25, p_wasl_o25, p_helmond_o25], dFmt);
 
-        // Kupon 4: 🎯 Günün Çifte Şans & Sigortalı Kuponu (~2.16 Oran, Min Oran: 1.21)
+        // Kupon 4: ⚡ İY / MS Özel Analiz Kuponu (Kullanıcı Talebi: İY 0/MS 1, İY 1/MS 1) (~17.50 Oran)
+        const c_htft = this._createArchivedCoupon({
+            id: 'c_htft_' + yDate, title: '⚡ İY / MS Özel Analiz Kuponu',
+            subtitle: 'Chaves İY 1/MS 1 (1.85), Standard Liege İY 1/MS 1 (2.15) ve Guingamp İY 0/MS 1 (4.40)', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
+            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50, confidence: 90
+        }, [p_chaves_htft, p_standard_htft, p_guingamp_htft], dFmt);
+
+        // Kupon 5: 🎯 Günün Çifte Şans & Sigortalı Kuponu (~2.16 Oran, Min Oran: 1.21)
         const c4 = this._createArchivedCoupon({
-            id: 'c_htft_' + yDate, title: '🎯 Günün Çifte Şans & Sigortalı Kuponu',
+            id: 'c_double_' + yDate, title: '🎯 Günün Çifte Şans & Sigortalı Kuponu',
             subtitle: 'MTK 1-X (1.22), Larne 1-X (1.21), Aarhus 1-X (1.21) ve Sandhausen 1-X (1.21) ÇŞ', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
-            badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 95
+            badgeType: 'primary', icon: '🎯', themeColor: '#3B82F6', recommendedStake: 100, confidence: 95
         }, [p_mtk_cs, p_larne_cs, p_aarhus_cs, p_sandhausen_cs], dFmt);
 
-        // Kupon 5: 💎 Günün Bomba / Değer Kuponu (~3.50 Oran, Min Oran: 1.44)
+        // Kupon 6: 💎 Günün Bomba / Değer Kuponu (~3.50 Oran, Min Oran: 1.44)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Günün Bomba / Değer Kuponu (~3.50 Oran)',
             subtitle: 'Cartagena MS 1 (1.44), Ruch Chorzow MS 1 (1.61) ve Partick Thistle MS 2 (1.51) ile Yüksek Getiri', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 88
         }, [p_cartagena_ms, p_chorzow_ms, p_ayr_ms2], dFmt);
 
-        return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
+        return { coupons: [c1, c2, c3, c_htft, c4, c5], euroCoupons: [] };
     },
 
     _generateAuthentic2026_10_15Coupons() {
@@ -4264,7 +4296,7 @@ const HistoricalCouponsService = {
                 date: '2026-10-16',
                 dateFormatted: '16 Ekim 2026',
                 dayName: 'Cuma (Bugün)',
-                concept: "Resmi Nesine & İddaa Cuma Bülteni (Günün 5 Özel Kuponu - 169 Maç)",
+                concept: "Resmi Nesine & İddaa Cuma Bülteni (Günün 6 Özel Kuponu: Banko, İdeal, Gol, İY/MS, Çifte Şans, Değer - 169 Maç)",
                 generator: () => this._generateAuthentic2026_10_16Coupons('2026-10-16')
             },
         ];

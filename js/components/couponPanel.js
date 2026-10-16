@@ -43,8 +43,8 @@ const CouponPanel = {
         let result = [];
 
         // 1. Teyitli/otantik kupon seti kontrolü (HistoricalCouponsService - Resmi Maçkolik & İddaa Teyitli)
-        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
-            const hist = HistoricalCouponsService.getCouponsByDate(queryDate);
+        if (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof window.HistoricalCouponsService.getCouponsByDate === 'function') {
+            const hist = window.HistoricalCouponsService.getCouponsByDate(queryDate);
             if (Array.isArray(hist) && hist.length > 0) {
                 result = [...hist];
             }
@@ -110,7 +110,8 @@ const CouponPanel = {
 
         // Eğer 8 kupon modu aktifse ve 8'den az kupon varsa expandTo8Coupons ile 8'e tamamla
         const hasUefa = result.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
-        const maxLimit = hasUefa ? 6 : 5;
+        const hasHtFt = result.some(c => (c.id && c.id.includes('htft')) || (c.title && /iy.*ms|ilk yarı/i.test(c.title)));
+        const maxLimit = (hasUefa || hasHtFt) ? 6 : 5;
         if (mode === 8 && result.length < 8 && window.CouponEngine?.expandTo8Coupons) {
             result = window.CouponEngine.expandTo8Coupons(result, window.app?.matches || [], queryDate);
         } else if (mode <= 6 && result.length > maxLimit) {

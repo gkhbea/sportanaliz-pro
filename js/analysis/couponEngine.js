@@ -289,68 +289,99 @@ const CouponEngine = {
         }
 
         // ============================================================
-        // ⚡ İY / MS ÖZEL ANALİZ KUPONU (Kullanıcı Talebi: İY 0/MS 1, İY 0/MS 2, İY 1/MS 2)
+        // ⚡ İY / MS ÖZEL ANALİZ KUPONU (Kullanıcı Talebi: İY 0/MS 1, İY 0/MS 2, İY 1/MS 2, İY 1/MS 1)
         // ============================================================
         let htftPicks = selectPicksForCoupon(
             (c, item) => (
-                (c.marketCode === 'HTX_FT1' || c.marketCode === 'HTX_FT2' || c.marketCode === 'HT1_FT2' || c.marketCode === 'HT2_FT1' || c.marketCode === 'HT1_FT1' || c.category === 'iy_ms' || c.category === 'iy_ms_surpriz') &&
-                (c.probability >= 14 || (c.marketCode === 'HT1_FT2' && c.probability >= 1.2) || (c.marketCode === 'HT2_FT1' && c.probability >= 1.4))
+                (c.marketCode === 'HTX_FT1' || c.marketCode === 'HTX_FT2' || c.marketCode === 'HT1_FT2' || c.marketCode === 'HT2_FT1' || c.marketCode === 'HT1_FT1' || c.marketCode === 'HT2_FT2' || c.category === 'iy_ms' || c.category === 'iy_ms_surpriz') &&
+                (c.probability >= 14 || (c.marketCode === 'HT1_FT2' && c.probability >= 1.2) || (c.marketCode === 'HT2_FT1' && c.probability >= 1.4) || (c.marketCode === 'HT1_FT1' && c.probability >= 30))
             ),
             (a, b) => {
                 const scoreA = (a.pick.marketCode === 'HT1_FT2' || a.pick.marketCode === 'HT2_FT1') ? (a.pick.probability * 15 + a.pick.odd * 1.5) : (a.pick.probability * 2.2 + a.pick.odd * 2.0);
                 const scoreB = (b.pick.marketCode === 'HT1_FT2' || b.pick.marketCode === 'HT2_FT1') ? (b.pick.probability * 15 + b.pick.odd * 1.5) : (b.pick.probability * 2.2 + b.pick.odd * 2.0);
                 return scoreB - scoreA;
             },
-            2,
+            3,
             true // İY/MS özel bir tür olduğu için güvenli maçları da kullanabilir
         );
 
         // Fallback: Eğer havuzda henüz yeterli İY/MS adayı yoksa, bültendeki maçların Poisson modelinden türet
-        if (!htftPicks || htftPicks.length < 2) {
+        if (!htftPicks || htftPicks.length < 3) {
             pool.forEach(item => {
-                if (htftPicks.length >= 2) return;
+                if (htftPicks.length >= 3) return;
                 const key = getMatchKey(item.match);
                 if ((matchUsageCount.get(key) || 0) >= 2) return;
                 const p = item.result?.poisson;
                 const htft = p?.halfTimeFullTime;
                 if (!htft) return;
                 
-                if (htft['X/1'] >= 16) {
-                    const exists = htftPicks.some(hp => hp.item.match.id === item.match.id);
-                    if (!exists) {
-                        htftPicks.push({
-                            item,
-                            pick: {
-                                marketCode: 'HTX_FT1',
-                                title: 'İlk Yarı X / Maç Sonu 1',
-                                shortPick: 'İY 0 / MS 1',
-                                probability: htft['X/1'],
-                                odd: +(100 / Math.max(htft['X/1'], 10) * 0.85).toFixed(2),
-                                confidenceScore: 78,
-                                category: 'iy_ms'
-                            }
-                        });
-                        usedMatchKeys.add(key);
-                        matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
-                    }
+                const exists = htftPicks.some(hp => hp.item.match.id === item.match.id);
+                if (exists) return;
+
+                if (htft['X/1'] >= 15) {
+                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['X/1'], 10) * 0.85).toFixed(2));
+                    htftPicks.push({
+                        item,
+                        pick: {
+                            marketCode: 'HTX_FT1',
+                            title: 'İlk Yarı X / Maç Sonu 1',
+                            shortPick: 'İY 0 / MS 1',
+                            probability: htft['X/1'],
+                            odd: oddVal,
+                            confidenceScore: 78,
+                            category: 'iy_ms'
+                        }
+                    });
+                    usedMatchKeys.add(key);
+                    matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                 } else if (htft['X/2'] >= 14) {
-                    const exists = htftPicks.some(hp => hp.item.match.id === item.match.id);
-                    if (!exists) {
-                        htftPicks.push({
-                            item,
-                            pick: {
-                                marketCode: 'HTX_FT2',
-                                title: 'İlk Yarı X / Maç Sonu 2',
-                                shortPick: 'İY 0 / MS 2',
-                                probability: htft['X/2'],
-                                odd: +(100 / Math.max(htft['X/2'], 10) * 0.85).toFixed(2),
-                                confidenceScore: 74,
-                                category: 'iy_ms'
-                            }
-                        });
-                        usedMatchKeys.add(key);
-                        matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
-                    }
+                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['X/2'], 10) * 0.85).toFixed(2));
+                    htftPicks.push({
+                        item,
+                        pick: {
+                            marketCode: 'HTX_FT2',
+                            title: 'İlk Yarı X / Maç Sonu 2',
+                            shortPick: 'İY 0 / MS 2',
+                            probability: htft['X/2'],
+                            odd: oddVal,
+                            confidenceScore: 74,
+                            category: 'iy_ms'
+                        }
+                    });
+                    usedMatchKeys.add(key);
+                    matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
+                } else if (htft['1/1'] >= 30) {
+                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['1/1'], 10) * 0.85).toFixed(2));
+                    htftPicks.push({
+                        item,
+                        pick: {
+                            marketCode: 'HT1_FT1',
+                            title: 'İlk Yarı 1 / Maç Sonu 1',
+                            shortPick: 'İY 1 / MS 1',
+                            probability: htft['1/1'],
+                            odd: oddVal,
+                            confidenceScore: 82,
+                            category: 'iy_ms'
+                        }
+                    });
+                    usedMatchKeys.add(key);
+                    matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
+                } else if (htft['2/2'] >= 30) {
+                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['2/2'], 10) * 0.85).toFixed(2));
+                    htftPicks.push({
+                        item,
+                        pick: {
+                            marketCode: 'HT2_FT2',
+                            title: 'İlk Yarı 2 / Maç Sonu 2',
+                            shortPick: 'İY 2 / MS 2',
+                            probability: htft['2/2'],
+                            odd: oddVal,
+                            confidenceScore: 80,
+                            category: 'iy_ms'
+                        }
+                    });
+                    usedMatchKeys.add(key);
+                    matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                 }
             });
         }
@@ -529,7 +560,8 @@ const CouponEngine = {
         const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
         const parsedMax = parseInt(maxCoupons, 10);
         const hasUefa = qualifiedCoupons.some(c => c.id === 'coupon-uefa' || (c.id && c.id.includes('uefa')));
-        const defaultMax = isWeekend ? 8 : (hasUefa ? 6 : 5);
+        const hasHtFt = qualifiedCoupons.some(c => c.id === 'coupon-htft' || (c.id && c.id.includes('htft')));
+        const defaultMax = isWeekend ? 8 : ((hasUefa || hasHtFt) ? 6 : 5);
         const targetMax = (!isNaN(parsedMax) && parsedMax > 0) ? parsedMax : defaultMax;
         let coupons = qualifiedCoupons.slice(0, targetMax);
 
