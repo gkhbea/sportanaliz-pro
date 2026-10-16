@@ -171,6 +171,14 @@ const DataManager = {
                 }
                 existing.allOdds.push({ source: match.source, odds: { ...match.odds } });
 
+                if (!existing.odds.htft && match.odds.htft) {
+                    existing.odds.htft = match.odds.htft;
+                    existing.hasHtFtMarket = true;
+                }
+                if (!existing.rawData?.MA && match.rawData?.MA) {
+                    existing.rawData = match.rawData;
+                }
+
                 // Eksik oranları tamamla
                 ['home', 'draw', 'away', 'cs1X', 'cs12', 'csX2', 'over15', 'under15', 'over25', 'under25', 'over35', 'under35', 'bttsYes', 'bttsNo', 'firstHalfHome', 'firstHalfDraw', 'firstHalfAway'].forEach(prop => {
                     if (!existing.odds[prop] && match.odds[prop]) {

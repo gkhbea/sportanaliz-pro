@@ -199,10 +199,13 @@ const NesineService = {
                 dayStr: event.DAY || '',
                 odds: odds,
                 editorChoices: editorChoices,
+                hasHtFtMarket: !!(odds.htft && Object.keys(odds.htft).length >= 9),
                 rawData: {
                     eventCode: event.C,
                     eventVersion: event.EV,
-                    type: event.TYPE
+                    type: event.TYPE,
+                    MA: event.MA || [],
+                    event: event
                 }
             };
         } catch (e) {
@@ -333,6 +336,22 @@ const NesineService = {
                             if (val > 1) {
                                 if (o.N === 1) odds.firstHalfUnder15 = val;
                                 else if (o.N === 2) odds.firstHalfOver15 = val;
+                            }
+                        });
+                    }
+
+                    // MTID 5: İlk Yarı / Maç Sonu (1/1, 1/X, 1/2, X/1, X/X, X/2, 2/1, 2/X, 2/2)
+                    if (mtid === 5 && Array.isArray(oca)) {
+                        odds.htft = {};
+                        const nKeyMap = {
+                            1: '1/1', 2: '1/X', 3: '1/2',
+                            4: 'X/1', 5: 'X/X', 6: 'X/2',
+                            7: '2/1', 8: '2/X', 9: '2/2'
+                        };
+                        oca.forEach(o => {
+                            const val = parseFloat(o.O || o.Odds || 0);
+                            if (val > 1 && nKeyMap[o.N]) {
+                                odds.htft[nKeyMap[o.N]] = val;
                             }
                         });
                     }

@@ -3646,6 +3646,55 @@ const HistoricalCouponsService = {
             detail: "Ayr Utd vs P. Thistle · MS 2 (21:30 | İddaa Kod: 3217726)"
         }, yDate, dFmt);
 
+        // ---- 🚀 KULLANICI TALEBİ: YÜKSEK ORANLI SİSTEM 4-5-6 SEÇİMLERİ (NESİNE & BİLYONER RESMİ BÜLTEN) ----
+        // 22. E. Frankfurt vs Köln (21:30) - Almanya Bundesliga - İY 1 / MS 1 (Resmi MTID 5 Oran: 2.55)
+        const p_frankfurt_htft = this._createArchivedPick({
+            index: 22, iddaaCode: '3217571', homeTeam: "E. Frankfurt", awayTeam: "Köln", league: "Almanya Bundesliga",
+            timeStr: '21:30', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 1 / MS 1', marketCode: 'HT1_FT1', odd: 2.55, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "E. Frankfurt vs Köln · İY 1 / MS 1 (21:30 | İddaa Kod: 3217571)"
+        }, yDate, dFmt);
+
+        // 23. Burnley vs Wolverhampton (22:00) - İngiltere Premier Lig - Taraf (MS 2) (Resmi MTID 1 Oran: 2.07)
+        const p_burnley_ms = this._createArchivedPick({
+            index: 23, iddaaCode: '3211144', homeTeam: "Burnley", awayTeam: "Wolverhampton", league: "İngiltere Premier Lig",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Wolverhampton Kazanır)', marketCode: 'MS2', odd: 2.07, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Burnley vs Wolverhampton · MS 2 (22:00 | İddaa Kod: 3211144)"
+        }, yDate, dFmt);
+
+        // 24. Frosinone vs Sassuolo (21:45) - İtalya Serie B - Taraf (MS 2) (Resmi MTID 1 Oran: 2.32)
+        const p_sassuolo_ms = this._createArchivedPick({
+            index: 24, iddaaCode: '3211087', homeTeam: "Frosinone", awayTeam: "Sassuolo", league: "İtalya Serie B",
+            timeStr: '21:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Sassuolo Kazanır)', marketCode: 'MS2', odd: 2.32, confidence: 89,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Frosinone vs Sassuolo · MS 2 (21:45 | İddaa Kod: 3211087)"
+        }, yDate, dFmt);
+
+        // 25. Dep. La Coruna vs Levante (22:00) - İspanya La Liga 2 - İY 1 / MS 1 (Resmi MTID 5 Oran: 2.95)
+        const p_lacoruna_htft = this._createArchivedPick({
+            index: 25, iddaaCode: '3216309', homeTeam: "Dep. La Coruna", awayTeam: "Levante", league: "İspanya La Liga 2",
+            timeStr: '22:00', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 1 / MS 1', marketCode: 'HT1_FT1', odd: 2.95, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Dep. La Coruna vs Levante · İY 1 / MS 1 (22:00 | İddaa Kod: 3216309)"
+        }, yDate, dFmt);
+
+        // 26. Annecy vs AS Nancy (21:00) - Fransa Ligue 2 - Taraf (MS 1) (Resmi MTID 1 Oran: 2.40)
+        const p_annecy_ms = this._createArchivedPick({
+            index: 26, iddaaCode: '3210967', homeTeam: "Annecy", awayTeam: "AS Nancy", league: "Fransa Ligue 2",
+            timeStr: '21:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Annecy Kazanır)', marketCode: 'MS1', odd: 2.40, confidence: 89,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Annecy vs AS Nancy · MS 1 (21:00 | İddaa Kod: 3210967)"
+        }, yDate, dFmt);
+
+        // 27. Le Mans vs Toulouse (21:45) - Fransa Kupası / Lig - Taraf (MS 2) (Resmi MTID 1 Oran: 2.09)
+        const p_toulouse_ms = this._createArchivedPick({
+            index: 27, iddaaCode: '3211162', homeTeam: "Le Mans", awayTeam: "Toulouse", league: "Fransa Kupası / Lig",
+            timeStr: '21:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Toulouse Kazanır)', marketCode: 'MS2', odd: 2.09, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Le Mans vs Toulouse · MS 2 (21:45 | İddaa Kod: 3211162)"
+        }, yDate, dFmt);
+
         // Kupon 1: 🛡️ Garantör Banko / Ultra Güven Kuponu (~2.54 Oran, Min Oran: 1.29)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / Ultra Güven Kuponu',
@@ -3688,7 +3737,15 @@ const HistoricalCouponsService = {
             badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 50, confidence: 88
         }, [p_cartagena_ms, p_chorzow_ms, p_ayr_ms2], dFmt);
 
-        return { coupons: [c1, c2, c3, c_htft, c4, c5], euroCoupons: [] };
+        // Kupon 7: 🚀 Yüksek Oranlı Sistem 4-5-6 Kuponu (~181.18 Düz Oran, 22 Kolon)
+        const c_sys456 = this._createArchivedCoupon({
+            id: 'c_sys456_' + yDate, title: '🚀 Yüksek Oranlı Sistem 4-5-6 Kuponu (22 Kolon)',
+            subtitle: '6 Maçlık Yüksek Oranlı Sistem: Frankfurt İY1/MS1 (2.55), Wolves MS2 (2.07), Sassuolo MS2 (2.32), La Coruna İY1/MS1 (2.95), Annecy MS1 (2.40), Toulouse MS2 (2.09) · 4 maçta bile net kâr (Düz: 181.18 Oran)',
+            badge: '⏳ SİSTEM 4-5-6 (22 KOLON)',
+            badgeType: 'special', icon: '🚀', themeColor: '#EC4899', recommendedStake: 220, confidence: 90
+        }, [p_frankfurt_htft, p_burnley_ms, p_sassuolo_ms, p_lacoruna_htft, p_annecy_ms, p_toulouse_ms], dFmt);
+
+        return { coupons: [c1, c2, c3, c_htft, c4, c5, c_sys456], euroCoupons: [] };
     },
 
     _generateAuthentic2026_10_15Coupons() {
@@ -4316,7 +4373,7 @@ const HistoricalCouponsService = {
                 date: '2026-10-16',
                 dateFormatted: '16 Ekim 2026',
                 dayName: 'Cuma (Bugün)',
-                concept: "Resmi Nesine & İddaa Cuma Bülteni (Günün 6 Özel Kuponu: Banko, İdeal, Gol, İY/MS 5'li Sistem, Çifte Şans, Değer - 169 Maç)",
+                concept: "Resmi Nesine & İddaa Cuma Bülteni (Günün 7 Özel Kuponu: Banko, İdeal, Gol, İY/MS 5'li Sistem, Çifte Şans, Değer, Sistem 4-5-6 - 169 Maç)",
                 generator: () => this._generateAuthentic2026_10_16Coupons('2026-10-16')
             },
         ];
