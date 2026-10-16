@@ -74494,6 +74494,46 @@ const HistoricalDailyArchives = {
             "status": "PENDING",
             "statusBadge": "⏳ BEKLİYOR",
             "detail": "Ayr Utd vs P. Thistle · MS 2 (P. Thistle Kazanır) (21:30 | İddaa Kod: 3217726)"
+        },
+        {
+            "id": "h_2026-10-16_20",
+            "iddaaCode": "3288435",
+            "homeTeam": "Braga",
+            "awayTeam": "Gil Vicente",
+            "league": "Portekiz Premier Lig",
+            "timeStr": "22:15",
+            "scoreStr": "0 - 0",
+            "scoreStatus": "NOT_STARTED",
+            "minuteStr": "22:15",
+            "primaryPick": "İY 1 / MS 1",
+            "marketTitle": "İlk Yarı / Maç Sonu",
+            "odd": 2.10,
+            "probability": 90,
+            "accuracyRate": 90,
+            "confidenceScore": 90,
+            "status": "PENDING",
+            "statusBadge": "⏳ BEKLİYOR",
+            "detail": "Braga vs Gil Vicente · İY 1 / MS 1 (22:15 | İddaa Kod: 3288435)"
+        },
+        {
+            "id": "h_2026-10-16_21",
+            "iddaaCode": "3273994",
+            "homeTeam": "Sporting Hasselt",
+            "awayTeam": "Cercle Brugge",
+            "league": "Belçika Kupası",
+            "timeStr": "21:30",
+            "scoreStr": "0 - 0",
+            "scoreStatus": "NOT_STARTED",
+            "minuteStr": "21:30",
+            "primaryPick": "İY 2 / MS 2",
+            "marketTitle": "İlk Yarı / Maç Sonu",
+            "odd": 2.35,
+            "probability": 88,
+            "accuracyRate": 88,
+            "confidenceScore": 88,
+            "status": "PENDING",
+            "statusBadge": "⏳ BEKLİYOR",
+            "detail": "Sporting Hasselt vs Cercle Brugge · İY 2 / MS 2 (21:30 | İddaa Kod: 3273994)"
         }
     ]
 }

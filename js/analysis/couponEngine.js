@@ -289,26 +289,26 @@ const CouponEngine = {
         }
 
         // ============================================================
-        // ⚡ İY / MS ÖZEL ANALİZ KUPONU (Kullanıcı Talebi: İY 0/MS 1, İY 0/MS 2, İY 1/MS 2, İY 1/MS 1)
+        // ⚡ İY / MS ÖZEL ANALİZ & SİSTEM KUPONU (Kullanıcı Talebi: 4-5 Maç Sistem Kuponu)
         // ============================================================
         let htftPicks = selectPicksForCoupon(
             (c, item) => (
                 (c.marketCode === 'HTX_FT1' || c.marketCode === 'HTX_FT2' || c.marketCode === 'HT1_FT2' || c.marketCode === 'HT2_FT1' || c.marketCode === 'HT1_FT1' || c.marketCode === 'HT2_FT2' || c.category === 'iy_ms' || c.category === 'iy_ms_surpriz') &&
-                (c.probability >= 14 || (c.marketCode === 'HT1_FT2' && c.probability >= 1.2) || (c.marketCode === 'HT2_FT1' && c.probability >= 1.4) || (c.marketCode === 'HT1_FT1' && c.probability >= 30))
+                (c.probability >= 14 || (c.marketCode === 'HT1_FT2' && c.probability >= 1.2) || (c.marketCode === 'HT2_FT1' && c.probability >= 1.4) || (c.marketCode === 'HT1_FT1' && c.probability >= 30) || (c.marketCode === 'HT2_FT2' && c.probability >= 30))
             ),
             (a, b) => {
                 const scoreA = (a.pick.marketCode === 'HT1_FT2' || a.pick.marketCode === 'HT2_FT1') ? (a.pick.probability * 15 + a.pick.odd * 1.5) : (a.pick.probability * 2.2 + a.pick.odd * 2.0);
                 const scoreB = (b.pick.marketCode === 'HT1_FT2' || b.pick.marketCode === 'HT2_FT1') ? (b.pick.probability * 15 + b.pick.odd * 1.5) : (b.pick.probability * 2.2 + b.pick.odd * 2.0);
                 return scoreB - scoreA;
             },
-            3,
+            5,
             true // İY/MS özel bir tür olduğu için güvenli maçları da kullanabilir
         );
 
         // Fallback: Eğer havuzda henüz yeterli İY/MS adayı yoksa, bültendeki maçların Poisson modelinden türet
-        if (!htftPicks || htftPicks.length < 3) {
+        if (!htftPicks || htftPicks.length < 5) {
             pool.forEach(item => {
-                if (htftPicks.length >= 3) return;
+                if (htftPicks.length >= 5) return;
                 const key = getMatchKey(item.match);
                 if ((matchUsageCount.get(key) || 0) >= 2) return;
                 const p = item.result?.poisson;
@@ -491,20 +491,23 @@ const CouponEngine = {
             }));
         }
 
-        // ⚡ İY / MS ÖZEL KUPONU
+        // ⚡ İY / MS ÖZEL KUPONU (4-5 Maç Sistem veya Özel Kombine)
         if (htftPicks && htftPicks.length >= 2) {
+            const isSystem = htftPicks.length >= 4;
             qualifiedCoupons.push(this._formatCoupon({
                 id: 'coupon-htft',
-                title: '⚡ İY / MS Özel Analiz Kuponu',
-                subtitle: 'Yüksek model yüzdeli İY 0/MS 1, İY 0/MS 2 ve Bomba İY 1/MS 2',
-                badge: '⚡ İY / MS ÖZEL · YÜKSEK ÇARPAN',
+                title: isSystem ? `⚡ İY / MS ${htftPicks.length}'li Sistem Kuponu (Sistem 2-3-${htftPicks.length === 5 ? '4-5' : '4'})` : '⚡ İY / MS Özel Analiz Kuponu',
+                subtitle: isSystem 
+                    ? `${htftPicks.length} Maçlık İY/MS Sistem Kombinasyonu (Sistem ile 2 maçta bile kazanç garantili)` 
+                    : 'Yüksek model yüzdeli İY 0/MS 1, İY 1/MS 1 ve İY 0/MS 2',
+                badge: isSystem ? '⚡ İY / MS SİSTEM' : '⚡ İY / MS ÖZEL · YÜKSEK ÇARPAN',
                 badgeType: 'special',
                 icon: '⚡',
                 themeColor: '#8B5CF6',
                 accentBg: 'rgba(139, 92, 246, 0.14)',
                 picks: htftPicks,
-                strategy: 'İlk yarı ve ikinci yarı bağımsız Poisson olasılık modeliyle hesaplanan yüksek yüzdeli İY 0/MS 1, İY 0/MS 2 ve sürpriz çevirme (İY 1/MS 2) tercihlerini birleştiren özel kupondur.',
-                recommendedStake: 50
+                strategy: 'İlk yarı ve ikinci yarı bağımsız Poisson olasılık modeliyle hesaplanan yüksek yüzdeli İY/MS tahminleri. Yüksek çarpanlı maçlar sistem formülüyle (Sistem 2-3-4-5) 2 maçta bile kâra geçmeyi garantiler.',
+                recommendedStake: isSystem ? 100 : 50
             }));
         }
 

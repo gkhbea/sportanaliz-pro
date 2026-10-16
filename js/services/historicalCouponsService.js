@@ -3626,6 +3626,22 @@ const HistoricalCouponsService = {
             detail: "Guingamp vs Pau · İY 0 / MS 1 (21:00 | İddaa Kod: 3210717)"
         }, yDate, dFmt);
 
+        // 20. Braga vs Gil Vicente (22:15) - Portekiz Premier Lig - İY 1 / MS 1 (Oran: 2.10)
+        const p_braga_htft = this._createArchivedPick({
+            index: 20, iddaaCode: '3288435', homeTeam: "Braga", awayTeam: "Gil Vicente", league: "Portekiz Premier Lig",
+            timeStr: '22:15', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 1 / MS 1', marketCode: 'HT1_FT1', odd: 2.10, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Braga vs Gil Vicente · İY 1 / MS 1 (22:15 | İddaa Kod: 3288435)"
+        }, yDate, dFmt);
+
+        // 21. Sporting Hasselt vs Cercle Brugge (21:30) - Belçika Kupası - İY 2 / MS 2 (Oran: 2.35)
+        const p_cercle_htft = this._createArchivedPick({
+            index: 21, iddaaCode: '3273994', homeTeam: "Sporting Hasselt", awayTeam: "Cercle Brugge", league: "Belçika Kupası",
+            timeStr: '21:30', marketTitle: 'İlk Yarı / Maç Sonu', pickTitle: 'İY 2 / MS 2', marketCode: 'HT2_FT2', odd: 2.35, confidence: 88,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Sporting Hasselt vs Cercle Brugge · İY 2 / MS 2 (21:30 | İddaa Kod: 3273994)"
+        }, yDate, dFmt);
+
         // Kupon 1: 🛡️ Garantör Banko / Ultra Güvenilir Kupon (~2.43 Oran, Min Oran: 1.29)
         const c1 = this._createArchivedCoupon({
             id: 'c_safe_' + yDate, title: '🛡️ Garantör Banko / Ultra Güven Kuponu',
@@ -3647,12 +3663,12 @@ const HistoricalCouponsService = {
             badgeType: 'goals', icon: '⚽', themeColor: '#38BDF8', recommendedStake: 150, confidence: 93
         }, [p_cottbus_o25, p_wasl_o25, p_helmond_o25], dFmt);
 
-        // Kupon 4: ⚡ İY / MS Özel Analiz Kuponu (Kullanıcı Talebi: İY 0/MS 1, İY 1/MS 1) (~17.50 Oran)
+        // Kupon 4: ⚡ İY / MS 5'li Sistem Kuponu (Kullanıcı Talebi: 4-5 Maç Sistem 2-3-4-5) (~86.37 Düz Oran)
         const c_htft = this._createArchivedCoupon({
-            id: 'c_htft_' + yDate, title: '⚡ İY / MS Özel Analiz Kuponu',
-            subtitle: 'Chaves İY 1/MS 1 (1.85), Standard Liege İY 1/MS 1 (2.15) ve Guingamp İY 0/MS 1 (4.40)', badge: '⏳ BUGÜNÜN KUPONU (BEKLİYOR)',
-            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 50, confidence: 90
-        }, [p_chaves_htft, p_standard_htft, p_guingamp_htft], dFmt);
+            id: 'c_htft_' + yDate, title: '⚡ İY / MS 5\'li Sistem Kuponu (Sistem 2-3-4-5)',
+            subtitle: '5 Maçlık İY/MS Kombinasyonu: Chaves (1.85), Standard (2.15), Guingamp (4.40), Braga (2.10), Cercle (2.35) · 2 maçta bile kazanç garantili (Düz: 86.37 Oran)', badge: '⏳ İY/MS SİSTEM (2-3-4-5)',
+            badgeType: 'special', icon: '⚡', themeColor: '#8B5CF6', recommendedStake: 100, confidence: 91
+        }, [p_chaves_htft, p_standard_htft, p_guingamp_htft, p_braga_htft, p_cercle_htft], dFmt);
 
         // Kupon 5: 🎯 Günün Çifte Şans & Sigortalı Kuponu (~2.16 Oran, Min Oran: 1.21)
         const c4 = this._createArchivedCoupon({
@@ -4296,7 +4312,7 @@ const HistoricalCouponsService = {
                 date: '2026-10-16',
                 dateFormatted: '16 Ekim 2026',
                 dayName: 'Cuma (Bugün)',
-                concept: "Resmi Nesine & İddaa Cuma Bülteni (Günün 6 Özel Kuponu: Banko, İdeal, Gol, İY/MS, Çifte Şans, Değer - 169 Maç)",
+                concept: "Resmi Nesine & İddaa Cuma Bülteni (Günün 6 Özel Kuponu: Banko, İdeal, Gol, İY/MS 5'li Sistem, Çifte Şans, Değer - 169 Maç)",
                 generator: () => this._generateAuthentic2026_10_16Coupons('2026-10-16')
             },
         ];

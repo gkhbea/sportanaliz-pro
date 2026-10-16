@@ -160,13 +160,14 @@ const CouponPanel = {
 
         let couponList = this.getCouponsForDate(chosenDate, coupons, currentMode);
         const hasUefaInList = couponList.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
-        const maxRenderLimit = hasUefaInList ? 6 : 5;
+        const hasHtFtInList = couponList.some(c => (c.id && c.id.includes('htft')) || (c.title && /iy.*ms|ilk yarı/i.test(c.title)));
+        const maxRenderLimit = (hasUefaInList || hasHtFtInList) ? 6 : 5;
         if (currentMode === 8 && couponList.length < 8 && window.CouponEngine?.expandTo8Coupons) {
             couponList = window.CouponEngine.expandTo8Coupons(couponList, window.app?.matches || [], chosenDate);
         } else if (currentMode <= 6 && couponList.length > maxRenderLimit) {
             couponList = couponList.slice(0, maxRenderLimit);
         }
-        if (hasUefaInList && currentMode === 5) {
+        if ((hasUefaInList || hasHtFtInList) && currentMode === 5) {
             currentMode = 6;
         }
         this.assistantCouponCount = currentMode;
