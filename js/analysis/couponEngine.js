@@ -91,6 +91,84 @@ const CouponEngine = {
     },
 
     /**
+     * KULLANICI KURALI: "Sporting Hasselt vs Cercle Brugge iy2/ms2 demiş ama bunun bahsini alamıyorus ne nesinede nede bilyonerde yok"
+     * Bültende bir maç açık olsa dahi, hedeflenen SPESİFİK BAHİS MARKETİNİN (örn. İY/MS, Çifte Şans, Alt/Üst)
+     * Nesine / Bilyoner / İddaa'da fiilen açıldığını ve aktif olduğunu garanti eder.
+     */
+    isMarketOpenOnPlatforms(match, marketType = 'MS') {
+        if (!this.isBettingOpenOnPlatforms(match)) return false;
+
+        const rawMarkets = match.rawData?.MA || match.rawData?.Markets || match.rawData?.event?.MA;
+        if (!Array.isArray(rawMarkets) || rawMarkets.length === 0) {
+            // Eğer ham market listesi yoksa genel odds nesnesine bak
+            if (marketType === 'HT' || marketType.startsWith('HT') || marketType === 'iy_ms') {
+                return !!(match.odds && (match.odds.htft || match.odds.halfTimeFullTime || match.hasHtFtMarket));
+            }
+            return true;
+        }
+
+        // İY / MS (İlk Yarı / Maç Sonu): İddaa Resmi Market Kodu MTID === 5
+        if (marketType === 'HT' || marketType.startsWith('HT') || marketType === 'iy_ms') {
+            const m5 = rawMarkets.find(m => m.MTID === 5);
+            return !!(m5 && Array.isArray(m5.OCA) && m5.OCA.length >= 9);
+        }
+
+        // Maç Sonucu: MTID === 1
+        if (marketType === 'MS' || marketType === 'MS1' || marketType === 'MS2' || marketType === 'MSX' || marketType === 'taraf') {
+            return rawMarkets.some(m => m.MTID === 1);
+        }
+
+        // Çifte Şans: MTID === 3
+        if (marketType === 'CS' || marketType.startsWith('CS') || marketType.startsWith('DC') || marketType === 'cifte_sans') {
+            return rawMarkets.some(m => m.MTID === 3);
+        }
+
+        // 2.5 Alt / Üst: MTID === 12
+        if (marketType === 'OVER25' || marketType === '2.5UST' || marketType === 'OVER_25') {
+            return rawMarkets.some(m => m.MTID === 12);
+        }
+
+        // 1.5 Alt / Üst: MTID === 14
+        if (marketType === 'OVER15' || marketType === '1.5UST' || marketType === 'OVER_15') {
+            return rawMarkets.some(m => m.MTID === 14);
+        }
+
+        // KG Var / Yok: MTID === 38
+        if (marketType === 'BTTS' || marketType === 'KG' || marketType === 'BTTS_Y') {
+            return rawMarkets.some(m => m.MTID === 38);
+        }
+
+        return true;
+    },
+
+    /**
+     * İddaa MTID 5 pazarından resmi İY/MS oranını çeker
+     */
+    getOfficialHtFtOdd(match, pickType) {
+        const rawMarkets = match.rawData?.MA || match.rawData?.Markets || match.rawData?.event?.MA;
+        if (!Array.isArray(rawMarkets)) return null;
+        const m5 = rawMarkets.find(m => m.MTID === 5);
+        if (!m5 || !Array.isArray(m5.OCA)) return null;
+
+        // İddaa resmi N indeksleri: 1: 1/1, 2: 1/X, 3: 1/2, 4: X/1, 5: X/X, 6: X/2, 7: 2/1, 8: 2/X, 9: 2/2
+        const nMap = {
+            '1/1': 1, 'HT1_FT1': 1,
+            '1/X': 2, 'HT1_FTX': 2,
+            '1/2': 3, 'HT1_FT2': 3,
+            'X/1': 4, 'HTX_FT1': 4,
+            'X/X': 5, 'HTX_FTX': 5,
+            'X/2': 6, 'HTX_FT2': 6,
+            '2/1': 7, 'HT2_FT1': 7,
+            '2/X': 8, 'HT2_FTX': 8,
+            '2/2': 9, 'HT2_FT2': 9
+        };
+        const targetN = nMap[pickType];
+        if (!targetN) return null;
+        const oc = m5.OCA.find(o => o.N === targetN);
+        return oc && oc.O ? parseFloat(oc.O) : null;
+    },
+
+    /**
      * Günün maçlarını filtreler
      */
     _filterTodayMatches(matches) {
@@ -180,6 +258,11 @@ const CouponEngine = {
                     if (prevCats.has(c.category) && item.candidates.some(alt => !prevCats.has(alt.category))) {
                         return; // Farklı bir kategori varsa (örn. MS yerine Korner/Kart veya Alt/Üst) onu tercih et
                     }
+
+                    // SPESİFİK BAHİS MARKETİ AÇIK MI KONTROLÜ (Nesine / Bilyoner / İddaa):
+                    // Bültende maç olsa bile İY/MS (MTID 5), KG Var veya ilgili market açılmamışsa KESİNLİKLE kupona alınmaz!
+                    const mType = (c.category === 'iy_ms' || (c.marketCode && c.marketCode.startsWith('HT'))) ? 'HT' : (c.category || c.marketCode);
+                    if (!this.isMarketOpenOnPlatforms(item.match, mType)) return;
 
                     if (filterFn(c, item)) {
                         candidates.push({ item, pick: c });
@@ -355,11 +438,16 @@ const CouponEngine = {
         );
 
         // Fallback: Eğer havuzda henüz yeterli İY/MS adayı yoksa, bültendeki maçların Poisson modelinden türet
+        // KULLANICI KURALI: Sadece Nesine & Bilyoner'de İY/MS (MTID 5) marketi fiilen açık olan maçlar seçilebilir!
         if (!htftPicks || htftPicks.length < 5) {
             pool.forEach(item => {
                 if (htftPicks.length >= 5) return;
                 const key = getMatchKey(item.match);
                 if ((matchUsageCount.get(key) || 0) >= 2) return;
+                
+                // KRİTİK KONTROL: Nesine / Bilyoner'de İY/MS (MTID 5) açık mı?
+                if (!this.isMarketOpenOnPlatforms(item.match, 'HT')) return;
+
                 const p = item.result?.poisson;
                 const htft = p?.halfTimeFullTime;
                 if (!htft) return;
@@ -368,7 +456,9 @@ const CouponEngine = {
                 if (exists) return;
 
                 if (htft['X/1'] >= 15) {
-                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['X/1'], 10) * 0.85).toFixed(2));
+                    const officialOdd = this.getOfficialHtFtOdd(item.match, 'HTX_FT1');
+                    const oddVal = officialOdd || Math.max(1.20, +(100 / Math.max(htft['X/1'], 10) * 0.85).toFixed(2));
+                    if (oddVal < 1.20) return;
                     htftPicks.push({
                         item,
                         pick: {
@@ -384,7 +474,9 @@ const CouponEngine = {
                     usedMatchKeys.add(key);
                     matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                 } else if (htft['X/2'] >= 14) {
-                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['X/2'], 10) * 0.85).toFixed(2));
+                    const officialOdd = this.getOfficialHtFtOdd(item.match, 'HTX_FT2');
+                    const oddVal = officialOdd || Math.max(1.20, +(100 / Math.max(htft['X/2'], 10) * 0.85).toFixed(2));
+                    if (oddVal < 1.20) return;
                     htftPicks.push({
                         item,
                         pick: {
@@ -400,7 +492,9 @@ const CouponEngine = {
                     usedMatchKeys.add(key);
                     matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                 } else if (htft['1/1'] >= 30) {
-                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['1/1'], 10) * 0.85).toFixed(2));
+                    const officialOdd = this.getOfficialHtFtOdd(item.match, 'HT1_FT1');
+                    const oddVal = officialOdd || Math.max(1.20, +(100 / Math.max(htft['1/1'], 10) * 0.85).toFixed(2));
+                    if (oddVal < 1.20) return;
                     htftPicks.push({
                         item,
                         pick: {
@@ -416,7 +510,9 @@ const CouponEngine = {
                     usedMatchKeys.add(key);
                     matchUsageCount.set(key, (matchUsageCount.get(key) || 0) + 1);
                 } else if (htft['2/2'] >= 30) {
-                    const oddVal = Math.max(1.20, +(100 / Math.max(htft['2/2'], 10) * 0.85).toFixed(2));
+                    const officialOdd = this.getOfficialHtFtOdd(item.match, 'HT2_FT2');
+                    const oddVal = officialOdd || Math.max(1.20, +(100 / Math.max(htft['2/2'], 10) * 0.85).toFixed(2));
+                    if (oddVal < 1.20) return;
                     htftPicks.push({
                         item,
                         pick: {
