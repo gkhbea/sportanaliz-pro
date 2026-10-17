@@ -76,6 +76,10 @@ const AllMatchesTrackerPanel = {
         // Pazar kırılımları
         const bd = stats.marketBreakdown || {};
 
+        const limit = this.displayLimit || 60;
+        const visibleReports = filteredReports.slice(0, limit);
+        const hasMore = filteredReports.length > limit;
+
         return `
             <div class="all-stats-view-container animate-fade-in">
                 <!-- Üst Hero Banner -->
@@ -204,7 +208,16 @@ const AllMatchesTrackerPanel = {
                                 <h3>Arama kriterlerine uygun maç bulunamadı</h3>
                                 <p>Filtreyi temizleyerek tüm maçları listeleyebilirsiniz.</p>
                             </div>
-                        ` : filteredReports.map(report => this.renderMatchReportCard(report)).join('')}
+                        ` : `
+                            ${visibleReports.map(report => this.renderMatchReportCard(report)).join('')}
+                            ${hasMore ? `
+                                <div style="text-align:center;padding:24px 10px;grid-column:1/-1;">
+                                    <button class="btn btn-outline" id="btn-load-more-stats" style="padding:10px 24px;font-weight:800;border-color:rgba(0,240,255,0.4);color:#00F0FF;border-radius:12px;background:rgba(0,240,255,0.06);cursor:pointer;">
+                                        ⬇️ Daha Fazla Maç Göster (+60 / Kalan: ${filteredReports.length - limit})
+                                    </button>
+                                </div>
+                            ` : ''}
+                        `}
                     </div>
                 </div>
             `;

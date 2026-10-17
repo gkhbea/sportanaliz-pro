@@ -81,7 +81,13 @@ const CouponPanel = {
         // 5. Kesin Güvenlik Ağı: Eğer hiçbir kaynaktan kupon gelmediyse otantik güncel kuponları getir
         if (result.length === 0) {
             if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
-                if (typeof HistoricalCouponsService._generateAuthentic2026_10_16Coupons === 'function') {
+                if (typeof HistoricalCouponsService._generateAuthentic2026_10_17Coupons === 'function') {
+                    const aut17 = HistoricalCouponsService._generateAuthentic2026_10_17Coupons('2026-10-17');
+                    if (aut17 && Array.isArray(aut17.coupons) && aut17.coupons.length > 0) {
+                        result = [...aut17.coupons];
+                    }
+                }
+                if (result.length === 0 && typeof HistoricalCouponsService._generateAuthentic2026_10_16Coupons === 'function') {
                     const aut16 = HistoricalCouponsService._generateAuthentic2026_10_16Coupons('2026-10-16');
                     if (aut16 && Array.isArray(aut16.coupons) && aut16.coupons.length > 0) {
                         result = [...aut16.coupons];

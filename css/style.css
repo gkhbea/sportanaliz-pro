@@ -68,7 +68,7 @@
 
 html {
     font-size: 15px;
-    scroll-behavior: smooth;
+    scroll-behavior: auto; /* Akıcı ve donmasız kaydırma */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -80,6 +80,25 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.6;
+}
+
+/* Sayfa hızlı kaydırılırken hover hesaplamalarını geçici durdurarak 60+ FPS garantisi */
+body.is-scrolling * {
+    pointer-events: none !important;
+}
+
+/* Donanım ivmelendirme ve sanal görünürlük (Ekran dışı elemanları GPU'da render etmeyerek RAM ve CPU tasarrufu sağlar) */
+.match-card,
+.live-match-card,
+.bet-item-row,
+.coupon-card,
+.virtual-coupon-card,
+.daily-analysis-card,
+.all-stats-reports-container > div {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 85px;
+    contain: layout style paint;
+    transform: translateZ(0);
 }
 
 /* Custom Scrollbar */

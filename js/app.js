@@ -132,6 +132,20 @@ const App = {
      * Event Listener'lar
      */
     bindEvents() {
+        // 60+ FPS Donmasız Kaydırma Optimizasyonu (Scroll Freeze & Lag Fix)
+        let scrollTimer = null;
+        const onFastScroll = () => {
+            if (!document.body.classList.contains('is-scrolling')) {
+                document.body.classList.add('is-scrolling');
+            }
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(() => {
+                document.body.classList.remove('is-scrolling');
+            }, 120);
+        };
+        window.addEventListener('scroll', onFastScroll, { passive: true });
+        window.addEventListener('wheel', onFastScroll, { passive: true });
+
         // Navigation (Header, Mobil Alt Bar, Üst Kayan Butonlar ve Çekmece Menü)
         document.querySelectorAll('.nav-btn, .m-nav-btn, .m-pill-btn, .m-drawer-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1829,7 +1843,11 @@ const App = {
                 if (generated && generated.length > 0) coupons = generated;
             }
             if (!coupons || coupons.length === 0) {
-                if (window.HistoricalCouponsService?._generateAuthentic2026_10_16Coupons) {
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_17Coupons) {
+                    const aut17 = window.HistoricalCouponsService._generateAuthentic2026_10_17Coupons('2026-10-17');
+                    if (aut17 && aut17.coupons && aut17.coupons.length > 0) coupons = aut17.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_16Coupons) {
                     const aut16 = window.HistoricalCouponsService._generateAuthentic2026_10_16Coupons('2026-10-16');
                     if (aut16 && aut16.coupons && aut16.coupons.length > 0) coupons = aut16.coupons;
                 }
@@ -1992,10 +2010,19 @@ const App = {
             }
         });
 
+        // 4. Daha Fazla Maç Yükle (Progressive Render)
+        container.querySelector('#btn-load-more-stats')?.addEventListener('click', () => {
+            if (window.AllMatchesTrackerPanel) {
+                AllMatchesTrackerPanel.displayLimit = (AllMatchesTrackerPanel.displayLimit || 60) + 60;
+                this.loadAllMatchesStats(this.currentAllStatsSearch || '', this.currentAllStatsFilter || 'all');
+            }
+        });
+
         // 5. Filtre Tab Butonları
         container.querySelectorAll('.all-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const f = btn.dataset.filter;
+                if (window.AllMatchesTrackerPanel) AllMatchesTrackerPanel.displayLimit = 60;
                 this.loadAllMatchesStats(this.currentAllStatsSearch || '', f);
             });
         });
@@ -2004,6 +2031,7 @@ const App = {
         const searchInput = container.querySelector('#all-stats-search-input');
         if (searchInput) {
             searchInput.addEventListener('input', Helpers.debounce((e) => {
+                if (window.AllMatchesTrackerPanel) AllMatchesTrackerPanel.displayLimit = 60;
                 this.loadAllMatchesStats(e.target.value, this.currentAllStatsFilter || 'all');
             }, 300));
         }

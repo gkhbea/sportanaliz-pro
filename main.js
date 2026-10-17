@@ -34,6 +34,13 @@ if (!electron || !electron.app) {
         app.setPath('userData', path.join(app.getPath('appData'), 'SportAnaliz Pro'));
     } catch(e) {}
 
+    // Windows Donanım Hızlandırma & Akıcı Kaydırma (Scroll ve Minimize Lag Engelleme)
+    app.commandLine.appendSwitch('enable-gpu-rasterization');
+    app.commandLine.appendSwitch('enable-zero-copy');
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
+    app.commandLine.appendSwitch('disable-background-timer-throttling');
+    app.commandLine.appendSwitch('disable-renderer-backgrounding');
+
     // Tekil oturum kontrolü (İki kez açılmasını engeller)
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
@@ -112,7 +119,8 @@ if (!electron || !electron.app) {
                 nodeIntegration: false,
                 contextIsolation: true,
                 sandbox: false,
-                spellcheck: false
+                spellcheck: false,
+                backgroundThrottling: false
             }
         });
 

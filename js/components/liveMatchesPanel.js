@@ -138,6 +138,10 @@ const LiveMatchesPanel = {
             return 0;
         });
 
+        const liveLimit = this.displayLimit || 60;
+        const visibleLive = filteredList.slice(0, liveLimit);
+        const hasMoreLive = filteredList.length > liveLimit;
+
         return `
             <div class="live-matches-view-container animate-fade-in">
                 <!-- Üst Hızlı Kupon Navigasyon Şeridi -->
@@ -279,8 +283,15 @@ const LiveMatchesPanel = {
                         </div>
                     ` : `
                         <div class="live-matches-grid">
-                            ${filteredList.map(item => this.renderLiveMatchCard(item)).join('')}
+                            ${visibleLive.map(item => this.renderLiveMatchCard(item)).join('')}
                         </div>
+                        ${hasMoreLive ? `
+                            <div class="load-more-live-wrapper" style="text-align: center; margin: 24px 0 16px;">
+                                <button id="btn-load-more-live" class="btn btn-outline" style="padding: 10px 28px; font-weight: 600; font-size: 14px; border-radius: 8px; cursor: pointer;">
+                                    🔽 Daha Fazla Karşılaşma Göster (${visibleLive.length} / ${filteredList.length})
+                                </button>
+                            </div>
+                        ` : ''}
                     `}
                 </div>
             </div>
@@ -493,6 +504,7 @@ const LiveMatchesPanel = {
             btn.addEventListener('click', () => {
                 const f = btn.dataset.liveFilter || 'all';
                 this.currentFilter = f;
+                this.displayLimit = 60;
                 app.loadLiveMatches(f, this.searchQuery);
             });
         });
@@ -502,8 +514,18 @@ const LiveMatchesPanel = {
         if (searchInput) {
             searchInput.addEventListener('input', Helpers.debounce((e) => {
                 this.searchQuery = e.target.value;
+                this.displayLimit = 60;
                 app.loadLiveMatches(this.currentFilter, this.searchQuery);
             }, 250));
+        }
+
+        // 5.1 Daha Fazla Göster Butonu
+        const btnLoadMoreLive = container.querySelector('#btn-load-more-live');
+        if (btnLoadMoreLive) {
+            btnLoadMoreLive.addEventListener('click', () => {
+                this.displayLimit = (this.displayLimit || 60) + 60;
+                app.loadLiveMatches(this.currentFilter, this.searchQuery);
+            });
         }
 
         // 6. Üst Kısayol Butonları (Tüm Kuponlar, Tutan Kuponlar, Yatan Kuponlar, Dashboard)
