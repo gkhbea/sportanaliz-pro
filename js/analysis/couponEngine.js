@@ -1457,26 +1457,36 @@ const CouponEngine = {
     /**
      * Kuponu panoya metin olarak kopyala
      */
-    formatCouponForClipboard(coupon) {
+    formatCouponForClipboard(coupon, index) {
         if (!coupon) return '';
 
         const now = new Date();
-        const dateFormatted = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const d = String(now.getDate()).padStart(2, '0');
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const y = now.getFullYear();
+        const todayStr = `${d}.${m}.${y}`;
+        const couponIdx = (index !== undefined && index !== null) ? (index + 1) : (coupon.index || 1);
+        const nesineCouponName = `${todayStr} - ${couponIdx}`;
 
-        let text = `🎯 SportAnaliz Pro — ${coupon.title}\n`;
-        text += `📅 Günün Maçları (${dateFormatted})\n`;
-        text += `📊 Toplam Oran: ${coupon.totalOdd} · Ortalama Güven: %${coupon.avgConfidence}\n`;
+        let text = `🎯 SportAnaliz Pro — ${nesineCouponName} · ${coupon.title}\n`;
+        text += `🏷️ Nesine Kupon Adı: ${nesineCouponName}\n`;
+        text += `📅 Tarih: ${todayStr}\n`;
+        text += `📊 Toplam Oran: ${coupon.totalOdd} · Ortalama Güven: %${coupon.avgConfidence || coupon.confidence || 88}\n`;
         text += `─────────────────────────\n`;
 
-        coupon.matches.forEach((m, i) => {
-            text += `${i + 1}. ${m.homeTeam} vs ${m.awayTeam}\n`;
+        const matches = coupon.matches || coupon.picks || [];
+        matches.forEach((m, i) => {
+            const iddaaCode = m.iddaaCode || m.match?.iddaaCode || m.match?.code || '';
+            const codeTag = iddaaCode ? ` [🏷️ Nesine Kod: ${iddaaCode}]` : '';
+            text += `${i + 1}. ${m.homeTeam} vs ${m.awayTeam}${codeTag}\n`;
             text += `   🏆 ${m.league} (${m.isToday ? 'Bugün ' : ''}${m.timeStr})\n`;
-            text += `   👉 Tercih: ${m.pickTitle} (Oran: ${m.odd} · %${m.probability})\n`;
-            text += `   💡 Neden: ${m.reason}\n\n`;
+            text += `   👉 Tercih: ${m.pickTitle} (Oran: ${m.odd} · %${m.probability || m.confidence || 85})\n`;
+            if (m.reason) text += `   💡 Neden: ${m.reason}\n`;
+            text += `\n`;
         });
 
         text += `─────────────────────────\n`;
-        text += `💰 100 TL Yatırım ile Olası Kazanç: ${(100 * parseFloat(coupon.totalOdd)).toFixed(2)} TL\n`;
+        text += `💰 50 TL Yatırım ile Olası Kazanç: ${(50 * parseFloat(coupon.totalOdd)).toFixed(2)} TL\n`;
         text += `⚠️ Not: İstatistiksel olasılık tahminidir, kesin kazanç garantisi içermez.\n`;
         return text;
     },

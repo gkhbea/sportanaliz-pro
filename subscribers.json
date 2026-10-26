@@ -3,14 +3,20 @@
     "email": "gokhanelalyz@gmail.com",
     "time": "10:00",
     "active": true,
+    "dailyCoupons": true,
+    "couponResults": true,
+    "weeklyStats": true,
     "createdAt": "2026-10-09T13:20:00.000Z",
-    "updatedAt": "2026-10-09T13:20:00.000Z"
+    "updatedAt": "2026-10-26T19:00:00.000Z"
   },
   {
     "email": "gokhanelal06@gmail.com",
     "time": "10:00",
     "active": true,
+    "dailyCoupons": true,
+    "couponResults": true,
+    "weeklyStats": true,
     "createdAt": "2026-09-10T12:02:08.581Z",
-    "updatedAt": "2026-09-10T12:12:08.008Z"
+    "updatedAt": "2026-10-26T19:00:00.000Z"
   }
 ]

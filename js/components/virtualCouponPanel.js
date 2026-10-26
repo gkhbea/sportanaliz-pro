@@ -186,8 +186,7 @@ const VirtualCouponManager = {
                     else status = 'pending';
 
                     const isWon = status === 'won';
-                    const isLost = status === 'lost';
-                    const stake = c.recommendedStake || 100;
+                    const stake = 50; // KULLANICI TALİMATI: kuponlar sadece 50 tllik olsun daha fazla olmasın
                     const totalOdds = parseFloat(c.totalOdd) || 2.0;
                     const potentialReturn = Math.round(stake * totalOdds * 100) / 100;
                     const payout = isWon ? potentialReturn : 0;
@@ -410,7 +409,7 @@ const VirtualCouponManager = {
                 const autoId = 'auto_vk_' + todayIso + '_' + (coupon.id || (idx + 1));
                 const existing = stored.find(c => c.id === autoId || (c.archiveDate === todayIso && c.name === coupon.title));
 
-                const stake = parseFloat(coupon.recommendedStake) || 100;
+                const stake = 50; // KULLANICI TALİMATI: kuponlar sadece 50 tllik olsun daha fazla olmasın
                 const totalOdds = parseFloat(coupon.totalOdd) || 2.0;
                 const potentialReturn = Math.round(stake * totalOdds * 100) / 100;
 

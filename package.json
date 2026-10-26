@@ -7,6 +7,11 @@
     "start": "node main.js",
     "dev": "node proxy-server.js",
     "desktop": "electron .",
+    "mailer": "node scripts/autonomous_email_service.js",
+    "mailer:test": "node scripts/autonomous_email_service.js --all",
+    "mailer:daily": "node scripts/autonomous_email_service.js --daily",
+    "mailer:results": "node scripts/autonomous_email_service.js --results",
+    "mailer:weekly": "node scripts/autonomous_email_service.js --weekly",
     "build:exe": "electron-builder --win",
     "build": "echo 'Build successful'"
   },

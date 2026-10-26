@@ -304,6 +304,9 @@
                     <button class="btn btn-primary btn-sm" id="btn-quick-coupons" style="background:linear-gradient(135deg, #10B981, #00F0FF);color:#000;font-weight:800;" title="Günün yapay zeka hazır analiz kuponları &amp; İY/MS">
                         🤖 Bahis Yap (Özel Kuponlar)
                     </button>
+                    <button class="btn btn-primary btn-sm" id="btn-quick-nesine-coupons" onclick="App.generateNesineCoupons()" style="background:linear-gradient(135deg, #F59E0B, #EAB308);color:#000;font-weight:900;border:1px solid rgba(255,255,255,0.3);box-shadow:0 0 12px rgba(245,158,11,0.35);" title="Nesine resmi bültenini tara ve maç kodlarıyla anında garantör kuponlar oluştur">
+                        ⚡ Nesine Otomatik Kupon
+                    </button>
                     <button class="btn btn-primary btn-sm" id="btn-quick-analysis-view" onclick="App.navigate('analysis')" style="background:linear-gradient(135deg, #6366f1, #8b5cf6);color:#fff;font-weight:700;" title="Maç İstatistik ve Model Analizi">
                         📊 Maç Analizi
                     </button>
@@ -668,8 +671,8 @@
                 <div style="display:flex;align-items:center;gap:10px;">
                     <span style="font-size:1.5rem;">📧</span>
                     <div>
-                        <h3 style="margin:0;font-size:1.15rem;">Kuponları E-Posta ile Al</h3>
-                        <p style="margin:2px 0 0;font-size:0.78rem;color:var(--text-secondary);">Günün garantör kuponları doğrudan gelen kutunuza gelsin</p>
+                        <h3 style="margin:0;font-size:1.15rem;">SportAnaliz Pro E-Posta Asistanı</h3>
+                        <p style="margin:2px 0 0;font-size:0.78rem;color:var(--text-secondary);">Günün kuponları, sonuçlar (tuttu/yattı) ve haftalık istatistikler mailinize gelsin</p>
                     </div>
                 </div>
                 <button class="modal-close" data-close="modal-email-coupons">✕</button>
@@ -677,8 +680,8 @@
             <div class="modal-body">
                 <!-- Info Banner -->
                 <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:0.85rem;color:#cbd5e1;line-height:1.5;">
-                    <strong style="color:#38bdf8;">📅 Bugünün Bülteni (10.09.2026):</strong>
-                    Garantör Banko, Editör, Gol Yağmuru, Değer Kuponları, Şampiyonlar Ligi ve Önümüzdeki 3 Saat kuponları özet oranlar, güven yüzdeleri ve resmi Maçkolik linkleriyle e-postanıza gönderilir.
+                    <strong style="color:#38bdf8;">🤖 Otomatik Mail Servisi:</strong>
+                    Programa her gün bakmanıza gerek kalmadan; sabah kuponları (10:00), gece tutma sonuçları (23:30) ve haftalık istatistikler doğrudan e-posta adresinize iletilir.
                 </div>
 
                 <form id="form-send-coupons" onsubmit="return false;">
@@ -686,16 +689,33 @@
                         <label for="input-email-target" style="display:block;margin-bottom:6px;font-weight:600;font-size:0.88rem;">
                             📬 Alıcı E-Posta Adresi:
                         </label>
-                        <input type="email" id="input-email-target" class="form-control" placeholder="ornek@gmail.com" required style="width:100%;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;color:#fff;font-size:0.95rem;">
+                        <input type="email" id="input-email-target" class="form-control" value="gokhanelalyz@gmail.com" placeholder="gokhanelalyz@gmail.com" required style="width:100%;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;color:#fff;font-size:0.95rem;">
                     </div>
 
-                    <!-- Abone Ol Checkbox -->
-                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px 14px;margin-bottom:18px;">
+                    <!-- 3 Otomatik Bildirim Seçeneği -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px 14px;margin-bottom:18px;display:flex;flex-direction:column;gap:10px;">
+                        <strong style="color:#ffffff;font-size:0.88rem;border-bottom:1px solid var(--border-color);padding-bottom:6px;display:block;">
+                            🔔 Otomatik Mail Bildirim Tercihleri:
+                        </strong>
                         <label class="toggle-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;">
                             <input type="checkbox" id="check-subscribe-daily" checked style="width:18px;height:18px;accent-color:var(--accent-green);cursor:pointer;">
                             <div>
-                                <strong style="color:#ffffff;font-size:0.9rem;">🔔 Her Sabah Otomatik Mail Gönder (Abone Ol)</strong>
-                                <p style="margin:2px 0 0;font-size:0.78rem;color:var(--text-muted);">Her sabah saat 10:00'da bülten analiz edilir ve günün kuponları e-postanıza düşer.</p>
+                                <strong style="color:#ffffff;font-size:0.85rem;">🎯 Her Sabah Günün Kuponları (10:00)</strong>
+                                <p style="margin:1px 0 0;font-size:0.75rem;color:var(--text-muted);">Günün hazır 5-8 garantör kuponu, oranlar ve xG analizleri.</p>
+                            </div>
+                        </label>
+                        <label class="toggle-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;">
+                            <input type="checkbox" id="check-subscribe-results" checked style="width:18px;height:18px;accent-color:var(--accent-green);cursor:pointer;">
+                            <div>
+                                <strong style="color:#ffffff;font-size:0.85rem;">🏁 Her Gece Kupon Tutma / Sonuç Raporu (23:30)</strong>
+                                <p style="margin:1px 0 0;font-size:0.75rem;color:var(--text-muted);">Hangi kuponun tuttuğu, maç skorları ve günün net kâr/zarar karnesi.</p>
+                            </div>
+                        </label>
+                        <label class="toggle-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;">
+                            <input type="checkbox" id="check-subscribe-weekly" checked style="width:18px;height:18px;accent-color:var(--accent-green);cursor:pointer;">
+                            <div>
+                                <strong style="color:#ffffff;font-size:0.85rem;">📊 Haftalık İstatistik & Performans Bülteni</strong>
+                                <p style="margin:1px 0 0;font-size:0.75rem;color:var(--text-muted);">Her Pazar/Pazartesi 7 günlük başarı oranı, ROI ve en iyi oranlar.</p>
                             </div>
                         </label>
                     </div>
@@ -707,7 +727,7 @@
                         </summary>
                         <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                             <p style="margin:0;font-size:0.78rem;color:var(--text-muted);">
-                                Boş bırakırsanız sistem anında test sunucusu (Ethereal) üzerinden gönderir ve tek tıkla açabileceğiniz web önizleme linki sunar. Kendi Gmail hesabınızdan göndermek isterseniz Gmail ve Uygulama Şifrenizi girebilirsiniz.
+                                Kendi Gmail hesabınızdan göndermek için Gmail ve 16 haneli Uygulama Şifrenizi (.env dosyasından veya buradan) girebilirsiniz. Boş bırakılırsa güvenli test sunucusu üzerinden gönderilir.
                             </p>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                                 <div>
@@ -726,10 +746,16 @@
                     <div id="mail-status-box" style="display:none;margin-bottom:16px;padding:12px 14px;border-radius:8px;font-size:0.85rem;"></div>
 
                     <!-- Aksiyon Butonları -->
-                    <div style="display:flex;gap:10px;justify-content:flex-end;">
-                        <button type="button" class="btn btn-ghost" data-close="modal-email-coupons">Vazgeç</button>
-                        <button type="submit" class="btn btn-primary" id="btn-submit-send-mail" style="display:inline-flex;align-items:center;gap:8px;">
-                            <span>🚀 Şimdi Gönder</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+                        <button type="button" class="btn btn-ghost" data-close="modal-email-coupons">Kapat</button>
+                        <button type="button" class="btn btn-secondary" id="btn-send-weekly-mail" style="font-size:0.82rem;">
+                            📊 Haftalık Özeti Gönder
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btn-send-results-mail" style="font-size:0.82rem;">
+                            🏁 Sonuçları Gönder (Tuttu/Yattı)
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btn-submit-send-mail" style="display:inline-flex;align-items:center;gap:6px;">
+                            <span>🎯 Günlük Kuponları Gönder</span>
                         </button>
                     </div>
                 </form>

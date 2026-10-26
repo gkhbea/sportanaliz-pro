@@ -17,3 +17,4 @@ data_cache/*
 !data_cache/web_verified_scores.json
 
 .env
+nesine_credentials.json

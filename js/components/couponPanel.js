@@ -37,7 +37,13 @@ const CouponPanel = {
         }
         const todayStr = this._getLocalToday();
         const queryDate = chosenDate || todayStr;
-        const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+        let isDateWeekend = false;
+        try {
+            const qd = new Date(queryDate + 'T12:00:00');
+            isDateWeekend = (qd.getDay() === 0 || qd.getDay() === 6);
+        } catch (e) {}
+        const isCurrentWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+        const isWeekend = isDateWeekend || isCurrentWeekend;
         const mode = targetMode || this.assistantCouponCount || (isWeekend ? 8 : 5);
 
         let result = [];
@@ -81,7 +87,19 @@ const CouponPanel = {
         // 5. Kesin Güvenlik Ağı: Eğer hiçbir kaynaktan kupon gelmediyse otantik güncel kuponları getir
         if (result.length === 0) {
             if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
-                if (typeof HistoricalCouponsService._generateAuthentic2026_10_17Coupons === 'function') {
+                if (typeof HistoricalCouponsService._generateAuthentic2026_10_25Coupons === 'function') {
+                    const aut25 = HistoricalCouponsService._generateAuthentic2026_10_25Coupons('2026-10-25');
+                    if (aut25 && Array.isArray(aut25.coupons) && aut25.coupons.length > 0) {
+                        result = [...aut25.coupons];
+                    }
+                }
+                if (result.length === 0 && typeof HistoricalCouponsService._generateAuthentic2026_10_26Coupons === 'function') {
+                    const aut26 = HistoricalCouponsService._generateAuthentic2026_10_26Coupons('2026-10-26');
+                    if (aut26 && Array.isArray(aut26.coupons) && aut26.coupons.length > 0) {
+                        result = [...aut26.coupons];
+                    }
+                }
+                if (result.length === 0 && typeof HistoricalCouponsService._generateAuthentic2026_10_17Coupons === 'function') {
                     const aut17 = HistoricalCouponsService._generateAuthentic2026_10_17Coupons('2026-10-17');
                     if (aut17 && Array.isArray(aut17.coupons) && aut17.coupons.length > 0) {
                         result = [...aut17.coupons];
@@ -120,7 +138,7 @@ const CouponPanel = {
         const maxLimit = (hasUefa || hasHtFt) ? 6 : 5;
         if (mode === 8 && result.length < 8 && window.CouponEngine?.expandTo8Coupons) {
             result = window.CouponEngine.expandTo8Coupons(result, window.app?.matches || [], queryDate);
-        } else if (mode <= 6 && result.length > maxLimit) {
+        } else if (mode <= 6 && result.length > maxLimit && result.length < 8) {
             result = result.slice(0, maxLimit);
         }
 
@@ -376,6 +394,9 @@ const CouponPanel = {
                         <button class="btn btn-sm" onclick="App.navigate('dashboard')" style="background:linear-gradient(135deg, #00F0FF, #3B82F6);color:#000;font-weight:900;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;box-shadow:0 0 16px rgba(0,240,255,0.35);" title="Bültenin tüm maçlarını listele">
                             ⚽ Tüm Bülten Maçlarını Gör (${activeAnalyzedCount > 0 ? activeAnalyzedCount : 177}+ Maç)
                         </button>
+                        <button class="btn btn-xs" id="btn-generate-nesine-coupons" onclick="window.app && window.app.generateNesineCoupons && window.app.generateNesineCoupons()" style="background:linear-gradient(135deg, #F59E0B, #EAB308);border:1px solid #fbbf24;color:#000;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;box-shadow:0 0 16px rgba(245,158,11,0.4);" title="Nesine resmi bültenini tara ve maç kodlarıyla güncel kuponları otomatik oluştur">
+                            ⚡ Nesine Otomatik Kupon Oluştur
+                        </button>
                         <button class="btn btn-xs" id="btn-generate-hourly-coupon" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:1px solid #fbbf24;color:#000;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;box-shadow:0 0 16px rgba(245,158,11,0.4);" title="Canlı oynanan ve önümüzdeki 0-5 saat içinde başlayacak maçlardan en garantili kuponu üret">
                             ⚡ Canlı &amp; 0-5 Saat Kuponu Yap
                         </button>
@@ -416,10 +437,12 @@ const CouponPanel = {
                             const p = c.confidence || c.winProbability || 88;
                             const pCol = p >= 92 ? '#10B981' : (p >= 88 ? '#00F0FF' : (p >= 80 ? '#8B5CF6' : '#F59E0B'));
                             const shortTitle = (c.title || '').replace(/Kuponu.*/i, '').replace(/Kupon.*/i, '').trim();
+                            const todayFmt = (window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10)).split('-').reverse().join('.');
+                            const nesineLabel = `${todayFmt} - ${i + 1}`;
                             return `
                                 <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.08);border-left:4px solid ${pCol};border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
                                     <div>
-                                        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:800;text-transform:uppercase;">${i+1}. ${shortTitle}</div>
+                                        <div style="font-size:0.72rem;color:#fde68a;font-weight:900;text-transform:uppercase;">🏷️ ${nesineLabel} · ${shortTitle}</div>
                                         <div style="font-size:0.8rem;font-weight:800;color:#cbd5e1;margin-top:2px;">Oran: <span style="color:#00F0FF;font-weight:900;">${c.totalOdd}</span></div>
                                     </div>
                                     <div style="text-align:right;">
@@ -679,7 +702,7 @@ const CouponPanel = {
         const evalResult = window.MatchTracker ? window.MatchTracker.evaluateCoupon(coupon) : { status: coupon.resultStatus?.toUpperCase() || 'WON' };
         const isWon = evalResult.status === 'WON' || coupon.resultStatus === 'won';
         const isLost = evalResult.status === 'LOST' || coupon.resultStatus === 'lost';
-        const defaultStake = coupon.recommendedStake || 100;
+        const defaultStake = 50; // KULLANICI TALİMATI: kuponlar sadece 50 tllik olsun daha fazla olmasın
         const totalOdd = parseFloat(coupon.totalOdd || '1.00');
         const potentialWin = coupon.potentialReturn || (defaultStake * totalOdd).toFixed(2);
         const netProfit = coupon.netProfit !== undefined ? coupon.netProfit : (isWon ? +(potentialWin - defaultStake).toFixed(2) : -defaultStake);
@@ -1166,6 +1189,9 @@ const CouponPanel = {
                                     <span style="font-size:0.72rem;font-weight:800;color:${isLost ? '#EF4444' : (isWon ? '#10B981' : (coupon.themeColor || '#00F0FF'))};text-transform:uppercase;letter-spacing:0.5px;">
                                         ${index + 1}. KUPON · ${isLost ? `❌ KAYBETTİ (${evalResult.wonCount}/${evalResult.totalCount})` : (isWon ? `🎉 KAZANDI (${evalResult.wonCount}/${evalResult.totalCount})` : (evalResult.wonCount > 0 ? `⏳ DEVAM EDİYOR (${evalResult.wonCount}/${evalResult.totalCount} Tamam)` : (coupon.badge || 'ÖZEL KOMBİNE')))}
                                     </span>
+                                    <span style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(217,119,6,0.35));border:1px solid #fbbf24;color:#fde68a;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(245,158,11,0.25);" title="Nesine resmi kupon adı">
+                                        🏷️ Nesine: ${(window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10)).split('-').reverse().join('.')} - ${index + 1}
+                                    </span>
                                     ${currentAlloc ? `
                                         <span style="background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.45);color:#F59E0B;padding:1px 6px;border-radius:4px;font-size:0.68rem;font-weight:900;">
                                             🤖 Asistan: ${defaultStake} TL (%${currentAlloc.pct})
@@ -1173,7 +1199,7 @@ const CouponPanel = {
                                     ` : ''}
                                 </div>
                                 <h3 style="margin:2px 0 0 0;font-size:1.15rem;color:#ffffff;font-weight:800;">
-                                    ${coupon.title}
+                                    <span style="color:#fbbf24;margin-right:6px;">${(window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10)).split('-').reverse().join('.')} - ${index + 1} ·</span>${coupon.title}
                                 </h3>
                             </div>
                         </div>
@@ -1271,6 +1297,13 @@ const CouponPanel = {
                             Toplam Oran: ${totalOdd.toFixed(2)}
                         </span>
                     </div>
+
+                    <!-- 📋 Nesine Kodlarıyla Panoya Kopyala Butonu -->
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button class="btn btn-sm btn-copy-coupon-codes" data-coupon-idx="${index}" style="flex:1;background:linear-gradient(135deg, rgba(234,179,8,0.2), rgba(202,138,4,0.35));border:1.5px solid #facc15;color:#facc15;font-weight:900;border-radius:8px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 14px rgba(234,179,8,0.2);" title="Tüm Nesine maç kodları ve tercihlerini panoya kopyala">
+                            <span style="font-size:1rem;">📋</span> <span>Nesine Kodlarıyla Kopyala</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -1322,8 +1355,8 @@ const CouponPanel = {
             matchBadge = `<span style="font-size:0.72rem;color:#00F0FF;background:rgba(0,240,255,0.15);padding:2px 6px;border-radius:4px;font-weight:800;">⚡ CANLI (${minDisp})</span>`;
         }
 
-        const iddaaCode = matchItem.iddaaCode || matchItem.match?.iddaaCode || matchItem.match?.code || '';
-        const iddaaBadge = iddaaCode ? `<span style="background:rgba(234,179,8,0.2);border:1px solid rgba(234,179,8,0.5);color:#facc15;padding:1px 5px;border-radius:4px;font-weight:900;font-size:0.7rem;">🏷️ Kod: ${iddaaCode}</span>` : '';
+        const iddaaCode = matchItem.iddaaCode || matchItem.match?.iddaaCode || matchItem.match?.code || (matchItem.match?.rawData && matchItem.match?.rawData?.eventCode) || '';
+        const iddaaBadge = iddaaCode ? `<span style="background:rgba(234,179,8,0.25);border:1.2px solid #facc15;color:#facc15;padding:2px 7px;border-radius:5px;font-weight:900;font-size:0.75rem;box-shadow:0 0 8px rgba(234,179,8,0.25);">🏷️ Nesine Kod: ${iddaaCode}</span>` : '';
 
         const timeBadge = `<span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);color:#38BDF8;padding:1px 6px;border-radius:4px;font-weight:700;font-size:0.72rem;">⏰ ${timeStr}</span>`;
         const detailStr = matchItem.detail || matchItem.evaluation?.detail || matchItem.analysisReason || '';
@@ -1544,6 +1577,51 @@ const CouponPanel = {
         document.getElementById('btn-reload-5-coupons')?.addEventListener('click', () => {
             const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
             app.loadDailyCoupons(true, app.activeCouponFilter || 'all', activeDate);
+        });
+
+        // ⚡ Nesine Otomatik Kupon Oluştur Butonu
+        document.getElementById('btn-generate-nesine-coupons')?.addEventListener('click', () => {
+            if (window.app && typeof window.app.generateNesineCoupons === 'function') {
+                window.app.generateNesineCoupons();
+            }
+        });
+
+        // 📋 Nesine Kodlarıyla Panoya Kopyala Butonu Dinleyicileri
+        document.querySelectorAll('.btn-copy-coupon-codes').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.dataset.couponIdx, 10);
+                const couponList = this.lastDisplayedCoupons || app?.coupons || [];
+                const targetCoupon = couponList[idx];
+                if (!targetCoupon) return;
+
+                let textToCopy = '';
+                if (window.CouponEngine && typeof window.CouponEngine.formatCouponForClipboard === 'function') {
+                    textToCopy = window.CouponEngine.formatCouponForClipboard(targetCoupon, idx);
+                } else {
+                    textToCopy = `🎯 ${targetCoupon.title} (Toplam Oran: ${targetCoupon.totalOdd})\n`;
+                    (targetCoupon.matches || targetCoupon.picks || []).forEach((m, mi) => {
+                        const code = m.iddaaCode || m.match?.iddaaCode || m.match?.code || '';
+                        textToCopy += `${mi + 1}. ${m.homeTeam} vs ${m.awayTeam} ${code ? `[🏷️ Nesine Kod: ${code}]` : ''} -> ${m.pickTitle} (Oran: ${m.odd})\n`;
+                    });
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        window.Helpers?.showToast?.('📋 Kupon ve Nesine maç kodları panoya kopyalandı!', 'success');
+                    }).catch(() => {
+                        window.Helpers?.showToast?.('Kupon panoya kopyalandı.', 'success');
+                    });
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = textToCopy;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    window.Helpers?.showToast?.('📋 Kupon ve Nesine maç kodları panoya kopyalandı!', 'success');
+                }
+            });
         });
 
         // ⚡ Canlı & 0-5 Saat Arası Maçlar Kuponu Yap Butonu

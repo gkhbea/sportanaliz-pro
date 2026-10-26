@@ -59,3 +59,29 @@ Eğer telefonunuzdan veya dışarıdan istediğiniz zaman girmek isterseniz:
   5. Çifte Şans
   6. Değer (Value)
   7. Sistem 4-5-6
+
+---
+
+## 📬 7/24 Otonom E-Posta Servisi (Programa Bakmanıza Gerek Kalmadan)
+
+Programa her gün bakamadığınız durumlar için 3 farklı otomatik e-posta raporu mevcuttur:
+
+1. **Günün Kuponları (Sabah 10:00):** Günün hazır garantör kuponları, oranlar ve xG analizleri.
+2. **Kupon Sonuçları & Kasa Raporu (Gece 23:30):** Hangi kuponların tuttuğu, maçların kesinleşen skorları ve net kâr/zarar durumu.
+3. **Haftalık İstatistik Bülteni (Her Pazar/Pazartesi):** Son 7 günün genel kazanma oranı, ROI ve kupon karnesi.
+
+### Hızlı Başlatma Seçenekleri:
+- **`TEST_MAIL_GONDER.bat`**: 3 raporu da tek tıkla test eder ve gönderir.
+- **`GOREV_ZAMANLAYICI_KUR.bat`**: Windows her açıldığında arka planda sessizce çalışmasını sağlar (Programa hiç girmeseniz bile mailler otomatik gelir).
+- **`OTOMATIK_MAIL_SERVISI.bat`**: Servisi ekranda arka plan konsolu olarak hemen başlatır.
+
+### Gmail ile Doğrudan Gönderim (.env):
+`.env` dosyasına Gmail adresinizi ve 16 haneli **Google Uygulama Şifrenizi** girmeniz yeterlidir:
+```ini
+SMTP_USER=gokhanelalyz@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+```
+*(Google Uygulama Şifresi almak için: [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords))*
+

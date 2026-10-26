@@ -373,10 +373,20 @@ const App = {
             this.openMailModal();
         });
 
-        // E-Posta Gönderme Formu Gönderimi
+        // E-Posta Gönderme Formu Gönderimi (Günün Kuponları)
         document.getElementById('form-send-coupons')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.sendCouponsEmail();
+        });
+
+        // E-Posta Kupon Sonuçlarını Gönder Butonu (Tuttu/Yattı)
+        document.getElementById('btn-send-results-mail')?.addEventListener('click', () => {
+            this.sendResultsEmail();
+        });
+
+        // E-Posta Haftalık İstatistiği Gönder Butonu
+        document.getElementById('btn-send-weekly-mail')?.addEventListener('click', () => {
+            this.sendWeeklyStatsEmail();
         });
 
         // Save Supabase settings
@@ -1843,7 +1853,15 @@ const App = {
                 if (generated && generated.length > 0) coupons = generated;
             }
             if (!coupons || coupons.length === 0) {
-                if (window.HistoricalCouponsService?._generateAuthentic2026_10_17Coupons) {
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_26Coupons) {
+                    const aut26 = window.HistoricalCouponsService._generateAuthentic2026_10_26Coupons('2026-10-26');
+                    if (aut26 && aut26.coupons && aut26.coupons.length > 0) coupons = aut26.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_25Coupons) {
+                    const aut25 = window.HistoricalCouponsService._generateAuthentic2026_10_25Coupons('2026-10-25');
+                    if (aut25 && aut25.coupons && aut25.coupons.length > 0) coupons = aut25.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_17Coupons) {
                     const aut17 = window.HistoricalCouponsService._generateAuthentic2026_10_17Coupons('2026-10-17');
                     if (aut17 && aut17.coupons && aut17.coupons.length > 0) coupons = aut17.coupons;
                 }
@@ -1896,6 +1914,84 @@ const App = {
                 container.innerHTML = CouponPanel.render(fallback, [], 'all', '2026-10-13', 177);
                 CouponPanel.bindEvents(this, fallback, [], '2026-10-13');
             }
+        }
+    },
+
+    /**
+     * Nesine resmi bültenini tara ve maç kodlarıyla güncel garantör kuponları otomatik üret
+     */
+    async generateNesineCoupons() {
+        Helpers.showToast('⚡ Nesine bülteni taranıyor ve maç kodlarıyla kuponlar hesaplanıyor...', 'info');
+
+        try {
+            // Eğer maçlar henüz hafızada yoksa veya azsa bülteni yükle
+            if (!this.matches || this.matches.length < 15) {
+                await this.loadDashboard();
+            }
+
+            let poolMatches = this.matches || [];
+
+            // Eğer hala az maç varsa yerel Nesine önbelleğinden çek
+            if (poolMatches.length < 15 && window.NesineService) {
+                const candidates = [
+                    './data_cache/nesine_bulten_today_2026-10-26.json',
+                    './data_cache/nesine_bulten_today.json',
+                    'data_cache/nesine_bulten_today.json'
+                ];
+                for (const url of candidates) {
+                    try {
+                        const r = await fetch(url);
+                        if (r.ok) {
+                            const data = await r.json();
+                            const parsed = window.NesineService.parseEvents(data, 'football');
+                            if (parsed && parsed.length > 0) {
+                                poolMatches = parsed;
+                                this.matches = parsed;
+                                break;
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
+            const targetCount = isWeekend ? 8 : 6;
+
+            let newCoupons = [];
+            if (window.CouponEngine) {
+                newCoupons = window.CouponEngine.generateDailyCoupons(poolMatches, true, targetCount) || [];
+            }
+
+            if (!newCoupons || newCoupons.length === 0) {
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_26Coupons) {
+                    const aut = window.HistoricalCouponsService._generateAuthentic2026_10_26Coupons('2026-10-26');
+                    if (aut && Array.isArray(aut.coupons)) newCoupons = aut.coupons;
+                }
+            }
+
+            if (newCoupons && newCoupons.length > 0) {
+                this.coupons = newCoupons;
+                if (window.CouponPanel) {
+                    window.CouponPanel.lastDisplayedCoupons = newCoupons;
+                    window.CouponPanel.assistantCouponCount = newCoupons.length;
+                }
+
+                // Kuponlar sekmesine git
+                this.navigate('coupons');
+                const container = document.getElementById('coupons-container');
+                if (container && window.CouponPanel) {
+                    const todayStr = window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10);
+                    container.innerHTML = window.CouponPanel.render(newCoupons, [], 'all', todayStr, poolMatches.length);
+                    window.CouponPanel.bindEvents(this, newCoupons, [], todayStr);
+                }
+
+                Helpers.showToast(`🎯 Nesine resmi maç kodlarıyla ${newCoupons.length} otomatik kupon başarıyla hazırlandı!`, 'success');
+            } else {
+                Helpers.showToast('Nesine bülteninden kupon üretilemedi.', 'warning');
+            }
+        } catch (err) {
+            console.error('Nesine kupon üretme hatası:', err);
+            Helpers.showToast('Nesine kupon hatası: ' + err.message, 'error');
         }
     },
 
@@ -2526,8 +2622,10 @@ const App = {
       */
      async sendCouponsEmail() {
          const emailInput = document.getElementById('input-email-target');
-         const targetEmail = emailInput ? emailInput.value.trim() : '';
+         const targetEmail = emailInput ? emailInput.value.trim() : 'gokhanelalyz@gmail.com';
          const subscribeDaily = document.getElementById('check-subscribe-daily')?.checked ?? true;
+         const subscribeResults = document.getElementById('check-subscribe-results')?.checked ?? true;
+         const subscribeWeekly = document.getElementById('check-subscribe-weekly')?.checked ?? true;
          const submitBtn = document.getElementById('btn-submit-send-mail');
          const statusBox = document.getElementById('mail-status-box');
 
@@ -2536,26 +2634,6 @@ const App = {
              return;
          }
 
-         // Kuponları hazırla (Bugünün canlı kuponları)
-         if (!this.matches || this.matches.length === 0) {
-             await this.loadDashboard();
-         }
-
-         const dailyCoupons = (window.CouponEngine) ? window.CouponEngine.generateDailyCoupons(this.matches) : [];
-         const euroCoupons = (window.CouponEngine) ? window.CouponEngine.generateEuropeanCoupons(this.matches) : [];
-         const hourlyCoupon = (window.CouponEngine && window.CouponEngine.generateHourlyCoupon) ? window.CouponEngine.generateHourlyCoupon(this.matches, 3) : null;
-
-         const allCouponsToSend = [];
-         if (hourlyCoupon) allCouponsToSend.push(hourlyCoupon);
-         if (Array.isArray(euroCoupons)) allCouponsToSend.push(...euroCoupons);
-         if (Array.isArray(dailyCoupons)) allCouponsToSend.push(...dailyCoupons);
-
-         if (allCouponsToSend.length === 0) {
-             Helpers.showToast('Gönderilecek kupon bulunamadı. Lütfen bülteni yenileyin.', 'error');
-             return;
-         }
-
-         // İsteğe bağlı SMTP ayarları
          const smtpEmail = document.getElementById('smtp-email')?.value.trim();
          const smtpPass = document.getElementById('smtp-pass')?.value.trim();
          let smtpConfig = null;
@@ -2564,7 +2642,6 @@ const App = {
              Helpers.storage.set('smtp_email', smtpEmail);
          }
 
-         // UI loading durumuna al
          if (submitBtn) {
              submitBtn.disabled = true;
              submitBtn.innerHTML = '⏳ Gönderiliyor...';
@@ -2574,7 +2651,7 @@ const App = {
              statusBox.style.background = 'rgba(56, 189, 248, 0.1)';
              statusBox.style.border = '1px solid rgba(56, 189, 248, 0.3)';
              statusBox.style.color = '#38bdf8';
-             statusBox.innerHTML = '📬 Kuponlar e-posta şablonuna dönüştürülüyor ve gönderim başlatılıyor...';
+             statusBox.innerHTML = '📬 Günün kuponları e-posta şablonuna dönüştürülüyor ve gönderiliyor...';
          }
 
          try {
@@ -2582,33 +2659,38 @@ const App = {
                  ? 'http://localhost:3001' 
                  : '';
 
+             const now = new Date();
+             const dateStr = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
+
              const res = await fetch(`${baseUrl}/api/mail/send-coupons`, {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json' },
                  body: JSON.stringify({
                      email: targetEmail,
-                     coupons: allCouponsToSend,
                      smtpConfig,
-                     dateStr: '10 Eylül 2026'
+                     dateStr
                  })
              });
 
              const result = await res.json();
-
              if (!res.ok || !result.success) {
                  throw new Error(result.error || result.detail || 'E-posta gönderilemedi.');
              }
 
              Helpers.storage.set('subscriber_email', targetEmail);
 
-             // Günlük abonelik seçildiyse kaydet
-             if (subscribeDaily) {
-                 fetch(`${baseUrl}/api/mail/subscribe`, {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json' },
-                     body: JSON.stringify({ email: targetEmail, time: '10:00' })
-                 }).catch(e => console.warn('Abonelik kaydedilemedi:', e));
-             }
+             // Abonelik tercihlerini sunucuya kaydet
+             fetch(`${baseUrl}/api/mail/subscribe`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({
+                     email: targetEmail,
+                     time: '10:00',
+                     dailyCoupons: subscribeDaily,
+                     couponResults: subscribeResults,
+                     weeklyStats: subscribeWeekly
+                 })
+             }).catch(e => console.warn('Abonelik güncellenemedi:', e));
 
              if (statusBox) {
                  statusBox.style.background = 'rgba(16, 185, 129, 0.15)';
@@ -2628,15 +2710,14 @@ const App = {
 
                  statusBox.innerHTML = `
                      <div>
-                         ✅ <strong>Tebrikler!</strong> Günün tüm garantör kuponları <strong>${targetEmail}</strong> adresine başarıyla gönderildi.
-                         ${subscribeDaily ? '<br>🔔 <em>Her sabah saat 10:00 bülten aboneliğiniz aktif edildi!</em>' : ''}
+                         ✅ <strong>Tebrikler!</strong> Günün tüm hazır garantör kuponları <strong>${targetEmail}</strong> adresine iletildi.
+                         <br>🔔 <em>Otomatik bildirimler: Kuponlar (10:00), Sonuçlar (23:30), Haftalık Karne (Pazar)</em>
                      </div>
                      ${previewHtml}
                  `;
              }
 
-             Helpers.showToast(`✅ Kuponlar ${targetEmail} adresine iletildi!`, 'success');
-
+             Helpers.showToast(`✅ Günün kuponları ${targetEmail} adresine gönderildi!`, 'success');
          } catch (err) {
              console.error('Mail gönderim hatası:', err);
              if (statusBox) {
@@ -2649,7 +2730,177 @@ const App = {
          } finally {
              if (submitBtn) {
                  submitBtn.disabled = false;
-                 submitBtn.innerHTML = '🚀 Şimdi Gönder';
+                 submitBtn.innerHTML = '🎯 Günlük Kuponları Gönder';
+             }
+         }
+     },
+
+     /**
+      * Kuponların tutup tutmadığını ve maç sonuçlarını e-posta olarak gönder
+      */
+     async sendResultsEmail() {
+         const emailInput = document.getElementById('input-email-target');
+         const targetEmail = emailInput ? emailInput.value.trim() : 'gokhanelalyz@gmail.com';
+         const statusBox = document.getElementById('mail-status-box');
+         const btn = document.getElementById('btn-send-results-mail');
+
+         if (!targetEmail || !targetEmail.includes('@')) {
+             Helpers.showToast('Lütfen geçerli bir e-posta adresi yazın.', 'warning');
+             return;
+         }
+
+         if (btn) {
+             btn.disabled = true;
+             btn.innerHTML = '⏳ Sonuçlar Gönderiliyor...';
+         }
+         if (statusBox) {
+             statusBox.style.display = 'block';
+             statusBox.style.background = 'rgba(56, 189, 248, 0.1)';
+             statusBox.style.border = '1px solid rgba(56, 189, 248, 0.3)';
+             statusBox.style.color = '#38bdf8';
+             statusBox.innerHTML = '🏁 Kupon tutma durumları ve maç skorları derleniyor...';
+         }
+
+         try {
+             const baseUrl = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001')) 
+                 ? 'http://localhost:3001' 
+                 : '';
+
+             const res = await fetch(`${baseUrl}/api/mail/send-results`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ email: targetEmail, force: true })
+             });
+
+             const result = await res.json();
+             if (!res.ok || !result.success) {
+                 throw new Error(result.error || result.reason || 'Sonuç raporu gönderilemedi.');
+             }
+
+             if (statusBox) {
+                 statusBox.style.background = 'rgba(16, 185, 129, 0.15)';
+                 statusBox.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                 statusBox.style.color = '#34d399';
+
+                 const firstRes = (result.results && result.results[0]) || {};
+                 let previewHtml = '';
+                 if (firstRes.previewUrl) {
+                     previewHtml = `
+                     <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(16,185,129,0.3);">
+                         <strong>🌐 E-posta Web Önizleme Linki:</strong><br>
+                         <a href="${firstRes.previewUrl}" target="_blank" style="color:#00f0ff;text-decoration:underline;font-weight:700;word-break:break-all;">
+                             ${firstRes.previewUrl} ➔
+                         </a>
+                     </div>`;
+                 }
+
+                 statusBox.innerHTML = `
+                     <div>
+                         🏁 <strong>Kupon Sonuç Raporu Gönderildi!</strong><br>
+                         Hangi kuponun tuttuğu, maç skorları ve net kâr raporu <strong>${targetEmail}</strong> adresine iletildi.
+                     </div>
+                     ${previewHtml}
+                 `;
+             }
+             Helpers.showToast(`🏁 Kupon sonuçları ${targetEmail} adresine gönderildi!`, 'success');
+         } catch (err) {
+             console.error('Sonuç mail hatası:', err);
+             if (statusBox) {
+                 statusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+                 statusBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                 statusBox.style.color = '#f87171';
+                 statusBox.innerHTML = `❌ <strong>Hata:</strong> ${err.message || 'Sonuç raporu gönderilemedi.'}`;
+             }
+             Helpers.showToast('Sonuç raporu gönderimi başarısız: ' + err.message, 'error');
+         } finally {
+             if (btn) {
+                 btn.disabled = false;
+                 btn.innerHTML = '🏁 Sonuçları Gönder (Tuttu/Yattı)';
+             }
+         }
+     },
+
+     /**
+      * Haftalık istatistik ve performans bültenini e-posta olarak gönder
+      */
+     async sendWeeklyStatsEmail() {
+         const emailInput = document.getElementById('input-email-target');
+         const targetEmail = emailInput ? emailInput.value.trim() : 'gokhanelalyz@gmail.com';
+         const statusBox = document.getElementById('mail-status-box');
+         const btn = document.getElementById('btn-send-weekly-mail');
+
+         if (!targetEmail || !targetEmail.includes('@')) {
+             Helpers.showToast('Lütfen geçerli bir e-posta adresi yazın.', 'warning');
+             return;
+         }
+
+         if (btn) {
+             btn.disabled = true;
+             btn.innerHTML = '⏳ Haftalık Karne Gönderiliyor...';
+         }
+         if (statusBox) {
+             statusBox.style.display = 'block';
+             statusBox.style.background = 'rgba(56, 189, 248, 0.1)';
+             statusBox.style.border = '1px solid rgba(56, 189, 248, 0.3)';
+             statusBox.style.color = '#38bdf8';
+             statusBox.innerHTML = '📊 Son 7 günün kupon performansı ve kâr istatistikleri hesaplanıyor...';
+         }
+
+         try {
+             const baseUrl = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '3001')) 
+                 ? 'http://localhost:3001' 
+                 : '';
+
+             const res = await fetch(`${baseUrl}/api/mail/send-weekly`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ email: targetEmail, force: true })
+             });
+
+             const result = await res.json();
+             if (!res.ok || !result.success) {
+                 throw new Error(result.error || result.reason || 'Haftalık istatistik gönderilemedi.');
+             }
+
+             if (statusBox) {
+                 statusBox.style.background = 'rgba(16, 185, 129, 0.15)';
+                 statusBox.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                 statusBox.style.color = '#34d399';
+
+                 const firstRes = (result.results && result.results[0]) || {};
+                 let previewHtml = '';
+                 if (firstRes.previewUrl) {
+                     previewHtml = `
+                     <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(16,185,129,0.3);">
+                         <strong>🌐 E-posta Web Önizleme Linki:</strong><br>
+                         <a href="${firstRes.previewUrl}" target="_blank" style="color:#00f0ff;text-decoration:underline;font-weight:700;word-break:break-all;">
+                             ${firstRes.previewUrl} ➔
+                         </a>
+                     </div>`;
+                 }
+
+                 statusBox.innerHTML = `
+                     <div>
+                         📊 <strong>Haftalık İstatistik Bülteni Gönderildi!</strong><br>
+                         Genel kazanma oranı, ROI ve 7 günlük performans karnesi <strong>${targetEmail}</strong> adresine iletildi.
+                     </div>
+                     ${previewHtml}
+                 `;
+             }
+             Helpers.showToast(`📊 Haftalık istatistik ${targetEmail} adresine gönderildi!`, 'success');
+         } catch (err) {
+             console.error('Haftalık mail hatası:', err);
+             if (statusBox) {
+                 statusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+                 statusBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                 statusBox.style.color = '#f87171';
+                 statusBox.innerHTML = `❌ <strong>Hata:</strong> ${err.message || 'Haftalık istatistik gönderilemedi.'}`;
+             }
+             Helpers.showToast('Haftalık istatistik gönderimi başarısız: ' + err.message, 'error');
+         } finally {
+             if (btn) {
+                 btn.disabled = false;
+                 btn.innerHTML = '📊 Haftalık Özeti Gönder';
              }
          }
      },

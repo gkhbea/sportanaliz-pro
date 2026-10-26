@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');
+const fetch = (typeof globalThis.fetch === 'function') ? globalThis.fetch : require('node-fetch');
 const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
@@ -124,9 +124,9 @@ function getCached(key, forceRefresh = false, customTTL = null) {
         }
     }
 
-    // 3. Disk Geriye Dönük Kurtarıcı (Son kayıtlı dosya)
+    // 3. Disk Geriye Dönük Kurtarıcı (Son kayıtlı dosya, TTL geçerliyse)
     const latest = findLatestDiskCache(key);
-    if (latest) {
+    if (latest && (Date.now() - latest.mtimeMs < ttl)) {
         try {
             const fileData = fs.readFileSync(latest.fullPath, 'utf8');
             const parsed = JSON.parse(fileData);
@@ -147,10 +147,17 @@ function setCache(key, data) {
 
     // Diske asenkron yaz (Sunucuyu ve CPU'yu bekletmez)
     const filePath = getCacheFilePath(key);
-    fs.writeFile(filePath, JSON.stringify(data), 'utf8', (err) => {
+    const cleanKey = key.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 80);
+    const genericPath = path.join(CACHE_DIR, `${cleanKey}.json`);
+    const jsonStr = JSON.stringify(data);
+
+    fs.writeFile(filePath, jsonStr, 'utf8', (err) => {
         if (err) console.warn(`Disk önbellek yazma hatası (${key}):`, err.message);
         else console.log(`💾 [GÜNLÜK ÖNBELLEK KAYDEDİLDİ] ${path.basename(filePath)}`);
     });
+    if (filePath !== genericPath) {
+        fs.writeFile(genericPath, jsonStr, 'utf8', () => {});
+    }
 }
 
 // ---- Rate Limiting (Korumalı ve Engellemesiz) ----
@@ -170,7 +177,7 @@ async function refreshNesineBulletinBackground() {
     try {
         const url = `https://cdnbulten.nesine.com/api/bulten/getprebultenfull`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -918,267 +925,33 @@ app.get('/api/proxy/live/scores', async (req, res) => {
 });
 
 // ============================================================
-// ---- Mail / E-posta Gönderim Servisi (Nodemailer) ----
+// ---- Mail / E-posta Gönderim Servisi (emailNotificationService) ----
 // ============================================================
-const SUBSCRIBERS_FILE = path.join(__dirname, 'subscribers.json');
-
-function getSubscribers() {
-    try {
-        if (fs.existsSync(SUBSCRIBERS_FILE)) {
-            const raw = fs.readFileSync(SUBSCRIBERS_FILE, 'utf8');
-            return JSON.parse(raw);
-        }
-    } catch (e) {
-        console.warn('Abone listesi okuma hatası:', e.message);
-    }
-    return [];
-}
-
-function saveSubscribers(list) {
-    try {
-        fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(list, null, 2), 'utf8');
-        return true;
-    } catch (e) {
-        console.error('Abone listesi kaydetme hatası:', e.message);
-        return false;
-    }
-}
-
-/**
- * Kuponlar için şık, responsive HTML e-posta şablonu oluştur
- */
-function buildCouponsEmailHtml({ coupons = [], dateStr = '', targetEmail = '' }) {
-    const todayFormatted = dateStr || '10 Eylül 2026';
-    let totalBetsCount = 0;
-    coupons.forEach(c => totalBetsCount += (c.matches ? c.matches.length : 0));
-
-    let couponsCardsHtml = '';
-
-    coupons.forEach((coupon, idx) => {
-        const title = coupon.title || `Kupon #${idx + 1}`;
-        const badge = coupon.badge || 'GÜVENLİ TERCİH';
-        const totalOdd = coupon.totalOdd || '1.00';
-        const avgConfidence = coupon.avgConfidence || 75;
-        const themeColor = coupon.themeColor || '#7C3AED';
-        const icon = coupon.icon || '🎯';
-
-        let matchesHtml = '';
-        (coupon.matches || []).forEach((m, mIdx) => {
-            const time = m.timeStr || m.matchTime || '20:00';
-            const league = m.league || 'Futbol';
-            const home = m.homeTeam || 'Ev Sahibi';
-            const away = m.awayTeam || 'Deplasman';
-            const pick = m.pickTitle || m.marketTitle || 'MS 1';
-            const odd = m.odd || '1.50';
-            const prob = m.probability || m.confidenceScore || 75;
-            const reason = m.reason || 'İstatistiksel xG ve form modellemesi';
-            const mackolik = (m.match && m.match.mackolikUrl) ? m.match.mackolikUrl : (m.mackolikUrl || 'https://arsiv.mackolik.com/Canli-Sonuclar');
-
-            matchesHtml += `
-            <div style="background:#131527;border:1px solid #232742;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-bottom:6px;">
-                    <span>⚽ ${league} · <strong style="color:#38bdf8;">${time}</strong></span>
-                    <span style="background:#1e293b;padding:2px 8px;border-radius:4px;color:#cbd5e1;font-size:11px;">#${mIdx + 1}</span>
-                </div>
-                <div style="font-size:15px;font-weight:700;color:#ffffff;margin-bottom:6px;">
-                    ${home} <span style="color:#64748b;font-weight:400;">vs</span> ${away}
-                </div>
-                <div style="background:#1e1b4b;border-left:3px solid ${themeColor};padding:8px 10px;border-radius:6px;margin-bottom:6px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="color:#e0e7ff;font-weight:700;font-size:14px;">👉 ${pick}</span>
-                        <span style="background:${themeColor};color:#ffffff;padding:2px 8px;border-radius:4px;font-weight:800;font-size:13px;">Oran: ${odd}</span>
-                    </div>
-                    <div style="font-size:11px;color:#a5b4fc;margin-top:4px;">
-                        🎯 Model İhtimali: <strong>%${prob}</strong>
-                    </div>
-                </div>
-                <div style="font-size:11px;color:#94a3b8;line-height:1.4;margin-bottom:6px;">
-                    💡 <em>${reason}</em>
-                </div>
-                <div style="text-align:right;">
-                    <a href="${mackolik}" target="_blank" style="color:#38bdf8;font-size:11px;text-decoration:none;font-weight:600;">
-                        🔗 Maçkolik Detay & Canlı Skor ➔
-                    </a>
-                </div>
-            </div>`;
-        });
-
-        couponsCardsHtml += `
-        <div style="background:#0e101f;border:1px solid #1e2238;border-radius:14px;padding:18px;margin-bottom:20px;box-shadow:0 6px 16px rgba(0,0,0,0.4);">
-            <div style="border-bottom:1px solid #232742;padding-bottom:12px;margin-bottom:14px;">
-                <div style="display:inline-block;background:${themeColor}22;color:${themeColor};border:1px solid ${themeColor}44;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">
-                    ${badge}
-                </div>
-                <h3 style="margin:0 0 4px 0;font-size:18px;font-weight:800;color:#ffffff;">
-                    ${icon} ${title}
-                </h3>
-                <div style="display:flex;gap:12px;font-size:13px;color:#cbd5e1;margin-top:8px;">
-                    <span style="background:#10b98122;color:#34d399;padding:4px 10px;border-radius:6px;font-weight:800;">
-                        💰 Toplam Oran: ${totalOdd}
-                    </span>
-                    <span style="background:#38bdf822;color:#38bdf8;padding:4px 10px;border-radius:6px;font-weight:700;">
-                        ⭐ Ortalama Güven: %${avgConfidence}
-                    </span>
-                    <span style="background:#6366f122;color:#a5b4fc;padding:4px 10px;border-radius:6px;font-weight:700;">
-                        📋 ${coupon.matches ? coupon.matches.length : 0} Maç
-                    </span>
-                </div>
-            </div>
-            <div>
-                ${matchesHtml}
-            </div>
-            <div style="background:#090a12;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:10px;">
-                <span>💵 100 TL Yatırımla Olası Kazanç:</span>
-                <strong style="color:#10b981;font-size:14px;">${(100 * parseFloat(totalOdd || 1)).toFixed(2)} TL</strong>
-            </div>
-        </div>`;
-    });
-
-    return `
-    <!DOCTYPE html>
-    <html lang="tr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SportAnaliz Pro Günlük Kuponlar</title>
-    </head>
-    <body style="margin:0;padding:0;background-color:#06070d;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;color:#f1f5f9;">
-        <div style="max-width:680px;margin:0 auto;padding:24px 16px;">
-            <!-- Header Banner -->
-            <div style="background:linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);border:1px solid #312e81;border-radius:18px;padding:26px;text-align:center;margin-bottom:24px;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-                <div style="display:inline-flex;align-items:center;gap:8px;font-size:24px;font-weight:900;color:#ffffff;margin-bottom:6px;">
-                    ⚡ Sport<span style="color:#00f0ff;">Analiz</span> Pro
-                </div>
-                <h1 style="margin:6px 0;font-size:22px;color:#ffffff;font-weight:800;">
-                    📅 Günün Garantör Kuponları & Analiz Bülteni
-                </h1>
-                <p style="margin:4px 0 12px 0;color:#94a3b8;font-size:13px;">
-                    Tarih: <strong style="color:#38bdf8;">${todayFormatted}</strong> · 4 Platform Konsensüsü (Nesine, Bilyoner, İddaa, Misli)
-                </p>
-                <div style="display:inline-block;background:#059669;color:#ffffff;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;">
-                    ✅ %100 Bugüne Özel Maçlar · 13.09 ve İleri Tarihler Elendi
-                </div>
-            </div>
-
-            <!-- Özet İstatistikler -->
-            <div style="display:flex;gap:10px;margin-bottom:20px;text-align:center;">
-                <div style="flex:1;background:#0e101f;border:1px solid #1e2238;border-radius:10px;padding:12px;">
-                    <div style="font-size:20px;font-weight:800;color:#00f0ff;">${coupons.length}</div>
-                    <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Hazır Kupon</div>
-                </div>
-                <div style="flex:1;background:#0e101f;border:1px solid #1e2238;border-radius:10px;padding:12px;">
-                    <div style="font-size:20px;font-weight:800;color:#10b981;">${totalBetsCount}</div>
-                    <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Toplam Maç</div>
-                </div>
-                <div style="flex:1;background:#0e101f;border:1px solid #1e2238;border-radius:10px;padding:12px;">
-                    <div style="font-size:20px;font-weight:800;color:#f59e0b;">10.09</div>
-                    <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Bugünün Bülteni</div>
-                </div>
-            </div>
-
-            <!-- Kupon Kartları -->
-            ${couponsCardsHtml}
-
-            <!-- Footer & Uyarı -->
-            <div style="background:#0a0c16;border:1px solid #1e2238;border-radius:12px;padding:18px;text-align:center;font-size:11px;color:#64748b;line-height:1.6;margin-top:24px;">
-                <p style="margin:0 0 6px 0;color:#94a3b8;">
-                    ⚠️ <strong>Sorumlu Bahis Uyarısı:</strong> Bu e-postadaki tüm veriler istatistiksel Poisson modelleri ve konsensüs analizleriyle üretilmiştir. Kesin kazanç taahhüt etmez.
-                </p>
-                <p style="margin:0;">
-                    SportAnaliz Pro · Otomatik Günlük E-posta Servisi · Alıcı: ${targetEmail || 'Kullanıcı'}
-                </p>
-            </div>
-        </div>
-    </body>
-    </html>`;
-}
-
-/**
- * Mail Taşıyıcı Oluşturucu
- */
-async function createMailTransporter(smtpConfig) {
-    const user = (smtpConfig && smtpConfig.user) || process.env.SMTP_USER || process.env.GMAIL_USER;
-    const pass = (smtpConfig && smtpConfig.pass) || process.env.SMTP_PASS || process.env.GMAIL_APP_PASS || process.env.SMTP_PASSWORD;
-    const host = (smtpConfig && smtpConfig.host) || process.env.SMTP_HOST;
-    const port = (smtpConfig && smtpConfig.port) || process.env.SMTP_PORT || 587;
-
-    if (user && pass) {
-        // Özel SMTP veya doğrudan Gmail servisi
-        const isGmail = (user && user.includes('gmail.com')) || (host && host.includes('gmail.com'));
-        if (isGmail) {
-            return {
-                transporter: nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: { user, pass }
-                }),
-                isTest: false,
-                from: (smtpConfig && smtpConfig.from) || `"SportAnaliz Pro" <${user}>`
-            };
-        } else if (host) {
-            return {
-                transporter: nodemailer.createTransport({
-                    host: host,
-                    port: parseInt(port) || 587,
-                    secure: parseInt(port) === 465,
-                    auth: { user, pass }
-                }),
-                isTest: false,
-                from: (smtpConfig && smtpConfig.from) || process.env.SMTP_FROM || `"SportAnaliz Pro" <${user}>`
-            };
-        } else {
-            return {
-                transporter: nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: { user, pass }
-                }),
-                isTest: false,
-                from: (smtpConfig && smtpConfig.from) || `"SportAnaliz Pro" <${user}>`
-            };
-        }
-    }
-
-    // SMTP yapılandırılmamışsa otomatik Ethereal Test Hesabı oluştur
-    const testAccount = await nodemailer.createTestAccount();
-    return {
-        transporter: nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
-            secure: false,
-            auth: {
-                user: testAccount.user,
-                pass: testAccount.pass
-            }
-        }),
-        isTest: true,
-        from: `"SportAnaliz Pro" <${testAccount.user}>`
-    };
-}
+const emailService = require('./js/services/emailNotificationService.js');
 
 // POST /api/mail/send-coupons: Kuponları e-postaya gönder
 app.post('/api/mail/send-coupons', async (req, res) => {
     try {
         const { email, coupons, smtpConfig, dateStr } = req.body;
-
         if (!email || !email.includes('@')) {
             return res.status(400).json({ error: 'Geçerli bir e-posta adresi giriniz.' });
         }
+        const { transporter, isTest, from } = await emailService.createMailTransporter(smtpConfig);
+        const couponsToSend = (Array.isArray(coupons) && coupons.length > 0)
+            ? coupons
+            : emailService.fetchCouponsForDate(new Date().toISOString().slice(0, 10));
 
-        if (!Array.isArray(coupons) || coupons.length === 0) {
-            return res.status(400).json({ error: 'Gönderilecek kupon listesi bulunamadı.' });
-        }
-
-        const { transporter, isTest, from } = await createMailTransporter(smtpConfig);
-
-        const htmlContent = buildCouponsEmailHtml({
-            coupons,
-            dateStr: dateStr || '10 Eylül 2026',
+        const formattedDate = dateStr || new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
+        const htmlContent = emailService.buildCouponsEmailHtml({
+            coupons: couponsToSend,
+            dateStr: formattedDate,
             targetEmail: email
         });
 
         const mailOptions = {
             from: from || '"SportAnaliz Pro" <noreply@sportanaliz.pro>',
             to: email,
-            subject: `⚡ SportAnaliz Pro — Günün Hazır Kuponları (${dateStr || '10 Eylül 2026'})`,
+            subject: `🎯 SportAnaliz Pro — Günün Hazır Kuponları (${formattedDate})`,
             html: htmlContent
         };
 
@@ -1206,33 +979,70 @@ app.post('/api/mail/send-coupons', async (req, res) => {
     }
 });
 
+// POST /api/mail/send-results: Kupon sonuçları (tutup tutmadığı) maili gönder
+app.post('/api/mail/send-results', async (req, res) => {
+    try {
+        const { email, targetDate, force = true } = req.body;
+        const result = await emailService.sendCouponResults({
+            targetEmail: email || null,
+            targetDate: targetDate || null,
+            force
+        });
+        res.json(result);
+    } catch (err) {
+        console.error('[MAIL SONUÇ HATASI]:', err);
+        res.status(500).json({ error: 'Kupon sonuç raporu gönderilemedi', detail: err.message });
+    }
+});
+
+// POST /api/mail/send-weekly: Haftalık istatistik bülteni maili gönder
+app.post('/api/mail/send-weekly', async (req, res) => {
+    try {
+        const { email, force = true } = req.body;
+        const result = await emailService.sendWeeklyStats({
+            targetEmail: email || null,
+            force
+        });
+        res.json(result);
+    } catch (err) {
+        console.error('[MAIL HAFTALIK HATASI]:', err);
+        res.status(500).json({ error: 'Haftalık istatistik raporu gönderilemedi', detail: err.message });
+    }
+});
+
 // POST /api/mail/subscribe: Günlük otomatik e-posta aboneliği kaydet
 app.post('/api/mail/subscribe', (req, res) => {
     try {
-        const { email, time = '10:00' } = req.body;
+        const { email, time = '10:00', dailyCoupons = true, couponResults = true, weeklyStats = true } = req.body;
         if (!email || !email.includes('@')) {
             return res.status(400).json({ error: 'Geçerli bir e-posta adresi giriniz.' });
         }
 
-        const subscribers = getSubscribers();
+        const subscribers = emailService.getSubscribers();
         const existing = subscribers.find(s => s.email.toLowerCase() === email.toLowerCase());
 
         if (existing) {
             existing.active = true;
             existing.updatedAt = new Date().toISOString();
             existing.time = time;
+            existing.dailyCoupons = dailyCoupons !== false;
+            existing.couponResults = couponResults !== false;
+            existing.weeklyStats = weeklyStats !== false;
         } else {
             subscribers.push({
                 email: email.trim().toLowerCase(),
                 time,
                 active: true,
+                dailyCoupons: dailyCoupons !== false,
+                couponResults: couponResults !== false,
+                weeklyStats: weeklyStats !== false,
                 createdAt: new Date().toISOString()
             });
         }
 
-        saveSubscribers(subscribers);
-        console.log(`[ABONELİK] Yeni günlük abone eklendi/güncellendi: ${email}`);
-        res.json({ success: true, message: `${email} adresi günlük kupon bültenine başarıyla kaydedildi.` });
+        emailService.saveSubscribers(subscribers);
+        console.log(`[ABONELİK] Günlük abone eklendi/güncellendi: ${email}`);
+        res.json({ success: true, message: `${email} adresi bülten ve sonuç bildirimlerine başarıyla kaydedildi.` });
     } catch (err) {
         res.status(500).json({ error: 'Abonelik kaydedilemedi', detail: err.message });
     }
@@ -1240,81 +1050,39 @@ app.post('/api/mail/subscribe', (req, res) => {
 
 // GET /api/mail/subscribers: Abone durumunu sorgula
 app.get('/api/mail/subscribers', (req, res) => {
-    const subscribers = getSubscribers();
+    const subscribers = emailService.getSubscribers();
     res.json({ total: subscribers.length, subscribers });
 });
 
-// ---- Günlük Otomatik Kupon Gönderim Servisi (Tüm Aboneler İçin) ----
-let lastDailyMailDate = null;
+// GET /api/mail/status: Mail sistemi ve SMTP durumunu sorgula
+app.get('/api/mail/status', (req, res) => {
+    const history = emailService.getMailHistory();
+    const subscribers = emailService.getSubscribers();
+    const hasSmtp = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS && process.env.SMTP_PASS.trim().length > 3);
+    res.json({
+        hasSmtp,
+        smtpUser: process.env.SMTP_USER || null,
+        smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
+        isTestMode: !hasSmtp,
+        subscribersCount: subscribers.length,
+        subscribers,
+        history
+    });
+});
 
-async function sendDailyCouponsToSubscribers(force = false) {
-    const today = new Date().toISOString().slice(0, 10);
-    if (!force && lastDailyMailDate === today) {
-        return { skipped: true, reason: 'Bugün zaten gönderildi.' };
-    }
-
-    const subscribers = getSubscribers().filter(s => s.active !== false);
-    if (subscribers.length === 0) {
-        return { skipped: true, reason: 'Kayıtlı aktif abone yok.' };
-    }
-
-    try {
-        console.log(`[GÜNLÜK MAIL] ${subscribers.length} aboneye günün kuponları hazırlanıyor...`);
-        let coupons = [];
-        try {
-            global.window = global;
-            require('./js/utils/statistics.js');
-            require('./js/utils/helpers.js');
-            require('./js/services/historicalCouponsService.js');
-            coupons = global.HistoricalCouponsService?.getCouponsByDate?.(today) || [];
-        } catch (e) {
-            console.warn('[GÜNLÜK MAIL] Kupon alma uyarısı:', e.message);
-        }
-
-        if (!coupons || coupons.length === 0) {
-            return { skipped: true, reason: 'Günün kuponları henüz hazır değil.' };
-        }
-
-        const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-        const { transporter, isTest, from } = await createMailTransporter();
-        const results = [];
-
-        for (const sub of subscribers) {
-            try {
-                const htmlContent = buildCouponsEmailHtml({
-                    coupons,
-                    dateStr,
-                    targetEmail: sub.email
-                });
-
-                const mailOptions = {
-                    from,
-                    to: sub.email,
-                    subject: `🎯 SportAnaliz Pro — Günün 5 Özel Analiz Kuponu (${dateStr})`,
-                    html: htmlContent
-                };
-
-                const info = await transporter.sendMail(mailOptions);
-                const previewUrl = isTest ? nodemailer.getTestMessageUrl(info) : null;
-                console.log(`[GÜNLÜK MAIL] Gönderildi -> ${sub.email} (${info.messageId}) ${isTest ? '[Ethereal]' : '[Canlı]'}`);
-                results.push({ email: sub.email, success: true, messageId: info.messageId, previewUrl });
-            } catch (err) {
-                console.error(`[GÜNLÜK MAIL] ${sub.email} gönderilemedi:`, err.message);
-                results.push({ email: sub.email, success: false, error: err.message });
-            }
-        }
-
-        lastDailyMailDate = today;
-        return { success: true, sentCount: results.filter(r => r.success).length, results };
-    } catch (err) {
-        console.error('[GÜNLÜK MAIL HATASI]:', err);
-        return { success: false, error: err.message };
-    }
-}
-
-// POST /api/mail/trigger-daily: Günlük kupon dağıtımını manuel tetikle
+// Manuel Tetikleyiciler
 app.post('/api/mail/trigger-daily', async (req, res) => {
-    const result = await sendDailyCouponsToSubscribers(true);
+    const result = await emailService.sendDailyCoupons({ force: true });
+    res.json(result);
+});
+
+app.post('/api/mail/trigger-results', async (req, res) => {
+    const result = await emailService.sendCouponResults({ force: true });
+    res.json(result);
+});
+
+app.post('/api/mail/trigger-weekly', async (req, res) => {
+    const result = await emailService.sendWeeklyStats({ force: true });
     res.json(result);
 });
 
@@ -1441,9 +1209,9 @@ setInterval(() => runAutonomousSportsIntelAgent(), 2 * 60 * 1000); // Her 2 daki
 setTimeout(() => syncLiveFeedsInBackground(), 5000); // 5 sn sonra ilk çalışma
 setInterval(() => syncLiveFeedsInBackground(), 45 * 1000); // Her 45 saniyede bir
 
-// Günlük kupon e-posta gönderimini başlat (sunucu açılışında ve periyodik kontrol)
-setTimeout(() => sendDailyCouponsToSubscribers(), 8000); // 8 sn sonra ilk kontrol
-setInterval(() => sendDailyCouponsToSubscribers(), 30 * 60 * 1000); // Her 30 dakikada bir kontrol
+// Günlük kupon, maç sonuçları ve haftalık istatistik e-posta kontrolünü başlat
+setTimeout(() => emailService.checkAndSendDueEmails().catch(() => {}), 8000); // 8 sn sonra ilk kontrol
+setInterval(() => emailService.checkAndSendDueEmails().catch(() => {}), 10 * 60 * 1000); // Her 10 dakikada bir kontrol
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`
