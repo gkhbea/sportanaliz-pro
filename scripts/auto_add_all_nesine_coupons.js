@@ -71,6 +71,32 @@ app.whenReady().then(async () => {
     }
 
     if (!coupons || coupons.length === 0) {
+        const cacheFile = path.join(DATA_CACHE_DIR, 'nesine_coupons_today.json');
+        if (fs.existsSync(cacheFile)) {
+            try {
+                const cachedData = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+                if (Array.isArray(cachedData.coupons) && cachedData.coupons.length > 0) {
+                    coupons = cachedData.coupons.map((c, idx) => ({
+                        index: idx + 1,
+                        id: c.name || `coupon_${idx + 1}`,
+                        title: c.title,
+                        totalOdd: c.totalOdd,
+                        matches: (c.picks || []).map(p => ({
+                            iddaaCode: p.iddaaCode,
+                            homeTeam: p.homeTeam,
+                            awayTeam: p.awayTeam,
+                            pickTitle: p.pickTitle,
+                            marketTitle: p.marketTitle,
+                            odd: p.odd
+                        }))
+                    }));
+                    console.log(`[BILGI] Kuponlar yerel önbellekten (${cacheFile}) başarıyla yüklendi (${coupons.length} kupon).`);
+                }
+            } catch (e) {}
+        }
+    }
+
+    if (!coupons || coupons.length === 0) {
         console.log('[BILGI] Kupon havuzu varsayılan 8 kupon seti ile yapılandırılıyor...');
         coupons = [
             { index: 1, title: '🛡️ Garantör Banko / Kasa Katlama Kuponu', totalOdd: '1.96' },

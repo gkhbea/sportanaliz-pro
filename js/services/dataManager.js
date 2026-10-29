@@ -35,6 +35,7 @@ const DataManager = {
 
         // Güvenlik Ağı: Eğer canlı bağlantılardan maç gelmediyse yerel önbellek dosyasından bülteni yükle
         if (results.matches.length === 0) {
+            try {
                 const todayIso = new Date().toISOString().slice(0, 10);
                 const candidates = [
                     `./data_cache/nesine_bulten_today_${todayIso}.json`,

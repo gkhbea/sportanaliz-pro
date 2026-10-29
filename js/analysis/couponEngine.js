@@ -1382,8 +1382,8 @@ const CouponEngine = {
 
             const cons = p.item.editor?.consensus || { percentage: 80 };
             const isToday = this._isMatchToday(m);
-            const timeStr = m.matchDate ? Helpers.formatDate(m.matchDate, 'time') : (m.matchTime || 'Bugün');
-            const dateStr = m.matchDate ? Helpers.formatDate(m.matchDate, 'short') : '';
+            const timeStr = m.matchDate ? ((typeof Helpers !== 'undefined' && Helpers.formatDate) ? Helpers.formatDate(m.matchDate, 'time') : new Date(m.matchDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })) : (m.matchTime || 'Bugün');
+            const dateStr = m.matchDate ? ((typeof Helpers !== 'undefined' && Helpers.formatDate) ? Helpers.formatDate(m.matchDate, 'short') : new Date(m.matchDate).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })) : '';
             const dateDisplay = isToday ? `Bugün ${timeStr}` : (dateStr ? `${dateStr} ${timeStr}` : timeStr);
 
             // Seçim gerekçesi üret

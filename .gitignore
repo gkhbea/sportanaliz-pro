@@ -10,6 +10,8 @@ scratch/
 data_cache/*
 !data_cache/default_bulten.json
 !data_cache/nesine_bulten_today.json
+!data_cache/nesine_coupons_today.json
+!data_cache/live_scores_feed_today.json
 !data_cache/nesine_bulten_today_2026-10-13.json
 !data_cache/nesine_bulten_today_2026-10-14.json
 !data_cache/nesine_bulten_today_2026-10-15.json
