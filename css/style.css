@@ -7869,3 +7869,51 @@ body:not(:has(#disclaimer-banner)) .main-content {
     border-color: #00f0ff;
     box-shadow: 0 4px 15px rgba(0, 240, 255, 0.45);
 }
+
+/* ======================================================== */
+/* ⏱️ ZAMAN DİLİMİ KUPON SEKMELERİ (SABAH, ÖĞLEN, AKŞAM, TÜM GÜN) */
+/* ======================================================== */
+.c-timeslot-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.c-timeslot-tabs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 10px;
+}
+
+.c-timeslot-btn {
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.c-timeslot-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.c-timeslot-btn.active {
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .c-timeslot-tabs-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .c-timeslot-btn {
+        padding: 10px 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .c-timeslot-tabs-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}

@@ -12,6 +12,217 @@
 const CouponPanel = {
     selectedAnalysisDate: null,
     modalActiveFilter: 'all',
+    activeTimeSlot: 'all',
+
+    getMatchHour(matchItem) {
+        if (!matchItem) return 20;
+        const timeStr = matchItem.timeStr 
+            || matchItem.match?.timeStr 
+            || (matchItem.matchDate ? matchItem.matchDate.split('T')[1]?.slice(0, 5) : null)
+            || (matchItem.match?.matchDate ? matchItem.match.matchDate.split('T')[1]?.slice(0, 5) : null)
+            || '';
+        if (timeStr && timeStr.includes(':')) {
+            const h = parseInt(timeStr.trim().split(':')[0], 10);
+            if (!isNaN(h)) return h;
+        }
+        return 20;
+    },
+
+    getMatchTimeSlot(matchItem) {
+        const h = this.getMatchHour(matchItem);
+        if (h >= 0 && h < 12) return 'morning'; // 00:00 - 11:59 (Sabah & Gece)
+        if (h >= 12 && h < 18) return 'noon';   // 12:00 - 17:59 (Öğlen)
+        return 'evening';                       // 18:00 - 23:59 (Akşam)
+    },
+
+    getCouponTimeSlot(coupon) {
+        if (!coupon) return 'evening';
+        if (coupon.timeSlot) return coupon.timeSlot;
+        if (coupon.session) return coupon.session;
+
+        const idLow = (coupon.id || '').toLowerCase();
+        const titleLow = (coupon.title || '').toLowerCase();
+        if (idLow.includes('morning') || idLow.includes('night') || titleLow.includes('sabah') || titleLow.includes('gece')) {
+            return 'morning';
+        }
+        if (idLow.includes('noon') || titleLow.includes('öğlen') || titleLow.includes('oglen') || titleLow.includes('gündüz') || titleLow.includes('gunduz')) {
+            return 'noon';
+        }
+        if (idLow.includes('evening') || titleLow.includes('akşam') || titleLow.includes('aksam') || idLow.includes('uefa')) {
+            return 'evening';
+        }
+
+        const matches = coupon.matches || coupon.picks || [];
+        if (matches.length === 0) return 'evening';
+
+        let mCount = 0, nCount = 0, eCount = 0;
+        matches.forEach(m => {
+            const slot = this.getMatchTimeSlot(m.match || m);
+            if (slot === 'morning') mCount++;
+            else if (slot === 'noon') nCount++;
+            else eCount++;
+        });
+
+        if (mCount > nCount && mCount >= eCount && mCount > 0) return 'morning';
+        if (nCount >= mCount && nCount >= eCount && nCount > 0) return 'noon';
+        return 'evening';
+    },
+
+    getTimeSlotMeta(slot) {
+        switch (slot) {
+            case 'morning':
+                return {
+                    id: 'morning',
+                    icon: '🌅',
+                    title: 'Sabah Kuponları',
+                    shortTitle: 'Sabah',
+                    timeRange: '00:00 - 12:00',
+                    color: '#06B6D4',
+                    gradient: 'linear-gradient(135deg, rgba(6,182,212,0.22), rgba(8,145,178,0.32))',
+                    border: '#06B6D4',
+                    badgeText: '🌅 SABAH & GECE',
+                    desc: 'Gece ve sabahın erken saatlerinde oynanan maçlar (Latin Amerika, Asya, erken bülten)'
+                };
+            case 'noon':
+                return {
+                    id: 'noon',
+                    icon: '☀️',
+                    title: 'Öğlen Kuponları',
+                    shortTitle: 'Öğlen',
+                    timeRange: '12:00 - 18:00',
+                    color: '#F59E0B',
+                    gradient: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(217,119,6,0.32))',
+                    border: '#F59E0B',
+                    badgeText: '☀️ ÖĞLEN BÜLTENİ',
+                    desc: 'Gündüz seansı ve öğleden sonra başlayan karşılaşmalar (12:00 - 18:00)'
+                };
+            case 'evening':
+                return {
+                    id: 'evening',
+                    icon: '🌙',
+                    title: 'Akşam Kuponları',
+                    shortTitle: 'Akşam',
+                    timeRange: '18:00 - 23:59',
+                    color: '#A855F7',
+                    gradient: 'linear-gradient(135deg, rgba(168,85,247,0.22), rgba(126,34,206,0.32))',
+                    border: '#A855F7',
+                    badgeText: '🌙 AKŞAM BÜLTENİ',
+                    desc: 'Akşam ana bülteni, Avrupa ligleri, dev maçlar ve gece karşılaşmaları (18:00 - 23:59)'
+                };
+            default:
+                return {
+                    id: 'all',
+                    icon: '🌐',
+                    title: 'Tüm Gün Kuponları',
+                    shortTitle: 'Tüm Gün',
+                    timeRange: '00:00 - 23:59',
+                    color: '#00F0FF',
+                    gradient: 'linear-gradient(135deg, rgba(0,240,255,0.2), rgba(16,185,129,0.2))',
+                    border: '#00F0FF',
+                    badgeText: '🌐 TÜM GÜN',
+                    desc: 'Günün tüm zaman dilimlerini kapsayan eksiksiz kupon havuzu'
+                };
+        }
+    },
+
+    renderTimeSlotTabs(allCoupons = [], activeSlot = 'all') {
+        const counts = {
+            all: allCoupons.length,
+            morning: allCoupons.filter(c => this.getCouponTimeSlot(c) === 'morning').length,
+            noon: allCoupons.filter(c => this.getCouponTimeSlot(c) === 'noon').length,
+            evening: allCoupons.filter(c => this.getCouponTimeSlot(c) === 'evening').length
+        };
+
+        const slots = [
+            {
+                id: 'all',
+                label: 'TÜM GÜN',
+                icon: '🌐',
+                time: '24 Saat Bülteni',
+                count: counts.all,
+                activeColor: '#00F0FF',
+                activeBg: 'linear-gradient(135deg, rgba(0,240,255,0.18), rgba(16,185,129,0.18))',
+                border: '#00F0FF',
+                sub: 'Eksiksiz Havuz'
+            },
+            {
+                id: 'morning',
+                label: 'SABAH KUPONLARI',
+                icon: '🌅',
+                time: '00:00 - 12:00',
+                count: counts.morning,
+                activeColor: '#06B6D4',
+                activeBg: 'linear-gradient(135deg, rgba(6,182,212,0.22), rgba(8,145,178,0.28))',
+                border: '#06B6D4',
+                sub: 'Gece & Erken Sabah'
+            },
+            {
+                id: 'noon',
+                label: 'ÖĞLEN KUPONLARI',
+                icon: '☀️',
+                time: '12:00 - 18:00',
+                count: counts.noon,
+                activeColor: '#F59E0B',
+                activeBg: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(217,119,6,0.28))',
+                border: '#F59E0B',
+                sub: 'Gündüz Seansı'
+            },
+            {
+                id: 'evening',
+                label: 'AKŞAM KUPONLARI',
+                icon: '🌙',
+                time: '18:00 - 23:59',
+                count: counts.evening,
+                activeColor: '#A855F7',
+                activeBg: 'linear-gradient(135deg, rgba(168,85,247,0.22), rgba(126,34,206,0.28))',
+                border: '#A855F7',
+                sub: 'Avrupa & Gece'
+            }
+        ];
+
+        return `
+            <!-- ⏱️ MAÇ SAATİNE GÖRE ZAMAN DİLİMİ SEKMELERİ (SABAH, ÖĞLEN, AKŞAM, TÜM GÜN) -->
+            <div class="c-timeslot-section" style="background:linear-gradient(135deg, rgba(15,23,42,0.85), rgba(30,41,59,0.75));border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 16px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;padding:0 2px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:1.3rem;background:rgba(255,255,255,0.06);padding:6px;border-radius:10px;">⏱️</span>
+                        <div>
+                            <div style="font-weight:900;color:#ffffff;font-size:0.92rem;letter-spacing:0.3px;">
+                                MAÇ SAATİNE GÖRE KUPON SEÇİMİ:
+                            </div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">
+                                Kuponların tutup tutmadığı maç saatlerine bağlıdır. Oynayacağınız saate göre kupon seçin:
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.75rem;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10B981;padding:4px 10px;border-radius:8px;font-weight:800;display:inline-flex;align-items:center;gap:6px;">
+                        <span>🛡️</span> Kupon Hedefi 5 · Zorlama Yok · Aynı Maç Maks. 2 Kere &amp; Farklı Seçenekle
+                    </div>
+                </div>
+
+                <div class="c-timeslot-tabs-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:10px;">
+                    ${slots.map(s => {
+                        const isActive = (activeSlot === s.id);
+                        return `
+                            <button type="button" class="c-timeslot-btn ${isActive ? 'active' : ''}" data-timeslot="${s.id}" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:${isActive ? s.activeBg : 'rgba(255,255,255,0.03)'};border:1.5px solid ${isActive ? s.border : 'rgba(255,255,255,0.08)'};border-radius:12px;cursor:pointer;transition:all 0.25s ease;box-shadow:${isActive ? '0 0 18px ' + s.border + '44' : 'none'};text-align:left;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="font-size:1.5rem;">${s.icon}</span>
+                                    <div>
+                                        <div style="font-weight:900;font-size:0.86rem;color:${isActive ? s.activeColor : '#ffffff'};">${s.label}</div>
+                                        <div style="font-size:0.72rem;color:${isActive ? '#cbd5e1' : 'var(--text-muted)'};margin-top:2px;font-weight:700;">⏰ ${s.time}</div>
+                                        <div style="font-size:0.68rem;color:var(--text-muted);margin-top:1px;">${s.sub}</div>
+                                    </div>
+                                </div>
+                                <span style="background:${isActive ? s.border : 'rgba(255,255,255,0.1)'};color:${isActive ? '#000000' : '#ffffff'};font-weight:900;padding:4px 10px;border-radius:10px;font-size:0.8rem;box-shadow:${isActive ? '0 0 8px ' + s.border : 'none'};">
+                                    ${s.count}
+                                </span>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    },
 
     /**
      * Seçilen Tarihe Göre Kuponları Getirir (Dün, Bugün vb.)
@@ -203,25 +414,33 @@ const CouponPanel = {
             ? window.MatchTracker.getDailyAnalysisStats(chosenDate) 
             : { totalAnalyzed: 0, wonAnalyzed: 0, lostAnalyzed: 0, winRate: 0, matches: [] };
 
-        // Tutan, Yatan ve Bekleyen Kuponları Ayrıştır
-        const wonCoupons = couponList.filter(c => this.isCouponWon(c));
-        const lostCoupons = couponList.filter(c => this.isCouponLost(c));
-        const pendingCoupons = couponList.filter(c => this.isCouponPending(c));
+        // ⏱️ KULLANICI KURALI: Zaman Dilimi Sekmeleri (Sabah, Öğlen, Akşam, Tüm Gün)
+        this.activeTimeSlot = this.activeTimeSlot || 'all';
+
+        let slotCoupons = couponList;
+        if (this.activeTimeSlot && this.activeTimeSlot !== 'all') {
+            slotCoupons = couponList.filter(c => this.getCouponTimeSlot(c) === this.activeTimeSlot);
+        }
+
+        // Tutan, Yatan ve Bekleyen Kuponları Ayrıştır (Seçili zaman dilimine göre)
+        const wonCoupons = slotCoupons.filter(c => this.isCouponWon(c));
+        const lostCoupons = slotCoupons.filter(c => this.isCouponLost(c));
+        const pendingCoupons = slotCoupons.filter(c => this.isCouponPending(c));
 
         // Aktif filtreye göre gösterilecek kuponları belirle
-        let displayedCoupons = couponList;
+        let displayedCoupons = slotCoupons;
         let filterNoticeHtml = '';
 
         if (activeFilter === 'tutan' || activeFilter === 'won') {
             if (wonCoupons.length > 0) {
                 displayedCoupons = wonCoupons;
             } else {
-                displayedCoupons = couponList;
+                displayedCoupons = slotCoupons;
                 filterNoticeHtml = `<div style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(6,78,59,0.25));border:1px solid rgba(16,185,129,0.4);border-radius:12px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
                     <span style="font-size:1.4rem;">⏳</span>
                     <div>
-                        <strong style="color:#10B981;font-size:0.9rem;">Bugünün Karşılaşmaları Henüz Başlamadı</strong>
-                        <div style="color:#cbd5e1;font-size:0.8rem;margin-top:2px;">Tutan maçlar henüz kesinleşmediği için günün bekleyen 5 garantör kuponu aşağıda listeleniyor.</div>
+                        <strong style="color:#10B981;font-size:0.9rem;">Bu Zaman Diliminde Tutan Kuponlar Henüz Kesinleşmedi</strong>
+                        <div style="color:#cbd5e1;font-size:0.8rem;margin-top:2px;">Seçili zaman dilimindeki bekleyen kuponlar aşağıda listeleniyor.</div>
                     </div>
                 </div>`;
             }
@@ -229,24 +448,24 @@ const CouponPanel = {
             if (lostCoupons.length > 0) {
                 displayedCoupons = lostCoupons;
             } else {
-                displayedCoupons = couponList;
+                displayedCoupons = slotCoupons;
                 filterNoticeHtml = `<div style="background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(180,83,9,0.25));border:1px solid rgba(245,158,11,0.4);border-radius:12px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,0.25);">
                     <span style="font-size:1.4rem;">🛡️</span>
                     <div>
                         <strong style="color:#fbbf24;font-size:0.9rem;">Kaybeden Kupon Bulunmuyor</strong>
-                        <div style="color:#cbd5e1;font-size:0.8rem;margin-top:2px;">Kayıp kupon bulunmadığından günün tüm garantör kuponları listeleniyor.</div>
+                        <div style="color:#cbd5e1;font-size:0.8rem;margin-top:2px;">Seçili zaman diliminde kayıp kupon bulunmadığından tüm kuponlar listeleniyor.</div>
                     </div>
                 </div>`;
             }
         } else if (activeFilter === 'pending') {
-            displayedCoupons = pendingCoupons.length > 0 ? pendingCoupons : couponList;
+            displayedCoupons = pendingCoupons.length > 0 ? pendingCoupons : slotCoupons;
         }
 
-        if (displayedCoupons.length === 0 && couponList.length > 0) {
-            displayedCoupons = couponList;
+        if (displayedCoupons.length === 0 && slotCoupons.length > 0) {
+            displayedCoupons = slotCoupons;
         }
 
-        const totalCount = couponList.length;
+        const totalCount = slotCoupons.length;
         
         // Bülten ve analiz edilen maç sayıları (Tarihe göre ayrıştırılmış — en az 177 maç)
         const isSelectedDateToday = (chosenDate === todayStr);
@@ -265,6 +484,40 @@ const CouponPanel = {
         
         // Yüzde kaç analiz edildi hesabı
         const analysisPercent = activeAnalyzedCount > 0 ? 100 : 0;
+
+        const timeSlotMeta = this.getTimeSlotMeta(this.activeTimeSlot);
+        let slotNoticeHtml = '';
+        if (this.activeTimeSlot !== 'all') {
+            slotNoticeHtml = `
+                <div style="background:linear-gradient(135deg,rgba(15,23,42,0.92),rgba(30,41,59,0.88));border:1.5px solid ${timeSlotMeta.border};border-left:5px solid ${timeSlotMeta.border};border-radius:12px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.35);">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:1.6rem;background:${timeSlotMeta.gradient};padding:6px 10px;border-radius:10px;">${timeSlotMeta.icon}</span>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <strong style="color:${timeSlotMeta.color};font-size:0.95rem;">${timeSlotMeta.title} (${timeSlotMeta.timeRange})</strong>
+                                <span style="background:${timeSlotMeta.border};color:#000000;font-size:0.75rem;font-weight:900;padding:2px 8px;border-radius:10px;">${slotCoupons.length} KUPON</span>
+                            </div>
+                            <div style="color:#cbd5e1;font-size:0.8rem;margin-top:2px;">
+                                ${slotCoupons.length > 0 
+                                    ? `Bu zaman aralığında oynanacak ${slotCoupons.length} kupon listeleniyor. Maç saatleri şeffaftır.` 
+                                    : `Bu zaman diliminde kriterleri tam sağlayan güvenli maç bulunamadı.`}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.75rem;color:#cbd5e1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:6px 12px;border-radius:8px;">
+                        🛡️ <strong>Kullanıcı Kuralı:</strong> Zorlama kupon yapılmaz (Hedef: 5) · Aynı maç en fazla 2 kez &amp; farklı seçenekle oynanır
+                    </div>
+                </div>
+            `;
+        }
+
+        const sessionHeaderTitle = (this.activeTimeSlot && this.activeTimeSlot !== 'all')
+            ? `Benim İçin Bahis Yap — ${timeSlotMeta.icon} ${timeSlotMeta.title} (${slotCoupons.length} Kupon)`
+            : `Benim İçin Bahis Yap — Günün ${couponList.length} Özel Kuponu ${currentMode === 8 ? '(Hafta Sonu 8 Kupon Modu)' : '(5 Kupon Modu)'}`;
+
+        const sessionHeaderSub = (this.activeTimeSlot && this.activeTimeSlot !== 'all')
+            ? `Saat ${timeSlotMeta.timeRange} aralığında başlayan karşılaşmalardan seçilmiş ${slotCoupons.length} kupon · Zorlama yapılmamıştır`
+            : `${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden AI konsensüsüyle hazırlanmış ${couponList.length} stratejik kupon`;
 
         return `
             <div class="coupons-view-container animate-fade-in">
@@ -299,6 +552,7 @@ const CouponPanel = {
                         <button class="btn btn-sm" onclick="App.navigate('daily-analysis')" style="background:linear-gradient(135deg,#10B981,#059669);color:#000;font-weight:800;border:none;border-radius:8px;padding:6px 14px;font-size:0.8rem;cursor:pointer;">
                             📅 Günlük Karnede İncele
                         </button>
+                    </div>
                 </div>
 
                 <!-- 🛡️ BİLYONER & NESİNE RESMİ BAHİS DOĞRULAMA BANDI -->
@@ -319,7 +573,11 @@ const CouponPanel = {
 
                 ${this.renderMonthlyFinancialBanner()}
 
-                ${this.renderTopStatusMenu(couponList, wonCoupons, lostCoupons, pendingCoupons, activeFilter)}
+                ${this.renderTimeSlotTabs(couponList, this.activeTimeSlot)}
+
+                ${slotNoticeHtml}
+
+                ${this.renderTopStatusMenu(slotCoupons, wonCoupons, lostCoupons, pendingCoupons, activeFilter)}
 
                 <!-- ======================================================== -->
                 <!-- 🎯 ANALİZ HAVUZU & CANLI İLERLEME GÖSTERGESİ (YÜZDE BAR) -->
@@ -383,10 +641,10 @@ const CouponPanel = {
                         <span style="font-size:1.4rem;">🤖</span>
                         <div>
                             <h3 style="margin:0;font-size:1.15rem;color:#ffffff;font-weight:800;">
-                                Benim İçin Bahis Yap — Günün ${couponList.length} Özel Kuponu ${currentMode === 8 ? '(Hafta Sonu 8 Kupon Modu)' : '(5 Kupon Modu)'}
+                                ${sessionHeaderTitle}
                             </h3>
                             <span style="font-size:0.82rem;color:var(--text-muted);">
-                                ${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden AI konsensüsüyle hazırlanmış ${couponList.length} stratejik kupon
+                                ${sessionHeaderSub}
                             </span>
                         </div>
                     </div>
@@ -420,14 +678,16 @@ const CouponPanel = {
                 ${filterNoticeHtml}
 
                 ${displayedCoupons.length === 0 ? `
-                    <div class="empty-state" style="padding:60px 20px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:16px;">
-                        <span class="empty-icon">${activeFilter === 'tutan' ? '✅' : (activeFilter === 'yatan' ? '❌' : '⏳')}</span>
-                        <h3 style="color:#ffffff;margin-bottom:6px;">Bu filtrede kupon bulunmuyor</h3>
-                        <p style="color:var(--text-muted);font-size:0.9rem;">
-                            ${activeFilter === 'tutan' ? 'Henüz resmi olarak %100 sonuçlanmış tutan kupon yok veya maçlar devam ediyor.' : (activeFilter === 'yatan' ? 'Şu an yatan kupon bulunmuyor.' : `Günün ${totalCount} kuponunu görmek için "Tüm Kuponlar" sekmesine tıklayabilirsiniz.`)}
+                    <div class="empty-state" style="padding:60px 20px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:16px;text-align:center;">
+                        <span class="empty-icon" style="font-size:3rem;display:block;margin-bottom:12px;">${this.activeTimeSlot !== 'all' ? timeSlotMeta.icon : (activeFilter === 'tutan' ? '✅' : (activeFilter === 'yatan' ? '❌' : '⏳'))}</span>
+                        <h3 style="color:#ffffff;margin-bottom:6px;">${this.activeTimeSlot !== 'all' ? `${timeSlotMeta.title} Bulunmuyor` : 'Bu filtrede kupon bulunmuyor'}</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;max-width:550px;margin:0 auto 16px;">
+                            ${this.activeTimeSlot !== 'all' 
+                                ? `Bu saat aralığında (${timeSlotMeta.timeRange}) güven kriterini tam karşılayan maç bulunmuyor. Kaliteyi korumak ve kayıp riskini önlemek adına <strong>yapay/zorlama kupon eklenmemiştir</strong>.`
+                                : (activeFilter === 'tutan' ? 'Henüz resmi olarak %100 sonuçlanmış tutan kupon yok veya maçlar devam ediyor.' : (activeFilter === 'yatan' ? 'Şu an yatan kupon bulunmuyor.' : `Günün kuponlarını görmek için "Tüm Kuponlar" sekmesine tıklayabilirsiniz.`))}
                         </p>
-                        <button class="btn btn-primary btn-sm btn-filter-all" data-coupon-filter="all" style="margin-top:12px;">
-                            🌐 Tüm Kuponları Göster (${totalCount})
+                        <button class="btn btn-primary btn-sm btn-filter-all" data-coupon-filter="all" data-timeslot="all" style="background:linear-gradient(135deg,#00F0FF,#3B82F6);color:#000;font-weight:900;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;">
+                            🌐 Tüm Gün Kuponlarını Göster (${couponList.length})
                         </button>
                     </div>
                 ` : `
@@ -1189,6 +1449,15 @@ const CouponPanel = {
                                     <span style="font-size:0.72rem;font-weight:800;color:${isLost ? '#EF4444' : (isWon ? '#10B981' : (coupon.themeColor || '#00F0FF'))};text-transform:uppercase;letter-spacing:0.5px;">
                                         ${index + 1}. KUPON · ${isLost ? `❌ KAYBETTİ (${evalResult.wonCount}/${evalResult.totalCount})` : (isWon ? `🎉 KAZANDI (${evalResult.wonCount}/${evalResult.totalCount})` : (evalResult.wonCount > 0 ? `⏳ DEVAM EDİYOR (${evalResult.wonCount}/${evalResult.totalCount} Tamam)` : (coupon.badge || 'ÖZEL KOMBİNE')))}
                                     </span>
+                                    ${(() => {
+                                        const cSlot = this.getCouponTimeSlot(coupon);
+                                        const cMeta = this.getTimeSlotMeta(cSlot);
+                                        return `
+                                            <span style="background:${cMeta.gradient};border:1.2px solid ${cMeta.border};color:#ffffff;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:900;letter-spacing:0.3px;display:inline-flex;align-items:center;gap:4px;" title="Kupon Seansı: ${cMeta.timeRange}">
+                                                ${cMeta.icon} ${cMeta.badgeText} (${cMeta.timeRange})
+                                            </span>
+                                        `;
+                                    })()}
                                     <span style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(217,119,6,0.35));border:1px solid #fbbf24;color:#fde68a;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:900;letter-spacing:0.5px;box-shadow:0 0 10px rgba(245,158,11,0.25);" title="Nesine resmi kupon adı">
                                         🏷️ Nesine: ${(window.MatchTracker?.getLocalDateStr?.() || new Date().toISOString().slice(0, 10)).split('-').reverse().join('.')} - ${index + 1}
                                     </span>
@@ -1358,7 +1627,9 @@ const CouponPanel = {
         const iddaaCode = matchItem.iddaaCode || matchItem.match?.iddaaCode || matchItem.match?.code || (matchItem.match?.rawData && matchItem.match?.rawData?.eventCode) || '';
         const iddaaBadge = iddaaCode ? `<span style="background:rgba(234,179,8,0.25);border:1.2px solid #facc15;color:#facc15;padding:2px 7px;border-radius:5px;font-weight:900;font-size:0.75rem;box-shadow:0 0 8px rgba(234,179,8,0.25);">🏷️ Nesine Kod: ${iddaaCode}</span>` : '';
 
-        const timeBadge = `<span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);color:#38BDF8;padding:1px 6px;border-radius:4px;font-weight:700;font-size:0.72rem;">⏰ ${timeStr}</span>`;
+        const matchSlot = this.getMatchTimeSlot(matchItem.match || matchItem);
+        const matchSlotMeta = this.getTimeSlotMeta(matchSlot);
+        const timeBadge = `<span style="background:${matchSlotMeta.gradient};border:1px solid ${matchSlotMeta.border};color:#ffffff;padding:2px 7px;border-radius:5px;font-weight:800;font-size:0.72rem;display:inline-flex;align-items:center;gap:4px;" title="Başlama Saati: ${timeStr} (${matchSlotMeta.title})">⏰ ${timeStr} · ${matchSlotMeta.icon} ${matchSlotMeta.shortTitle}</span>`;
         const detailStr = matchItem.detail || matchItem.evaluation?.detail || matchItem.analysisReason || '';
         const mackolikUrl = matchItem.mackolikUrl || (iddaaCode ? `https://arsiv.mackolik.com/Match/Default.aspx?id=${iddaaCode}` : 'https://arsiv.mackolik.com/Canli-Sonuclar');
         const mackolikLink = iddaaCode ? `
@@ -1467,6 +1738,17 @@ const CouponPanel = {
                 app.activeCouponFilter = filter;
                 const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
                 app.loadDailyCoupons(false, filter, activeDate);
+            });
+        });
+
+        // ⏱️ KULLANICI KURALI: Zaman Dilimi Sekmeleri (Sabah, Öğlen, Akşam, Tüm Gün)
+        document.querySelectorAll('[data-timeslot]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const slot = btn.dataset.timeslot;
+                this.activeTimeSlot = slot;
+                const currentFilter = app.activeCouponFilter || 'all';
+                const activeDate = app.getUserSelectedDate ? app.getUserSelectedDate() : (this.selectedAnalysisDate || 'today');
+                app.loadDailyCoupons(false, currentFilter, activeDate);
             });
         });
 

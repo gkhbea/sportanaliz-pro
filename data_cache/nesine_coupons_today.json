@@ -30,7 +30,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_1.png",
-      "timestamp": "2026-10-30T12:45:41.232Z"
+      "timestamp": "2026-10-30T12:45:41.232Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 2,
@@ -59,7 +62,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_2.png",
-      "timestamp": "2026-10-30T12:45:51.436Z"
+      "timestamp": "2026-10-30T12:45:51.436Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 3,
@@ -88,7 +94,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_3.png",
-      "timestamp": "2026-10-30T12:46:00.976Z"
+      "timestamp": "2026-10-30T12:46:00.976Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 4,
@@ -117,7 +126,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_4.png",
-      "timestamp": "2026-10-30T12:46:12.242Z"
+      "timestamp": "2026-10-30T12:46:12.242Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 5,
@@ -146,7 +158,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_5.png",
-      "timestamp": "2026-10-30T12:46:20.934Z"
+      "timestamp": "2026-10-30T12:46:20.934Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 6,
@@ -175,7 +190,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_6.png",
-      "timestamp": "2026-10-30T12:46:29.932Z"
+      "timestamp": "2026-10-30T12:46:29.932Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 7,
@@ -204,7 +222,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_7.png",
-      "timestamp": "2026-10-30T12:46:38.694Z"
+      "timestamp": "2026-10-30T12:46:38.694Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     },
     {
       "couponNumber": 8,
@@ -233,7 +254,10 @@
       ],
       "savedInAccount": true,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_8.png",
-      "timestamp": "2026-10-30T12:46:48.928Z"
+      "timestamp": "2026-10-30T12:46:48.928Z",
+      "timeSlot": "noon",
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "12:00 - 18:00"
     }
   ]
 }

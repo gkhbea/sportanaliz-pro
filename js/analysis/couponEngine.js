@@ -194,15 +194,58 @@ const CouponEngine = {
     },
 
     /**
-     * Günlük 4 Kuponu Oluştur — Sadece GÜNÜN MAÇLARINDAN
+     * Maç saatini ve zaman dilimini belirler
+     * Sabah: 00:00 - 11:59 | Öğlen: 12:00 - 17:59 | Akşam: 18:00 - 23:59
+     */
+    getMatchHour(match) {
+        if (!match) return 20;
+        const timeStr = match.timeStr 
+            || (match.matchDate ? match.matchDate.split('T')[1]?.slice(0, 5) : null)
+            || (match.match?.timeStr)
+            || '';
+        if (timeStr && timeStr.includes(':')) {
+            const h = parseInt(timeStr.trim().split(':')[0], 10);
+            if (!isNaN(h)) return h;
+        }
+        return 20;
+    },
+
+    getMatchTimeSlot(match) {
+        const h = this.getMatchHour(match);
+        if (h >= 0 && h < 12) return 'morning'; // 00:00 - 11:59 (Sabah & Gece)
+        if (h >= 12 && h < 18) return 'noon';   // 12:00 - 17:59 (Öğlen)
+        return 'evening';                       // 18:00 - 23:59 (Akşam)
+    },
+
+    getCouponTimeSlot(coupon) {
+        if (!coupon) return 'evening';
+        if (coupon.timeSlot) return coupon.timeSlot;
+        const matches = coupon.matches || coupon.picks || [];
+        if (matches.length === 0) return 'evening';
+        let mCount = 0, nCount = 0, eCount = 0;
+        matches.forEach(m => {
+            const slot = this.getMatchTimeSlot(m.match || m);
+            if (slot === 'morning') mCount++;
+            else if (slot === 'noon') nCount++;
+            else eCount++;
+        });
+        if (mCount > nCount && mCount >= eCount && mCount > 0) return 'morning';
+        if (nCount >= mCount && nCount >= eCount && nCount > 0) return 'noon';
+        return 'evening';
+    },
+
+    /**
+     * Günlük Kuponları Oluştur — Sadece GÜNÜN MAÇLARINDAN
      * @param {Array} matches - Bültendeki maçlar listesi
      * @param {boolean} forceNew - Önbelleği temizleyip yeniden üret
-     * @returns {Array} 4 adet kupon nesnesi
+     * @param {number|null} maxCoupons - İstenen maksimum kupon sayısı (Hedef: 5)
+     * @param {string} timeSlot - 'all', 'morning', 'noon', 'evening'
+     * @returns {Array} Kupon nesneleri
      */
-    generateDailyCoupons(matches = [], forceNew = false, maxCoupons = null) {
+    generateDailyCoupons(matches = [], forceNew = false, maxCoupons = null, timeSlot = 'all') {
         const todayStr = new Date().toISOString().slice(0, 10);
 
-        if (!forceNew && this.cachedCoupons && Array.isArray(this.cachedCoupons) && this.cachedCoupons.length > 0 && this.cachedCoupons.length <= 5) {
+        if (!forceNew && this.cachedCoupons && Array.isArray(this.cachedCoupons) && this.cachedCoupons.length > 0 && this.cachedCoupons.length <= 5 && (!timeSlot || timeSlot === 'all')) {
             return this.cachedCoupons;
         }
 
@@ -214,11 +257,20 @@ const CouponEngine = {
         const bettingOpenMatches = (matches || []).filter(m => this.isBettingOpenOnPlatforms(m));
         const todayMatches = bettingOpenMatches.filter(m => this._isMatchToday(m));
         let targetMatches = todayMatches.length >= 15 ? todayMatches : bettingOpenMatches;
+
+        // KULLANICI KURALI: Zaman dilimi seçildiyse (Sabah, Öğlen, Akşam) o saatteki maçları filtrele
+        if (timeSlot && timeSlot !== 'all') {
+            const slotFiltered = targetMatches.filter(m => this.getMatchTimeSlot(m) === timeSlot);
+            if (slotFiltered.length >= 3) {
+                targetMatches = slotFiltered;
+            }
+        }
+
         this.poolSourceLabel = 'Günün Maçları (Bugünün Bülteni)';
 
         // 2. Maç havuzunu analiz et
         let pool = this._buildAnalysisPool(targetMatches);
-        if (pool.length < 10 && targetMatches !== bettingOpenMatches) {
+        if (pool.length < 10 && targetMatches !== bettingOpenMatches && (!timeSlot || timeSlot === 'all')) {
             pool = this._buildAnalysisPool(bettingOpenMatches);
         }
         if (pool.length === 0) return [];
@@ -713,9 +765,15 @@ const CouponEngine = {
         const targetMax = (!isNaN(parsedMax) && parsedMax > 0) ? parsedMax : defaultMax;
         let coupons = qualifiedCoupons.slice(0, targetMax);
 
-        if (targetMax >= 8 && coupons.length < 8) {
+        if (targetMax >= 8 && coupons.length < 8 && (!timeSlot || timeSlot === 'all')) {
             coupons = this.expandTo8Coupons(coupons, matches, todayStr);
         }
+
+        // KULLANICI KURALI: Her kupona saatine göre zaman dilimi ata (Sabah, Öğlen, Akşam)
+        coupons.forEach(c => {
+            if (!c.timeSlot) c.timeSlot = this.getCouponTimeSlot(c);
+            if (!c.sessionName) c.sessionName = (c.timeSlot === 'morning' ? 'Sabah & Gece Kuponu' : (c.timeSlot === 'noon' ? 'Öğlen Kuponu' : 'Akşam Kuponu'));
+        });
 
         this.cachedCoupons = coupons;
         this.lastGeneratedAt = new Date();

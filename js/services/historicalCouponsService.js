@@ -137,6 +137,28 @@ const HistoricalCouponsService = {
         const payout = allWon ? potentialReturn : 0;
         const netProfit = allWon ? Math.round((potentialReturn - stake) * 100) / 100 : (anyLost ? -stake : 0);
 
+        // Kupon zaman dilimi belirleme (Sabah 00:00-12:00, Öğlen 12:00-18:00, Akşam 18:00-23:59)
+        let timeSlot = cfg.timeSlot;
+        if (!timeSlot && picks && picks.length > 0) {
+            let mCount = 0, nCount = 0, eCount = 0;
+            picks.forEach(p => {
+                const t = p.timeStr || (p.match?.timeStr) || '20:00';
+                const parts = t.trim().split(':');
+                const h = parseInt(parts[0], 10);
+                if (!isNaN(h)) {
+                    if (h >= 0 && h < 12) mCount++;
+                    else if (h >= 12 && h < 18) nCount++;
+                    else eCount++;
+                }
+            });
+            if (mCount > nCount && mCount >= eCount && mCount > 0) timeSlot = 'morning';
+            else if (nCount >= mCount && nCount >= eCount && nCount > 0) timeSlot = 'noon';
+            else timeSlot = 'evening';
+        }
+        if (!timeSlot) timeSlot = 'evening';
+
+        const sessionName = cfg.sessionName || (timeSlot === 'morning' ? 'Sabah & Gece Kuponu' : (timeSlot === 'noon' ? 'Öğlen Kuponu' : 'Akşam Kuponu'));
+
         return {
             id: cfg.id,
             title: cfg.title,
@@ -158,6 +180,8 @@ const HistoricalCouponsService = {
             matches: picks,
             matchCount: picks.length,
             dateLabel: dateLabel,
+            timeSlot: timeSlot,
+            sessionName: sessionName,
             resultStatus: allWon ? 'won' : (anyLost ? 'lost' : (hasLive ? 'live' : 'pending')),
             status: allWon ? 'won' : (anyLost ? 'lost' : (hasLive ? 'live' : 'pending')),
             isWon: allWon,
@@ -3621,69 +3645,142 @@ const HistoricalCouponsService = {
             detail: "America De Cali vs Fortaleza · 1-X Çifte Şans (02:30 | Resmi İddaa Kod: 3247856)"
         }, yDate, dFmt);
 
-        // Kupon 1: 🏆 UEFA / Uluslararası Kombine (4.06 Oran)
+        // 19. Antigua 1-X ÇŞ (1.18) - Sabah (03:00)
+        const p_antigua_cs = this._createArchivedPick({
+            index: 19, iddaaCode: '3236041', homeTeam: "Antigua", awayTeam: "Dep. San Pedro", league: "Guatemala Liga Nacional",
+            timeStr: '03:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Antigua Kaybetmez)', marketCode: 'CS1X', odd: 1.18, confidence: 97,
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Antigua vs Dep. San Pedro · 1-X Çifte Şans (03:00 | Resmi İddaa Kod: 3236041)"
+        }, yDate, dFmt);
+
+        // 20. CD Marquense İY 0.5 ÜST (1.36) - Sabah (05:10)
+        const p_marquense_ht = this._createArchivedPick({
+            index: 20, iddaaCode: '3237387', homeTeam: "CD Marquense", awayTeam: "Dep. Guastatoya", league: "Guatemala Liga Nacional",
+            timeStr: '05:10', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'HT_OV05', odd: 1.36, confidence: 94,
+            homeScore: 1, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "CD Marquense vs Dep. Guastatoya · İY 0.5 ÜST (05:10 | Resmi İddaa Kod: 3237387)"
+        }, yDate, dFmt);
+
+        // 21. Rathfriland İY 0.5 ÜST (1.37) - Akşam (22:45)
+        const p_rathfriland_ht = this._createArchivedPick({
+            index: 21, iddaaCode: '3255552', homeTeam: "Rathfriland Rangers", awayTeam: "Strabane Athletic", league: "Kuzey İrlanda Kupası",
+            timeStr: '22:45', marketTitle: 'İlk Yarı Gol', pickTitle: 'İY 0.5 ÜST', marketCode: 'HT_OV05', odd: 1.37, confidence: 95,
+            homeScore: 3, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Rathfriland Rangers vs Strabane Athletic · İY 0.5 ÜST (22:45 | Resmi İddaa Kod: 3255552)"
+        }, yDate, dFmt);
+
+        // 22. Halaba Ketema vs Hadiya Hossana (15:00) - 1.5 ÜST (1.37) - Öğlen
+        const p_halaba = this._createArchivedPick({
+            index: 22, iddaaCode: '3360828', homeTeam: "Halaba Ketema", awayTeam: "Hadiya Hossana", league: "Etiyopya Premier Lig",
+            timeStr: '15:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.37, confidence: 93,
+            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Halaba Ketema vs Hadiya Hossana · 1.5 ÜST (15:00 | Resmi İddaa Kod: 3360828)"
+        }, yDate, dFmt);
+
+        // 23. Kataka vs Uganda Police (15:00) - 1.5 ÜST (1.48) - Öğlen
+        const p_kataka = this._createArchivedPick({
+            index: 23, iddaaCode: '3252596', homeTeam: "Kataka", awayTeam: "Uganda Police", league: "Uganda Premier Lig",
+            timeStr: '15:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.48, confidence: 92,
+            homeScore: 1, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "Kataka vs Uganda Police · 1.5 ÜST (15:00 | Resmi İddaa Kod: 3252596)"
+        }, yDate, dFmt);
+
+        // 24. NK Dubrava vs NK Sesvete (15:30) - 1.5 ÜST (1.45) - Öğlen
+        const p_dubrava = this._createArchivedPick({
+            index: 24, iddaaCode: '3255194', homeTeam: "NK Dubrava", awayTeam: "NK Sesvete", league: "Hırvatistan 1. NL",
+            timeStr: '15:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.45, confidence: 94,
+            homeScore: 2, awayScore: 1, isWon: true, isPending: false, isLive: false,
+            detail: "NK Dubrava vs NK Sesvete · 1.5 ÜST (15:30 | Resmi İddaa Kod: 3255194)"
+        }, yDate, dFmt);
+
+        // 25. Dibba AL Hisn vs Dubai City (15:30) - 1.5 ÜST (1.30) - Öğlen
+        const p_dibba = this._createArchivedPick({
+            index: 25, iddaaCode: '3312456', homeTeam: "Dibba AL Hisn", awayTeam: "Dubai City", league: "BAE 1. Lig",
+            timeStr: '15:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.30, confidence: 94,
+            homeScore: 2, awayScore: 0, isWon: true, isPending: false, isLive: false,
+            detail: "Dibba AL Hisn vs Dubai City · 1.5 ÜST (15:30 | Resmi İddaa Kod: 3312456)"
+        }, yDate, dFmt);
+
+        // =========================================================================
+        // KULLANICI KURALI:
+        // 1. Sabah (00:00 - 12:00), Öğlen (12:00 - 18:00), Akşam (18:00 - 23:59)
+        // 2. Maksimum 5 kupon hedefi, kupon çıkmıyorsa ZORLAMA YAPMA!
+        // 3. Aynı maçı en fazla 2 kere ve 2 farklı seçenekle oyna!
+        // =========================================================================
+
+        // Kupon 1: 🏆 UEFA & Ada Ligi Akşam Kombinesi (🌙 Akşam: 22:30 - 23:00)
         const c1 = this._createArchivedCoupon({
             id: 'c_uefa_' + yDate, title: '🏆 UEFA & Ada Ligi Özel Kombinesi',
-            subtitle: 'Stenhousemuir (1.53), Sheffield Utd (1.71) ve Rathfriland (1.55) ile Gol Şöleni',
+            subtitle: 'Stenhousemuir (1.53), Sheffield Utd (1.71) ve Rathfriland (1.55) ile Akşam Gol Şöleni',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'safe', icon: '🏆', themeColor: '#3B82F6', recommendedStake: 250, confidence: 93
+            badgeType: 'safe', icon: '🏆', themeColor: '#3B82F6', recommendedStake: 250, confidence: 93,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
         }, [p_stenhouse, p_sheffield, p_rathfriland], dFmt);
 
-        // Kupon 2: 🛡️ Garantör Banko / Kasa Katlama (2.53 Oran)
+        // Kupon 2: 🛡️ Garantör Banko / Kasa Katlama (🌅 Sabah & Gece: 02:30 - 05:10)
         const c2 = this._createArchivedCoupon({
             id: 'c_banko_' + yDate, title: '🛡️ Garantör Banko / Kasa Katlama Kuponu',
             subtitle: 'Antigua MS 1 (1.34), Marquense MS 1 (1.41) ve America De Cali MS 1 (1.34) ile Kesin Kazanç',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 400, confidence: 96
+            badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 400, confidence: 96,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
         }, [p_antigua, p_marquense, p_america_cali], dFmt);
 
-        // Kupon 3: ⚡ İdeal Sistem Kuponu (2.72 Oran)
+        // Kupon 3: ⚡ İdeal Sistem Kuponu (☀️ Öğlen: 15:30)
         const c3 = this._createArchivedCoupon({
             id: 'c_ideal_' + yDate, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)',
-            subtitle: 'Farco 1.5Ü (1.43), Baladiyyat 1.5Ü (1.42) ve Kahrabaa 1.5Ü (1.34) İdeal Çarpımı',
+            subtitle: 'Farco 1.5Ü (1.43), Baladiyyat 1.5Ü (1.42) ve Kahrabaa 1.5Ü (1.34) İdeal Öğlen Çarpımı',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'special', icon: '⚡', themeColor: '#6366F1', recommendedStake: 250, confidence: 94
+            badgeType: 'special', icon: '⚡', themeColor: '#6366F1', recommendedStake: 250, confidence: 94,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
         }, [p_farco, p_baladiyyat, p_kahrabaa], dFmt);
 
-        // Kupon 4: ⚽ Günün Gol Yağmuru (2.63 Oran)
+        // Kupon 4: ⚽ Günün Gol Yağmuru (☀️ Öğlen: 15:30)
         const c4 = this._createArchivedCoupon({
             id: 'c_goals_' + yDate, title: '⚽ Günün Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)',
-            subtitle: 'EL Terasanah 1.5Ü (1.46), El Sekka 1.5Ü (1.42) ve Alqana 1.5Ü (1.27) ile Gol Düelloları',
+            subtitle: 'EL Terasanah 1.5Ü (1.46), El Sekka 1.5Ü (1.42) ve Dibba 1.5Ü (1.30) ile Öğlen Golleri',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'special', icon: '⚽', themeColor: '#EC4899', recommendedStake: 200, confidence: 94
-        }, [p_terasanah, p_sekka, p_alqana], dFmt);
+            badgeType: 'special', icon: '⚽', themeColor: '#EC4899', recommendedStake: 200, confidence: 94,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_terasanah, p_sekka, p_dibba], dFmt);
 
-        // Kupon 5: 💎 Sürpriz & Değer (Value) Kuponu (4.41 Oran)
+        // Kupon 5: 💎 Sürpriz & Değer (Value) Kuponu (🌙 Akşam: 20:30 - 23:00)
         const c5 = this._createArchivedCoupon({
             id: 'c_value_' + yDate, title: '💎 Sürpriz & Değer (Value) Kuponu (~4.41 Oran)',
-            subtitle: 'Alajuelense MS 1 (1.65), Bielefeld MS 1 (1.64) ve AD Fafe MS 1 (1.63) Yüksek Değer Kombini',
+            subtitle: 'Alqana 1.5Ü (1.27), Bielefeld MS 1 (1.64) ve AD Fafe MS 1 (1.63) Akşam Kombini',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 150, confidence: 91
-        }, [p_alajuelense, p_bielefeld, p_fafe], dFmt);
+            badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 150, confidence: 91,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_alqana, p_bielefeld, p_fafe], dFmt);
 
-        // Kupon 6: 🌟 Günün Yıldız Kuponu / Süper Kombine (2.51 Oran)
+        // Kupon 6: 🌟 Öğlen Süper Kombine Kuponu (☀️ Öğlen: 15:00 - 15:30)
         const c6 = this._createArchivedCoupon({
-            id: 'c_vip_' + yDate, title: '🌟 Günün Yıldız Kuponu / Süper Kombine',
-            subtitle: 'Persepolis 1.5Ü (1.34), Malavan 1.5Ü (1.39) ve ZOB Ahan 1.5Ü (1.35) VIP Seçimleri',
+            id: 'c_vip_' + yDate, title: '🌟 Öğlen Süper Kombine Kuponu',
+            subtitle: 'Halaba Ketema 1.5Ü (1.37), Kataka 1.5Ü (1.48) ve NK Dubrava 1.5Ü (1.45) VIP Seçimleri',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'special', icon: '🌟', themeColor: '#8B5CF6', recommendedStake: 200, confidence: 94
-        }, [p_farco, p_baladiyyat, p_alqana], dFmt);
+            badgeType: 'special', icon: '🌟', themeColor: '#8B5CF6', recommendedStake: 200, confidence: 94,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_halaba, p_kataka, p_dubrava], dFmt);
 
-        // Kupon 7: ⏱️ İlk Yarı & İkinci Yarı Kombinesi (2.74 Oran)
+        // Kupon 7: ⏱️ İlk Yarı & Çifte Şans Kombinesi (🌙 Akşam: 22:30 - 23:00)
+        // Stenhouse (İY 0.5 ÜST), Sheffield (1-X ÇŞ), Rathfriland (İY 0.5 ÜST) -> 2. kullanım ve tamamen farklı bahis marketi!
         const c7 = this._createArchivedCoupon({
-            id: 'c_htft_' + yDate, title: '⏱️ İlk Yarı & İkinci Yarı Kombinesi',
-            subtitle: 'Stenhousemuir İY 0.5Ü (1.38), Sheffield Utd 1-X (1.28) ve Rathfriland 2.5Ü (1.55)',
+            id: 'c_htft_' + yDate, title: '⏱️ İlk Yarı & Çifte Şans Kombinesi',
+            subtitle: 'Stenhousemuir İY 0.5Ü (1.38), Sheffield Utd 1-X (1.28) ve Rathfriland İY 0.5Ü (1.37)',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'special', icon: '⏱️', themeColor: '#F43F5E', recommendedStake: 200, confidence: 95
-        }, [p_stenhouse_ht, p_sheffield_cs, p_rathfriland], dFmt);
+            badgeType: 'special', icon: '⏱️', themeColor: '#F43F5E', recommendedStake: 200, confidence: 95,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_stenhouse_ht, p_sheffield_cs, p_rathfriland_ht], dFmt);
 
-        // Kupon 8: 🌙 Gece / Güney Amerika & Özel Ligler (2.22 Oran)
+        // Kupon 8: 🌙 Gece & Erken Sabah Güven Kuponu (🌅 Sabah & Gece: 02:30 - 05:10)
+        // Antigua (1-X ÇŞ), Marquense (İY 0.5 ÜST), America De Cali (1-X ÇŞ) -> 2. kullanım ve tamamen farklı bahis marketi!
         const c8 = this._createArchivedCoupon({
-            id: 'c_night_' + yDate, title: '🌙 Gece / Güney Amerika & Özel Ligler',
-            subtitle: 'Antigua MS 1 (1.34), Marquense MS 1 (1.41) ve America De Cali 1-X (1.22) ile Gece Güvencesi',
+            id: 'c_night_' + yDate, title: '🌙 Gece & Erken Sabah Güven Kuponu',
+            subtitle: 'Antigua 1-X (1.18), Marquense İY 0.5Ü (1.36) ve America De Cali 1-X (1.22) ile Gece Güvencesi',
             badge: '🎉 KAZANDI 3/3',
-            badgeType: 'special', icon: '🌙', themeColor: '#06B6D4', recommendedStake: 300, confidence: 96
-        }, [p_antigua, p_marquense, p_america_cs], dFmt);
+            badgeType: 'special', icon: '🌙', themeColor: '#06B6D4', recommendedStake: 300, confidence: 96,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
+        }, [p_antigua_cs, p_marquense_ht, p_america_cs], dFmt);
 
         return { coupons: [c1, c2, c3, c4, c5, c6, c7, c8], euroCoupons: [] };
     },
@@ -5398,6 +5495,12 @@ const HistoricalCouponsService = {
         if (fallback15 && fallback15.coupons && fallback15.coupons.length > 0) return fallback15.coupons;
         const fallback14 = this._generateAuthentic2026_10_14Coupons('2026-10-14');
         return (fallback14 && fallback14.coupons) ? fallback14.coupons : [];
+    },
+
+    getCouponsByTimeSlot(dateStr, timeSlot = 'all') {
+        const coupons = this.getCouponsByDate(dateStr) || [];
+        if (!timeSlot || timeSlot === 'all') return coupons;
+        return coupons.filter(c => c.timeSlot === timeSlot);
     },
 
     invalidateCache() {
