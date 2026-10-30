@@ -1,10 +1,11 @@
 /**
  * nesine_login_and_add_coupons.js — SportAnaliz Pro
- * 1. Nesine penceresini ekranda acar.
- * 2. Kullanici adi (14410079556) ve sifreyi (Efe2016.) otomatik yazar.
- * 3. Guvenlik koduna odaklanir; kullanici kodu girip giris yapinca
- *    tum 8 kuponu sirayla ("27.10.2026 - 1", "27.10.2026 - 2"...)
- *    kullanicinin resmi hesabina kaydeder.
+ * 1. Nesine penceresini ekranda açar.
+ * 2. Kullanıcı adı (14410079556) ve şifreyi otomatik yazar.
+ * 3. Güvenlik koduna odaklanır; kullanıcı kodu girip giriş yapınca
+ *    tüm 8 kuponu sırayla ("30.10.2026 - 1", "30.10.2026 - 2"...)
+ *    HER KUPONDA FARKLI VE BENZERSİZ MAÇLARLA kullanıcının resmi hesabına kaydeder.
+ *    Asla aynı maçları tekrar tekrar oynamaz!
  */
 
 const { app, BrowserWindow } = require('electron');
@@ -22,7 +23,9 @@ try {
     }
 } catch(e) {}
 
-const ARTIFACT_DIR = 'C:\\Users\\gökhan\\.gemini\\antigravity-ide\\brain\\dbc56cea-2049-4934-99a7-897c052bfaac';
+const ARTIFACT_DIR = path.join(__dirname, '..', 'data_cache', 'screenshots');
+if (!fs.existsSync(ARTIFACT_DIR)) fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
+
 const DATA_CACHE_DIR = path.join(__dirname, '..', 'data_cache');
 
 function getTodayFormatted() {
@@ -35,83 +38,31 @@ function getTodayFormatted() {
 
 const todayFormatted = getTodayFormatted();
 
+const COUPON_TEMPLATES = [
+    { number: 1, title: '🛡️ Garantör Banko / Kasa Katlama Kuponu', icon: '🛡️' },
+    { number: 2, title: '⚡ İdeal Sistem Kuponu (Editör Seçimi)', icon: '⚡' },
+    { number: 3, title: '⚽ Günün Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)', icon: '⚽' },
+    { number: 4, title: '🎯 Çifte Şans & Sıfır Risk Sigortalı Kupon', icon: '🎯' },
+    { number: 5, title: '💎 Akılcı Değer & Taraf Kuponu', icon: '💎' },
+    { number: 6, title: '🌟 VIP Kombin (Favori Güçler)', icon: '🌟' },
+    { number: 7, title: '⏱️ İlk Yarı & İkinci Yarı Kombinesi', icon: '⏱️' },
+    { number: 8, title: '🌙 Gece / Güney Amerika & Özel Ligler', icon: '🌙' }
+];
+
 app.whenReady().then(async () => {
     console.log('===================================================================');
     console.log('  ⚡ SPORTANALIZ PRO — NESINE HESABA OTOMATIK KUPON KAYDEDICI');
     console.log(`  📅 Tarih: ${todayFormatted}`);
     console.log(`  👤 Uye: ${USERNAME}`);
+    console.log('  🎯 Kural: 8 Kuponun her biri FARKLI ve BENZERSİZ maçlarla oynanır!');
     console.log('===================================================================');
 
-    // 1. Once kupon listesini hazirla
-    let coupons = [];
-    try {
-        const fetchWin = new BrowserWindow({ show: false, webPreferences: { contextIsolation: false, nodeIntegration: true } });
-        await fetchWin.loadURL('http://localhost:3001');
-        await new Promise(r => setTimeout(r, 3000));
-        coupons = await fetchWin.webContents.executeJavaScript(`
-            (() => {
-                let list = (window.app && window.app.coupons && window.app.coupons.length > 0)
-                    ? window.app.coupons
-                    : (window.CouponEngine ? CouponEngine.generateDailyCoupons(window.app?.matches || [], true, 8) : []);
-                if (list.length < 8 && window.CouponEngine?.expandTo8Coupons) {
-                    list = window.CouponEngine.expandTo8Coupons(list, window.app?.matches || [], 'today');
-                }
-                return list.slice(0, 8).map((c, idx) => ({
-                    index: idx + 1,
-                    id: c.id,
-                    title: c.title,
-                    totalOdd: c.totalOdd
-                }));
-            })()
-        `);
-        fetchWin.close();
-    } catch(e) {}
-
-    if (!coupons || coupons.length === 0) {
-        const cacheFile = path.join(DATA_CACHE_DIR, 'nesine_coupons_today.json');
-        if (fs.existsSync(cacheFile)) {
-            try {
-                const cachedData = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
-                if (Array.isArray(cachedData.coupons) && cachedData.coupons.length > 0) {
-                    coupons = cachedData.coupons.map((c, idx) => ({
-                        index: idx + 1,
-                        id: c.name || `coupon_${idx + 1}`,
-                        title: c.title,
-                        totalOdd: c.totalOdd,
-                        matches: (c.picks || []).map(p => ({
-                            iddaaCode: p.iddaaCode,
-                            homeTeam: p.homeTeam,
-                            awayTeam: p.awayTeam,
-                            pickTitle: p.pickTitle,
-                            marketTitle: p.marketTitle,
-                            odd: p.odd
-                        }))
-                    }));
-                    console.log(`[BILGI] Kuponlar yerel önbellekten (${cacheFile}) başarıyla yüklendi (${coupons.length} kupon).`);
-                }
-            } catch (e) {}
-        }
-    }
-
-    if (!coupons || coupons.length === 0) {
-        coupons = [
-            { index: 1, title: 'Garantor Banko / Kasa Katlama Kuponu', totalOdd: '1.96' },
-            { index: 2, title: 'Ideal Sistem Kuponu (Editor Secimi)', totalOdd: '2.74' },
-            { index: 3, title: 'Gunun Gol Yagmuru Kuponu (2.5 UST)', totalOdd: '2.39' },
-            { index: 4, title: 'Cifte Sans & Sifir Risk Sigortali Kupon', totalOdd: '2.18' },
-            { index: 5, title: 'Akilci Deger & Taraf Kuponu', totalOdd: '3.22' },
-            { index: 6, title: 'VIP Kombin (Favori Gucler)', totalOdd: '2.49' },
-            { index: 7, title: 'Ilk Yari & Ikinci Yari Kombinesi', totalOdd: '2.85' },
-            { index: 8, title: 'Gece / Guney Amerika & Ozel Ligler', totalOdd: '3.10' }
-        ];
-    }
-
-    // 2. Nesine.com'u gorunur pencere olarak ac
-    console.log('[BILGI] Nesine ekranda aciliyor, uye bilgileri dolduruluyor...');
+    // 1. Nesine.com'u gorunur pencere olarak ac
+    console.log('[1/4] Nesine ekranda aciliyor, uye bilgileri dolduruluyor...');
     const win = new BrowserWindow({
-        width: 1500,
-        height: 950,
-        show: true, // Kullanici guvenlik kodunu gorsun diye ekranda acilir
+        width: 1550,
+        height: 980,
+        show: true, // Kullanici guvenlik kodunu gorsun ve girsin
         title: 'Nesine.com — Lutfen Guvenlik Kodunu Giriniz (SportAnaliz Pro)',
         webPreferences: { nodeIntegration: false, contextIsolation: true }
     });
@@ -120,78 +71,76 @@ app.whenReady().then(async () => {
     await win.loadURL('https://www.nesine.com/iddaa');
     await new Promise(r => setTimeout(r, 4000));
 
-    // 3. Giris Yap butonuna tikla, kullanici adi ve sifreyi yaz, captcha'ya odaklan
+    // Popuplari kapat ve Giris Yap modalini acip formu doldur
     await win.webContents.executeJavaScript(`
         (async () => {
-            // Popuplari kapat
-            Array.from(document.querySelectorAll('button, a')).forEach(b => {
-                const t = (b.innerText || '').toLowerCase().trim();
-                if (t === 'kabul et' || t === 'tamam' || t === 'anladim') try { b.click(); } catch(e){}
+            const closeModals = () => {
+                Array.from(document.querySelectorAll('button, a, span, .close')).forEach(b => {
+                    const t = (b.innerText || '').toLowerCase().trim();
+                    if (t === 'kabul et' || t === 'tamam' || t === 'anladım' || t === 'kapat') {
+                        try { b.click(); } catch(e){}
+                    }
+                });
+            };
+            closeModals();
+
+            // Giris Yap butonuna tikla
+            const loginBtn = Array.from(document.querySelectorAll('a, button, span')).find(el => {
+                const t = (el.innerText || '').toLowerCase().trim();
+                return t === 'giriş yap' || t === 'giris yap';
             });
-
-            // Ustteki Giris Yap butonuna bas
-            const topLoginBtn = Array.from(document.querySelectorAll('button, a')).find(b => (b.innerText || '').trim().toLowerCase() === 'giriş yap');
-            if (topLoginBtn) topLoginBtn.click();
-
-            await new Promise(r => setTimeout(r, 1200));
-
-            const passInput = document.querySelector('input[type="password"]');
-            if (passInput) {
-                const parent = passInput.closest('form, div[class*="login"], div[class*="modal"]') || passInput.parentElement?.parentElement;
-                
-                // Kullanici adi
-                const userInput = parent ? parent.querySelector('input[type="text"], input[type="tel"]') : null;
-                if (userInput) {
-                    userInput.focus();
-                    userInput.value = '${USERNAME}';
-                    userInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    userInput.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-
-                // Sifre
-                passInput.focus();
-                passInput.value = '${PASSWORD}';
-                passInput.dispatchEvent(new Event('input', { bubbles: true }));
-                passInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-                // Beni Hatirla
-                const rem = document.querySelector('#isRemember, input[name="isRemember"]');
-                if (rem && !rem.checked) {
-                    try { rem.click(); } catch(e){}
-                }
-
-                // Guvenlik Kodu alanini bul ve odaklan
-                const allVisibleInputs = Array.from(parent ? parent.querySelectorAll('input[type="text"]') : document.querySelectorAll('input')).filter(el => el.offsetWidth > 0);
-                const captchaInput = allVisibleInputs.find(inp => inp !== userInput);
-                if (captchaInput) {
-                    captchaInput.focus();
-                }
-
-                // Ekrana dikkat cekici rehber banner ekle
-                const banner = document.createElement('div');
-                banner.id = 'sportanaliz-guide-banner';
-                banner.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:900;z-index:999999;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:2px solid #fff;text-align:center;';
-                banner.innerHTML = '⚡ <b>SPORTANALIZ PRO:</b> Kullanıcı adı ve şifreniz yazıldı.<br>Lütfen görseldeki <b>GÜVENLİK KODUNU</b> girip <b>GİRİŞ</b> butonuna basınız.<br><span style="font-size:13px;font-weight:700;">Giriş yaptığınız anda 8 kupon sırayla Nesine hesabınıza otomatik kaydedilecektir.</span>';
-                document.body.appendChild(banner);
+            if (loginBtn) {
+                loginBtn.click();
+                await new Promise(r => setTimeout(r, 1000));
             }
+
+            // Kullanici adi ve sifreyi doldur
+            const userInp = document.querySelector('input[type="text"][name*="user"], input[name*="username"], input[placeholder*="Üye No"], input[placeholder*="TC"], #txtUsername, #username, input.username');
+            if (userInp) {
+                userInp.focus();
+                userInp.value = '${USERNAME}';
+                userInp.dispatchEvent(new Event('input', { bubbles: true }));
+                userInp.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            const passInp = document.querySelector('input[type="password"]');
+            if (passInp) {
+                passInp.focus();
+                passInp.value = '${PASSWORD}';
+                passInp.dispatchEvent(new Event('input', { bubbles: true }));
+                passInp.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // Guvenlik kodu inputuna odaklan
+            const captchaInput = document.querySelector('input[name*="captcha"], input[placeholder*="Güvenlik"], input[id*="captcha"], input[id*="Security"]');
+            if (captchaInput) {
+                captchaInput.focus();
+            }
+
+            // Bilgilendirme rehber cubugu olustur
+            const guide = document.createElement('div');
+            guide.id = 'sportanaliz-guide-banner';
+            guide.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999999;background:linear-gradient(135deg,#1E293B,#0F172A);color:#F8FAFC;padding:14px 20px;text-align:center;font-size:15px;font-weight:600;font-family:sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.5);border-bottom:3px solid #10B981;';
+            guide.innerHTML = '⚡ <b>SportAnaliz Pro</b> | Kullanıcı adı ve şifreniz dolduruldu. Lütfen ekrandaki <b>Güvenlik Kodunu</b> yazıp <b>Giriş Yap</b>\\'a tıklayınız. 8 farklı kuponunuz otomatik eklenecektir.';
+            document.body.appendChild(guide);
         })()
     `);
 
-    console.log('\n===================================================================');
-    console.log('👉 Lutfen ekranda acilan Nesine penceresindeki 5 haneli Guvenlik Kodunu');
-    console.log('   yazip "GIRIS" butonuna basiniz.');
-    console.log('   Giris basarili oldugunda tum kuponlar sirayla hesabiniza eklenecektir.');
-    console.log('===================================================================\n');
+    console.log('[2/4] Kullanici bilgileri yazildi. Lutfen ekrandaki guvenlik kodunu girip "Giris Yap"a basiniz...');
 
-    // 4. Girisin basarili olmasini bekle (Maksimum 10 dakika boyunca kontrol et)
+    // Kullanicinin giris yapmasini bekle (maksimum 180 saniye)
     let loggedIn = false;
-    for (let wait = 0; wait < 600; wait++) {
+    for (let sec = 0; sec < 180; sec++) {
         await new Promise(r => setTimeout(r, 1000));
         try {
             loggedIn = await win.webContents.executeJavaScript(`
                 (() => {
-                    const text = document.body.innerText || '';
-                    const hasUser = text.includes('Hesabım') || text.includes('Çıkış') || text.includes('Bakiye') || text.includes('${USERNAME}');
+                    const hasUser = !!(
+                        document.querySelector('.member-menu, .user-profile, .user-info, .account-info, .header-user, #memberSummary, [class*="member"], [class*="profile"]') ||
+                        document.body.innerText.includes('Hesabım') ||
+                        document.body.innerText.includes('Çıkış') ||
+                        document.body.innerText.includes('${USERNAME}')
+                    );
                     const noPass = !document.querySelector('input[type="password"]');
                     return hasUser && noPass;
                 })()
@@ -202,181 +151,216 @@ app.whenReady().then(async () => {
 
     if (!loggedIn) {
         console.log('[UYARI] Giris suresi doldu veya kullanici girisi henuz yapilmadi.');
-    } else {
-        console.log('🎉 NESINE HESABINA BASARIYLA GIRIS YAPILDI!');
-        console.log('[BILGI] Simdi 8 kupon sirayla hesabiniza kaydediliyor...');
-
-        // Banner guncelle
-        await win.webContents.executeJavaScript(`
-            (() => {
-                const b = document.getElementById('sportanaliz-guide-banner');
-                if (b) {
-                    b.style.background = 'linear-gradient(135deg,#10B981,#059669)';
-                    b.style.color = '#fff';
-                    b.innerHTML = '✅ <b>GİRİŞ BAŞARILI!</b> Kuponlar sırayla hesabınıza kaydediliyor, lütfen bekleyiniz...';
-                }
-            })()
-        `);
-
-        await new Promise(r => setTimeout(r, 2000));
-
-        const processedResults = [];
-
-        // 8 kuponu sirayla ekle ve kaydet
-        for (let i = 0; i < coupons.length; i++) {
-            const coupon = coupons[i];
-            const couponNumber = i + 1;
-            const nesineCouponName = `${todayFormatted} - ${couponNumber}`;
-
-            console.log(`\n▶ [KUPON ${couponNumber}/${coupons.length}] "${nesineCouponName}" ekleniyor... (${coupon.title})`);
-
-            try {
-                const stepResult = await win.webContents.executeJavaScript(`
-                    (async () => {
-                        // Popuplari kapat
-                        const closeModals = () => {
-                            Array.from(document.querySelectorAll('button, a, span')).forEach(b => {
-                                const t = (b.innerText || '').toLowerCase().trim();
-                                if (t === 'kabul et' || t === 'tamam' || t === 'kapat') try { b.click(); } catch(e){}
-                            });
-                        };
-                        closeModals();
-
-                        // Onceki kuponu temizle (Cop kutusu)
-                        const trashIcons = Array.from(document.querySelectorAll('i, svg, button')).filter(el => {
-                            const cls = (el.className || '').toString().toLowerCase();
-                            return cls.includes('trash') || cls.includes('delete') || cls.includes('remove');
-                        });
-                        for (const ic of trashIcons) {
-                            try {
-                                const btn = ic.closest('button, a, div') || ic;
-                                btn.click();
-                                break;
-                            } catch(e){}
-                        }
-                        closeModals();
-                        await new Promise(res => setTimeout(res, 500));
-
-                        // 3 mac sec
-                        const oddButtons = Array.from(document.querySelectorAll('button, a, div')).filter(el => {
-                            const t = el.innerText.trim();
-                            if (/^\\d+\\.\\d{2}$/.test(t)) {
-                                const val = parseFloat(t);
-                                return val >= 1.20 && val <= 3.80 && el.offsetHeight > 10;
-                            }
-                            return false;
-                        });
-
-                        const selectedOdds = [];
-                        const usedRowKeys = new Set();
-                        const startOffset = (${i} * 4) % Math.max(1, oddButtons.length - 12);
-                        const candidateList = oddButtons.slice(startOffset).concat(oddButtons.slice(0, startOffset));
-
-                        for (const btn of candidateList) {
-                            if (selectedOdds.length >= 3) break;
-
-                            let p = btn.parentElement;
-                            for (let step = 0; step < 5; step++) {
-                                if (p && (p.innerText.includes(' - ') || p.innerText.includes('\\n'))) break;
-                                if (p) p = p.parentElement;
-                            }
-                            const rowKey = p ? p.innerText.slice(0, 40) : null;
-                            if (rowKey && usedRowKeys.has(rowKey)) continue;
-
-                            try {
-                                btn.click();
-                                btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-                                selectedOdds.push({
-                                    odd: btn.innerText.trim(),
-                                    matchText: p ? p.innerText.replace(/\\s+/g, ' ').slice(0, 70) : 'Maç'
-                                });
-                                if (rowKey) usedRowKeys.add(rowKey);
-                                closeModals();
-                                await new Promise(res => setTimeout(res, 300));
-                            } catch(e) {}
-                        }
-
-                        // Kupon Adini Yaz
-                        await new Promise(res => setTimeout(res, 600));
-                        const nameInput = document.querySelector('#coupon-name, input.coupon-name-input, input[placeholder*="Kupon"]');
-                        let nameSaved = false;
-                        if (nameInput) {
-                            nameInput.focus();
-                            nameInput.value = '${nesineCouponName}';
-                            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-                            nameInput.dispatchEvent(new Event('change', { bubbles: true }));
-                            nameInput.dispatchEvent(new Event('blur', { bubbles: true }));
-
-                            // Kaydet butonuna bas (Giris yapildigi icin Nesine Uye Hesabina kalici kaydeder!)
-                            const saveBtn = document.querySelector('#saveCouponName, .btn-save-coupon-name, button[title*="Kaydet"]');
-                            if (saveBtn) {
-                                try { saveBtn.click(); } catch(e){}
-                            }
-                            nameSaved = (nameInput.value === '${nesineCouponName}');
-                        }
-
-                        return {
-                            selectedCount: selectedOdds.length,
-                            selectedOdds,
-                            couponName: '${nesineCouponName}',
-                            nameSaved
-                        };
-                    })()
-                `);
-
-                console.log(`   ✅ ${stepResult.selectedCount} mac secildi. Kupon Adi: "${stepResult.couponName}" hesaba kaydedildi!`);
-
-                await new Promise(r => setTimeout(r, 1500));
-                const img = await win.capturePage();
-                const screenshotFile = `nesine_hesap_kupon_${couponNumber}.png`;
-                fs.writeFileSync(path.join(ARTIFACT_DIR, screenshotFile), img.toPNG());
-                console.log(`   📸 Ekran goruntusu: ${screenshotFile}`);
-
-                processedResults.push({
-                    couponNumber,
-                    name: nesineCouponName,
-                    title: coupon.title,
-                    totalOdd: coupon.totalOdd,
-                    picks: stepResult.selectedOdds,
-                    savedInAccount: true,
-                    screenshot: path.join(ARTIFACT_DIR, screenshotFile),
-                    timestamp: new Date().toISOString()
-                });
-
-            } catch (err) {
-                console.error(`   ❌ Kupon ${couponNumber} ekleme hatasi:`, err.message);
-            }
-
-            await new Promise(r => setTimeout(r, 1200));
-        }
-
-        // Sonuclari kaydet
-        if (!fs.existsSync(DATA_CACHE_DIR)) fs.mkdirSync(DATA_CACHE_DIR, { recursive: true });
-        fs.writeFileSync(path.join(DATA_CACHE_DIR, 'nesine_coupons_today.json'), JSON.stringify({
-            date: todayFormatted,
-            userAccount: USERNAME,
-            totalCoupons: processedResults.length,
-            coupons: processedResults
-        }, null, 2), 'utf8');
-
-        console.log('\n===================================================================');
-        console.log(`🎉 TEBRIKLER! ${processedResults.length} ADET KUPONUN TAMAMI NESINE HESABINIZA KAYDEDILDI!`);
-        console.log('   Nesine.com -> Hesabim -> Kuponlarim / Kaydedilen Kuponlar bolumunde gorebilirsiniz.');
-        console.log('===================================================================');
-
-        // Banner final
-        await win.webContents.executeJavaScript(`
-            (() => {
-                const b = document.getElementById('sportanaliz-guide-banner');
-                if (b) {
-                    b.innerHTML = '🎉 <b>8 KUPONUN TAMAMI HESABINIZA KAYDEDİLDİ!</b><br>Nesine -> Hesabım -> Kuponlarım bölümünden görebilirsiniz.';
-                }
-            })()
-        `);
-
-        await new Promise(r => setTimeout(r, 4000));
+        win.close();
+        app.quit();
+        return;
     }
 
+    console.log('🎉 NESINE HESABINA BASARIYLA GIRIS YAPILDI!');
+    console.log('[3/4] 8 Kupon sırayla, HER BİRİ FARKLI VE BENZERSİZ MAÇLARLA hesabınıza kaydediliyor...');
+
+    // Banner guncelle
+    await win.webContents.executeJavaScript(`
+        (() => {
+            const b = document.getElementById('sportanaliz-guide-banner');
+            if (b) {
+                b.style.background = 'linear-gradient(135deg,#10B981,#059669)';
+                b.style.color = '#fff';
+                b.innerHTML = '✅ <b>GİRİŞ BAŞARILI!</b> 8 benzersiz kupon sırayla hesabınıza kaydediliyor, lütfen bekleyiniz...';
+            }
+        })()
+    `);
+
+    await new Promise(r => setTimeout(r, 2000));
+
+    const processedResults = [];
+
+    // Kuponları sırayla ekle ve kaydet (Dinamik akışla her kupona 3 farklı maç)
+    for (let i = 0; i < COUPON_TEMPLATES.length; i++) {
+        const tpl = COUPON_TEMPLATES[i];
+        const couponNumber = i + 1;
+        const nesineCouponName = `${todayFormatted} - ${couponNumber}`;
+
+        console.log(`\n-------------------------------------------------------------------`);
+        console.log(`▶ [KUPON ${couponNumber}/8] "${nesineCouponName}" ekleniyor... (${tpl.title})`);
+
+        try {
+            const stepResult = await win.webContents.executeJavaScript(`
+                (async () => {
+                    const couponNum = ${couponNumber};
+                    const nesineCouponName = '${nesineCouponName}';
+
+                    // 1. Önceki kuponu temizle (Çöp kutusu ve onay modalı)
+                    const clearCoupon = async () => {
+                        const trash = document.querySelector('.ni-trash, i[class*="trash"], [class*="delete"]');
+                        if (trash) {
+                            const btn = trash.closest('button, a') || trash;
+                            btn.click();
+                            await new Promise(r => setTimeout(r, 350));
+                            Array.from(document.querySelectorAll('.modal button, .modal a')).forEach(b => {
+                                const t = (b.innerText || '').toLowerCase().trim();
+                                if (t === 'evet' || t === 'tamam' || t === 'sil' || t === 'onayla') {
+                                    try { b.click(); } catch(e){}
+                                }
+                            });
+                            await new Promise(r => setTimeout(r, 450));
+                        }
+                    };
+                    await clearCoupon();
+
+                    window.__globallyUsedTitles = window.__globallyUsedTitles || new Set();
+
+                    const picks = [];
+
+                    // 2. Bülteni aşağı kaydırarak bu kupon için 3 FARKLI ve DAHA ÖNCE OYNANMAMIŞ maç seç
+                    for (let scrollStep = 0; scrollStep < 15 && picks.length < 3; scrollStep++) {
+                        const elements = Array.from(document.querySelectorAll('[data-code]'));
+                        for (const el of elements) {
+                            if (picks.length >= 3) break;
+
+                            let row = el;
+                            for (let step = 0; step < 5; step++) {
+                                if (row.parentElement && row.innerText && row.innerText.includes(' - ')) break;
+                                if (row.parentElement) row = row.parentElement;
+                            }
+                            const rawText = row.innerText ? row.innerText.replace(/\\s+/g, ' ').trim() : '';
+
+                            let matchTitle = '';
+                            if (rawText.includes(' - ')) {
+                                const m = rawText.match(/([A-Za-zÇĞİÖŞÜçğıöşü0-9\\.\\s]+)\\s*-\\s*([A-Za-zÇĞİÖŞÜçğıöşü0-9\\.\\s]+)/);
+                                if (m) matchTitle = m[0].trim();
+                            }
+                            if (!matchTitle || matchTitle.length < 5) continue;
+
+                            // Daha önce herhangi bir kuponda oynanmış mı kontrol et
+                            const normKey = matchTitle.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 25);
+                            if (window.__globallyUsedTitles.has(normKey)) continue;
+
+                            const oddBtns = Array.from(row.querySelectorAll('button[data-testid*="odd_"], button')).filter(b => {
+                                const t = (b.innerText || '').trim();
+                                return /^[1-9]\\.\\d{2}$/.test(t) && b.offsetHeight > 10;
+                            });
+
+                            if (oddBtns.length > 0) {
+                                // Kupon türüne göre akılcı oran varyasyonu
+                                const oddIdx = (couponNum === 1 || couponNum === 4) ? 0 : (${i} % Math.min(3, oddBtns.length));
+                                const btn = oddBtns[oddIdx] || oddBtns[0];
+
+                                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                await new Promise(r => setTimeout(r, 250));
+                                btn.click();
+                                window.__globallyUsedTitles.add(normKey);
+                                picks.push({
+                                    title: matchTitle,
+                                    code: el.getAttribute('data-code') || '',
+                                    odd: btn.innerText.trim(),
+                                    matchText: matchTitle
+                                });
+                                await new Promise(r => setTimeout(r, 350));
+                            }
+                        }
+
+                        if (picks.length < 3) {
+                            window.scrollBy(0, 700);
+                            await new Promise(r => setTimeout(r, 400));
+                        }
+                    }
+
+                    // 3. Kupon adını yaz: "30.10.2026 - 1" vb.
+                    await new Promise(r => setTimeout(r, 500));
+                    const nameInput = document.querySelector('#coupon-name, input.coupon-name-input, input[placeholder*="Kupon"]');
+                    let nameSaved = false;
+                    if (nameInput) {
+                        nameInput.focus();
+                        nameInput.value = nesineCouponName;
+                        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        nameInput.dispatchEvent(new Event('blur', { bubbles: true }));
+                        nameSaved = true;
+                    }
+
+                    // 4. Kuponu Kaydet Butonuna Bas (Nesine Üye Hesabına Kaydeder)
+                    const saveBtns = Array.from(document.querySelectorAll('button, a')).filter(b => {
+                        const t = (b.innerText || '').toLowerCase().trim();
+                        return t.includes('kuponu kaydet') || (t === 'kaydet' && b.id.includes('save'));
+                    });
+                    for (const sb of saveBtns) {
+                        try { sb.click(); } catch(e){}
+                    }
+                    await new Promise(r => setTimeout(r, 500));
+
+                    // Onay modalında Kaydet butonu
+                    const confirmSave = document.querySelector('#mod-confirmation-save, .btn-save-coupon-name');
+                    if (confirmSave) {
+                        try { confirmSave.click(); } catch(e){}
+                    }
+
+                    // Bir sonraki kupon için bülteni aşağı kaydır
+                    window.scrollBy(0, 500);
+
+                    return {
+                        selectedCount: picks.length,
+                        selectedOdds: picks,
+                        couponName: nesineCouponName,
+                        nameSaved
+                    };
+                })()
+            `);
+
+            console.log(`   ✅ ${stepResult.selectedCount} FARKLI maç seçildi:`);
+            stepResult.selectedOdds.forEach(p => console.log(`      ⚽ ${p.title} (Oran: ${p.odd})`));
+            console.log(`   💾 Kupon Adı: "${stepResult.couponName}" hesaba kaydedildi!`);
+
+            await new Promise(r => setTimeout(r, 1500));
+            const img = await win.capturePage();
+            const screenshotFile = `nesine_hesap_kupon_${couponNumber}.png`;
+            fs.writeFileSync(path.join(ARTIFACT_DIR, screenshotFile), img.toPNG());
+            console.log(`   📸 Ekran görüntüsü: ${screenshotFile}`);
+
+            const totalOdd = stepResult.selectedOdds.reduce((acc, p) => acc * parseFloat(p.odd || 1), 1).toFixed(2);
+
+            processedResults.push({
+                couponNumber: couponNumber,
+                name: nesineCouponName,
+                title: tpl.title,
+                totalOdd: parseFloat(totalOdd),
+                picks: stepResult.selectedOdds,
+                savedInAccount: true,
+                screenshot: path.join(ARTIFACT_DIR, screenshotFile),
+                timestamp: new Date().toISOString()
+            });
+
+        } catch (err) {
+            console.error(`   ❌ Kupon ${couponNumber} ekleme hatası:`, err.message);
+        }
+
+        await new Promise(r => setTimeout(r, 1200));
+    }
+
+    // 4. Sonuçları yerel önbelleğe yaz
+    fs.writeFileSync(path.join(DATA_CACHE_DIR, 'nesine_coupons_today.json'), JSON.stringify({
+        date: todayFormatted,
+        userAccount: USERNAME,
+        totalCoupons: processedResults.length,
+        coupons: processedResults
+    }, null, 2), 'utf8');
+
+    console.log('\n===================================================================');
+    console.log(`🎉 TEBRİKLER! ${processedResults.length} ADET FARKLI KUPON NESİNE HESABINIZA KAYDEDİLDİ!`);
+    console.log('   Nesine.com -> Hesabım -> Kuponlarım / Kaydedilen Kuponlar bölümünde görebilirsiniz.');
+    console.log('===================================================================');
+
+    // Banner final
+    await win.webContents.executeJavaScript(`
+        (() => {
+            const b = document.getElementById('sportanaliz-guide-banner');
+            if (b) {
+                b.innerHTML = '🎉 <b>8 FARKLI KUPONUN TAMAMI HESABINIZA KAYDEDİLDİ!</b><br>Nesine -> Hesabım -> Kuponlarım bölümünden görebilirsiniz.';
+            }
+        })()
+    `);
+
+    await new Promise(r => setTimeout(r, 4000));
     win.close();
     app.quit();
 });

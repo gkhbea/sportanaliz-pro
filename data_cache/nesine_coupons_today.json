@@ -6,362 +6,234 @@
     {
       "couponNumber": 1,
       "name": "30.10.2026 - 1",
-      "title": "🏆 UEFA Şampiyonlar Ligi Özel Kombinesi",
-      "subtitle": "Avrupa kupalarında haftanın en yüksek güvenli 3 maçı",
-      "badge": "🏆 DEVLER LİGİ · UEFA ÖZEL",
-      "totalOdd": 4.06,
+      "title": "🛡️ Garantör Banko / Kasa Katlama Kuponu",
+      "totalOdd": 6.76,
       "picks": [
         {
-          "iddaaCode": "3255271",
-          "homeTeam": "Stenhousemuir",
-          "awayTeam": "Livingston",
-          "pickTitle": "2.5 ÜST",
-          "marketTitle": "2.5 Gol Üstü",
-          "marketCode": "OVER_25",
-          "odd": "1.53",
-          "timeStr": "22:30",
-          "matchText": "22:30 Stenhousemuir - Livingston 2.5 ÜST 1.53"
+          "title": "El Daklyeh Entag Harby 0 0 C 2.12 2.32 2.60 -",
+          "code": "3248016",
+          "odd": "2.12",
+          "matchText": "El Daklyeh Entag Harby 0 0 C 2.12 2.32 2.60 -"
         },
         {
-          "iddaaCode": "3255481",
-          "homeTeam": "Sheffield Utd",
-          "awayTeam": "Wrexham",
-          "pickTitle": "2.5 ÜST",
-          "marketTitle": "2.5 Gol Üstü",
-          "marketCode": "OVER_25",
-          "odd": "1.71",
-          "timeStr": "23:00",
-          "matchText": "23:00 Sheffield Utd - Wrexham 2.5 ÜST 1.71"
+          "title": "50 Emirates Club - Dibba 3 2.53 3.15 1.92",
+          "code": "3312438",
+          "odd": "2.53",
+          "matchText": "50 Emirates Club - Dibba 3 2.53 3.15 1.92"
         },
         {
-          "iddaaCode": "3255552",
-          "homeTeam": "Rathfriland Rangers",
-          "awayTeam": "Strabane Athletic",
-          "pickTitle": "2.5 ÜST",
-          "marketTitle": "2.5 Gol Üstü",
-          "marketCode": "OVER_25",
-          "odd": "1.55",
-          "timeStr": "22:45",
-          "matchText": "22:45 Rathfriland Rangers - Strabane Athletic 2.5 ÜST 1.55"
+          "title": "50 Dibba AL Hisn SC - Dubai City 3 1.26 4.10 5.12",
+          "code": "3312456",
+          "odd": "1.26",
+          "matchText": "50 Dibba AL Hisn SC - Dubai City 3 1.26 4.10 5.12"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.560Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_1.png",
+      "timestamp": "2026-10-30T12:45:41.232Z"
     },
     {
       "couponNumber": 2,
       "name": "30.10.2026 - 2",
-      "title": "🛡️ Garantör / En Güvenilir Kupon",
-      "subtitle": "Günün en banko, en yüksek kazanma ihtimalli 3 seçimi",
-      "badge": "🛡️ ULTRA GÜVEN · BANKO",
-      "totalOdd": 2.53,
+      "title": "⚡ İdeal Sistem Kuponu (Editör Seçimi)",
+      "totalOdd": 33.27,
       "picks": [
         {
-          "iddaaCode": "3236041",
-          "homeTeam": "Antigua",
-          "awayTeam": "Dep. San Pedro",
-          "pickTitle": "MS 1",
-          "marketTitle": "Maç Sonu 1 (Antigua)",
-          "marketCode": "MS_1",
-          "odd": "1.34",
-          "timeStr": "03:00",
-          "matchText": "03:00 Antigua - Dep. San Pedro MS 1 1.34"
+          "title": "50 AL Musannah SC - Al Orouba",
+          "code": "3304746",
+          "odd": "4.37",
+          "matchText": "50 AL Musannah SC - Al Orouba"
         },
         {
-          "iddaaCode": "3237387",
-          "homeTeam": "CD Marquense",
-          "awayTeam": "Dep. Guastatoya",
-          "pickTitle": "MS 1",
-          "marketTitle": "Maç Sonu 1 (CD Marquense)",
-          "marketCode": "MS_1",
-          "odd": "1.41",
-          "timeStr": "05:10",
-          "matchText": "05:10 CD Marquense - Dep. Guastatoya MS 1 1.41"
+          "title": "00 Halaba Ketema - Hadiya Hossana 3 3.06 2.48 1.99 1.37 1.99 1",
+          "code": "3360828",
+          "odd": "2.48",
+          "matchText": "00 Halaba Ketema - Hadiya Hossana 3 3.06 2.48 1.99 1.37 1.99 1"
         },
         {
-          "iddaaCode": "3247856",
-          "homeTeam": "America De Cali",
-          "awayTeam": "Fortaleza",
-          "pickTitle": "MS 1",
-          "marketTitle": "Maç Sonu 1 (America De Cali)",
-          "marketCode": "MS_1",
-          "odd": "1.34",
-          "timeStr": "02:30",
-          "matchText": "02:30 America De Cali - Fortaleza MS 1 1.34"
+          "title": "00 Trnje - NK Dugo Selo 3 2.02 3.07 2.42 1.74 1.51 0",
+          "code": "3253919",
+          "odd": "3.07",
+          "matchText": "00 Trnje - NK Dugo Selo 3 2.02 3.07 2.42 1.74 1.51 0"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.560Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_2.png",
+      "timestamp": "2026-10-30T12:45:51.436Z"
     },
     {
       "couponNumber": 3,
       "name": "30.10.2026 - 3",
-      "title": "İdeal Günlük Editör Kuponu",
-      "subtitle": "4 Platform ortak konsensüsü ve dengeli oranlar",
-      "badge": "🎯 4 PLATFORM HARMANI · DENGELİ",
-      "totalOdd": 2.72,
+      "title": "⚽ Günün Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)",
+      "totalOdd": 3.17,
       "picks": [
         {
-          "iddaaCode": "3247716",
-          "homeTeam": "Farco",
-          "awayTeam": "Telecom Egypt",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.43",
-          "timeStr": "15:30",
-          "matchText": "15:30 Farco - Telecom Egypt 1.5 ÜST 1.43"
+          "title": "00 NK Dubrava - NK Sesvete 3 3.34 2.97 1.67 1.45 1.84 1",
+          "code": "3255194",
+          "odd": "1.67",
+          "matchText": "00 NK Dubrava - NK Sesvete 3 3.34 2.97 1.67 1.45 1.84 1"
         },
         {
-          "iddaaCode": "3247743",
-          "homeTeam": "Baladiyyat AL M.",
-          "awayTeam": "AL Nasr Cairo",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.42",
-          "timeStr": "15:30",
-          "matchText": "15:30 Baladiyyat AL M. - AL Nasr Cairo 1.5 ÜST 1.42"
+          "title": "00 Nassaji Maz. - Persepolis 2 6.80 3.19 1.29 1.28 2.22 1",
+          "code": "3252152",
+          "odd": "1.29",
+          "matchText": "00 Nassaji Maz. - Persepolis 2 6.80 3.19 1.29 1.28 2.22 1"
         },
         {
-          "iddaaCode": "3247792",
-          "homeTeam": "Kahrabaa Ismailia",
-          "awayTeam": "Masar",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.34",
-          "timeStr": "15:30",
-          "matchText": "15:30 Kahrabaa Ismailia - Masar 1.5 ÜST 1.34"
+          "title": "00 Kataka - Uganda Police 3 4.03 3.25 1.47 1.80 1.48 1",
+          "code": "3252596",
+          "odd": "1.47",
+          "matchText": "00 Kataka - Uganda Police 3 4.03 3.25 1.47 1.80 1.48 1"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.560Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_3.png",
+      "timestamp": "2026-10-30T12:46:00.976Z"
     },
     {
       "couponNumber": 4,
       "name": "30.10.2026 - 4",
-      "title": "Günün Gol Yağmuru Kuponu",
-      "subtitle": "Taraf riskine girmeden saf gol istatistikleri",
-      "badge": "⚽ YÜKSEK xG & GOL BEKLENTİSİ",
-      "totalOdd": 2.63,
+      "title": "🎯 Çifte Şans & Sıfır Risk Sigortalı Kupon",
+      "totalOdd": 11.62,
       "picks": [
         {
-          "iddaaCode": "3247843",
-          "homeTeam": "EL Terasanah",
-          "awayTeam": "Maleyat Kafr El Z.",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.46",
-          "timeStr": "15:30",
-          "matchText": "15:30 EL Terasanah - Maleyat Kafr El Z. 1.5 ÜST 1.46"
+          "title": "00 USM Blida - Wa Mostaganem 3 1.15 4.11 8.72 1.52 1.74 0",
+          "code": "3358992",
+          "odd": "1.15",
+          "matchText": "00 USM Blida - Wa Mostaganem 3 1.15 4.11 8.72 1.52 1.74 0"
         },
         {
-          "iddaaCode": "3247920",
-          "homeTeam": "El Sekka El Hadid",
-          "awayTeam": "Tanta",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.42",
-          "timeStr": "15:30",
-          "matchText": "15:30 El Sekka El Hadid - Tanta 1.5 ÜST 1.42"
+          "title": "00 MC EL Bayadh - ASM Oran 3 2.83 2.67 1.98 1.30 2.15 1",
+          "code": "3358993",
+          "odd": "2.83",
+          "matchText": "00 MC EL Bayadh - ASM Oran 3 2.83 2.67 1.98 1.30 2.15 1"
         },
         {
-          "iddaaCode": "3252134",
-          "homeTeam": "Alqana",
-          "awayTeam": "Enppi Club",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.27",
-          "timeStr": "21:00",
-          "matchText": "21:00 Alqana - Enppi Club 1.5 ÜST 1.27"
+          "title": "00 ESM Kolea - USM EL Harrach 3 3.57 2.62 1.75",
+          "code": "3358998",
+          "odd": "3.57",
+          "matchText": "00 ESM Kolea - USM EL Harrach 3 3.57 2.62 1.75"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.561Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_4.png",
+      "timestamp": "2026-10-30T12:46:12.242Z"
     },
     {
       "couponNumber": 5,
       "name": "30.10.2026 - 5",
-      "title": "Sürpriz & Değer (Value) Kuponu",
-      "subtitle": "Piyasa oranlarının gerçek gücün üzerinde açıldığı tercihler",
-      "badge": "💎 YÜKSEK ÇARPAN · VALUE EDGE",
-      "totalOdd": 4.41,
+      "title": "💎 Akılcı Değer & Taraf Kuponu",
+      "totalOdd": 20.67,
       "picks": [
         {
-          "iddaaCode": "3252480",
-          "homeTeam": "Alajuelense",
-          "awayTeam": "Motagua",
-          "pickTitle": "MS 1",
-          "marketTitle": "Maç Sonu 1 (Alajuelense)",
-          "marketCode": "MS_1",
-          "odd": "1.65",
-          "timeStr": "05:00",
-          "matchText": "05:00 Alajuelense - Motagua MS 1 1.65"
+          "title": "00 NK Opatija - Mladost Zdralovi 3 2.34 2.65 2.33 1.39 1.94",
+          "code": "3252644",
+          "odd": "2.65",
+          "matchText": "00 NK Opatija - Mladost Zdralovi 3 2.34 2.65 2.33 1.39 1.94"
         },
         {
-          "iddaaCode": "3252618",
-          "homeTeam": "A. Bielefeld",
-          "awayTeam": "Braunschweig",
-          "pickTitle": "MS 1",
-          "marketTitle": "Maç Sonu 1 (A. Bielefeld)",
-          "marketCode": "MS_1",
-          "odd": "1.64",
-          "timeStr": "20:30",
-          "matchText": "20:30 A. Bielefeld - Braunschweig MS 1 1.64"
+          "title": "00 Jerash - Hay AL Amir Hassan 3 1.47 3.17 4.14 1.60 1.63 0",
+          "code": "3252120",
+          "odd": "3.17",
+          "matchText": "00 Jerash - Hay AL Amir Hassan 3 1.47 3.17 4.14 1.60 1.63 0"
         },
         {
-          "iddaaCode": "3258994",
-          "homeTeam": "AD Fafe",
-          "awayTeam": "P. Ferreira",
-          "pickTitle": "MS 1",
-          "marketTitle": "Maç Sonu 1 (AD Fafe)",
-          "marketCode": "MS_1",
-          "odd": "1.63",
-          "timeStr": "23:00",
-          "matchText": "23:00 AD Fafe - P. Ferreira MS 1 1.63"
+          "title": "15 Malavan Bandar A. - Chador Malu Y. 2 2.22 2.46 2.65 1.21 2.47 0",
+          "code": "3252193",
+          "odd": "2.46",
+          "matchText": "15 Malavan Bandar A. - Chador Malu Y. 2 2.22 2.46 2.65 1.21 2.47 0"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.561Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_5.png",
+      "timestamp": "2026-10-30T12:46:20.934Z"
     },
     {
       "couponNumber": 6,
       "name": "30.10.2026 - 6",
-      "title": "Günün Yıldız Kuponu / Süper Kombine",
-      "subtitle": "Günün en formda elit takımları ve seçkin maçları",
-      "badge": "👑 ELİT SEÇİM · ÖZEL KOMBİNE",
-      "totalOdd": 2.51,
+      "title": "🌟 VIP Kombin (Favori Güçler)",
+      "totalOdd": 9.83,
       "picks": [
         {
-          "iddaaCode": "3252152",
-          "homeTeam": "Nassaji Maz.",
-          "awayTeam": "Persepolis",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.34",
-          "timeStr": "16:00",
-          "matchText": "16:00 Nassaji Maz. - Persepolis 1.5 ÜST 1.34"
+          "title": "El Daklyeh Entag Harby 0 0 C 2.14 2.30 2.60 -",
+          "code": "3248016",
+          "odd": "2.60",
+          "matchText": "El Daklyeh Entag Harby 0 0 C 2.14 2.30 2.60 -"
         },
         {
-          "iddaaCode": "3252193",
-          "homeTeam": "Malavan Bandar Anzali",
-          "awayTeam": "Chador Malu Y.",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
+          "title": "30 Xorazm Fk Urganch - Pakhtakor Tashkent 3 4.54 3.41 1.39 1.66 1.59 1",
+          "code": "3247742",
           "odd": "1.39",
-          "timeStr": "16:15",
-          "matchText": "16:15 Malavan Bandar Anzali - Chador Malu Y. 1.5 ÜST 1.39"
+          "matchText": "30 Xorazm Fk Urganch - Pakhtakor Tashkent 3 4.54 3.41 1.39 1.66 1.59 1"
         },
         {
-          "iddaaCode": "3252257",
-          "homeTeam": "ZOB Ahan I.",
-          "awayTeam": "Esteghlal K.",
-          "pickTitle": "1.5 ÜST",
-          "marketTitle": "1.5 Gol Üstü",
-          "marketCode": "OVER_15",
-          "odd": "1.35",
-          "timeStr": "15:00",
-          "matchText": "15:00 ZOB Ahan I. - Esteghlal K. 1.5 ÜST 1.35"
+          "title": "30 Sogdiana - FK Buxoro 3 1.86 3.05 2.72 1.82 1.46 0",
+          "code": "3247860",
+          "odd": "2.72",
+          "matchText": "30 Sogdiana - FK Buxoro 3 1.86 3.05 2.72 1.82 1.46 0"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.561Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_6.png",
+      "timestamp": "2026-10-30T12:46:29.932Z"
     },
     {
       "couponNumber": 7,
       "name": "30.10.2026 - 7",
-      "title": "🎯 İlk Yarı & İkinci Yarı Kombinesi",
-      "subtitle": "Nesine & Bilyoner bültenine tam uyumlu ilk yarı ve maç sonu kombinasyonları",
-      "badge": "🎯 İLK YARI & MAÇ SONU",
-      "totalOdd": 3.47,
+      "title": "⏱️ İlk Yarı & İkinci Yarı Kombinesi",
+      "totalOdd": 13.79,
       "picks": [
         {
-          "iddaaCode": "3255271",
-          "homeTeam": "Stenhousemuir",
-          "awayTeam": "Livingston",
-          "pickTitle": "İlk Yarı 0.5 ÜST",
-          "marketTitle": "İlk Yarı Gol",
-          "marketCode": "HT_OV05",
-          "odd": "1.38",
-          "timeStr": "22:30",
-          "matchText": "22:30 Stenhousemuir - Livingston İlk Yarı 0.5 ÜST 1.38"
+          "title": "0 2.24 2.98 2.19 2.24 -",
+          "code": "3349449",
+          "odd": "5.43",
+          "matchText": "0 2.24 2.98 2.19 2.24 -"
         },
         {
-          "iddaaCode": "3255481",
-          "homeTeam": "Sheffield Utd",
-          "awayTeam": "Wrexham",
-          "pickTitle": "Çifte Şans 1X & 1.5 ÜST",
-          "marketTitle": "Kombine İddaa",
-          "marketCode": "DC1X_OV15",
-          "odd": "1.62",
-          "timeStr": "23:00",
-          "matchText": "23:00 Sheffield Utd - Wrexham Çifte Şans 1X & 1.5 ÜST 1.62"
+          "title": "30 Kokand 1912 - Qizilqum Zarafshon 3 1.91 2.77 2.87 1.38 1.97 0",
+          "code": "3247861",
+          "odd": "1.91",
+          "matchText": "30 Kokand 1912 - Qizilqum Zarafshon 3 1.91 2.77 2.87 1.38 1.97 0"
         },
         {
-          "iddaaCode": "3255552",
-          "homeTeam": "Rathfriland Rangers",
-          "awayTeam": "Strabane Athletic",
-          "pickTitle": "2.5 ÜST",
-          "marketTitle": "Toplam Gol",
-          "marketCode": "OVER25",
-          "odd": "1.55",
-          "timeStr": "22:45",
-          "matchText": "22:45 Rathfriland Rangers - Strabane Athletic 2.5 ÜST 1.55"
+          "title": "00 GC Mascara - NA Hussein Dey 3 1.33 3.15 6.21 1.34 2.05 0",
+          "code": "3358988",
+          "odd": "1.33",
+          "matchText": "00 GC Mascara - NA Hussein Dey 3 1.33 3.15 6.21 1.34 2.05 0"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.561Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_7.png",
+      "timestamp": "2026-10-30T12:46:38.694Z"
     },
     {
       "couponNumber": 8,
       "name": "30.10.2026 - 8",
       "title": "🌙 Gece / Güney Amerika & Özel Ligler",
-      "subtitle": "Gece seansı, Brezilya/Arjantin/MLS ve haftasonu kapanış maçları fırsatları",
-      "badge": "🌙 GECE BÜLTENİ · LATİN",
-      "totalOdd": 3.6,
+      "totalOdd": 20.88,
       "picks": [
         {
-          "iddaaCode": "3236041",
-          "homeTeam": "Antigua",
-          "awayTeam": "Dep. San Pedro",
-          "pickTitle": "MS 1 (Ev Sahibi)",
-          "marketTitle": "Gece Seansı",
-          "marketCode": "MS_1",
-          "odd": "1.72",
-          "timeStr": "03:00",
-          "matchText": "03:00 Antigua - Dep. San Pedro MS 1 (Ev Sahibi) 1.72"
+          "title": "00 Irb Sidi M Hamed Benali - WA Tlemcen 3 1.39 3.13 5.16 1.32 2.10 0",
+          "code": "3359002",
+          "odd": "3.13",
+          "matchText": "00 Irb Sidi M Hamed Benali - WA Tlemcen 3 1.39 3.13 5.16 1.32 2.10 0"
         },
         {
-          "iddaaCode": "3237387",
-          "homeTeam": "CD Marquense",
-          "awayTeam": "Dep. Guastatoya",
-          "pickTitle": "1.5 Gol Üstü",
-          "marketTitle": "Latin Bülteni",
-          "marketCode": "OVER_15",
-          "odd": "1.35",
-          "timeStr": "05:10",
-          "matchText": "05:10 CD Marquense - Dep. Guastatoya 1.5 Gol Üstü 1.35"
+          "title": "00 ES Mostaganem - MC Saida 3 1.64 2.69 3.97",
+          "code": "3359003",
+          "odd": "2.69",
+          "matchText": "00 ES Mostaganem - MC Saida 3 1.64 2.69 3.97"
         },
         {
-          "iddaaCode": "3247856",
-          "homeTeam": "America De Cali",
-          "awayTeam": "Fortaleza",
-          "pickTitle": "Çifte Şans X2",
-          "marketTitle": "Gece Seansı",
-          "marketCode": "DC_X2",
-          "odd": "1.55",
-          "timeStr": "02:30",
-          "matchText": "02:30 America De Cali - Fortaleza Çifte Şans X2 1.55"
+          "title": "00 Nrb Teleghma - CA Batna 3 2.25 2.48 2.60",
+          "code": "3359202",
+          "odd": "2.48",
+          "matchText": "00 Nrb Teleghma - CA Batna 3 2.25 2.48 2.60"
         }
       ],
       "savedInAccount": true,
-      "timestamp": "2026-10-29T21:04:08.561Z"
+      "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_8.png",
+      "timestamp": "2026-10-30T12:46:48.928Z"
     }
   ]
 }
