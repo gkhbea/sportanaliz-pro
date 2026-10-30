@@ -200,6 +200,8 @@ const CouponEngine = {
     getMatchHour(match) {
         if (!match) return 20;
         const timeStr = match.timeStr 
+            || match.kickoffTime
+            || match.match?.kickoffTime
             || (match.matchDate ? match.matchDate.split('T')[1]?.slice(0, 5) : null)
             || (match.match?.timeStr)
             || '';

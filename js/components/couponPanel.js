@@ -18,6 +18,8 @@ const CouponPanel = {
         if (!matchItem) return 20;
         const timeStr = matchItem.timeStr 
             || matchItem.match?.timeStr 
+            || matchItem.kickoffTime
+            || matchItem.match?.kickoffTime
             || (matchItem.matchDate ? matchItem.matchDate.split('T')[1]?.slice(0, 5) : null)
             || (matchItem.match?.matchDate ? matchItem.match.matchDate.split('T')[1]?.slice(0, 5) : null)
             || '';
@@ -390,29 +392,8 @@ const CouponPanel = {
         }
         this._lastTotalAnalyzedCount = totalAnalyzedCount; // bindEvents için sakla
 
-        const isWeekend = (new Date().getDay() === 0 || new Date().getDay() === 6);
-        let currentMode = this.assistantCouponCount || (isWeekend ? 8 : 5);
-
-        let couponList = this.getCouponsForDate(chosenDate, coupons, currentMode);
-        const hasUefaInList = couponList.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
-        const hasHtFtInList = couponList.some(c => (c.id && c.id.includes('htft')) || (c.title && /iy.*ms|ilk yarı/i.test(c.title)));
-        const maxRenderLimit = (hasUefaInList || hasHtFtInList) ? 6 : 5;
-        if (currentMode === 8 && couponList.length < 8 && window.CouponEngine?.expandTo8Coupons) {
-            couponList = window.CouponEngine.expandTo8Coupons(couponList, window.app?.matches || [], chosenDate);
-        } else if (currentMode <= 6 && couponList.length > maxRenderLimit) {
-            couponList = couponList.slice(0, maxRenderLimit);
-        }
-        if ((hasUefaInList || hasHtFtInList) && currentMode === 5) {
-            currentMode = 6;
-        }
-        this.assistantCouponCount = currentMode;
-        if (window.app) window.app.coupons = couponList;
-        this.lastDisplayedCoupons = couponList;
-
-        // Seçilen Tarihin Analiz İstatistiklerini Al
-        const dailyAnalysisStats = window.MatchTracker 
-            ? window.MatchTracker.getDailyAnalysisStats(chosenDate) 
-            : { totalAnalyzed: 0, wonAnalyzed: 0, lostAnalyzed: 0, winRate: 0, matches: [] };
+        // KULLANICI KURALI: "sabah öglen ve aksama ayrı ayrı 5 tane hazırlayabilirsin eğer mac varsa tek akşama 8 kupon sıgdırmana gerek yok"
+        let couponList = this.getCouponsForDate(chosenDate, coupons, 15);
 
         // ⏱️ KULLANICI KURALI: Zaman Dilimi Sekmeleri (Sabah, Öğlen, Akşam, Tüm Gün)
         this.activeTimeSlot = this.activeTimeSlot || 'all';
@@ -420,7 +401,20 @@ const CouponPanel = {
         let slotCoupons = couponList;
         if (this.activeTimeSlot && this.activeTimeSlot !== 'all') {
             slotCoupons = couponList.filter(c => this.getCouponTimeSlot(c) === this.activeTimeSlot);
+            // Her seans için ayrı ayrı en fazla 5 kupon (eğer maç varsa; zorlama yok)
+            if (slotCoupons.length > 5) {
+                slotCoupons = slotCoupons.slice(0, 5);
+            }
         }
+
+        this.assistantCouponCount = slotCoupons.length;
+        if (window.app) window.app.coupons = slotCoupons;
+        this.lastDisplayedCoupons = slotCoupons;
+
+        // Seçilen Tarihin Analiz İstatistiklerini Al
+        const dailyAnalysisStats = window.MatchTracker 
+            ? window.MatchTracker.getDailyAnalysisStats(chosenDate) 
+            : { totalAnalyzed: 0, wonAnalyzed: 0, lostAnalyzed: 0, winRate: 0, matches: [] };
 
         // Tutan, Yatan ve Bekleyen Kuponları Ayrıştır (Seçili zaman dilimine göre)
         const wonCoupons = slotCoupons.filter(c => this.isCouponWon(c));
@@ -512,12 +506,12 @@ const CouponPanel = {
         }
 
         const sessionHeaderTitle = (this.activeTimeSlot && this.activeTimeSlot !== 'all')
-            ? `Benim İçin Bahis Yap — ${timeSlotMeta.icon} ${timeSlotMeta.title} (${slotCoupons.length} Kupon)`
-            : `Benim İçin Bahis Yap — Günün ${couponList.length} Özel Kuponu ${currentMode === 8 ? '(Hafta Sonu 8 Kupon Modu)' : '(5 Kupon Modu)'}`;
+            ? `Benim İçin Bahis Yap — ${timeSlotMeta.icon} ${timeSlotMeta.title} (${slotCoupons.length} Kupon · Hedef: 5)`
+            : `Benim İçin Bahis Yap — 🌐 Günün Tüm Seans Kuponları (${couponList.length} Kupon · Sabah, Öğlen ve Akşam)`;
 
         const sessionHeaderSub = (this.activeTimeSlot && this.activeTimeSlot !== 'all')
-            ? `Saat ${timeSlotMeta.timeRange} aralığında başlayan karşılaşmalardan seçilmiş ${slotCoupons.length} kupon · Zorlama yapılmamıştır`
-            : `${activeAnalyzedCount > 0 ? activeAnalyzedCount + ' analiz' : 'Bülten'} üzerinden AI konsensüsüyle hazırlanmış ${couponList.length} stratejik kupon`;
+            ? `Saat ${timeSlotMeta.timeRange} aralığında başlayan karşılaşmalardan seçilmiş ${slotCoupons.length} kupon · Tek seansa sıkıştırma yapılmaz`
+            : `Sabah, Öğlen ve Akşam seansları için ayrı ayrı 5'er kupon havuzu · Toplam ${couponList.length} stratejik kupon`;
 
         return `
             <div class="coupons-view-container animate-fade-in">
