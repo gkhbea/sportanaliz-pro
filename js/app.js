@@ -1853,7 +1853,11 @@ const App = {
                 if (generated && generated.length > 0) coupons = generated;
             }
             if (!coupons || coupons.length === 0) {
-                if (window.HistoricalCouponsService?._generateAuthentic2026_10_26Coupons) {
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_29Coupons) {
+                    const autActive = window.HistoricalCouponsService._generateAuthentic2026_10_29Coupons(chosenDate);
+                    if (autActive && autActive.coupons && autActive.coupons.length > 0) coupons = autActive.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_26Coupons) {
                     const aut26 = window.HistoricalCouponsService._generateAuthentic2026_10_26Coupons('2026-10-26');
                     if (aut26 && aut26.coupons && aut26.coupons.length > 0) coupons = aut26.coupons;
                 }

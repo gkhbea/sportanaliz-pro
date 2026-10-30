@@ -61,7 +61,9 @@ let isIntelAgentRunning = false;
 const INTEL_CACHE_FILE = path.join(CACHE_DIR, 'match_intel_updates.json');
 
 function getCacheFilePath(key) {
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const trNow = new Date(now.getTime() + (3 * 60 + now.getTimezoneOffset()) * 60 * 1000);
+    const today = `${trNow.getFullYear()}-${String(trNow.getMonth() + 1).padStart(2, '0')}-${String(trNow.getDate()).padStart(2, '0')}`;
     const cleanKey = key.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 80);
     return path.join(CACHE_DIR, `${cleanKey}_${today}.json`);
 }

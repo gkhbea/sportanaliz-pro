@@ -36,8 +36,15 @@ const DataManager = {
         // Güvenlik Ağı: Eğer canlı bağlantılardan maç gelmediyse yerel önbellek dosyasından bülteni yükle
         if (results.matches.length === 0) {
             try {
-                const todayIso = new Date().toISOString().slice(0, 10);
+                const now = new Date();
+                const todayY = now.getFullYear();
+                const todayM = now.getMonth();
+                const todayD = now.getDate();
+                const localTodayIso = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
+                const todayIso = now.toISOString().slice(0, 10);
                 const candidates = [
+                    `./data_cache/nesine_bulten_today_${localTodayIso}.json`,
+                    `data_cache/nesine_bulten_today_${localTodayIso}.json`,
                     `./data_cache/nesine_bulten_today_${todayIso}.json`,
                     `data_cache/nesine_bulten_today_${todayIso}.json`,
                     './data_cache/nesine_bulten_today.json',
@@ -112,8 +119,8 @@ const DataManager = {
         const todayIso = now.toISOString().slice(0, 10);
 
         results.matches.sort((a, b) => {
-            const isTodayA = (a.dateStr === todayStr || (a.matchDate && a.matchDate.startsWith(todayIso)) || a.isToday);
-            const isTodayB = (b.dateStr === todayStr || (b.matchDate && b.matchDate.startsWith(todayIso)) || b.isToday);
+            const isTodayA = (a.dateStr === todayStr || a.dateStr === todayFmtDot || (a.matchDate && (a.matchDate.startsWith(todayStr) || a.matchDate.startsWith(todayIso))) || a.isToday);
+            const isTodayB = (b.dateStr === todayStr || b.dateStr === todayFmtDot || (b.matchDate && (b.matchDate.startsWith(todayStr) || b.matchDate.startsWith(todayIso))) || b.isToday);
 
             // 1. Bugünün maçları önce
             if (isTodayA && !isTodayB) return -1;
@@ -323,7 +330,10 @@ const DataManager = {
             const dayAfterTomorrowStart = new Date(todayYear, todayMonth, todayDate + 2, 0, 0, 0);
             const weekEnd = new Date(todayYear, todayMonth, todayDate + 7, 23, 59, 59);
 
+            const yesterdayDateObj = new Date(todayYear, todayMonth, todayDate - 1);
+            const yesterdayLocalStr = `${yesterdayDateObj.getFullYear()}-${String(yesterdayDateObj.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDateObj.getDate()).padStart(2, '0')}`;
             const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+            const localTodayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDate).padStart(2, '0')}`;
             const todayStr = now.toISOString().slice(0, 10);
 
             filtered = filtered.filter(m => {
@@ -333,13 +343,13 @@ const DataManager = {
 
                 switch (dateFilter) {
                     case 'yesterday': {
-                        const isYesterdayDate = mDateStr.includes(yesterdayStr) || dStr.includes('09.09.2026') || dStr.includes('13.09.2026');
+                        const isYesterdayDate = mDateStr.includes(yesterdayLocalStr) || mDateStr.includes(yesterdayStr) || dStr.includes('09.09.2026') || dStr.includes('13.09.2026');
                         const isYesterdayTime = md && !isNaN(md.getTime()) && (md >= yesterdayStart && md < todayStart);
                         return isYesterdayDate || isYesterdayTime;
                     }
                     case 'today': {
                         const todayDot = `${String(todayDate).padStart(2, '0')}.${String(todayMonth + 1).padStart(2, '0')}.${todayYear}`;
-                        const isTodayDate = mDateStr.includes(todayStr) || dStr === todayDot || dStr.includes(todayDot) || m.isToday === true;
+                        const isTodayDate = mDateStr.includes(localTodayStr) || mDateStr.includes(todayStr) || dStr === todayDot || dStr.includes(todayDot) || m.isToday === true;
                         const isTodayTime = md && !isNaN(md.getTime()) && (md >= todayStart && md < tomorrowStart);
                         return isTodayDate || isTodayTime;
                     }

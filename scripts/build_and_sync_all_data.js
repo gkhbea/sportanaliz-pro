@@ -5,6 +5,10 @@ const fetch = (typeof globalThis.fetch === 'function') ? globalThis.fetch : requ
 const CACHE_DIR = path.join(__dirname, '..', 'data_cache');
 const NesineService = require('../js/services/nesineService.js');
 const CouponEngine = require('../js/analysis/couponEngine.js');
+let HistoricalCouponsService = null;
+try {
+    HistoricalCouponsService = require('../js/services/historicalCouponsService.js');
+} catch (e) {}
 
 async function main() {
     console.log('🚀 [START] SportAnaliz Pro - Güncel Veri & Kupon Üretim Motoru Başlatıldı');
@@ -24,20 +28,36 @@ async function main() {
     const dStr = String(now.getDate()).padStart(2, '0');
     const mStr = String(now.getMonth() + 1).padStart(2, '0');
     const yStr = now.getFullYear();
-    const todayDot = `${dStr}.${mStr}.${yStr}`; // 29.10.2026
-    const todayIso = `${yStr}-${mStr}-${dStr}`; // 2026-10-29
+    const todayDot = `${dStr}.${mStr}.${yStr}`; // 31.10.2026
+    const todayIso = `${yStr}-${mStr}-${dStr}`; // 2026-10-31
 
-    const generated = CouponEngine.generateDailyCoupons(parsedMatches, true, 8);
-    const fullCoupons = (generated.length < 8) ? CouponEngine.expandTo8Coupons(generated, parsedMatches, todayIso) : generated.slice(0, 8);
+    let fullCoupons = [];
+    if (HistoricalCouponsService && typeof HistoricalCouponsService.getCouponsByDate === 'function') {
+        const histCoupons = HistoricalCouponsService.getCouponsByDate(todayIso);
+        if (histCoupons && histCoupons.length >= 10) {
+            fullCoupons = histCoupons;
+            console.log(`✅ ${fullCoupons.length} adet otantik seans kuponu (Sabah/Öğlen/Akşam) yüklendi.`);
+        }
+    }
 
-    console.log(`✅ ${fullCoupons.length} adet garantör kupon üretildi.`);
+    if (fullCoupons.length === 0) {
+        const morning = CouponEngine.generateDailyCoupons(parsedMatches, true, 5, 'morning');
+        const noon = CouponEngine.generateDailyCoupons(parsedMatches, true, 5, 'noon');
+        const evening = CouponEngine.generateDailyCoupons(parsedMatches, true, 5, 'evening');
+        fullCoupons = [...morning, ...noon, ...evening];
+        if (fullCoupons.length === 0) {
+            const gen = CouponEngine.generateDailyCoupons(parsedMatches, true, 8);
+            fullCoupons = (gen.length < 8) ? CouponEngine.expandTo8Coupons(gen, parsedMatches, todayIso) : gen;
+        }
+        console.log(`✅ ${fullCoupons.length} adet seans kuponu dinamik motor tarafından üretildi.`);
+    }
 
     // 3. nesine_coupons_today.json formatına dönüştür
     const formattedCoupons = fullCoupons.map((c, idx) => {
         const couponNumber = idx + 1;
         const name = `${todayDot} - ${couponNumber}`;
         const picks = (c.matches || c.picks || []).map(m => {
-            const code = m.matchCode || m.iddaaCode || (m.rawData && m.rawData.eventCode) || '';
+            const code = m.matchCode || m.iddaaCode || (m.rawData && m.rawData.eventCode) || m.code || '';
             const matchName = `${m.homeTeam} - ${m.awayTeam}`;
             const odd = m.odd ? String(m.odd) : '1.50';
             const pickTitle = m.pickTitle || m.shortPick || 'MS 1';
@@ -47,6 +67,7 @@ async function main() {
                 iddaaCode: String(code),
                 homeTeam: m.homeTeam,
                 awayTeam: m.awayTeam,
+                league: m.league,
                 pickTitle,
                 marketTitle: m.marketTitle || 'Maç Bahsi',
                 marketCode: m.marketCode || 'MS1',
@@ -55,6 +76,10 @@ async function main() {
                 matchText
             };
         });
+
+        let sessionTimeRange = '18:00 - 23:59';
+        if (c.timeSlot === 'morning') sessionTimeRange = '00:00 - 12:00';
+        else if (c.timeSlot === 'noon') sessionTimeRange = '12:00 - 18:00';
 
         return {
             couponNumber,
@@ -65,7 +90,11 @@ async function main() {
             totalOdd: parseFloat(c.totalOdd) || 2.50,
             picks,
             savedInAccount: true,
-            timestamp: new Date().toISOString()
+            screenshot: path.join(CACHE_DIR, 'screenshots', `nesine_kupon_${couponNumber}.png`),
+            timestamp: new Date().toISOString(),
+            timeSlot: c.timeSlot || 'evening',
+            sessionName: c.sessionName || 'Akşam Kuponu',
+            sessionTimeRange
         };
     });
 
@@ -73,6 +102,11 @@ async function main() {
         date: todayDot,
         userAccount: '14410079556',
         totalCoupons: formattedCoupons.length,
+        sessions: {
+            morning: formattedCoupons.filter(c => c.timeSlot === 'morning').length,
+            noon: formattedCoupons.filter(c => c.timeSlot === 'noon').length,
+            evening: formattedCoupons.filter(c => c.timeSlot === 'evening').length
+        },
         coupons: formattedCoupons
     };
 
