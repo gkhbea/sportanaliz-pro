@@ -19,6 +19,6 @@ if not exist "node_modules\" (
 )
 
 echo [BASLATILIYOR] SportAnaliz Pro aciliyor...
-start http://localhost:3001
+start "" /b cmd /c "timeout /t 2 >nul & start http://localhost:3001"
 node proxy-server.js
 pause

@@ -300,10 +300,16 @@ const CouponPanel = {
         // 5. Kesin Güvenlik Ağı: Eğer hiçbir kaynaktan kupon gelmediyse otantik güncel kuponları getir
         if (result.length === 0) {
             if (typeof window !== 'undefined' && window.HistoricalCouponsService) {
-                if (typeof HistoricalCouponsService._generateAuthentic2026_10_29Coupons === 'function') {
-                    const autActive = HistoricalCouponsService._generateAuthentic2026_10_29Coupons(queryDate);
+                if (typeof HistoricalCouponsService._generateAuthentic2026_10_31Coupons === 'function') {
+                    const autActive = HistoricalCouponsService._generateAuthentic2026_10_31Coupons(queryDate);
                     if (autActive && Array.isArray(autActive.coupons) && autActive.coupons.length > 0) {
                         result = [...autActive.coupons];
+                    }
+                }
+                if (result.length === 0 && typeof HistoricalCouponsService._generateAuthentic2026_10_29Coupons === 'function') {
+                    const aut29 = HistoricalCouponsService._generateAuthentic2026_10_29Coupons(queryDate);
+                    if (aut29 && Array.isArray(aut29.coupons) && aut29.coupons.length > 0) {
+                        result = [...aut29.coupons];
                     }
                 }
                 if (result.length === 0 && typeof HistoricalCouponsService._generateAuthentic2026_10_25Coupons === 'function') {
@@ -652,6 +658,9 @@ const CouponPanel = {
                         <button class="btn btn-sm" onclick="App.navigate('dashboard')" style="background:linear-gradient(135deg, #00F0FF, #3B82F6);color:#000;font-weight:900;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;box-shadow:0 0 16px rgba(0,240,255,0.35);" title="Bültenin tüm maçlarını listele">
                             ⚽ Tüm Bülten Maçlarını Gör (${activeAnalyzedCount > 0 ? activeAnalyzedCount : 177}+ Maç)
                         </button>
+                        <button class="btn btn-xs" id="btn-save-coupons-to-nesine" onclick="window.app && window.app.saveCouponsToNesineAccount && window.app.saveCouponsToNesineAccount()" style="background:linear-gradient(135deg, #10B981, #059669);border:1px solid #34d399;color:#fff;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;box-shadow:0 0 16px rgba(16,185,129,0.4);" title="Tüm kuponları tek tıkla Nesine.com hesabınıza otomatik kaydeder">
+                            📲 Nesine Hesabıma Otomatik Aktar
+                        </button>
                         <button class="btn btn-xs" id="btn-generate-nesine-coupons" onclick="window.app && window.app.generateNesineCoupons && window.app.generateNesineCoupons()" style="background:linear-gradient(135deg, #F59E0B, #EAB308);border:1px solid #fbbf24;color:#000;font-weight:900;border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;box-shadow:0 0 16px rgba(245,158,11,0.4);" title="Nesine resmi bültenini tara ve maç kodlarıyla güncel kuponları otomatik oluştur">
                             ⚡ Nesine Otomatik Kupon Oluştur
                         </button>
@@ -738,7 +747,7 @@ const CouponPanel = {
                             <button class="modal-close" data-close="modal-daily-analysis-matches">✕</button>
                         </div>
                         <div class="modal-body" id="modal-daily-analysis-body" style="padding:16px 20px;">
-                            ${this.renderDailyAnalysisModalBody(dailyAnalysisStats, chosenDate, this.modalActiveFilter)}
+                            <!-- Lazy loaded on modal open for high performance -->
                         </div>
                     </div>
                 </div>
@@ -847,7 +856,7 @@ const CouponPanel = {
                         <!-- Şık Seçmeli Dropdown -->
                         <div style="position:relative;display:inline-flex;align-items:center;">
                             <select class="select-daily-analysis-date" style="appearance:none;-webkit-appearance:none;background:rgba(15,23,42,0.95);border:1.5px solid #00F0FF;color:#ffffff;font-size:0.88rem;font-weight:800;border-radius:10px;padding:8px 36px 8px 14px;cursor:pointer;outline:none;box-shadow:0 0 14px rgba(0,240,255,0.25);min-width:250px;">
-                                ${availableDates.filter(d => d.date >= (window.MatchTracker?.SYSTEM_START_DATE || '2026-09-09')).map(d => {
+                                ${availableDates.filter(d => d.date >= (window.MatchTracker?.SYSTEM_START_DATE || '2026-11-01')).map(d => {
                                     const isSel = d.date === chosenDate;
                                     const dayCount = (d.isToday && (!d.totalAnalyzed || d.totalAnalyzed <= 5 || d.totalAnalyzed < total)) 
                                         ? total 
@@ -1200,7 +1209,7 @@ const CouponPanel = {
                 </div>
             ` : `
                 <div class="analysis-matches-list" style="display:flex;flex-direction:column;gap:8px;">
-                    ${filteredMatches.map((m, idx) => `
+                    ${filteredMatches.slice(0, 50).map((m, idx) => `
                         <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.025);border:1px solid ${m.status === 'WON' ? 'rgba(16,185,129,0.3)' : (m.status === 'LOST' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.08)')};border-radius:10px;padding:10px 14px;gap:12px;">
                             <div style="display:flex;align-items:center;gap:12px;flex:1;">
                                 <span style="font-weight:700;color:var(--text-muted);font-size:0.8rem;width:24px;">#${idx + 1}</span>
@@ -1224,6 +1233,11 @@ const CouponPanel = {
                             </div>
                         </div>
                     `).join('')}
+                    ${filteredMatches.length > 50 ? `
+                        <div style="text-align:center;padding:12px;font-size:0.82rem;color:var(--text-muted);">
+                            ℹ️ Toplam ${filteredMatches.length} maçtan ilk 50 tanesi listelendi. Tam döküm için 'Geçmiş Analizler' menüsünü inceleyebilirsiniz.
+                        </div>
+                    ` : ''}
                 </div>
             `}
         `;
@@ -1236,15 +1250,16 @@ const CouponPanel = {
         let stats = null;
         try {
             if (window.MatchTracker && typeof window.MatchTracker.calculateCumulativeCouponStats === 'function') {
-                stats = window.MatchTracker.calculateCumulativeCouponStats('2026-09-09');
+                stats = window.MatchTracker.calculateCumulativeCouponStats('2026-11-01');
             }
         } catch(e) {}
 
-        const oct = stats?.monthByMonth?.find(m => m.monthKey === '2026-10');
-        const sep = stats?.monthByMonth?.find(m => m.monthKey === '2026-09');
-        const octProfit = oct ? `+${oct.netProfit.toLocaleString('tr-TR')} TL` : '+20.829 TL';
-        const sepProfit = sep ? `+${sep.netProfit.toLocaleString('tr-TR')} TL` : '+20.786 TL';
-        const totalProfit = stats ? `+${stats.netProfit.toLocaleString('tr-TR')} TL` : '+41.615 TL';
+        const nov = stats?.monthByMonth?.find(m => m.monthKey === '2026-11');
+        const novProfitVal = nov ? nov.netProfit : (stats?.netProfit || 0);
+        const novProfit = novProfitVal > 0 ? `+${novProfitVal.toLocaleString('tr-TR')} TL` : (novProfitVal < 0 ? `-${Math.abs(novProfitVal).toLocaleString('tr-TR')} TL` : '0 TL');
+        const totalProfitVal = stats?.netProfit || 0;
+        const totalProfit = totalProfitVal > 0 ? `+${totalProfitVal.toLocaleString('tr-TR')} TL` : (totalProfitVal < 0 ? `-${Math.abs(totalProfitVal).toLocaleString('tr-TR')} TL` : '0 TL');
+        const totalRoi = stats?.roi || 0;
 
         return `
         <!-- 💰 AYLIK FİNANSAL KÂR ÖZETİ & YENİ 50-250 TL KUPON BAŞLANGIÇ ÇUBUĞU -->
@@ -1253,15 +1268,15 @@ const CouponPanel = {
                 <span style="font-size:1.5rem;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;">💰</span>
                 <div>
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <strong style="color:#ffffff;font-size:0.92rem;">Aylık Finansal Kâr Takibi:</strong>
+                        <strong style="color:#ffffff;font-size:0.92rem;">Finansal Kasa Takibi (01 Kasım 2026'dan İtibaren):</strong>
                         <span style="background:rgba(16,185,129,0.15);color:#10B981;border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;">
-                            Ekim 2026: ${octProfit}
-                        </span>
-                        <span style="background:rgba(56,189,248,0.12);color:#38BDF8;border:1px solid rgba(56,189,248,0.25);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;">
-                            Eylül 2026: ${sepProfit}
+                            Kasım 2026: ${novProfit}
                         </span>
                         <span style="background:rgba(0,240,255,0.15);color:#00F0FF;border:1px solid rgba(0,240,255,0.3);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:900;">
-                            1 Aylık Net: ${totalProfit}
+                            Net Kâr: ${totalProfit} (ROI: %${totalRoi})
+                        </span>
+                        <span style="background:rgba(59,130,246,0.15);color:#60A5FA;border:1px solid rgba(59,130,246,0.3);padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;">
+                            ✨ Kasa Sıfırlandı (500 TL Başlangıç)
                         </span>
                     </div>
                     <div style="font-size:0.76rem;color:var(--text-muted);margin-top:3px;">
@@ -1353,7 +1368,7 @@ const CouponPanel = {
         const hasUefaCoupon = currentCoupons.some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
         const defaultMode = (new Date().getDay() === 0 || new Date().getDay() === 6) ? 8 : (hasUefaCoupon ? 6 : 5);
         const currentMode = this.assistantCouponCount || defaultMode;
-        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : (currentMode === 6 ? 300 : 250));
+        const baseAmount = this.assistantInputAmount || 500;
         const alloc = window.CouponEngine?.calculateAssistantStakeAllocation
             ? window.CouponEngine.calculateAssistantStakeAllocation(baseAmount, true, currentMode, 50)
             : null;
@@ -1982,7 +1997,14 @@ const CouponPanel = {
         // Günlük Analiz Edilen Maçlar Modalını Aç Butonu
         document.getElementById('btn-open-daily-analysis-modal')?.addEventListener('click', () => {
             const modal = document.getElementById('modal-daily-analysis-matches');
-            if (modal) modal.classList.add('active');
+            if (modal) {
+                const modalBody = document.getElementById('modal-daily-analysis-body');
+                if (modalBody) {
+                    const stats = window.MatchTracker?.getDailyAnalysisStats(this.selectedAnalysisDate);
+                    modalBody.innerHTML = this.renderDailyAnalysisModalBody(stats, this.selectedAnalysisDate, this.modalActiveFilter || 'all');
+                }
+                modal.classList.add('active');
+            }
         });
 
         // Modal Kapatma (Analiz Karnesi)
@@ -2321,7 +2343,7 @@ const CouponPanel = {
         const hasUefa = (this.lastDisplayedCoupons || []).some(c => (c.id && c.id.includes('uefa')) || (c.title && /uefa|şampiyonlar|champions/i.test(c.title)));
         const defaultMode = isWeekend ? 8 : (hasUefa ? 6 : 5);
         const currentMode = this.assistantCouponCount || defaultMode;
-        const baseAmount = this.assistantInputAmount || (currentMode === 8 ? 400 : (currentMode === 6 ? 300 : 250));
+        const baseAmount = this.assistantInputAmount || 500;
         const isWinningsMode = this.assistantIsWinnings !== undefined ? this.assistantIsWinnings : true;
 
         const alloc = window.CouponEngine?.calculateAssistantStakeAllocation

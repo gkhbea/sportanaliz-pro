@@ -7,8 +7,8 @@ const UserProfileService = {
 
     defaultProfile: {
         userName: 'Pro Bahisçi',
-        startingBankroll: 1000,       // Başlangıç Kasası (TL)
-        currentBankroll: 1000,        // Güncel Kasa (TL)
+        startingBankroll: 500,       // Başlangıç Kasası (TL)
+        currentBankroll: 500,        // Güncel Kasa (TL)
         stakeStrategy: 'fixed',       // 'fixed' (Sabit TL), 'percentage' (% Kasa), 'kelly' (Kelly Kriteri)
         fixedStakeAmount: 250,        // Banko kupon başlangıç tutarı (250 TL)
         minStakeAmount: 50,           // Sürpriz/Bomba kupon başlangıç tutarı (50 TL)
@@ -17,7 +17,7 @@ const UserProfileService = {
         weeklyProfitGoal: 2500,       // Haftalık kâr hedefi (TL)
         stopLossDaily: 500,           // Günlük stop-loss limiti (TL)
         currency: 'TL',
-        createdAt: '2026-09-09'
+        createdAt: '2026-11-01'
     },
 
     /**
@@ -56,7 +56,7 @@ const UserProfileService = {
      */
     getBankrollSummary(systemNetProfit = 0) {
         const profile = this.getProfile();
-        const start = parseFloat(profile.startingBankroll) || 1000;
+        const start = parseFloat(profile.startingBankroll) || 500;
         const net = parseFloat(systemNetProfit) || 0;
         const currentBank = start + net;
         const growthPercent = start > 0 ? ((net / start) * 100).toFixed(1) : '0.0';
@@ -148,12 +148,15 @@ const UserProfileService = {
      */
     resetBankroll() {
         return this.saveProfile({
-            startingBankroll: 1000,
-            currentBankroll: 1000
+            startingBankroll: 500,
+            currentBankroll: 500
         });
     }
 };
 
 if (typeof window !== 'undefined') {
     window.UserProfileService = UserProfileService;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UserProfileService;
 }

@@ -15,7 +15,7 @@ const ProfitLossPanel = {
         let stats = null;
         try {
             stats = window.MatchTracker
-                ? window.MatchTracker.calculateCumulativeCouponStats('2026-09-09')
+                ? window.MatchTracker.calculateCumulativeCouponStats('2026-11-01')
                 : null;
         } catch(e) {
             console.error('ProfitLossPanel render hatasi:', e);
@@ -214,7 +214,7 @@ const ProfitLossPanel = {
         let stats = null;
         try {
             stats = window.MatchTracker
-                ? window.MatchTracker.calculateCumulativeCouponStats('2026-09-09')
+                ? window.MatchTracker.calculateCumulativeCouponStats('2026-11-01')
                 : null;
         } catch(e) {
             console.error(e);

@@ -75,30 +75,19 @@ html {
 
 body {
     font-family: var(--font-main);
-    background: var(--gradient-main);
+    background-color: #0a0b14;
+    background-image: var(--gradient-main);
+    background-attachment: fixed;
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.6;
 }
 
-/* Sayfa hızlı kaydırılırken hover hesaplamalarını geçici durdurarak 60+ FPS garantisi */
-body.is-scrolling * {
-    pointer-events: none !important;
-}
-
-/* Donanım ivmelendirme ve sanal görünürlük (Ekran dışı elemanları GPU'da render etmeyerek RAM ve CPU tasarrufu sağlar) */
-.match-card,
-.live-match-card,
-.bet-item-row,
-.coupon-card,
-.virtual-coupon-card,
-.daily-analysis-card,
-.all-stats-reports-container > div {
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 85px;
-    contain: layout style paint;
-    transform: translateZ(0);
+/* Akıcı, hafif ve 60+ FPS doğal kaydırma */
+html, body {
+    scroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Custom Scrollbar */
@@ -774,8 +763,8 @@ body:not(:has(#disclaimer-banner)) .main-content {
 }
 
 .matches-list {
-    max-height: 600px;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 /* ---- Match Card ---- */

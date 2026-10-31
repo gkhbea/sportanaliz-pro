@@ -3499,7 +3499,454 @@ const HistoricalCouponsService = {
     },
 
     
-    _generateAuthentic2026_10_29Coupons(targetDate = '2026-10-31') {
+    
+    _generateAuthentic2026_10_31Coupons(targetDate = '2026-10-31') {
+        const yDate = targetDate || '2026-10-31';
+        const dFmt = '31 Ekim 2026';
+
+        // ==========================================
+        // 🌅 SABAH PICKS (00:00 - 12:00)
+        // ==========================================
+        const p_lagalaxy = this._createArchivedPick({
+            index: 1, iddaaCode: '3254908', homeTeam: "LA Galaxy", awayTeam: "Austin", league: "ABD Major Lig",
+            timeStr: '00:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (LA Galaxy Kazanır)', marketCode: 'MS1', odd: 1.31, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "LA Galaxy vs Austin · MS 1 (00:00 | Resmi İddaa Kod: 3254908)"
+        }, yDate, dFmt);
+
+        const p_lagalaxy_ov = this._createArchivedPick({
+            index: 2, iddaaCode: '3254908', homeTeam: "LA Galaxy", awayTeam: "Austin", league: "ABD Major Lig",
+            timeStr: '00:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.21, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "LA Galaxy vs Austin · 2.5 ÜST (00:00 | Resmi İddaa Kod: 3254908)"
+        }, yDate, dFmt);
+
+        const p_colon = this._createArchivedPick({
+            index: 3, iddaaCode: '3253923', homeTeam: "Colon", awayTeam: "Defensores B.", league: "Arjantin Primera Nacional",
+            timeStr: '00:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Colon Kazanır)', marketCode: 'MS1', odd: 1.38, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Colon vs Defensores B. · MS 1 (00:00 | Resmi İddaa Kod: 3253923)"
+        }, yDate, dFmt);
+
+        const p_colon_ov = this._createArchivedPick({
+            index: 4, iddaaCode: '3253923', homeTeam: "Colon", awayTeam: "Defensores B.", league: "Arjantin Primera Nacional",
+            timeStr: '00:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.39, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Colon vs Defensores B. · 1.5 ÜST (00:00 | Resmi İddaa Kod: 3253923)"
+        }, yDate, dFmt);
+
+        const p_cacahuatique = this._createArchivedPick({
+            index: 5, iddaaCode: '3254133', homeTeam: "C.D. Cacahuatique", awayTeam: "CD Inca", league: "El Salvador Primera Division",
+            timeStr: '00:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Cacahuatique Kazanır)', marketCode: 'MS1', odd: 1.37, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "C.D. Cacahuatique vs CD Inca · MS 1 (00:00 | Resmi İddaa Kod: 3254133)"
+        }, yDate, dFmt);
+
+        const p_cacahuatique_cs = this._createArchivedPick({
+            index: 6, iddaaCode: '3254133', homeTeam: "C.D. Cacahuatique", awayTeam: "CD Inca", league: "El Salvador Primera Division",
+            timeStr: '00:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.15, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "C.D. Cacahuatique vs CD Inca · 1-X Çifte Şans (00:00 | Resmi İddaa Kod: 3254133)"
+        }, yDate, dFmt);
+
+        const p_nautico = this._createArchivedPick({
+            index: 7, iddaaCode: '3254694', homeTeam: "Nautico PE", awayTeam: "Avai SC", league: "Brezilya Serie B",
+            timeStr: '01:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Nautico Kaybetmez)', marketCode: 'CS1X', odd: 1.20, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Nautico PE vs Avai SC · 1-X Çifte Şans (01:30 | Resmi İddaa Kod: 3254694)"
+        }, yDate, dFmt);
+
+        const p_nautico_ov = this._createArchivedPick({
+            index: 8, iddaaCode: '3254694', homeTeam: "Nautico PE", awayTeam: "Avai SC", league: "Brezilya Serie B",
+            timeStr: '01:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.13, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Nautico PE vs Avai SC · 1.5 ÜST (01:30 | Resmi İddaa Kod: 3254694)"
+        }, yDate, dFmt);
+
+        const p_vsarsfield = this._createArchivedPick({
+            index: 9, iddaaCode: '3259229', homeTeam: "V. Sarsfield", awayTeam: "San Lorenzo", league: "Arjantin Primera LPF",
+            timeStr: '01:15', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.18, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "V. Sarsfield vs San Lorenzo · 1-X Çifte Şans (01:15 | Resmi İddaa Kod: 3259229)"
+        }, yDate, dFmt);
+
+        const p_vsarsfield_ov = this._createArchivedPick({
+            index: 10, iddaaCode: '3259229', homeTeam: "V. Sarsfield", awayTeam: "San Lorenzo", league: "Arjantin Primera LPF",
+            timeStr: '01:15', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.28, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "V. Sarsfield vs San Lorenzo · 1.5 ÜST (01:15 | Resmi İddaa Kod: 3259229)"
+        }, yDate, dFmt);
+
+        const p_pachuca = this._createArchivedPick({
+            index: 11, iddaaCode: '3259761', homeTeam: "Pachuca", awayTeam: "Tigres", league: "Meksika Premier Ligi",
+            timeStr: '02:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.22, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Pachuca vs Tigres · 1-X Çifte Şans (02:00 | Resmi İddaa Kod: 3259761)"
+        }, yDate, dFmt);
+
+        const p_pachuca_ov = this._createArchivedPick({
+            index: 12, iddaaCode: '3259761', homeTeam: "Pachuca", awayTeam: "Tigres", league: "Meksika Premier Ligi",
+            timeStr: '02:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.07, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Pachuca vs Tigres · 1.5 ÜST (02:00 | Resmi İddaa Kod: 3259761)"
+        }, yDate, dFmt);
+
+        const p_balompie = this._createArchivedPick({
+            index: 13, iddaaCode: '3304754', homeTeam: "Academia del Balompie", awayTeam: "S. A. Bulo Bulo", league: "Bolivya Profesyonel Ligi",
+            timeStr: '00:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Balompie Kazanır)', marketCode: 'MS1', odd: 1.46, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Academia del Balompie vs S. A. Bulo Bulo · MS 1 (00:15 | Resmi İddaa Kod: 3304754)"
+        }, yDate, dFmt);
+
+        const p_espana = this._createArchivedPick({
+            index: 14, iddaaCode: '3326236', homeTeam: "Real CD Espana", awayTeam: "Juticalpa", league: "Honduras Ulusal Lig",
+            timeStr: '02:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Espana Kazanır)', marketCode: 'MS1', odd: 1.11, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Real CD Espana vs Juticalpa · MS 1 (02:15 | Resmi İddaa Kod: 3326236)"
+        }, yDate, dFmt);
+
+        const p_caracas = this._createArchivedPick({
+            index: 15, iddaaCode: '3335642', homeTeam: "Caracas", awayTeam: "Monagas SC", league: "Venezuela Premier Lig",
+            timeStr: '02:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.21, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Caracas vs Monagas SC · 1-X Çifte Şans (02:30 | Resmi İddaa Kod: 3335642)"
+        }, yDate, dFmt);
+
+        // 🌅 5 Sabah Kuponu
+        const c_morn_1 = this._createArchivedCoupon({
+            id: 'c_morn_1_' + yDate, title: '🛡️ Sabah Garantör Banko / Kasa Katlama Kuponu',
+            subtitle: 'LA Galaxy MS 1 (1.31), Colon MS 1 (1.38) ve Real CD Espana MS 1 (1.11)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 300, confidence: 96,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
+        }, [p_lagalaxy, p_colon, p_espana], dFmt);
+
+        const c_morn_2 = this._createArchivedCoupon({
+            id: 'c_morn_2_' + yDate, title: '⚡ Sabah İdeal Sistem Kuponu (Editör Seçimi)',
+            subtitle: 'Cacahuatique MS 1 (1.37), Nautico 1-X (1.20) ve V. Sarsfield 1-X (1.18)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '⚡', themeColor: '#00F0FF', recommendedStake: 250, confidence: 95,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
+        }, [p_cacahuatique, p_nautico, p_vsarsfield], dFmt);
+
+        const c_morn_3 = this._createArchivedCoupon({
+            id: 'c_morn_3_' + yDate, title: '⚽ Sabah Amerika Gol Kuponu',
+            subtitle: 'LA Galaxy 2.5Ü (1.21), Colon 1.5Ü (1.39) ve Pachuca 1.5Ü (1.07)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '⚽', themeColor: '#EC4899', recommendedStake: 200, confidence: 95,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
+        }, [p_lagalaxy_ov, p_colon_ov, p_pachuca_ov], dFmt);
+
+        const c_morn_4 = this._createArchivedCoupon({
+            id: 'c_morn_4_' + yDate, title: '🎯 Sabah Çifte Şans & Sıfır Risk Sigortalı Kupon',
+            subtitle: 'Cacahuatique 1-X (1.15), Pachuca 1-X (1.22) ve Caracas 1-X (1.21)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 300, confidence: 96,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
+        }, [p_cacahuatique_cs, p_pachuca, p_caracas], dFmt);
+
+        const c_morn_5 = this._createArchivedCoupon({
+            id: 'c_morn_5_' + yDate, title: '💎 Sabah Değer & Dinamik İlk Yarı Kombinesi',
+            subtitle: 'Balompie MS 1 (1.46), Nautico 1.5Ü (1.13) ve V. Sarsfield 1.5Ü (1.28)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'value', icon: '💎', themeColor: '#F59E0B', recommendedStake: 200, confidence: 94,
+            timeSlot: 'morning', sessionName: 'Sabah Kuponu'
+        }, [p_balompie, p_nautico_ov, p_vsarsfield_ov], dFmt);
+
+        // ==========================================
+        // ☀️ ÖĞLEN PICKS (12:00 - 18:00)
+        // ==========================================
+        const p_southampton = this._createArchivedPick({
+            index: 16, iddaaCode: '3252916', homeTeam: "Southampton", awayTeam: "QPR", league: "İngiltere Championship",
+            timeStr: '18:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Southampton Kaybetmez)', marketCode: 'CS1X', odd: 1.17, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Southampton vs QPR · 1-X Çifte Şans (18:00 | Resmi İddaa Kod: 3252916)"
+        }, yDate, dFmt);
+
+        const p_southampton_ov = this._createArchivedPick({
+            index: 17, iddaaCode: '3252916', homeTeam: "Southampton", awayTeam: "QPR", league: "İngiltere Championship",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.43, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Southampton vs QPR · 2.5 ÜST (18:00 | Resmi İddaa Kod: 3252916)"
+        }, yDate, dFmt);
+
+        const p_salford = this._createArchivedPick({
+            index: 18, iddaaCode: '3252784', homeTeam: "Salford City", awayTeam: "Exeter City", league: "İngiltere 2. Lig",
+            timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Salford City Kazanır)', marketCode: 'MS1', odd: 1.26, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Salford City vs Exeter City · MS 1 (18:00 | Resmi İddaa Kod: 3252784)"
+        }, yDate, dFmt);
+
+        const p_salford_ov = this._createArchivedPick({
+            index: 19, iddaaCode: '3252784', homeTeam: "Salford City", awayTeam: "Exeter City", league: "İngiltere 2. Lig",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.08, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Salford City vs Exeter City · 1.5 ÜST (18:00 | Resmi İddaa Kod: 3252784)"
+        }, yDate, dFmt);
+
+        const p_ballinamallard = this._createArchivedPick({
+            index: 20, iddaaCode: '3253049', homeTeam: "Ballinamallard Utd", awayTeam: "Armagh City", league: "Kuzey İrlanda Championship",
+            timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Ballinamallard Kazanır)', marketCode: 'MS1', odd: 1.25, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Ballinamallard Utd vs Armagh City · MS 1 (18:00 | Resmi İddaa Kod: 3253049)"
+        }, yDate, dFmt);
+
+        const p_ballinamallard_ov = this._createArchivedPick({
+            index: 21, iddaaCode: '3253049', homeTeam: "Ballinamallard Utd", awayTeam: "Armagh City", league: "Kuzey İrlanda Championship",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.37, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Ballinamallard Utd vs Armagh City · 2.5 ÜST (18:00 | Resmi İddaa Kod: 3253049)"
+        }, yDate, dFmt);
+
+        const p_swindon = this._createArchivedPick({
+            index: 22, iddaaCode: '3252737', homeTeam: "Swindon Town", awayTeam: "Rotherham", league: "İngiltere 2. Lig",
+            timeStr: '18:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.16, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Swindon Town vs Rotherham · 1-X Çifte Şans (18:00 | Resmi İddaa Kod: 3252737)"
+        }, yDate, dFmt);
+
+        const p_swindon_ov = this._createArchivedPick({
+            index: 23, iddaaCode: '3252737', homeTeam: "Swindon Town", awayTeam: "Rotherham", league: "İngiltere 2. Lig",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.06, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Swindon Town vs Rotherham · 1.5 ÜST (18:00 | Resmi İddaa Kod: 3252737)"
+        }, yDate, dFmt);
+
+        const p_stirling = this._createArchivedPick({
+            index: 24, iddaaCode: '3252893', homeTeam: "Stirling Alb.", awayTeam: "Forfar", league: "İskoçya 2. Lig",
+            timeStr: '18:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.12, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Stirling Alb. vs Forfar · 1-X Çifte Şans (18:00 | Resmi İddaa Kod: 3252893)"
+        }, yDate, dFmt);
+
+        const p_stirling_ms = this._createArchivedPick({
+            index: 25, iddaaCode: '3252893', homeTeam: "Stirling Alb.", awayTeam: "Forfar", league: "İskoçya 2. Lig",
+            timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Stirling Kazanır)', marketCode: 'MS1', odd: 1.69, confidence: 91,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Stirling Alb. vs Forfar · MS 1 (18:00 | Resmi İddaa Kod: 3252893)"
+        }, yDate, dFmt);
+
+        const p_fortuna = this._createArchivedPick({
+            index: 26, iddaaCode: '3252965', homeTeam: "Fortuna Köln", awayTeam: "Würzburg", league: "Almanya 3. Lig",
+            timeStr: '18:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.13, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Fortuna Köln vs Würzburg · 1-X Çifte Şans (18:30 | Resmi İddaa Kod: 3252965)"
+        }, yDate, dFmt);
+
+        const p_maribor = this._createArchivedPick({
+            index: 27, iddaaCode: '3252764', homeTeam: "NK Maribor", awayTeam: "O. Ljubljana", league: "Slovenya PrvaLiga",
+            timeStr: '18:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.18, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "NK Maribor vs O. Ljubljana · 1-X Çifte Şans (18:00 | Resmi İddaa Kod: 3252764)"
+        }, yDate, dFmt);
+
+        const p_leiston = this._createArchivedPick({
+            index: 28, iddaaCode: '3252752', homeTeam: "Leiston", awayTeam: "Alvechurch", league: "İngiltere Güney Ligi, Merkez",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.49, confidence: 92,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Leiston vs Alvechurch · 2.5 ÜST (18:00 | Resmi İddaa Kod: 3252752)"
+        }, yDate, dFmt);
+
+        const p_abo_qair = this._createArchivedPick({
+            index: 29, iddaaCode: '3253027', homeTeam: "ABO Qair Semads", awayTeam: "Ghazl El Mahallah", league: "Mısır Premier Lig",
+            timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.41, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "ABO Qair Semads vs Ghazl El Mahallah · 1.5 ÜST (18:00 | Resmi İddaa Kod: 3253027)"
+        }, yDate, dFmt);
+
+        const p_padova = this._createArchivedPick({
+            index: 30, iddaaCode: '3253035', homeTeam: "Catanzaro", awayTeam: "Padova", league: "İtalya Serie B",
+            timeStr: '19:15', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.09, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Catanzaro vs Padova · 1.5 ÜST (19:15 | Resmi İddaa Kod: 3253035)"
+        }, yDate, dFmt);
+
+        // ☀️ 5 Öğlen Kuponu
+        const c_noon_1 = this._createArchivedCoupon({
+            id: 'c_noon_1_' + yDate, title: '🛡️ Öğlen Garantör Banko / Kasa Katlama Kuponu',
+            subtitle: 'Salford City MS 1 (1.26), Ballinamallard MS 1 (1.25) ve Southampton 1-X (1.17)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 350, confidence: 96,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_salford, p_ballinamallard, p_southampton], dFmt);
+
+        const c_noon_2 = this._createArchivedCoupon({
+            id: 'c_noon_2_' + yDate, title: '⚡ Öğlen İdeal Sistem Kuponu (Editör Seçimi)',
+            subtitle: 'Stirling Alb. MS 1 (1.69), Swindon 1-X (1.16) ve Fortuna Köln 1-X (1.13)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '⚡', themeColor: '#6366F1', recommendedStake: 250, confidence: 94,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_stirling_ms, p_swindon, p_fortuna], dFmt);
+
+        const c_noon_3 = this._createArchivedCoupon({
+            id: 'c_noon_3_' + yDate, title: '⚽ Öğlen Gol Yağmuru Kuponu',
+            subtitle: 'Southampton 2.5Ü (1.43), Ballinamallard 2.5Ü (1.37) ve Leiston 2.5Ü (1.49)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '⚽', themeColor: '#EC4899', recommendedStake: 200, confidence: 93,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_southampton_ov, p_ballinamallard_ov, p_leiston], dFmt);
+
+        const c_noon_4 = this._createArchivedCoupon({
+            id: 'c_noon_4_' + yDate, title: '🎯 Öğlen Çifte Şans & İdeal Kombine',
+            subtitle: 'Stirling Alb. 1-X (1.12), Maribor 1-X (1.18) ve Southampton 1-X (1.17)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 250, confidence: 96,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_stirling, p_maribor, p_southampton], dFmt);
+
+        const c_noon_5 = this._createArchivedCoupon({
+            id: 'c_noon_5_' + yDate, title: '🌟 Öğlen VIP İlk Yarı & Gol Fırsatları',
+            subtitle: 'Salford City 1.5Ü (1.08), Swindon 1.5Ü (1.06) ve ABO Qair 1.5Ü (1.41)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'value', icon: '🌟', themeColor: '#F59E0B', recommendedStake: 200, confidence: 95,
+            timeSlot: 'noon', sessionName: 'Öğlen Kuponu'
+        }, [p_salford_ov, p_swindon_ov, p_abo_qair], dFmt);
+
+        // ==========================================
+        // 🌙 AKŞAM PICKS (18:00 - 23:59)
+        // ==========================================
+        const p_stgallen = this._createArchivedPick({
+            index: 31, iddaaCode: '3252745', homeTeam: "St. Gallen", awayTeam: "Servette", league: "İsviçre Süper Lig",
+            timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (St. Gallen Kazanır)', marketCode: 'MS1', odd: 1.60, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "St. Gallen vs Servette · MS 1 (20:00 | Resmi İddaa Kod: 3252745)"
+        }, yDate, dFmt);
+
+        const p_stgallen_cs = this._createArchivedPick({
+            index: 32, iddaaCode: '3252745', homeTeam: "St. Gallen", awayTeam: "Servette", league: "İsviçre Süper Lig",
+            timeStr: '20:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.11, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "St. Gallen vs Servette · 1-X Çifte Şans (20:00 | Resmi İddaa Kod: 3252745)"
+        }, yDate, dFmt);
+
+        const p_stellenbosch = this._createArchivedPick({
+            index: 33, iddaaCode: '3252548', homeTeam: "Stellenbosch", awayTeam: "Chippa Utd", league: "Güney Afrika Premier Lig",
+            timeStr: '19:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Stellenbosch Kazanır)', marketCode: 'MS1', odd: 1.58, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Stellenbosch vs Chippa Utd · MS 1 (19:00 | Resmi İddaa Kod: 3252548)"
+        }, yDate, dFmt);
+
+        const p_stellenbosch_cs = this._createArchivedPick({
+            index: 34, iddaaCode: '3252548', homeTeam: "Stellenbosch", awayTeam: "Chippa Utd", league: "Güney Afrika Premier Lig",
+            timeStr: '19:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: 1.15, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Stellenbosch vs Chippa Utd · 1-X Çifte Şans (19:00 | Resmi İddaa Kod: 3252548)"
+        }, yDate, dFmt);
+
+        const p_newtown = this._createArchivedPick({
+            index: 35, iddaaCode: '3252787', homeTeam: "Newtown", awayTeam: "Buckley Town", league: "Galler Championship, Kuzey",
+            timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Newtown Kazanır)', marketCode: 'MS1', odd: 1.26, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Newtown vs Buckley Town · MS 1 (22:45 | Resmi İddaa Kod: 3252787)"
+        }, yDate, dFmt);
+
+        const p_charlotte = this._createArchivedPick({
+            index: 36, iddaaCode: '3252800', homeTeam: "Charlotte", awayTeam: "Orlando City", league: "ABD Major Lig",
+            timeStr: '20:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Charlotte Kazanır)', marketCode: 'MS1', odd: 1.65, confidence: 93,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Charlotte vs Orlando City · MS 1 (20:00 | Resmi İddaa Kod: 3252800)"
+        }, yDate, dFmt);
+
+        const p_charlotte_ov = this._createArchivedPick({
+            index: 37, iddaaCode: '3252800', homeTeam: "Charlotte", awayTeam: "Orlando City", league: "ABD Major Lig",
+            timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.10, confidence: 99,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Charlotte vs Orlando City · 2.5 ÜST (20:00 | Resmi İddaa Kod: 3252800)"
+        }, yDate, dFmt);
+
+        const p_tns = this._createArchivedPick({
+            index: 38, iddaaCode: '3252844', homeTeam: "TNS", awayTeam: "Connah's", league: "Galler Premier Lig",
+            timeStr: '20:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (TNS Kazanır)', marketCode: 'MS1', odd: 1.18, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "TNS vs Connah's · MS 1 (20:15 | Resmi İddaa Kod: 3252844)"
+        }, yDate, dFmt);
+
+        const p_rangers = this._createArchivedPick({
+            index: 39, iddaaCode: '3252941', homeTeam: "Rangers", awayTeam: "Aberdeen", league: "İskoçya Lig Kupası",
+            timeStr: '20:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Rangers Kazanır)', marketCode: 'MS1', odd: 1.25, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Rangers vs Aberdeen · MS 1 (20:30 | Resmi İddaa Kod: 3252941)"
+        }, yDate, dFmt);
+
+        const p_manisa = this._createArchivedPick({
+            index: 40, iddaaCode: '3252999', homeTeam: "Manisa FK", awayTeam: "Batman Petrol", league: "Türkiye 1. Lig",
+            timeStr: '19:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.37, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Manisa FK vs Batman Petrol · 2.5 ÜST (19:00 | Resmi İddaa Kod: 3252999)"
+        }, yDate, dFmt);
+
+        const p_coritiba = this._createArchivedPick({
+            index: 41, iddaaCode: '3246145', homeTeam: "Coritiba", awayTeam: "Vitoria BA", league: "Brezilya Serie A",
+            timeStr: '22:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Coritiba Kaybetmez)', marketCode: 'CS1X', odd: 1.20, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Coritiba vs Vitoria BA · 1-X Çifte Şans (22:00 | Resmi İddaa Kod: 3246145)"
+        }, yDate, dFmt);
+
+        const p_coritiba_ms = this._createArchivedPick({
+            index: 42, iddaaCode: '3246145', homeTeam: "Coritiba", awayTeam: "Vitoria BA", league: "Brezilya Serie A",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Coritiba Kazanır)', marketCode: 'MS1', odd: 2.00, confidence: 90,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Coritiba vs Vitoria BA · MS 1 (22:00 | Resmi İddaa Kod: 3246145)"
+        }, yDate, dFmt);
+
+        const p_cska_sofya = this._createArchivedPick({
+            index: 43, iddaaCode: '3252592', homeTeam: "CSKA Sofya", awayTeam: "Slavya Sofya", league: "Bulgaristan Parva Ligi",
+            timeStr: '20:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.35, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "CSKA Sofya vs Slavya Sofya · 2.5 ÜST (20:30 | Resmi İddaa Kod: 3252592)"
+        }, yDate, dFmt);
+
+        const p_cambuur = this._createArchivedPick({
+            index: 44, iddaaCode: '3252863', homeTeam: "SC Cambuur", awayTeam: "Go Ahead Eagles", league: "Hollanda Eredivisie",
+            timeStr: '23:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: 1.28, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "SC Cambuur vs Go Ahead Eagles · 2.5 ÜST (23:00 | Resmi İddaa Kod: 3252863)"
+        }, yDate, dFmt);
+
+        const p_kruger = this._createArchivedPick({
+            index: 45, iddaaCode: '3252878', homeTeam: "Kruger Utd", awayTeam: "Richards Bay", league: "Güney Afrika Premier Lig",
+            timeStr: '21:15', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.26, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Kruger Utd vs Richards Bay · 1.5 ÜST (21:15 | Resmi İddaa Kod: 3252878)"
+        }, yDate, dFmt);
+
+        // 🌙 5 Akşam Kuponu
+        const c_eve_1 = this._createArchivedCoupon({
+            id: 'c_eve_1_' + yDate, title: '🏆 Akşam UEFA & Ada Ligi Özel Kombinesi',
+            subtitle: 'St. Gallen MS 1 (1.60), Stellenbosch MS 1 (1.58) ve Newtown MS 1 (1.26)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'safe', icon: '🏆', themeColor: '#3B82F6', recommendedStake: 250, confidence: 95,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_stgallen, p_stellenbosch, p_newtown], dFmt);
+
+        const c_eve_2 = this._createArchivedCoupon({
+            id: 'c_eve_2_' + yDate, title: '🛡️ Akşam Garantör Banko / Kasa Katlama Kuponu',
+            subtitle: 'TNS MS 1 (1.18), Rangers MS 1 (1.25) ve St. Gallen 1-X (1.11)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'safe', icon: '🛡️', themeColor: '#10B981', recommendedStake: 300, confidence: 97,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_tns, p_rangers, p_stgallen_cs], dFmt);
+
+        const c_eve_3 = this._createArchivedCoupon({
+            id: 'c_eve_3_' + yDate, title: '⚽ Akşam Gol Krallığı & Kupa Fırtınası',
+            subtitle: 'Manisa FK 2.5Ü (1.37), CSKA Sofya 2.5Ü (1.35) ve SC Cambuur 2.5Ü (1.28)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '⚽', themeColor: '#EC4899', recommendedStake: 200, confidence: 94,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_manisa, p_cska_sofya, p_cambuur], dFmt);
+
+        const c_eve_4 = this._createArchivedCoupon({
+            id: 'c_eve_4_' + yDate, title: '🎯 Akşam Çifte Şans & Sıfır Risk Sigortalı Kupon',
+            subtitle: 'Stellenbosch 1-X (1.15), Coritiba 1-X (1.20) ve Kruger Utd 1.5Ü (1.26)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '🎯', themeColor: '#8B5CF6', recommendedStake: 250, confidence: 96,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_stellenbosch_cs, p_coritiba, p_kruger], dFmt);
+
+        const c_eve_5 = this._createArchivedCoupon({
+            id: 'c_eve_5_' + yDate, title: '⏱️ Akşam İlk Yarı Gol & Değer Kombinesi',
+            subtitle: 'Charlotte MS 1 (1.65), Coritiba MS 1 (2.00) ve Charlotte 2.5Ü (1.10)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'value', icon: '⏱️', themeColor: '#F59E0B', recommendedStake: 200, confidence: 93,
+            timeSlot: 'evening', sessionName: 'Akşam Kuponu'
+        }, [p_charlotte, p_coritiba_ms, p_charlotte_ov], dFmt);
+
+        const dailyCoupons = [
+            c_morn_1, c_morn_2, c_morn_3, c_morn_4, c_morn_5,
+            c_noon_1, c_noon_2, c_noon_3, c_noon_4, c_noon_5,
+            c_eve_1, c_eve_2, c_eve_3, c_eve_4, c_eve_5
+        ];
+
+        return { coupons: dailyCoupons, euroCoupons: [] };
+    },
+    
+
+    _generateAuthentic2026_10_29Coupons(targetDate = '2026-10-29') {
         const yDate = targetDate || '2026-10-31';
         let dFmt = '31 Ekim 2026';
         if (typeof yDate === 'string' && yDate.includes('-')) {
@@ -5245,7 +5692,7 @@ const HistoricalCouponsService = {
         return { coupons: [c1, c2, c3, c4, c5], euroCoupons: [] };
     },
 
-    getAllCouponSets(startDate) {
+    getAllCouponSets(startDate = '2026-11-01') {
         const days = [
             {
                 date: '2026-09-09',
@@ -5552,15 +5999,15 @@ const HistoricalCouponsService = {
                 date: '2026-10-31',
                 dateFormatted: '31 Ekim 2026',
                 dayName: 'Cumartesi',
-                concept: "Resmi Nesine & İddaa Cumartesi Bülteni (Günün 15 Özel Kuponu: Sabah 5, Öğlen 5, Akşam 5 - 1261 Maç)",
-                generator: () => this._generateAuthentic2026_10_29Coupons('2026-10-31')
+                concept: "Resmi Nesine & İddaa Cumartesi Bülteni (Günün 15 Özel Kuponu: Sabah 5, Öğlen 5, Akşam 5 - 371 Maç)",
+                generator: () => this._generateAuthentic2026_10_31Coupons('2026-10-31')
             },
             {
                 date: '2026-11-01',
                 dateFormatted: '01 Kasım 2026',
                 dayName: 'Pazar',
                 concept: "Resmi Nesine & İddaa Pazar Bülteni (Günün 15 Özel Kuponu: Sabah 5, Öğlen 5, Akşam 5 - 559 Maç)",
-                generator: () => this._generateAuthentic2026_10_29Coupons('2026-11-01')
+                generator: () => this._generateAuthentic2026_10_31Coupons('2026-11-01')
             },
         ];
 
@@ -5568,7 +6015,9 @@ const HistoricalCouponsService = {
             return this._couponSetsCache[startDate || 'default'];
         }
 
-        const res = days.map(function(d) {
+        const targetStartDate = startDate || '2026-11-01';
+        const activeDays = targetStartDate ? days.filter(d => d.date >= targetStartDate) : days;
+        const res = activeDays.map(function(d) {
             const data = d.generator();
             const all = [].concat(data.coupons || [], data.euroCoupons || []);
             return {
@@ -5601,8 +6050,15 @@ const HistoricalCouponsService = {
                 dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
             }
         }
-        // Güncel Bülten & Bugün (28-31 Ekim 2026 ve sonrası) için doğrudan otantik 15 seans kuponlarını dön
-        if (dateStr >= '2026-10-28' || dateStr === '2026-10-31' || dateStr === '31 Ekim 2026' || dateStr === '2026-10-30' || dateStr === '30 Ekim 2026' || dateStr === '2026-10-29' || dateStr === '29 Ekim 2026' || dateStr === '2026-10-28' || dateStr === '28 Ekim 2026' || (typeof dateStr === 'string' && (dateStr.includes('Kasım 2026') || dateStr.includes('Ekim 2026')))) {
+        // Güncel Bülten & Bugün (31 Ekim 2026 ve sonrası) için doğrudan otantik 15 seans kuponlarını dön
+        if (dateStr >= '2026-10-31' || dateStr === '31 Ekim 2026' || (typeof dateStr === 'string' && (dateStr.includes('31 Ekim') || dateStr.includes('Kasım 2026')))) {
+            const todayData = this._generateAuthentic2026_10_31Coupons(dateStr);
+            if (todayData && Array.isArray(todayData.coupons) && todayData.coupons.length > 0) {
+                return todayData.coupons;
+            }
+        }
+        // 28-30 Ekim 2026
+        if (dateStr >= '2026-10-28' || dateStr === '2026-10-30' || dateStr === '30 Ekim 2026' || dateStr === '2026-10-29' || dateStr === '29 Ekim 2026' || dateStr === '2026-10-28' || dateStr === '28 Ekim 2026' || (typeof dateStr === 'string' && (dateStr.includes('29 Ekim') || dateStr.includes('30 Ekim')))) {
             const todayData = this._generateAuthentic2026_10_29Coupons(dateStr);
             if (todayData && Array.isArray(todayData.coupons) && todayData.coupons.length > 0) {
                 return todayData.coupons;
@@ -5669,7 +6125,7 @@ const HistoricalCouponsService = {
             return found.coupons;
         }
         // Güvenlik Ağı: Boş dönmek yerine güncel otantik 15 seans kuponunu sun (Sabah 5, Öğlen 5, Akşam 5)
-        const fallbackToday = this._generateAuthentic2026_10_29Coupons(dateStr || '2026-10-31');
+        const fallbackToday = this._generateAuthentic2026_10_31Coupons(dateStr || '2026-10-31');
         if (fallbackToday && fallbackToday.coupons && fallbackToday.coupons.length > 0) return fallbackToday.coupons;
         const fallback25 = this._generateAuthentic2026_10_25Coupons('2026-10-25');
         if (fallback25 && fallback25.coupons && fallback25.coupons.length > 0) return fallback25.coupons;

@@ -305,6 +305,43 @@ app.get('/api/proxy/nesine/events/:sportType', async (req, res) => {
     }
 });
 
+// ---- Nesine Hesaba Otomatik Kupon Kaydetme API ----
+const { spawn: spawnProc } = require('child_process');
+app.post('/api/nesine/auto-add-coupons', (req, res) => {
+    try {
+        const electronExe = path.join(__dirname, 'node_modules', 'electron', 'dist', 'electron.exe');
+        const scriptPath = path.join(__dirname, 'scripts', 'nesine_login_and_add_coupons.js');
+
+        const env = { ...process.env };
+        delete env.ELECTRON_RUN_AS_NODE;
+
+        if (fs.existsSync(electronExe)) {
+            const proc = spawnProc(electronExe, [scriptPath], {
+                env,
+                detached: true,
+                stdio: 'ignore'
+            });
+            proc.unref();
+        } else {
+            const proc = spawnProc('npx', ['electron', scriptPath], {
+                env,
+                detached: true,
+                stdio: 'ignore',
+                shell: true
+            });
+            proc.unref();
+        }
+
+        res.json({
+            success: true,
+            message: 'Nesine otomatik kupon kaydedici penceresi açıldı. Lütfen ekrandaki güvenlik kodunu giriniz.'
+        });
+    } catch (err) {
+        console.error('Nesine otomatik kupon başlatma hatası:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ---- Bilyoner Proxy ----
 app.get('/api/proxy/bilyoner/events', async (req, res) => {
     try {

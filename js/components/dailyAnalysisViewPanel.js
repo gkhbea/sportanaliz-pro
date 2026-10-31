@@ -275,7 +275,7 @@ const DailyAnalysisViewPanel = {
                     </div>
                 ` : `
                     <div style="display:flex;flex-direction:column;gap:10px;">
-                        ${displayedMatches.map((m, idx) => {
+                        ${displayedMatches.slice(0, this.displayLimit || 40).map((m, idx) => {
                             const isWon = m.status === 'WON';
                             const isLost = m.status === 'LOST';
                             const isLive = m.status === 'LIVE';
@@ -331,6 +331,13 @@ const DailyAnalysisViewPanel = {
                             `;
                         }).join('')}
                     </div>
+                    ${displayedMatches.length > (this.displayLimit || 40) ? `
+                        <div style="text-align:center;padding:24px 0 16px;">
+                            <button id="btn-load-more-daily" class="btn btn-outline" style="border-color:#00F0FF;color:#00F0FF;font-weight:800;padding:10px 28px;border-radius:20px;font-size:0.9rem;background:rgba(0,240,255,0.08);cursor:pointer;transition:all 0.2s;">
+                                🔽 Daha Fazla Analiz Göster (${Math.min(displayedMatches.length, (this.displayLimit || 40))} / ${displayedMatches.length})
+                            </button>
+                        </div>
+                    ` : ''}
                 `}
             </div>
         `;
@@ -344,6 +351,7 @@ const DailyAnalysisViewPanel = {
         document.getElementById('select-daily-view-date')?.addEventListener('change', (e) => {
             const newDate = e.target.value;
             this.selectedDate = newDate;
+            this.displayLimit = 40;
             if (app?.setUserSelectedDate) {
                 app.setUserSelectedDate(newDate);
             } else {
@@ -360,6 +368,7 @@ const DailyAnalysisViewPanel = {
                 const targetDate = btn.dataset.date;
                 if (targetDate) {
                     this.selectedDate = targetDate;
+                    this.displayLimit = 40;
                     if (app?.setUserSelectedDate) {
                         app.setUserSelectedDate(targetDate);
                     } else {
@@ -376,6 +385,7 @@ const DailyAnalysisViewPanel = {
         document.querySelectorAll('.btn-daily-filter').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.activeFilter = btn.dataset.filter || 'all';
+                this.displayLimit = 40;
                 this.refreshView(app);
             });
         });
@@ -383,6 +393,13 @@ const DailyAnalysisViewPanel = {
         // Arama Kutusu
         document.getElementById('input-daily-search')?.addEventListener('input', (e) => {
             this.searchQuery = e.target.value;
+            this.displayLimit = 40;
+            this.refreshView(app);
+        });
+
+        // Daha Fazla Analiz Göster Butonu
+        document.getElementById('btn-load-more-daily')?.addEventListener('click', () => {
+            this.displayLimit = (this.displayLimit || 40) + 40;
             this.refreshView(app);
         });
 
@@ -407,7 +424,7 @@ const DailyAnalysisViewPanel = {
         let stats = null;
         try {
             if (window.MatchTracker && typeof window.MatchTracker.calculateCumulativeCouponStats === 'function') {
-                stats = window.MatchTracker.calculateCumulativeCouponStats('2026-09-09');
+                stats = window.MatchTracker.calculateCumulativeCouponStats('2026-11-01');
             }
         } catch(e) {}
 
@@ -440,7 +457,7 @@ const DailyAnalysisViewPanel = {
 
                 <div style="display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(16,185,129,0.3);padding:8px 16px;border-radius:12px;">
                     <div>
-                        <span style="font-size:0.7rem;color:var(--text-muted);display:block;font-weight:700;">1 AYLIK TOPLAM NET KÂR</span>
+                        <span style="font-size:0.7rem;color:var(--text-muted);display:block;font-weight:700;">GÜNCEL TOPLAM NET KÂR</span>
                         <strong style="font-size:1.3rem;color:#10B981;font-weight:900;">+${totalProfit.toLocaleString('tr-TR')} TL</strong>
                     </div>
                     <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;">

@@ -115,7 +115,7 @@ const KasaManager = {
                 <form id="form-kasa-settings">
                     <div style="margin-bottom:16px;">
                         <label style="font-size:0.82rem;font-weight:600;color:#cbd5e1;display:block;margin-bottom:6px;">🏁 Başlangıç Kasa Bakiyesi (TL)</label>
-                        <input type="number" id="input-starting-bank" value="${profile.startingBankroll || 1000}" min="100" step="50" style="width:100%;padding:10px 14px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:0.95rem;font-weight:700;">
+                        <input type="number" id="input-starting-bank" value="${profile.startingBankroll || 500}" min="100" step="50" style="width:100%;padding:10px 14px;background:#1e293b;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:0.95rem;font-weight:700;">
                     </div>
 
                     <div style="margin-bottom:16px;">
@@ -185,7 +185,7 @@ const KasaManager = {
         if (form) {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const startingBank = parseFloat(document.getElementById('input-starting-bank').value) || 1000;
+                const startingBank = parseFloat(document.getElementById('input-starting-bank').value) || 500;
                 const strategy = document.getElementById('select-stake-strategy').value || 'fixed';
                 const fixedStake = parseFloat(document.getElementById('input-fixed-stake').value) || 100;
                 const pctStake = parseFloat(document.getElementById('input-percentage-stake').value) || 5;

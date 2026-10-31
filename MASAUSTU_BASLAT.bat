@@ -11,9 +11,16 @@ echo Başlatılıyor, lütfen bekleyin...
 
 cd /d "%~dp0"
 
+set ELECTRON_RUN_AS_NODE=
+set ELECTRON_NO_ATTACH_CONSOLE=
+
 if not exist "node_modules\" (
     echo [BILGI] Ilk calistirma icin paketler kontrol ediliyor...
     call npm install
 )
 
-call npx electron .
+if exist "node_modules\electron\dist\electron.exe" (
+    "node_modules\electron\dist\electron.exe" .
+) else (
+    call npx electron .
+)

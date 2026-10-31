@@ -303,14 +303,36 @@ const MatchTracker = {
     },
 
     /**
-     * Durumu localStorage'a kaydet
+     * Durumu localStorage'a kaydet (Debounced & Non-blocking)
      */
     save() {
+        if (this._saveTimer) return;
+        this._saveTimer = setTimeout(() => {
+            this._saveTimer = null;
+            try {
+                if (!this.data) return;
+                this.data.lastCalculatedAt = new Date().toISOString();
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+            } catch (e) {
+                console.warn('MatchTracker save hatası:', e);
+            }
+        }, 1500);
+    },
+
+    /**
+     * Anında senkron kaydet (sayfa kapanırken veya acil durumlarda)
+     */
+    saveImmediate() {
+        if (this._saveTimer) {
+            clearTimeout(this._saveTimer);
+            this._saveTimer = null;
+        }
         try {
+            if (!this.data) return;
             this.data.lastCalculatedAt = new Date().toISOString();
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
         } catch (e) {
-            console.warn('MatchTracker save hatası:', e);
+            console.warn('MatchTracker saveImmediate hatası:', e);
         }
     },
 
@@ -1321,16 +1343,17 @@ const MatchTracker = {
      * @param {string} startDate - Başlangıç tarihi ('2026-09-09')
      * @returns {Object} Kümülatif istatistik karnesi
      */
-    calculateCumulativeCouponStats(startDate = '2026-09-09') {
+    calculateCumulativeCouponStats(startDate = '2026-11-01') {
         if (this._cumulativeStatsCache && this._cumulativeStatsCache[startDate]) {
             return this._cumulativeStatsCache[startDate];
         }
 
-        const couponSets = (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof window.HistoricalCouponsService.getAllCouponSets === 'function')
+        const rawSets = (typeof window !== 'undefined' && window.HistoricalCouponsService && typeof window.HistoricalCouponsService.getAllCouponSets === 'function')
             ? window.HistoricalCouponsService.getAllCouponSets(startDate)
             : (typeof window !== 'undefined' && window.CouponEngine && typeof window.CouponEngine.getAllArchivedCouponSets === 'function')
                 ? window.CouponEngine.getAllArchivedCouponSets(startDate)
                 : [];
+        const couponSets = (rawSets || []).filter(set => !startDate || (set.date && set.date >= startDate));
 
         let totalCoupons = 0;
         let wonCoupons = 0;
@@ -1490,11 +1513,22 @@ const MatchTracker = {
             calculatedAt: new Date().toISOString()
         };
 
-        // Kalıcı depolama
+        // Kalıcı depolama (Hafıza kotası aşımını engellemek için kupon dökümünü hafiflet)
         try {
-            localStorage.setItem('sportanaliz_cumulative_coupons_v1', JSON.stringify(result));
+            const storageResult = {
+                ...result,
+                allEvaluatedCoupons: (result.allEvaluatedCoupons || []).slice(0, 30) // En son 30 kupon yeterli
+            };
+            localStorage.setItem('sportanaliz_cumulative_coupons_v1', JSON.stringify(storageResult));
         } catch (e) {
-            console.warn('cumulative storage save error:', e);
+            try {
+                // Hâlâ kota hatası varsa kupon dökümünü tamamen çıkarıp sadece finansal özeti sakla
+                const minimalResult = { ...result };
+                delete minimalResult.allEvaluatedCoupons;
+                localStorage.setItem('sportanaliz_cumulative_coupons_v1', JSON.stringify(minimalResult));
+            } catch (err2) {
+                console.warn('cumulative storage save error:', err2);
+            }
         }
 
         this._cumulativeStatsCache = this._cumulativeStatsCache || {};
@@ -2382,7 +2416,7 @@ const MatchTracker = {
 
     DAILY_ANALYSIS_STORAGE_KEY: 'sportanaliz_daily_analysis_tracker',
 
-    SYSTEM_START_DATE: '2026-09-09',
+    SYSTEM_START_DATE: '2026-11-01',
 
     /**
      * Yerel saat dilimine göre YYYY-MM-DD formatında tarih üretir (UTC offset hatasını engeller)
@@ -9098,7 +9132,7 @@ const MatchTracker = {
             if (sourcePool && sourcePool.length > 0) {
                 try {
                     const rec = this.recordDailyAnalysis(sourcePool);
-                    if (rec && rec.totalAnalyzed > 5 && (rec.wonAnalyzed > 0 || rec.lostAnalyzed > 0)) return rec;
+                    if (rec && rec.matches && rec.matches.length > 0) return rec;
                 } catch (e) {}
             }
             if (histToday) return histToday;
@@ -9157,7 +9191,8 @@ const MatchTracker = {
             let pendingAnalyzed = 0;
             let liveAnalyzed = 0;
 
-            const dates = this.getAvailableAnalysisDates ? this.getAvailableAnalysisDates().map(d => d.date) : ['2026-09-17', '2026-09-18', '2026-09-19'];
+            const minDate = this.SYSTEM_START_DATE || '2026-11-01';
+            const dates = (this.getAvailableAnalysisDates ? this.getAvailableAnalysisDates().map(d => d.date) : []).filter(d => d >= minDate);
             const seenDates = new Set();
 
             dates.forEach(d => {

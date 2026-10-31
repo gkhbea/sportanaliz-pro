@@ -21,6 +21,27 @@ const App = {
      * Uygulama başlat
      */
     async init() {
+        // Kullanıcı Talimatı: Bakiyeleri ve istatistikleri sıfırla, 01 Kasım 2026'dan itibaren tut
+        if (localStorage.getItem('sportanaliz_season_start_date_v3') !== '2026-11-01') {
+            try {
+                localStorage.removeItem('sportanaliz_user_profile_v2');
+                localStorage.removeItem('sportanaliz_kasa_history');
+                localStorage.removeItem('sportanaliz_daily_analysis_history');
+                localStorage.removeItem('sportanaliz_daily_analysis_cache_v2');
+                localStorage.removeItem('sportanaliz_match_tracker_v3');
+                localStorage.removeItem('placed_coupons');
+                localStorage.removeItem('archived_coupons');
+                localStorage.removeItem('historical_coupons_cache');
+                localStorage.removeItem('sportanaliz_coupons');
+                localStorage.setItem('sportanaliz_season_start_date_v3', '2026-11-01');
+                localStorage.setItem('sportanaliz_user_chosen_date', '2026-11-01');
+                if (window.UserProfileService) {
+                    window.UserProfileService.resetBankroll(500);
+                }
+                console.log('✅ Tüm bakiyeler ve istatistikler 01 Kasım 2026 başlangıcıyla sıfırlandı.');
+            } catch (e) {}
+        }
+    
         console.log('🚀 SportAnaliz Pro başlatılıyor...');
 
         // Her ihtimale karşı yeniden bağla
@@ -132,19 +153,11 @@ const App = {
      * Event Listener'lar
      */
     bindEvents() {
-        // 60+ FPS Donmasız Kaydırma Optimizasyonu (Scroll Freeze & Lag Fix)
-        let scrollTimer = null;
-        const onFastScroll = () => {
-            if (!document.body.classList.contains('is-scrolling')) {
-                document.body.classList.add('is-scrolling');
+        window.addEventListener('beforeunload', () => {
+            if (window.MatchTracker && typeof window.MatchTracker.saveImmediate === 'function') {
+                window.MatchTracker.saveImmediate();
             }
-            clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(() => {
-                document.body.classList.remove('is-scrolling');
-            }, 120);
-        };
-        window.addEventListener('scroll', onFastScroll, { passive: true });
-        window.addEventListener('wheel', onFastScroll, { passive: true });
+        });
 
         // Navigation (Header, Mobil Alt Bar, Üst Kayan Butonlar ve Çekmece Menü)
         document.querySelectorAll('.nav-btn, .m-nav-btn, .m-pill-btn, .m-drawer-item').forEach(btn => {
@@ -1853,9 +1866,13 @@ const App = {
                 if (generated && generated.length > 0) coupons = generated;
             }
             if (!coupons || coupons.length === 0) {
-                if (window.HistoricalCouponsService?._generateAuthentic2026_10_29Coupons) {
-                    const autActive = window.HistoricalCouponsService._generateAuthentic2026_10_29Coupons(chosenDate);
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_31Coupons) {
+                    const autActive = window.HistoricalCouponsService._generateAuthentic2026_10_31Coupons(chosenDate);
                     if (autActive && autActive.coupons && autActive.coupons.length > 0) coupons = autActive.coupons;
+                }
+                if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_29Coupons) {
+                    const aut29 = window.HistoricalCouponsService._generateAuthentic2026_10_29Coupons(chosenDate);
+                    if (aut29 && aut29.coupons && aut29.coupons.length > 0) coupons = aut29.coupons;
                 }
                 if ((!coupons || coupons.length === 0) && window.HistoricalCouponsService?._generateAuthentic2026_10_26Coupons) {
                     const aut26 = window.HistoricalCouponsService._generateAuthentic2026_10_26Coupons('2026-10-26');
@@ -1924,6 +1941,21 @@ const App = {
     /**
      * Nesine resmi bültenini tara ve maç kodlarıyla güncel garantör kuponları otomatik üret
      */
+    async saveCouponsToNesineAccount() {
+        Helpers.showToast('🚀 Nesine kupon aktarma başlatılıyor, lütfen bekleyiniz...', 'info');
+        try {
+            const res = await fetch('/api/nesine/auto-add-coupons', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                Helpers.showToast('✅ Nesine penceresi açıldı! Lütfen ekrandaki güvenlik kodunu girip Giriş Yapınız; kuponlar otomatik kaydedilecek.', 'success', 8000);
+            } else {
+                Helpers.showToast('Nesine servisi: ' + (data.error || 'İşlem başlatılamadı'), 'warning');
+            }
+        } catch (e) {
+            Helpers.showToast('Masaüstü için: Lütfen klasördeki NESINE_KUPON_OTOMATIK_EKLE.bat dosyasını çalıştırınız.', 'info', 6000);
+        }
+    },
+
     async generateNesineCoupons() {
         Helpers.showToast('⚡ Nesine bülteni taranıyor ve maç kodlarıyla kuponlar hesaplanıyor...', 'info');
 
@@ -1967,8 +1999,8 @@ const App = {
             }
 
             if (!newCoupons || newCoupons.length === 0) {
-                if (window.HistoricalCouponsService?._generateAuthentic2026_10_26Coupons) {
-                    const aut = window.HistoricalCouponsService._generateAuthentic2026_10_26Coupons('2026-10-26');
+                if (window.HistoricalCouponsService?._generateAuthentic2026_10_31Coupons) {
+                    const aut = window.HistoricalCouponsService._generateAuthentic2026_10_31Coupons('2026-11-01');
                     if (aut && Array.isArray(aut.coupons)) newCoupons = aut.coupons;
                 }
             }
