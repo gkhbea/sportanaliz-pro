@@ -13,13 +13,34 @@ try {
 async function main() {
     console.log('🚀 [START] SportAnaliz Pro - Güncel Veri & Kupon Üretim Motoru Başlatıldı');
 
-    // 1. Canlı bülteni oku
-    const bultenPath = path.join(CACHE_DIR, 'nesine_bulten_today.json');
-    if (!fs.existsSync(bultenPath)) {
-        console.error('Bülten dosyası bulunamadı:', bultenPath);
+    // 1. Canlı bülteni çek veya yerel önbellekten oku
+    let rawData = null;
+    try {
+        console.log('📡 Nesine CDN üzerinden canlı bülten kontrol ediliyor...');
+        const resp = await fetch('https://cdnbulten.nesine.com/api/bulten/getprebultenfull', {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+            timeout: 20000
+        });
+        if (resp.ok) {
+            rawData = await resp.json();
+            fs.writeFileSync(path.join(CACHE_DIR, 'nesine_bulten_today.json'), JSON.stringify(rawData), 'utf8');
+            console.log('✅ Canlı Nesine bülteni başarıyla güncellendi.');
+        }
+    } catch (e) {
+        console.warn('Canlı bülten indirme uyarısı:', e.message);
+    }
+
+    if (!rawData) {
+        const bultenPath = path.join(CACHE_DIR, 'nesine_bulten_today.json');
+        if (fs.existsSync(bultenPath)) {
+            rawData = JSON.parse(fs.readFileSync(bultenPath, 'utf8'));
+        }
+    }
+
+    if (!rawData) {
+        console.error('Bülten verisi bulunamadı.');
         process.exit(1);
     }
-    const rawData = JSON.parse(fs.readFileSync(bultenPath, 'utf8'));
     const parsedMatches = NesineService.parseEvents(rawData, 'football');
     console.log(`✅ Parsed football matches: ${parsedMatches.length}`);
 

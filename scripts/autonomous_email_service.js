@@ -15,7 +15,20 @@
  *   node scripts/autonomous_email_service.js --all     -> Üç raporu da test için hemen gönderir
  */
 
+const path = require('path');
+const { fork } = require('child_process');
 const emailService = require('../js/services/emailNotificationService.js');
+
+async function syncDailyData() {
+    try {
+        const syncScript = path.join(__dirname, 'build_and_sync_all_data.js');
+        const child = fork(syncScript, [], { silent: true });
+        await new Promise((resolve) => child.on('exit', resolve));
+        console.log('✅ [GÜNCELLEME] Günün kuponları ve analiz verileri otonom senkronize edildi.');
+    } catch (e) {
+        console.warn('Otonom senkronizasyon uyarısı:', e.message);
+    }
+}
 
 async function main() {
     const args = process.argv.slice(2);
@@ -74,8 +87,9 @@ async function main() {
     console.log('   - Her Gece  23:30: Kupon Tutma / Maç Skor Sonuçları & Kâr Raporu');
     console.log('   - Her Pazar 23:45 / Pzt 09:30: Haftalık İstatistik Bülteni\n');
 
-    // İlk açılışta hemen kontrol et (eğer günün maili henüz atılmadıysa gönderir)
+    // İlk açılışta verileri güncelle ve kontrol et (eğer günün maili henüz atılmadıysa gönderir)
     try {
+        await syncDailyData();
         await emailService.checkAndSendDueEmails();
     } catch (e) {
         console.error('İlk kontrol hatası:', e.message);
@@ -84,6 +98,12 @@ async function main() {
     // Her 5 dakikada bir saati kontrol et
     setInterval(async () => {
         try {
+            const h = new Date().getHours();
+            const m = new Date().getMinutes();
+            // Sabah 10:00 ve Gece 23:30 öncesi verileri tazele
+            if ((h === 9 && m >= 55) || (h === 23 && m >= 25)) {
+                await syncDailyData();
+            }
             await emailService.checkAndSendDueEmails();
         } catch (e) {
             console.error('Zamanlayıcı kontrol hatası:', e.message);

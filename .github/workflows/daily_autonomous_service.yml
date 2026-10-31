@@ -1,0 +1,77 @@
+name: ⚡ SportAnaliz Pro 7/24 Otonom Bulut Robotu
+
+on:
+  schedule:
+    # Sabah 10:00 TSI (07:00 UTC) - Günün Kuponlarını Üret, Kaydet & E-Posta Gönder
+    - cron: '0 7 * * *'
+    # Gece 23:30 TSI (20:30 UTC) - Kupon Sonuçlarını Kontrol Et & Kasa Raporu Gönder
+    - cron: '30 20 * * *'
+    # Pazar Gece 23:45 TSI (20:45 UTC) - Haftalık Karne
+    - cron: '45 20 * * 0'
+  workflow_dispatch: # GitHub üzerinden tek tıkla elle tetikleme
+
+jobs:
+  run-autonomous-engine:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Kaynak Kodları Çek
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🟢 Node.js Ortamını Kur
+        uses: setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: 📦 Bağımlılıkları Yükle
+        run: npm ci || npm install
+
+      - name: ⚽ Günün Bültenini İndir ve Kuponları Üret / Kaydet
+        run: node scripts/build_and_sync_all_data.js
+        env:
+          NODE_ENV: production
+
+      - name: 📧 Sabah Kuponlarını E-Posta ile Gönder (Sabah Seansı)
+        if: github.event.schedule == '0 7 * * *' || github.event_name == 'workflow_dispatch'
+        run: node scripts/autonomous_email_service.js --daily
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER || 'gokhanelalyz@gmail.com' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS || 'sfcmwtdrjdhyumkr' }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: 587
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL || 'gokhanelalyz@gmail.com' }}
+
+      - name: 🏁 Gece Sonuçlarını & Kasa Kâr/Zararını Gönder (Gece Seansı)
+        if: github.event.schedule == '30 20 * * *'
+        run: node scripts/autonomous_email_service.js --results
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER || 'gokhanelalyz@gmail.com' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS || 'sfcmwtdrjdhyumkr' }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: 587
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL || 'gokhanelalyz@gmail.com' }}
+
+      - name: 📊 Haftalık Karne Raporunu Gönder (Pazar Gecesi)
+        if: github.event.schedule == '45 20 * * 0'
+        run: node scripts/autonomous_email_service.js --weekly
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER || 'gokhanelalyz@gmail.com' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS || 'sfcmwtdrjdhyumkr' }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: 587
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL || 'gokhanelalyz@gmail.com' }}
+
+      - name: 💾 Güncellenen Kuponları Depoya Kaydet (Git Commit & Push)
+        run: |
+          git config --global user.name "SportAnaliz Pro Bot"
+          git config --global user.email "bot@sportanaliz.pro"
+          git add data_cache/
+          if git diff --staged --quiet; then
+            echo "Değişiklik yok, commit gerekmedi."
+          else
+            git commit -m "chore(auto): günün kuponları ve analizleri otonom olarak güncellendi [skip ci]"
+            git push
+          fi
