@@ -17,7 +17,7 @@ const path = require('path');
 const fs = require('fs');
 
 let USERNAME = process.env.NESINE_USERNAME || '14410079556';
-let PASSWORD = process.env.NESINE_PASSWORD || 'Efe2016.';
+let PASSWORD = process.env.NESINE_PASSWORD || 'Efe2016..';
 
 try {
     const credPath = path.join(__dirname, '..', 'nesine_credentials.json');
