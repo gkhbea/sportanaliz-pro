@@ -91,12 +91,24 @@ app.whenReady().then(async () => {
     });
 
     win.maximize();
+    win.show();
+    win.focus();
     await win.loadURL('https://www.nesine.com/iddaa');
-    await new Promise(r => setTimeout(r, 4000));
+    await new Promise(r => setTimeout(r, 3500));
 
     // Popupları kapat ve Giriş Yap modalını açıp formu doldur
     await win.webContents.executeJavaScript(`
         (async () => {
+            const isAlreadyLoggedIn = !!(
+                document.querySelector('.member-menu, .user-profile, .user-info, .account-info, .header-user, #memberSummary, [class*="profile"]') ||
+                document.body.innerText.includes('Hesabım') ||
+                document.body.innerText.includes('Çıkış')
+            );
+            if (isAlreadyLoggedIn) {
+                console.log('Kullanıcı zaten giriş yapmış durumda.');
+                return;
+            }
+
             const closeModals = () => {
                 Array.from(document.querySelectorAll('button, a, span, .btn-close')).forEach(b => {
                     const t = (b.innerText || '').toLowerCase().trim();
@@ -151,9 +163,9 @@ app.whenReady().then(async () => {
 
     console.log('[2/4] Kullanıcı bilgileri yazıldı. Lütfen ekrandaki güvenlik kodunu girip "Giriş Yap"a basınız...');
 
-    // Kullanıcının giriş yapmasını bekle (maksimum 180 saniye)
+    // Kullanıcının giriş yapmasını bekle (maksimum 300 saniye / 5 dakika)
     let loggedIn = false;
-    for (let sec = 0; sec < 180; sec++) {
+    for (let sec = 0; sec < 300; sec++) {
         await new Promise(r => setTimeout(r, 1000));
         try {
             loggedIn = await win.webContents.executeJavaScript(`
