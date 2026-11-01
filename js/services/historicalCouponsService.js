@@ -3500,6 +3500,107 @@ const HistoricalCouponsService = {
 
     
     
+    
+    _generateAuthentic2026_11_01Coupons(targetDate = '2026-11-01') {
+        const yDate = targetDate || '2026-11-01';
+        const dFmt = '01 Kasım 2026';
+
+        // 1. Önce diske yazılmış 1 Kasım güncel 15 kuponunu yükle
+        try {
+            if (typeof require !== 'undefined') {
+                const fsModule = require('fs');
+                const pathModule = require('path');
+                const p = pathModule.join(__dirname, '..', '..', 'data_cache', 'nesine_coupons_today.json');
+                if (fsModule.existsSync(p)) {
+                    const data = JSON.parse(fsModule.readFileSync(p, 'utf8'));
+                    if (data && Array.isArray(data.coupons) && data.coupons.length > 0) {
+                        return { coupons: data.coupons, euroCoupons: [] };
+                    }
+                }
+            }
+        } catch(e) {}
+
+        // 2. Tarayıcı / Çevrimdışı Güvenlik Ağı (1 Kasım 2026 Resmi Bülteni)
+        const p_craiova = this._createArchivedPick({
+            index: 1, iddaaCode: '3254215', homeTeam: "Un. Craiova", awayTeam: "Botosani", league: "Romanya 1. Lig",
+            timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Craiova Kazanır)', marketCode: 'MS1', odd: 1.09, confidence: 97,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Un. Craiova vs Botosani · MS 1 (18:30 | Resmi İddaa Kod: 3254215)"
+        }, yDate, dFmt);
+
+        const p_elfsborg = this._createArchivedPick({
+            index: 2, iddaaCode: '3258351', homeTeam: "IF Elfsborg", awayTeam: "Orgryte", league: "İsveç Allsvenskan",
+            timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Elfsborg Kazanır)', marketCode: 'MS1', odd: 1.23, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "IF Elfsborg vs Orgryte · MS 1 (18:30 | Resmi İddaa Kod: 3258351)"
+        }, yDate, dFmt);
+
+        const p_muharraq = this._createArchivedPick({
+            index: 3, iddaaCode: '3342526', homeTeam: "Al Muharraq", awayTeam: "Sitra Club", league: "Bahreyn Premier Lig",
+            timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Al Muharraq Kazanır)', marketCode: 'MS1', odd: 1.22, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Al Muharraq vs Sitra Club · MS 1 (18:00 | Resmi İddaa Kod: 3342526)"
+        }, yDate, dFmt);
+
+        const p_lyon = this._createArchivedPick({
+            index: 4, iddaaCode: '3254138', homeTeam: "Lyon", awayTeam: "Angers", league: "Fransa Ligue 1",
+            timeStr: '19:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Lyon Kazanır)', marketCode: 'MS1', odd: 1.24, confidence: 96,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Lyon vs Angers · MS 1 (19:15 | Resmi İddaa Kod: 3254138)"
+        }, yDate, dFmt);
+
+        const p_celje = this._createArchivedPick({
+            index: 5, iddaaCode: '3253140', homeTeam: "NK Celje", awayTeam: "Nafta", league: "Slovenya PrvaLiga",
+            timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Celje Kazanır)', marketCode: 'MS1', odd: 1.24, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "NK Celje vs Nafta · MS 1 (19:30 | Resmi İddaa Kod: 3253140)"
+        }, yDate, dFmt);
+
+        const p_cusco = this._createArchivedPick({
+            index: 6, iddaaCode: '3253460', homeTeam: "Cusco", awayTeam: "Sport Boys", league: "Peru Prmr Ligi",
+            timeStr: '21:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Cusco Kazanır)', marketCode: 'MS1', odd: 1.29, confidence: 94,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Cusco vs Sport Boys · MS 1 (21:15 | Resmi İddaa Kod: 3253460)"
+        }, yDate, dFmt);
+
+        const p_strongest = this._createArchivedPick({
+            index: 7, iddaaCode: '3304791', homeTeam: "Strongest", awayTeam: "GV San Jose", league: "Bolivya Profesyonel Ligi",
+            timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Strongest Kazanır)', marketCode: 'MS1', odd: 1.08, confidence: 98,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Strongest vs GV San Jose · MS 1 (22:00 | Resmi İddaa Kod: 3304791)"
+        }, yDate, dFmt);
+
+        const p_palmeiras = this._createArchivedPick({
+            index: 8, iddaaCode: '3259493', homeTeam: "Palmeiras SP", awayTeam: "Vasco Da G.", league: "Brezilya Serie A",
+            timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: 1.22, confidence: 95,
+            homeScore: 0, awayScore: 0, isWon: false, isPending: true, isLive: false,
+            detail: "Palmeiras SP vs Vasco Da G. · 1.5 ÜST (22:00 | Resmi İddaa Kod: 3259493)"
+        }, yDate, dFmt);
+
+        const c1 = this._createArchivedCoupon({
+            id: 'c_morn_1_' + yDate, title: '🛡️ Akşamüstü Garantör Banko / Kasa Katlama Kuponu',
+            subtitle: 'Un. Craiova MS 1 (1.09), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '🛡️', themeColor: '#10B981', recommendedStake: 100, confidence: 96,
+            timeSlot: 'morning', sessionName: 'Akşamüstü Kuponu'
+        }, [p_craiova, p_elfsborg, p_muharraq], dFmt);
+
+        const c2 = this._createArchivedCoupon({
+            id: 'c_noon_1_' + yDate, title: '🌟 VIP Kombin (Favori Güçler)',
+            subtitle: 'Lyon MS 1 (1.24), NK Celje MS 1 (1.24) ve Cusco MS 1 (1.29)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '🌟', themeColor: '#6366F1', recommendedStake: 100, confidence: 95,
+            timeSlot: 'noon', sessionName: 'Akşam Kuponu'
+        }, [p_lyon, p_celje, p_cusco], dFmt);
+
+        const c3 = this._createArchivedCoupon({
+            id: 'c_eve_1_' + yDate, title: '🌙 Gece / Güney Amerika & Kasa Katlama',
+            subtitle: 'Strongest MS 1 (1.08) ve Palmeiras 1.5 ÜST (1.22)',
+            badge: '⏳ GÜNÜN KUPONU (BEKLİYOR)', badgeType: 'special', icon: '🌙', themeColor: '#F59E0B', recommendedStake: 100, confidence: 95,
+            timeSlot: 'evening', sessionName: 'Gece Kuponu'
+        }, [p_strongest, p_palmeiras], dFmt);
+
+        return { coupons: [c1, c2, c3], euroCoupons: [] };
+    },
+
     _generateAuthentic2026_10_31Coupons(targetDate = '2026-10-31') {
         const yDate = targetDate || '2026-10-31';
         const dFmt = '31 Ekim 2026';
@@ -6007,7 +6108,7 @@ const HistoricalCouponsService = {
                 dateFormatted: '01 Kasım 2026',
                 dayName: 'Pazar',
                 concept: "Resmi Nesine & İddaa Pazar Bülteni (Günün 15 Özel Kuponu: Sabah 5, Öğlen 5, Akşam 5 - 559 Maç)",
-                generator: () => this._generateAuthentic2026_10_31Coupons('2026-11-01')
+                generator: () => this._generateAuthentic2026_11_01Coupons('2026-11-01')
             },
         ];
 
@@ -6051,7 +6152,15 @@ const HistoricalCouponsService = {
             }
         }
         // Güncel Bülten & Bugün (31 Ekim 2026 ve sonrası) için doğrudan otantik 15 seans kuponlarını dön
-        if (dateStr >= '2026-10-31' || dateStr === '31 Ekim 2026' || (typeof dateStr === 'string' && (dateStr.includes('31 Ekim') || dateStr.includes('Kasım 2026')))) {
+        // 1 Kasım 2026 ve sonrası: Güncel 1 Kasım Seans Kuponları
+        if (dateStr >= '2026-11-01' || dateStr === '01 Kasım 2026' || dateStr === '1 Kasım 2026' || (typeof dateStr === 'string' && dateStr.includes('Kasım 2026'))) {
+            const todayData = this._generateAuthentic2026_11_01Coupons(dateStr);
+            if (todayData && Array.isArray(todayData.coupons) && todayData.coupons.length > 0) {
+                return todayData.coupons;
+            }
+        }
+        // 31 Ekim 2026
+        if (dateStr === '2026-10-31' || dateStr === '31 Ekim 2026' || (typeof dateStr === 'string' && dateStr.includes('31 Ekim'))) {
             const todayData = this._generateAuthentic2026_10_31Coupons(dateStr);
             if (todayData && Array.isArray(todayData.coupons) && todayData.coupons.length > 0) {
                 return todayData.coupons;
