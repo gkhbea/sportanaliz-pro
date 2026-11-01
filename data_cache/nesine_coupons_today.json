@@ -11,7 +11,7 @@
     {
       "couponNumber": 1,
       "name": "01.11.2026 - 1",
-      "title": "🛡️ Akşamüstü Garantör Banko / Kasa Katlama Kuponu",
+      "title": "🛡️ Sabah Garantör Banko / Kasa Katlama Kuponu",
       "subtitle": "Un. Craiova MS 1 (1.09), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)",
       "badge": "💎 Garantör Banko",
       "totalOdd": 1.86,
@@ -21,11 +21,11 @@
           "homeTeam": "Un. Craiova",
           "awayTeam": "Botosani",
           "league": "Romanya 1. Lig",
-          "pickTitle": "MS 1 (Craiova Kazanır)",
+          "timeStr": "18:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Craiova Kazanır)",
           "marketCode": "MS1",
           "odd": "1.09",
-          "timeStr": "18:30",
           "matchText": "18:30 Un. Craiova - Botosani MS 1 (Craiova Kazanır) 1.09"
         },
         {
@@ -33,11 +33,11 @@
           "homeTeam": "IF Elfsborg",
           "awayTeam": "Orgryte",
           "league": "İsveç Allsvenskan",
-          "pickTitle": "MS 1 (Elfsborg Kazanır)",
+          "timeStr": "18:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Elfsborg Kazanır)",
           "marketCode": "MS1",
           "odd": "1.23",
-          "timeStr": "18:30",
           "matchText": "18:30 IF Elfsborg - Orgryte MS 1 (Elfsborg Kazanır) 1.23"
         },
         {
@@ -45,11 +45,11 @@
           "homeTeam": "Al Muharraq",
           "awayTeam": "Sitra Club",
           "league": "Bahreyn Premier Lig",
-          "pickTitle": "MS 1 (Al Muharraq Kazanır)",
+          "timeStr": "18:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Al Muharraq Kazanır)",
           "marketCode": "MS1",
           "odd": "1.22",
-          "timeStr": "18:00",
           "matchText": "18:00 Al Muharraq - Sitra Club MS 1 (Al Muharraq Kazanır) 1.22"
         },
         {
@@ -57,25 +57,25 @@
           "homeTeam": "Hajer Al Hasa",
           "awayTeam": "AL Ula",
           "league": "Suudi Arabistan 1. Lig",
-          "pickTitle": "MS 2 (AL Ula Kazanır)",
+          "timeStr": "17:40",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 2 (AL Ula Kazanır)",
           "marketCode": "MS2",
           "odd": "1.14",
-          "timeStr": "17:40",
           "matchText": "17:40 Hajer Al Hasa - AL Ula MS 2 (AL Ula Kazanır) 1.14"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_1.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.328Z",
       "timeSlot": "morning",
-      "sessionName": "Akşamüstü Kuponu",
-      "sessionTimeRange": "00:00 - 12:00"
+      "sessionName": "Sabah Kuponu",
+      "sessionTimeRange": "17:30 - 19:00"
     },
     {
       "couponNumber": 2,
       "name": "01.11.2026 - 2",
-      "title": "⚡ İdeal Sistem Kuponu (Editör Seçimi)",
+      "title": "⚡ Sabah İdeal Sistem Kuponu (Editör Seçimi)",
       "subtitle": "Arouca 1-X Çifte Şans (1.01), B. Kaliningrad 1.5 ÜST (1.23) ve Levadeiakos 1.5 ÜST (1.23)",
       "badge": "⭐ Editör Seçimi",
       "totalOdd": 1.53,
@@ -85,11 +85,11 @@
           "homeTeam": "Arouca",
           "awayTeam": "N. Madeira",
           "league": "Portekiz Premier Lig",
-          "pickTitle": "1-X Çifte Şans (Arouca Kaybetmez)",
+          "timeStr": "18:30",
           "marketTitle": "Çifte Şans",
+          "pickTitle": "1-X Çifte Şans (Arouca Kaybetmez)",
           "marketCode": "CS1X",
           "odd": "1.01",
-          "timeStr": "18:30",
           "matchText": "18:30 Arouca - N. Madeira 1-X Çifte Şans (Arouca Kaybetmez) 1.01"
         },
         {
@@ -97,11 +97,11 @@
           "homeTeam": "B. Kaliningrad",
           "awayTeam": "Akron Tolyatti",
           "league": "Rusya Premier Lig",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "17:30",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.23",
-          "timeStr": "17:30",
           "matchText": "17:30 B. Kaliningrad - Akron Tolyatti 1.5 ÜST 1.23"
         },
         {
@@ -109,25 +109,25 @@
           "homeTeam": "APO Levadeiakos",
           "awayTeam": "Aris",
           "league": "Yunanistan Süper Lig",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "18:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.23",
-          "timeStr": "18:00",
           "matchText": "18:00 APO Levadeiakos - Aris 1.5 ÜST 1.23"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_2.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "morning",
-      "sessionName": "Akşamüstü Kuponu",
-      "sessionTimeRange": "00:00 - 12:00"
+      "sessionName": "Sabah Kuponu",
+      "sessionTimeRange": "17:30 - 19:00"
     },
     {
       "couponNumber": 3,
       "name": "01.11.2026 - 3",
-      "title": "⚽ Akşamüstü Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)",
+      "title": "⚽ Sabah Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)",
       "subtitle": "Nordsjælland 2.5 ÜST (1.34), B. Kaliningrad 1.5 ÜST (1.23) ve Levadeiakos 1.5 ÜST (1.23)",
       "badge": "⚽ Gol Düellosu",
       "totalOdd": 2.03,
@@ -137,11 +137,11 @@
           "homeTeam": "Nordsjælland",
           "awayTeam": "Midtjylland",
           "league": "Danimarka Süper Ligi",
-          "pickTitle": "2.5 ÜST",
+          "timeStr": "18:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "2.5 ÜST",
           "marketCode": "OVER25",
           "odd": "1.34",
-          "timeStr": "18:00",
           "matchText": "18:00 Nordsjælland - Midtjylland 2.5 ÜST 1.34"
         },
         {
@@ -149,11 +149,11 @@
           "homeTeam": "B. Kaliningrad",
           "awayTeam": "Akron Tolyatti",
           "league": "Rusya Premier Lig",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "17:30",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.23",
-          "timeStr": "17:30",
           "matchText": "17:30 B. Kaliningrad - Akron Tolyatti 1.5 ÜST 1.23"
         },
         {
@@ -161,25 +161,25 @@
           "homeTeam": "APO Levadeiakos",
           "awayTeam": "Aris",
           "league": "Yunanistan Süper Lig",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "18:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.23",
-          "timeStr": "18:00",
           "matchText": "18:00 APO Levadeiakos - Aris 1.5 ÜST 1.23"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_3.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "morning",
-      "sessionName": "Akşamüstü Kuponu",
-      "sessionTimeRange": "00:00 - 12:00"
+      "sessionName": "Sabah Kuponu",
+      "sessionTimeRange": "17:30 - 19:00"
     },
     {
       "couponNumber": 4,
       "name": "01.11.2026 - 4",
-      "title": "🎯 Çifte Şans & Sıfır Risk Sigortalı Kupon",
+      "title": "🎯 Sabah Çifte Şans & Sıfır Risk Sigortalı Kupon",
       "subtitle": "Arouca 1-X (1.01), Craiova MS 1 (1.09) ve Elfsborg MS 1 (1.23)",
       "badge": "🛡️ Sıfır Risk",
       "totalOdd": 1.35,
@@ -189,11 +189,11 @@
           "homeTeam": "Arouca",
           "awayTeam": "N. Madeira",
           "league": "Portekiz Premier Lig",
-          "pickTitle": "1-X Çifte Şans (Arouca Kaybetmez)",
+          "timeStr": "18:30",
           "marketTitle": "Çifte Şans",
+          "pickTitle": "1-X Çifte Şans (Arouca Kaybetmez)",
           "marketCode": "CS1X",
           "odd": "1.01",
-          "timeStr": "18:30",
           "matchText": "18:30 Arouca - N. Madeira 1-X Çifte Şans (Arouca Kaybetmez) 1.01"
         },
         {
@@ -201,11 +201,11 @@
           "homeTeam": "Un. Craiova",
           "awayTeam": "Botosani",
           "league": "Romanya 1. Lig",
-          "pickTitle": "MS 1 (Craiova Kazanır)",
+          "timeStr": "18:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Craiova Kazanır)",
           "marketCode": "MS1",
           "odd": "1.09",
-          "timeStr": "18:30",
           "matchText": "18:30 Un. Craiova - Botosani MS 1 (Craiova Kazanır) 1.09"
         },
         {
@@ -213,25 +213,25 @@
           "homeTeam": "IF Elfsborg",
           "awayTeam": "Orgryte",
           "league": "İsveç Allsvenskan",
-          "pickTitle": "MS 1 (Elfsborg Kazanır)",
+          "timeStr": "18:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Elfsborg Kazanır)",
           "marketCode": "MS1",
           "odd": "1.23",
-          "timeStr": "18:30",
           "matchText": "18:30 IF Elfsborg - Orgryte MS 1 (Elfsborg Kazanır) 1.23"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_4.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "morning",
-      "sessionName": "Akşamüstü Kuponu",
-      "sessionTimeRange": "00:00 - 12:00"
+      "sessionName": "Sabah Kuponu",
+      "sessionTimeRange": "17:30 - 19:00"
     },
     {
       "couponNumber": 5,
       "name": "01.11.2026 - 5",
-      "title": "💎 Akılcı Değer & Taraf Kuponu",
+      "title": "💎 Sabah Akılcı Değer & Taraf Kuponu",
       "subtitle": "UB Conquense MS 1 (1.46), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)",
       "badge": "💎 Değer Kombin",
       "totalOdd": 2.19,
@@ -241,11 +241,11 @@
           "homeTeam": "UB Conquense",
           "awayTeam": "RSD Alcala",
           "league": "İspanya Segunda RFEF",
-          "pickTitle": "MS 1 (Conquense Kazanır)",
+          "timeStr": "19:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Conquense Kazanır)",
           "marketCode": "MS1",
           "odd": "1.46",
-          "timeStr": "19:00",
           "matchText": "19:00 UB Conquense - RSD Alcala MS 1 (Conquense Kazanır) 1.46"
         },
         {
@@ -253,11 +253,11 @@
           "homeTeam": "IF Elfsborg",
           "awayTeam": "Orgryte",
           "league": "İsveç Allsvenskan",
-          "pickTitle": "MS 1 (Elfsborg Kazanır)",
+          "timeStr": "18:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Elfsborg Kazanır)",
           "marketCode": "MS1",
           "odd": "1.23",
-          "timeStr": "18:30",
           "matchText": "18:30 IF Elfsborg - Orgryte MS 1 (Elfsborg Kazanır) 1.23"
         },
         {
@@ -265,25 +265,25 @@
           "homeTeam": "Al Muharraq",
           "awayTeam": "Sitra Club",
           "league": "Bahreyn Premier Lig",
-          "pickTitle": "MS 1 (Al Muharraq Kazanır)",
+          "timeStr": "18:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Al Muharraq Kazanır)",
           "marketCode": "MS1",
           "odd": "1.22",
-          "timeStr": "18:00",
           "matchText": "18:00 Al Muharraq - Sitra Club MS 1 (Al Muharraq Kazanır) 1.22"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_5.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "morning",
-      "sessionName": "Akşamüstü Kuponu",
-      "sessionTimeRange": "00:00 - 12:00"
+      "sessionName": "Sabah Kuponu",
+      "sessionTimeRange": "17:30 - 19:00"
     },
     {
       "couponNumber": 6,
       "name": "01.11.2026 - 6",
-      "title": "🌟 VIP Kombin (Favori Güçler)",
+      "title": "🌟 Öğlen VIP Kombin (Favori Güçler)",
       "subtitle": "Lyon MS 1 (1.24), NK Celje MS 1 (1.24) ve Cusco MS 1 (1.29)",
       "badge": "🌟 VIP Güçler",
       "totalOdd": 1.98,
@@ -293,11 +293,11 @@
           "homeTeam": "Lyon",
           "awayTeam": "Angers",
           "league": "Fransa Ligue 1",
-          "pickTitle": "MS 1 (Lyon Kazanır)",
+          "timeStr": "19:15",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Lyon Kazanır)",
           "marketCode": "MS1",
           "odd": "1.24",
-          "timeStr": "19:15",
           "matchText": "19:15 Lyon - Angers MS 1 (Lyon Kazanır) 1.24"
         },
         {
@@ -305,11 +305,11 @@
           "homeTeam": "NK Celje",
           "awayTeam": "Nafta",
           "league": "Slovenya PrvaLiga",
-          "pickTitle": "MS 1 (Celje Kazanır)",
+          "timeStr": "19:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Celje Kazanır)",
           "marketCode": "MS1",
           "odd": "1.24",
-          "timeStr": "19:30",
           "matchText": "19:30 NK Celje - Nafta MS 1 (Celje Kazanır) 1.24"
         },
         {
@@ -317,25 +317,25 @@
           "homeTeam": "Cusco",
           "awayTeam": "Sport Boys",
           "league": "Peru Prmr Ligi",
-          "pickTitle": "MS 1 (Cusco Kazanır)",
+          "timeStr": "21:15",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Cusco Kazanır)",
           "marketCode": "MS1",
           "odd": "1.29",
-          "timeStr": "21:15",
           "matchText": "21:15 Cusco - Sport Boys MS 1 (Cusco Kazanır) 1.29"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_6.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "noon",
-      "sessionName": "Akşam Kuponu",
-      "sessionTimeRange": "12:00 - 18:00"
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "19:00 - 21:30"
     },
     {
       "couponNumber": 7,
       "name": "01.11.2026 - 7",
-      "title": "🛡️ Akşam Garanti & Kasa Katlama Kuponu",
+      "title": "🛡️ Öğlen Garanti & Kasa Katlama Kuponu",
       "subtitle": "D. Bükreş MS 1 (1.30), Lyon MS 1 (1.24) ve NK Celje MS 1 (1.24)",
       "badge": "💎 Kasa Katlama",
       "totalOdd": 2,
@@ -345,11 +345,11 @@
           "homeTeam": "D. Bükreş",
           "awayTeam": "UTA Arad",
           "league": "Romanya 1. Lig",
-          "pickTitle": "MS 1 (Dinamo Bükreş Kazanır)",
+          "timeStr": "21:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Dinamo Bükreş Kazanır)",
           "marketCode": "MS1",
           "odd": "1.30",
-          "timeStr": "21:30",
           "matchText": "21:30 D. Bükreş - UTA Arad MS 1 (Dinamo Bükreş Kazanır) 1.30"
         },
         {
@@ -357,11 +357,11 @@
           "homeTeam": "Lyon",
           "awayTeam": "Angers",
           "league": "Fransa Ligue 1",
-          "pickTitle": "MS 1 (Lyon Kazanır)",
+          "timeStr": "19:15",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Lyon Kazanır)",
           "marketCode": "MS1",
           "odd": "1.24",
-          "timeStr": "19:15",
           "matchText": "19:15 Lyon - Angers MS 1 (Lyon Kazanır) 1.24"
         },
         {
@@ -369,25 +369,25 @@
           "homeTeam": "NK Celje",
           "awayTeam": "Nafta",
           "league": "Slovenya PrvaLiga",
-          "pickTitle": "MS 1 (Celje Kazanır)",
+          "timeStr": "19:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Celje Kazanır)",
           "marketCode": "MS1",
           "odd": "1.24",
-          "timeStr": "19:30",
           "matchText": "19:30 NK Celje - Nafta MS 1 (Celje Kazanır) 1.24"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_7.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "noon",
-      "sessionName": "Akşam Kuponu",
-      "sessionTimeRange": "12:00 - 18:00"
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "19:00 - 21:30"
     },
     {
       "couponNumber": 8,
       "name": "01.11.2026 - 8",
-      "title": "⚽ Akşam Gol Düellosu (1.5 ÜST Kombini)",
+      "title": "⚽ Öğlen Gol Düellosu (1.5 ÜST Kombini)",
       "subtitle": "Lecce 1.5 ÜST (1.28), Boca Juniors 1.5 ÜST (1.27) ve Maritimo 1.5 ÜST (1.30)",
       "badge": "⚽ 1.5 Gol Üstü",
       "totalOdd": 2.11,
@@ -397,11 +397,11 @@
           "homeTeam": "Lecce",
           "awayTeam": "Genoa",
           "league": "İtalya Serie A",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "20:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.28",
-          "timeStr": "20:00",
           "matchText": "20:00 Lecce - Genoa 1.5 ÜST 1.28"
         },
         {
@@ -409,11 +409,11 @@
           "homeTeam": "Boca Juniors",
           "awayTeam": "River Plate",
           "league": "Arjantin Primera",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "21:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.27",
-          "timeStr": "21:00",
           "matchText": "21:00 Boca Juniors - River Plate 1.5 ÜST 1.27"
         },
         {
@@ -421,25 +421,25 @@
           "homeTeam": "Maritimo",
           "awayTeam": "Santa Clara",
           "league": "Portekiz Lig Kupası",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "21:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.30",
-          "timeStr": "21:00",
           "matchText": "21:00 Maritimo - Santa Clara 1.5 ÜST 1.30"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_8.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "noon",
-      "sessionName": "Akşam Kuponu",
-      "sessionTimeRange": "12:00 - 18:00"
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "19:00 - 21:30"
     },
     {
       "couponNumber": 9,
       "name": "01.11.2026 - 9",
-      "title": "🔥 Karşılıklı Gol & Tempolu Maçlar (2.5 ÜST)",
+      "title": "🔥 Öğlen Karşılıklı Gol & Tempolu Maçlar (2.5 ÜST)",
       "subtitle": "Bohemians P. 2.5 ÜST (1.45) ve Austria Wien 2.5 ÜST (1.54)",
       "badge": "🔥 Tempolu Maçlar",
       "totalOdd": 2.23,
@@ -449,11 +449,11 @@
           "homeTeam": "Bohemians P.",
           "awayTeam": "Sparta Prag",
           "league": "Çekya 1. Lig",
-          "pickTitle": "2.5 ÜST",
+          "timeStr": "20:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "2.5 ÜST",
           "marketCode": "OVER25",
           "odd": "1.45",
-          "timeStr": "20:00",
           "matchText": "20:00 Bohemians P. - Sparta Prag 2.5 ÜST 1.45"
         },
         {
@@ -461,25 +461,25 @@
           "homeTeam": "Austria Wien",
           "awayTeam": "Rapid Wien",
           "league": "Avusturya Bundesliga",
-          "pickTitle": "2.5 ÜST",
+          "timeStr": "19:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "2.5 ÜST",
           "marketCode": "OVER25",
           "odd": "1.54",
-          "timeStr": "19:00",
           "matchText": "19:00 Austria Wien - Rapid Wien 2.5 ÜST 1.54"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_9.png",
-      "timestamp": "2026-11-01T14:42:55.677Z",
+      "timestamp": "2026-11-01T15:10:55.339Z",
       "timeSlot": "noon",
-      "sessionName": "Akşam Kuponu",
-      "sessionTimeRange": "12:00 - 18:00"
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "19:00 - 21:30"
     },
     {
       "couponNumber": 10,
       "name": "01.11.2026 - 10",
-      "title": "🎯 Taraf Güvencesi & Editörün Yıldızı",
+      "title": "🎯 Öğlen Taraf Güvencesi & Editörün Yıldızı",
       "subtitle": "Zamora MS 1 (1.53), Cusco MS 1 (1.29) ve D. Bükreş MS 1 (1.30)",
       "badge": "🎯 Editörün Yıldızı",
       "totalOdd": 2.57,
@@ -489,11 +489,11 @@
           "homeTeam": "Zamora",
           "awayTeam": "RC Deportivo Fabril",
           "league": "İspanya Primera RFEF",
-          "pickTitle": "MS 1 (Zamora Kazanır)",
+          "timeStr": "20:45",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Zamora Kazanır)",
           "marketCode": "MS1",
           "odd": "1.53",
-          "timeStr": "20:45",
           "matchText": "20:45 Zamora - RC Deportivo Fabril MS 1 (Zamora Kazanır) 1.53"
         },
         {
@@ -501,11 +501,11 @@
           "homeTeam": "Cusco",
           "awayTeam": "Sport Boys",
           "league": "Peru Prmr Ligi",
-          "pickTitle": "MS 1 (Cusco Kazanır)",
+          "timeStr": "21:15",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Cusco Kazanır)",
           "marketCode": "MS1",
           "odd": "1.29",
-          "timeStr": "21:15",
           "matchText": "21:15 Cusco - Sport Boys MS 1 (Cusco Kazanır) 1.29"
         },
         {
@@ -513,25 +513,25 @@
           "homeTeam": "D. Bükreş",
           "awayTeam": "UTA Arad",
           "league": "Romanya 1. Lig",
-          "pickTitle": "MS 1 (Dinamo Bükreş Kazanır)",
+          "timeStr": "21:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Dinamo Bükreş Kazanır)",
           "marketCode": "MS1",
           "odd": "1.30",
-          "timeStr": "21:30",
           "matchText": "21:30 D. Bükreş - UTA Arad MS 1 (Dinamo Bükreş Kazanır) 1.30"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_10.png",
-      "timestamp": "2026-11-01T14:42:55.678Z",
+      "timestamp": "2026-11-01T15:10:55.340Z",
       "timeSlot": "noon",
-      "sessionName": "Akşam Kuponu",
-      "sessionTimeRange": "12:00 - 18:00"
+      "sessionName": "Öğlen Kuponu",
+      "sessionTimeRange": "19:00 - 21:30"
     },
     {
       "couponNumber": 11,
       "name": "01.11.2026 - 11",
-      "title": "🌙 Gece / Güney Amerika & Kasa Katlama",
+      "title": "🌙 Akşam / Güney Amerika & Kasa Katlama",
       "subtitle": "Strongest MS 1 (1.08), Palmeiras 1.5 ÜST (1.22) ve Deportes MS 2 (1.21)",
       "badge": "🌙 Gece Katlama",
       "totalOdd": 1.72,
@@ -541,11 +541,11 @@
           "homeTeam": "Strongest",
           "awayTeam": "GV San Jose",
           "league": "Bolivya Profesyonel Ligi",
-          "pickTitle": "MS 1 (Strongest Kazanır)",
+          "timeStr": "22:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Strongest Kazanır)",
           "marketCode": "MS1",
           "odd": "1.08",
-          "timeStr": "22:00",
           "matchText": "22:00 Strongest - GV San Jose MS 1 (Strongest Kazanır) 1.08"
         },
         {
@@ -553,11 +553,11 @@
           "homeTeam": "Palmeiras SP",
           "awayTeam": "Vasco Da G.",
           "league": "Brezilya Serie A",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "22:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.22",
-          "timeStr": "22:00",
           "matchText": "22:00 Palmeiras SP - Vasco Da G. 1.5 ÜST 1.22"
         },
         {
@@ -565,11 +565,11 @@
           "homeTeam": "Atl Grau",
           "awayTeam": "U. Deportes",
           "league": "Peru Prmr Ligi",
-          "pickTitle": "MS 2 (Deportes Kazanır)",
+          "timeStr": "23:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 2 (Deportes Kazanır)",
           "marketCode": "MS2",
           "odd": "1.21",
-          "timeStr": "23:30",
           "matchText": "23:30 Atl Grau - U. Deportes MS 2 (Deportes Kazanır) 1.21"
         },
         {
@@ -577,25 +577,25 @@
           "homeTeam": "Deport Cali",
           "awayTeam": "Boyaca Chico",
           "league": "Kolombiya Liga Dimayor",
-          "pickTitle": "MS 1 (Deport Cali Kazanır)",
+          "timeStr": "00:05",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Deport Cali Kazanır)",
           "marketCode": "MS1",
           "odd": "1.08",
-          "timeStr": "00:05",
           "matchText": "00:05 Deport Cali - Boyaca Chico MS 1 (Deport Cali Kazanır) 1.08"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_11.png",
-      "timestamp": "2026-11-01T14:42:55.678Z",
+      "timestamp": "2026-11-01T15:10:55.340Z",
       "timeSlot": "evening",
-      "sessionName": "Gece Kuponu",
-      "sessionTimeRange": "18:00 - 23:59"
+      "sessionName": "Akşam Kuponu",
+      "sessionTimeRange": "22:00 - 02:30"
     },
     {
       "couponNumber": 12,
       "name": "01.11.2026 - 12",
-      "title": "🛡️ Gece Sıfır Risk Sigortalı Kombin",
+      "title": "🛡️ Akşam Sıfır Risk Sigortalı Kombin",
       "subtitle": "Belgrano 1-X (1.08), Strongest MS 1 (1.08) ve Walter Ferretti MS 1 (1.15)",
       "badge": "🛡️ Sigortalı Gece",
       "totalOdd": 1.76,
@@ -605,11 +605,11 @@
           "homeTeam": "Belgrano",
           "awayTeam": "Barracas",
           "league": "Arjantin Primera LPF",
-          "pickTitle": "1-X Çifte Şans (Belgrano Kaybetmez)",
+          "timeStr": "00:30",
           "marketTitle": "Çifte Şans",
+          "pickTitle": "1-X Çifte Şans (Belgrano Kaybetmez)",
           "marketCode": "CS1X",
           "odd": "1.08",
-          "timeStr": "00:30",
           "matchText": "00:30 Belgrano - Barracas 1-X Çifte Şans (Belgrano Kaybetmez) 1.08"
         },
         {
@@ -617,11 +617,11 @@
           "homeTeam": "Strongest",
           "awayTeam": "GV San Jose",
           "league": "Bolivya Profesyonel Ligi",
-          "pickTitle": "MS 1 (Strongest Kazanır)",
+          "timeStr": "22:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Strongest Kazanır)",
           "marketCode": "MS1",
           "odd": "1.08",
-          "timeStr": "22:00",
           "matchText": "22:00 Strongest - GV San Jose MS 1 (Strongest Kazanır) 1.08"
         },
         {
@@ -629,11 +629,11 @@
           "homeTeam": "Walter Ferretti",
           "awayTeam": "San Marcos",
           "league": "Nikaragua Prmr Ligi",
-          "pickTitle": "MS 1 (Walter Ferretti Kazanır)",
+          "timeStr": "01:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Walter Ferretti Kazanır)",
           "marketCode": "MS1",
           "odd": "1.15",
-          "timeStr": "01:00",
           "matchText": "01:00 Walter Ferretti - San Marcos MS 1 (Walter Ferretti Kazanır) 1.15"
         },
         {
@@ -641,25 +641,25 @@
           "homeTeam": "I. Medellin",
           "awayTeam": "Alianza Valledupar",
           "league": "Kolombiya Liga Dimayor",
-          "pickTitle": "MS 1 (Medellin Kazanır)",
+          "timeStr": "02:10",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Medellin Kazanır)",
           "marketCode": "MS1",
           "odd": "1.31",
-          "timeStr": "02:10",
           "matchText": "02:10 I. Medellin - Alianza Valledupar MS 1 (Medellin Kazanır) 1.31"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_12.png",
-      "timestamp": "2026-11-01T14:42:55.678Z",
+      "timestamp": "2026-11-01T15:10:55.340Z",
       "timeSlot": "evening",
-      "sessionName": "Gece Kuponu",
-      "sessionTimeRange": "18:00 - 23:59"
+      "sessionName": "Akşam Kuponu",
+      "sessionTimeRange": "22:00 - 02:30"
     },
     {
       "couponNumber": 13,
       "name": "01.11.2026 - 13",
-      "title": "⚽ Gece Gol Yağmuru (1.5 ÜST)",
+      "title": "⚽ Akşam Gol Yağmuru (1.5 ÜST)",
       "subtitle": "Palmeiras 1.5 ÜST (1.22), Gremio Novo MS 1 (1.22) ve Medellin 1.5 ÜST (1.28)",
       "badge": "⚽ Gol Düellosu",
       "totalOdd": 1.91,
@@ -669,11 +669,11 @@
           "homeTeam": "Palmeiras SP",
           "awayTeam": "Vasco Da G.",
           "league": "Brezilya Serie A",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "22:00",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.22",
-          "timeStr": "22:00",
           "matchText": "22:00 Palmeiras SP - Vasco Da G. 1.5 ÜST 1.22"
         },
         {
@@ -681,11 +681,11 @@
           "homeTeam": "Gremio Novo",
           "awayTeam": "Operario",
           "league": "Brezilya Serie B",
-          "pickTitle": "MS 1 (Gremio Kazanır)",
+          "timeStr": "00:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Gremio Kazanır)",
           "marketCode": "MS1",
           "odd": "1.22",
-          "timeStr": "00:30",
           "matchText": "00:30 Gremio Novo - Operario MS 1 (Gremio Kazanır) 1.22"
         },
         {
@@ -693,25 +693,25 @@
           "homeTeam": "I. Medellin",
           "awayTeam": "Alianza Valledupar",
           "league": "Kolombiya Liga Dimayor",
-          "pickTitle": "1.5 ÜST",
+          "timeStr": "02:10",
           "marketTitle": "Toplam Gol",
+          "pickTitle": "1.5 ÜST",
           "marketCode": "OVER15",
           "odd": "1.28",
-          "timeStr": "02:10",
           "matchText": "02:10 I. Medellin - Alianza Valledupar 1.5 ÜST 1.28"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_13.png",
-      "timestamp": "2026-11-01T14:42:55.678Z",
+      "timestamp": "2026-11-01T15:10:55.340Z",
       "timeSlot": "evening",
-      "sessionName": "Gece Kuponu",
-      "sessionTimeRange": "18:00 - 23:59"
+      "sessionName": "Akşam Kuponu",
+      "sessionTimeRange": "22:00 - 02:30"
     },
     {
       "couponNumber": 14,
       "name": "01.11.2026 - 14",
-      "title": "💎 Gece Değer & Taraf Kuponu",
+      "title": "💎 Akşam Değer & Taraf Kuponu",
       "subtitle": "Cuiaba MS 1 (1.63), Deportes MS 2 (1.21) ve Walter Ferretti MS 1 (1.15)",
       "badge": "💎 Değer Kombin",
       "totalOdd": 2.27,
@@ -721,11 +721,11 @@
           "homeTeam": "Cuiaba",
           "awayTeam": "Sao Bernardo FC",
           "league": "Brezilya Serie B",
-          "pickTitle": "MS 1 (Cuiaba Kazanır)",
+          "timeStr": "00:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Cuiaba Kazanır)",
           "marketCode": "MS1",
           "odd": "1.63",
-          "timeStr": "00:30",
           "matchText": "00:30 Cuiaba - Sao Bernardo FC MS 1 (Cuiaba Kazanır) 1.63"
         },
         {
@@ -733,11 +733,11 @@
           "homeTeam": "Atl Grau",
           "awayTeam": "U. Deportes",
           "league": "Peru Prmr Ligi",
-          "pickTitle": "MS 2 (Deportes Kazanır)",
+          "timeStr": "23:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 2 (Deportes Kazanır)",
           "marketCode": "MS2",
           "odd": "1.21",
-          "timeStr": "23:30",
           "matchText": "23:30 Atl Grau - U. Deportes MS 2 (Deportes Kazanır) 1.21"
         },
         {
@@ -745,25 +745,25 @@
           "homeTeam": "Walter Ferretti",
           "awayTeam": "San Marcos",
           "league": "Nikaragua Prmr Ligi",
-          "pickTitle": "MS 1 (Walter Ferretti Kazanır)",
+          "timeStr": "01:00",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Walter Ferretti Kazanır)",
           "marketCode": "MS1",
           "odd": "1.15",
-          "timeStr": "01:00",
           "matchText": "01:00 Walter Ferretti - San Marcos MS 1 (Walter Ferretti Kazanır) 1.15"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_14.png",
-      "timestamp": "2026-11-01T14:42:55.678Z",
+      "timestamp": "2026-11-01T15:10:55.340Z",
       "timeSlot": "evening",
-      "sessionName": "Gece Kuponu",
-      "sessionTimeRange": "18:00 - 23:59"
+      "sessionName": "Akşam Kuponu",
+      "sessionTimeRange": "22:00 - 02:30"
     },
     {
       "couponNumber": 15,
       "name": "01.11.2026 - 15",
-      "title": "🌟 Gece Kapanış Süper Kombini",
+      "title": "🌟 Akşam Kapanış Süper Kombini",
       "subtitle": "I. Medellin MS 1 (1.31), Gremio Novo MS 1 (1.22) ve Belgrano 1-X (1.08)",
       "badge": "🌟 Kapanış Kombini",
       "totalOdd": 1.73,
@@ -773,11 +773,11 @@
           "homeTeam": "I. Medellin",
           "awayTeam": "Alianza Valledupar",
           "league": "Kolombiya Liga Dimayor",
-          "pickTitle": "MS 1 (Medellin Kazanır)",
+          "timeStr": "02:10",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Medellin Kazanır)",
           "marketCode": "MS1",
           "odd": "1.31",
-          "timeStr": "02:10",
           "matchText": "02:10 I. Medellin - Alianza Valledupar MS 1 (Medellin Kazanır) 1.31"
         },
         {
@@ -785,11 +785,11 @@
           "homeTeam": "Gremio Novo",
           "awayTeam": "Operario",
           "league": "Brezilya Serie B",
-          "pickTitle": "MS 1 (Gremio Kazanır)",
+          "timeStr": "00:30",
           "marketTitle": "Maç Sonucu",
+          "pickTitle": "MS 1 (Gremio Kazanır)",
           "marketCode": "MS1",
           "odd": "1.22",
-          "timeStr": "00:30",
           "matchText": "00:30 Gremio Novo - Operario MS 1 (Gremio Kazanır) 1.22"
         },
         {
@@ -797,20 +797,20 @@
           "homeTeam": "Belgrano",
           "awayTeam": "Barracas",
           "league": "Arjantin Primera LPF",
-          "pickTitle": "1-X Çifte Şans (Belgrano Kaybetmez)",
+          "timeStr": "00:30",
           "marketTitle": "Çifte Şans",
+          "pickTitle": "1-X Çifte Şans (Belgrano Kaybetmez)",
           "marketCode": "CS1X",
           "odd": "1.08",
-          "timeStr": "00:30",
           "matchText": "00:30 Belgrano - Barracas 1-X Çifte Şans (Belgrano Kaybetmez) 1.08"
         }
       ],
-      "savedInAccount": true,
+      "savedInAccount": false,
       "screenshot": "C:\\Users\\gökhan\\Desktop\\Yapay Zeka\\sportpro analiz\\sportanaliz-pro\\data_cache\\screenshots\\nesine_kupon_15.png",
-      "timestamp": "2026-11-01T14:42:55.678Z",
+      "timestamp": "2026-11-01T15:10:55.340Z",
       "timeSlot": "evening",
-      "sessionName": "Gece Kuponu",
-      "sessionTimeRange": "18:00 - 23:59"
+      "sessionName": "Akşam Kuponu",
+      "sessionTimeRange": "22:00 - 02:30"
     }
   ]
 }

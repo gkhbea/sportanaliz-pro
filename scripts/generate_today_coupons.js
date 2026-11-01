@@ -6,15 +6,15 @@ const todayDate = '2026-11-01';
 const todayFmt = '01 Kasım 2026';
 const todayDot = '01.11.2026';
 
-// 15 adet otantik, canlı Nesine bülteninde bulunan güncel kupon
+// 15 adet otantik, canlı Nesine bülteninde bulunan güncel kupon (5 Sabah, 5 Öğlen, 5 Akşam)
 const couponConfigs = [
-    // --- 🌅 SEANS 1: ÖĞLEDEN SONRA / AKŞAMÜSTÜ (17:30 - 19:00) ---
+    // --- 🌅 SEANS 1: SABAH / GÜNÜN İLK SEANSI (5 KUPON) ---
     {
         couponNumber: 1,
-        title: "🛡️ Akşamüstü Garantör Banko / Kasa Katlama Kuponu",
+        title: "🛡️ Sabah Garantör Banko / Kasa Katlama Kuponu",
         subtitle: "Un. Craiova MS 1 (1.09), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)",
         timeSlot: "morning",
-        sessionName: "Akşamüstü Kuponu",
+        sessionName: "Sabah Kuponu",
         sessionTimeRange: "17:30 - 19:00",
         badge: "💎 Garantör Banko",
         picks: [
@@ -26,10 +26,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 2,
-        title: "⚡ İdeal Sistem Kuponu (Editör Seçimi)",
+        title: "⚡ Sabah İdeal Sistem Kuponu (Editör Seçimi)",
         subtitle: "Arouca 1-X Çifte Şans (1.01), B. Kaliningrad 1.5 ÜST (1.23) ve Levadeiakos 1.5 ÜST (1.23)",
         timeSlot: "morning",
-        sessionName: "Akşamüstü Kuponu",
+        sessionName: "Sabah Kuponu",
         sessionTimeRange: "17:30 - 19:00",
         badge: "⭐ Editör Seçimi",
         picks: [
@@ -40,10 +40,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 3,
-        title: "⚽ Akşamüstü Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)",
+        title: "⚽ Sabah Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)",
         subtitle: "Nordsjælland 2.5 ÜST (1.34), B. Kaliningrad 1.5 ÜST (1.23) ve Levadeiakos 1.5 ÜST (1.23)",
         timeSlot: "morning",
-        sessionName: "Akşamüstü Kuponu",
+        sessionName: "Sabah Kuponu",
         sessionTimeRange: "17:30 - 19:00",
         badge: "⚽ Gol Düellosu",
         picks: [
@@ -54,10 +54,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 4,
-        title: "🎯 Çifte Şans & Sıfır Risk Sigortalı Kupon",
+        title: "🎯 Sabah Çifte Şans & Sıfır Risk Sigortalı Kupon",
         subtitle: "Arouca 1-X (1.01), Craiova MS 1 (1.09) ve Elfsborg MS 1 (1.23)",
         timeSlot: "morning",
-        sessionName: "Akşamüstü Kuponu",
+        sessionName: "Sabah Kuponu",
         sessionTimeRange: "17:30 - 19:00",
         badge: "🛡️ Sıfır Risk",
         picks: [
@@ -68,10 +68,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 5,
-        title: "💎 Akılcı Değer & Taraf Kuponu",
+        title: "💎 Sabah Akılcı Değer & Taraf Kuponu",
         subtitle: "UB Conquense MS 1 (1.46), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)",
         timeSlot: "morning",
-        sessionName: "Akşamüstü Kuponu",
+        sessionName: "Sabah Kuponu",
         sessionTimeRange: "17:30 - 19:00",
         badge: "💎 Değer Kombin",
         picks: [
@@ -81,13 +81,13 @@ const couponConfigs = [
         ]
     },
 
-    // --- 🌆 SEANS 2: AKŞAM ANA BÜLTEN SEANSI (19:00 - 21:30) ---
+    // --- 🌆 SEANS 2: ÖĞLEN / AKŞAMÜSTÜ SEANSI (5 KUPON) ---
     {
         couponNumber: 6,
-        title: "🌟 VIP Kombin (Favori Güçler)",
+        title: "🌟 Öğlen VIP Kombin (Favori Güçler)",
         subtitle: "Lyon MS 1 (1.24), NK Celje MS 1 (1.24) ve Cusco MS 1 (1.29)",
         timeSlot: "noon",
-        sessionName: "Akşam Kuponu",
+        sessionName: "Öğlen Kuponu",
         sessionTimeRange: "19:00 - 21:30",
         badge: "🌟 VIP Güçler",
         picks: [
@@ -98,10 +98,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 7,
-        title: "🛡️ Akşam Garanti & Kasa Katlama Kuponu",
+        title: "🛡️ Öğlen Garanti & Kasa Katlama Kuponu",
         subtitle: "D. Bükreş MS 1 (1.30), Lyon MS 1 (1.24) ve NK Celje MS 1 (1.24)",
         timeSlot: "noon",
-        sessionName: "Akşam Kuponu",
+        sessionName: "Öğlen Kuponu",
         sessionTimeRange: "19:00 - 21:30",
         badge: "💎 Kasa Katlama",
         picks: [
@@ -112,10 +112,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 8,
-        title: "⚽ Akşam Gol Düellosu (1.5 ÜST Kombini)",
+        title: "⚽ Öğlen Gol Düellosu (1.5 ÜST Kombini)",
         subtitle: "Lecce 1.5 ÜST (1.28), Boca Juniors 1.5 ÜST (1.27) ve Maritimo 1.5 ÜST (1.30)",
         timeSlot: "noon",
-        sessionName: "Akşam Kuponu",
+        sessionName: "Öğlen Kuponu",
         sessionTimeRange: "19:00 - 21:30",
         badge: "⚽ 1.5 Gol Üstü",
         picks: [
@@ -126,10 +126,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 9,
-        title: "🔥 Karşılıklı Gol & Tempolu Maçlar (2.5 ÜST)",
+        title: "🔥 Öğlen Karşılıklı Gol & Tempolu Maçlar (2.5 ÜST)",
         subtitle: "Bohemians P. 2.5 ÜST (1.45) ve Austria Wien 2.5 ÜST (1.54)",
         timeSlot: "noon",
-        sessionName: "Akşam Kuponu",
+        sessionName: "Öğlen Kuponu",
         sessionTimeRange: "19:00 - 21:30",
         badge: "🔥 Tempolu Maçlar",
         picks: [
@@ -139,10 +139,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 10,
-        title: "🎯 Taraf Güvencesi & Editörün Yıldızı",
+        title: "🎯 Öğlen Taraf Güvencesi & Editörün Yıldızı",
         subtitle: "Zamora MS 1 (1.53), Cusco MS 1 (1.29) ve D. Bükreş MS 1 (1.30)",
         timeSlot: "noon",
-        sessionName: "Akşam Kuponu",
+        sessionName: "Öğlen Kuponu",
         sessionTimeRange: "19:00 - 21:30",
         badge: "🎯 Editörün Yıldızı",
         picks: [
@@ -152,13 +152,13 @@ const couponConfigs = [
         ]
     },
 
-    // --- 🌙 SEANS 3: GECE / GÜNEY AMERİKA & KAPANIŞ (22:00 - 02:30) ---
+    // --- 🌙 SEANS 3: AKŞAM / GECE KAPANIŞ SEANSI (5 KUPON) ---
     {
         couponNumber: 11,
-        title: "🌙 Gece / Güney Amerika & Kasa Katlama",
+        title: "🌙 Akşam / Güney Amerika & Kasa Katlama",
         subtitle: "Strongest MS 1 (1.08), Palmeiras 1.5 ÜST (1.22) ve Deportes MS 2 (1.21)",
         timeSlot: "evening",
-        sessionName: "Gece Kuponu",
+        sessionName: "Akşam Kuponu",
         sessionTimeRange: "22:00 - 02:30",
         badge: "🌙 Gece Katlama",
         picks: [
@@ -170,10 +170,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 12,
-        title: "🛡️ Gece Sıfır Risk Sigortalı Kombin",
+        title: "🛡️ Akşam Sıfır Risk Sigortalı Kombin",
         subtitle: "Belgrano 1-X (1.08), Strongest MS 1 (1.08) ve Walter Ferretti MS 1 (1.15)",
         timeSlot: "evening",
-        sessionName: "Gece Kuponu",
+        sessionName: "Akşam Kuponu",
         sessionTimeRange: "22:00 - 02:30",
         badge: "🛡️ Sigortalı Gece",
         picks: [
@@ -185,10 +185,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 13,
-        title: "⚽ Gece Gol Yağmuru (1.5 ÜST)",
+        title: "⚽ Akşam Gol Yağmuru (1.5 ÜST)",
         subtitle: "Palmeiras 1.5 ÜST (1.22), Gremio Novo MS 1 (1.22) ve Medellin 1.5 ÜST (1.28)",
         timeSlot: "evening",
-        sessionName: "Gece Kuponu",
+        sessionName: "Akşam Kuponu",
         sessionTimeRange: "22:00 - 02:30",
         badge: "⚽ Gol Düellosu",
         picks: [
@@ -199,10 +199,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 14,
-        title: "💎 Gece Değer & Taraf Kuponu",
+        title: "💎 Akşam Değer & Taraf Kuponu",
         subtitle: "Cuiaba MS 1 (1.63), Deportes MS 2 (1.21) ve Walter Ferretti MS 1 (1.15)",
         timeSlot: "evening",
-        sessionName: "Gece Kuponu",
+        sessionName: "Akşam Kuponu",
         sessionTimeRange: "22:00 - 02:30",
         badge: "💎 Değer Kombin",
         picks: [
@@ -213,10 +213,10 @@ const couponConfigs = [
     },
     {
         couponNumber: 15,
-        title: "🌟 Gece Kapanış Süper Kombini",
+        title: "🌟 Akşam Kapanış Süper Kombini",
         subtitle: "I. Medellin MS 1 (1.31), Gremio Novo MS 1 (1.22) ve Belgrano 1-X (1.08)",
         timeSlot: "evening",
-        sessionName: "Gece Kuponu",
+        sessionName: "Akşam Kuponu",
         sessionTimeRange: "22:00 - 02:30",
         badge: "🌟 Kapanış Kombini",
         picks: [
@@ -274,3 +274,4 @@ console.log(`📋 Kupon Sayısı: ${formattedCoupons.length}`);
 formattedCoupons.forEach(c => {
     console.log(`  - [${c.name}] ${c.title} (Oran: ${c.totalOdd}) - ${c.picks.length} maç (${c.picks[0].timeStr})`);
 });
+

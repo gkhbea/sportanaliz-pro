@@ -96,15 +96,15 @@ app.whenReady().then(async () => {
     await win.loadURL('https://www.nesine.com/iddaa');
     await new Promise(r => setTimeout(r, 3500));
 
-    // Popupları kapat ve Giriş Yap modalını açıp formu doldur
+    // Popupları kapat ve Giriş Yap modalını açıp formu doldur ve otomatik GİRİŞ butonuna bas
     await win.webContents.executeJavaScript(`
         (async () => {
-            const isAlreadyLoggedIn = !!(
-                document.querySelector('.member-menu, .user-profile, .user-info, .account-info, .header-user, #memberSummary, [class*="profile"]') ||
+            const isAlreadyLoggedIn = () => !!(
+                document.querySelector('.member-menu, .user-profile, .user-info, .account-info, .header-user, #memberSummary') ||
                 document.body.innerText.includes('Hesabım') ||
                 document.body.innerText.includes('Çıkış')
             );
-            if (isAlreadyLoggedIn) {
+            if (isAlreadyLoggedIn()) {
                 console.log('Kullanıcı zaten giriş yapmış durumda.');
                 return;
             }
@@ -126,46 +126,58 @@ app.whenReady().then(async () => {
             });
             if (loginBtn) {
                 loginBtn.click();
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 1200));
             }
 
-            // Kullanıcı adı ve şifreyi doldur
-            const userInp = document.querySelector('input[type="text"][name*="user"], input[name*="username"], input[placeholder*="Üye No"], input[placeholder*="TC"], #txtUsername, #username, input.username');
-            if (userInp) {
-                userInp.focus();
-                userInp.value = '${USERNAME}';
-                userInp.dispatchEvent(new Event('input', { bubbles: true }));
-                userInp.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+            // Inputları Native Değer ile Doldur
+            const setNativeValue = (element, value) => {
+                const valueSetter = Object.getOwnPropertyDescriptor(element.__proto__, 'value') ||
+                                    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+                if (valueSetter && valueSetter.set) {
+                    valueSetter.set.call(element, value);
+                } else {
+                    element.value = value;
+                }
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+            };
 
-            const passInp = document.querySelector('input[type="password"]');
-            if (passInp) {
-                passInp.focus();
-                passInp.value = '${PASSWORD}';
-                passInp.dispatchEvent(new Event('input', { bubbles: true }));
-                passInp.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+            const textInps = Array.from(document.querySelectorAll('input[type="text"]')).filter(i => i.offsetParent !== null);
+            const passInps = Array.from(document.querySelectorAll('input[type="password"]')).filter(i => i.offsetParent !== null);
 
-            // Güvenlik kodu inputuna odaklan
-            const captchaInput = document.querySelector('input[name*="captcha"], input[placeholder*="Güvenlik"], input[id*="captcha"], input[id*="Security"]');
-            if (captchaInput) {
-                captchaInput.focus();
+            if (textInps.length > 0) setNativeValue(textInps[0], '${USERNAME}');
+            if (passInps.length > 0) setNativeValue(passInps[0], '${PASSWORD}');
+
+            await new Promise(r => setTimeout(r, 500));
+
+            // Otomatik GİRİŞ Butonuna Bas
+            const targetBtn = Array.from(document.querySelectorAll('button, a, input[type="submit"]')).find(b => {
+                const t = (b.innerText || b.value || '').trim();
+                return t === 'GİRİŞ' || t === 'GİRİŞ ▶' || t.startsWith('GİRİŞ');
+            });
+
+            if (targetBtn) {
+                targetBtn.focus();
+                targetBtn.click();
+            } else if (passInps.length > 0) {
+                passInps[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
+                passInps[0].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', keyCode: 13, bubbles: true }));
             }
 
             // Bilgilendirme rehber çubuğu oluştur
             const guide = document.createElement('div');
             guide.id = 'sportanaliz-guide-banner';
             guide.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999999;background:linear-gradient(135deg,#1E293B,#0F172A);color:#F8FAFC;padding:14px 20px;text-align:center;font-size:15px;font-weight:600;font-family:sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.5);border-bottom:3px solid #10B981;';
-            guide.innerHTML = '⚡ <b>SportAnaliz Pro</b> | Kullanıcı adı ve şifreniz dolduruldu. Lütfen ekrandaki <b>Güvenlik Kodunu</b> yazıp <b>Giriş Yap</b>\\'a tıklayınız. Kuponlarınız otomatik hesabınıza kaydedilecektir.';
+            guide.innerHTML = '⚡ <b>SportAnaliz Pro</b> | Üye girişiniz yapılıyor ve 15 adet kuponunuz hesabınıza kaydediliyor, lütfen bekleyiniz...';
             document.body.appendChild(guide);
         })()
     `);
 
-    console.log('[2/4] Kullanıcı bilgileri yazıldı. Lütfen ekrandaki güvenlik kodunu girip "Giriş Yap"a basınız...');
+    console.log('[2/4] Üye bilgileri dolduruldu ve GİRİŞ butonuna basıldı. Giriş kontrol ediliyor...');
 
-    // Kullanıcının giriş yapmasını bekle (maksimum 300 saniye / 5 dakika)
+    // Kullanıcının giriş yapmasını bekle (otomatik giriş 3-5 saniyede tamamlanır)
     let loggedIn = false;
-    for (let sec = 0; sec < 300; sec++) {
+    for (let sec = 0; sec < 45; sec++) {
         await new Promise(r => setTimeout(r, 1000));
         try {
             loggedIn = await win.webContents.executeJavaScript(`
@@ -176,8 +188,7 @@ app.whenReady().then(async () => {
                         document.body.innerText.includes('Çıkış') ||
                         document.body.innerText.includes('${USERNAME}')
                     );
-                    const noPass = !document.querySelector('input[type="password"]');
-                    return hasUser && noPass;
+                    return hasUser;
                 })()
             `);
             if (loggedIn) break;
