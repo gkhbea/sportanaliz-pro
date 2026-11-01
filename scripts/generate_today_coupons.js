@@ -127,14 +127,15 @@ const couponConfigs = [
     {
         couponNumber: 9,
         title: "🔥 Öğlen Karşılıklı Gol & Tempolu Maçlar (2.5 ÜST)",
-        subtitle: "Bohemians P. 2.5 ÜST (1.45) ve Austria Wien 2.5 ÜST (1.54)",
+        subtitle: "Bohemians P. 2.5 ÜST (1.45), Austria Wien 2.5 ÜST (1.54) ve L. Zagreb 2.5 ÜST (1.55)",
         timeSlot: "noon",
         sessionName: "Öğlen Kuponu",
         sessionTimeRange: "19:00 - 21:30",
         badge: "🔥 Tempolu Maçlar",
         picks: [
             { iddaaCode: '3254645', homeTeam: 'Bohemians P.', awayTeam: 'Sparta Prag', league: 'Çekya 1. Lig', timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.45' },
-            { iddaaCode: '3258330', homeTeam: 'Austria Wien', awayTeam: 'Rapid Wien', league: 'Avusturya Bundesliga', timeStr: '19:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.54' }
+            { iddaaCode: '3258330', homeTeam: 'Austria Wien', awayTeam: 'Rapid Wien', league: 'Avusturya Bundesliga', timeStr: '19:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.54' },
+            { iddaaCode: '3252892', homeTeam: 'L. Zagreb', awayTeam: 'Osijek', league: 'Hırvatistan 1. HNL', timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.55' }
         ]
     },
     {
