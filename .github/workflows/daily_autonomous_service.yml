@@ -75,3 +75,4 @@ jobs:
             git commit -m "chore(auto): günün kuponları ve analizleri otonom olarak güncellendi [skip ci]"
             git push
           fi
+

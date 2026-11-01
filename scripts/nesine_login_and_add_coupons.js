@@ -217,6 +217,14 @@ app.whenReady().then(async () => {
 
                     // 1. Önceki kuponu temizle (Temiz kupon başlangıcı)
                     const clearCoupon = async () => {
+                        // Kalan açık modal ve backdrop'ları temizle
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.querySelectorAll('.modal.show, .modal[style*="display: block"]').forEach(m => {
+                            m.style.display = 'none';
+                            m.classList.remove('show', 'in');
+                        });
+                        document.body.classList.remove('modal-open');
+
                         try {
                             if (window.CouponManager && typeof window.CouponManager.cancel === 'function') {
                                 window.CouponManager.cancel({ sender: 'trash' });
@@ -224,7 +232,7 @@ app.whenReady().then(async () => {
                         } catch(e){}
                         const trash = document.querySelector('.ni-trash, i[class*="trash"], [class*="delete"]');
                         if (trash) {
-                            const btn = trash.closest('button, a') || trash;
+                            const btn = trash.closest('button, a, div') || trash;
                             try { btn.click(); } catch(e){}
                             await new Promise(r => setTimeout(r, 300));
                             Array.from(document.querySelectorAll('.modal button, .modal a')).forEach(b => {
@@ -250,13 +258,15 @@ app.whenReady().then(async () => {
                             // Yöntem A: CouponManager üzerinden doğrudan maç kodunu ve oranını ekle
                             if (window.CouponManager && window.ProgramManager && matchCode) {
                                 try {
-                                    const ev = window.ProgramManager.GetProgramEventByCode(matchCode);
+                                    const codeInt = parseInt(matchCode, 10);
+                                    const ev = window.ProgramManager.GetProgramEventByCode(matchCode) ||
+                                               (codeInt ? window.ProgramManager.GetProgramEventByCode(codeInt) : null);
                                     if (ev && ev.MA && ev.MA.length > 0) {
                                         for (const m of ev.MA) {
                                             if (m.OCA) {
                                                 const oca = m.OCA.find(o => Math.abs(parseFloat(o.O) - targetOdd) < 0.05);
                                                 if (oca) {
-                                                    window.CouponManager.AddEventToCoupon(matchCode, m.ID || m.NO, oca.N, oca.O);
+                                                    window.CouponManager.AddEventToCoupon(ev.C || matchCode, m.ID || m.NO, oca.N, oca.O);
                                                     added = true;
                                                     selectedPicks.push({
                                                         title: (pick.homeTeam || '') + ' - ' + (pick.awayTeam || ''),
@@ -281,7 +291,7 @@ app.whenReady().then(async () => {
                                         searchInp.value = searchTerm;
                                         searchInp.dispatchEvent(new Event('input', { bubbles: true }));
                                         searchInp.dispatchEvent(new Event('keyup', { bubbles: true }));
-                                        await new Promise(r => setTimeout(r, 450));
+                                        await new Promise(r => setTimeout(r, 500));
 
                                         const oddButtons = Array.from(document.querySelectorAll('button, a, div, span')).filter(el => {
                                             const t = (el.innerText || '').trim();
@@ -314,7 +324,7 @@ app.whenReady().then(async () => {
                         for (let scrollStep = 0; scrollStep < 10 && selectedPicks.length < 3; scrollStep++) {
                             const oddBtns = Array.from(document.querySelectorAll('button, a, div')).filter(b => {
                                 const t = (b.innerText || '').trim();
-                                return /^[1-9]\\.\\d{2}$/.test(t) && b.offsetHeight > 10;
+                                return /^[1-9]\\.\\d{2}$/.test(t) && b.offsetHeight > 10 && !b.closest('.coupon, #coupon, .coupon-panel, .slip');
                             });
                             for (const btn of oddBtns) {
                                 if (selectedPicks.length >= 3) break;
@@ -334,37 +344,90 @@ app.whenReady().then(async () => {
                         }
                     }
 
-                    // 3. Kupon Kaydet Modalını Aç
+                    // 3. Kupon Kaydet Modalını Aç (Floppy disk butonu veya CouponManager.OpenSaveCouponPopup)
+                    let modalOpened = false;
                     try {
                         if (window.CouponManager && typeof window.CouponManager.OpenSaveCouponPopup === 'function') {
                             window.CouponManager.OpenSaveCouponPopup();
-                            await new Promise(r => setTimeout(r, 400));
+                            modalOpened = true;
                         }
                     } catch(e){}
 
+                    const saveIcon = document.querySelector('.saveBtn, .optionButtons.saveBtn, i.ni-save, [title="KAYDET"], [onclick*="OpenSaveCouponPopup"]');
+                    if (saveIcon) {
+                        const btn = saveIcon.closest('div, button, a') || saveIcon;
+                        try { btn.click(); modalOpened = true; } catch(e){}
+                    }
+
+                    await new Promise(r => setTimeout(r, 500));
+
                     // 4. Kupon Adını Yaz
-                    const nameInput = document.querySelector('#coupon-name, input.coupon-name-input, input[name="coupon-name"]');
+                    let nameInput = null;
+                    for (let w = 0; w < 25; w++) {
+                        nameInput = document.querySelector('#coupon-name, input.coupon-name-input, input[name="coupon-name"]');
+                        if (nameInput && nameInput.offsetParent !== null) break;
+                        await new Promise(r => setTimeout(r, 100));
+                    }
+
                     let nameSaved = false;
                     if (nameInput) {
                         nameInput.focus();
-                        nameInput.value = nesineCouponName;
+                        nameInput.value = '';
+                        // Nesine kupon adı en fazla 20 karakter kabul eder
+                        const safeName = nesineCouponName.slice(0, 20);
+                        nameInput.value = safeName;
                         nameInput.dispatchEvent(new Event('input', { bubbles: true }));
                         nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        nameInput.dispatchEvent(new Event('keyup', { bubbles: true }));
                         nameInput.dispatchEvent(new Event('blur', { bubbles: true }));
-                        nameSaved = true;
-                    }
+                        await new Promise(r => setTimeout(r, 300));
 
-                    // 5. Kaydet Butonuna Bas
-                    const saveBtn = document.querySelector('#mod-confirmation-save, #saveCouponName, .btn-save-coupon-name');
-                    if (saveBtn) {
-                        try { saveBtn.click(); } catch(e){}
-                    } else {
-                        Array.from(document.querySelectorAll('button, a')).forEach(b => {
-                            const t = (b.innerText || '').toLowerCase().trim();
-                            if (t === 'kaydet' || t.includes('kuponu kaydet')) {
-                                try { b.click(); } catch(e){}
+                        // 5. "Tamam" Butonuna Bas (#saveCouponName)
+                        const saveBtn = document.getElementById('saveCouponName') ||
+                                        document.querySelector('#mod-give-coupon-name-step1 #saveCouponName, #mod-give-coupon-name-step1 button.btn-primary');
+                        if (saveBtn) {
+                            if (window.$) {
+                                try { window.$(saveBtn).trigger('click'); } catch(e){}
                             }
+                            try { saveBtn.click(); } catch(e){}
+                            nameSaved = true;
+                        } else {
+                            const allBtns = Array.from(document.querySelectorAll('#mod-give-coupon-name-step1 button, .modal button'));
+                            const tamamBtn = allBtns.find(b => b.innerText.trim() === 'Tamam');
+                            if (tamamBtn) {
+                                if (window.$) {
+                                    try { window.$(tamamBtn).trigger('click'); } catch(e){}
+                                }
+                                try { tamamBtn.click(); } catch(e){}
+                                nameSaved = true;
+                            }
+                        }
+
+                        // 6. Step 2 "Kupon adı kaydedilmiştir" Modalını Kapat
+                        await new Promise(r => setTimeout(r, 800));
+                        for (let s2 = 0; s2 < 20; s2++) {
+                            const step2 = document.getElementById('mod-give-coupon-name-step2');
+                            if (step2 && (step2.classList.contains('show') || step2.style.display !== 'none' || step2.offsetHeight > 0)) {
+                                const okBtn = step2.querySelector('button, [data-id="btnOk"], .btn-close');
+                                if (okBtn) {
+                                    if (window.$) {
+                                        try { window.$(okBtn).trigger('click'); } catch(e){}
+                                    }
+                                    try { okBtn.click(); } catch(e){}
+                                    await new Promise(r => setTimeout(r, 300));
+                                    break;
+                                }
+                            }
+                            await new Promise(r => setTimeout(r, 100));
+                        }
+
+                        // Tüm backdrop ve açık modalları güvenlice temizle
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.querySelectorAll('.modal.show, .modal[style*="display: block"]').forEach(m => {
+                            m.style.display = 'none';
+                            m.classList.remove('show', 'in');
                         });
+                        document.body.classList.remove('modal-open');
                     }
 
                     return {
@@ -378,7 +441,11 @@ app.whenReady().then(async () => {
 
             console.log(`   ✅ ${stepResult.selectedCount} maç seçildi.`);
             stepResult.selectedOdds.forEach(p => console.log(`      ⚽ ${p.title} (${p.odd})`));
-            console.log(`   💾 Kupon Adı: "${stepResult.couponName}" hesaba kaydedildi!`);
+            if (stepResult && stepResult.nameSaved) {
+                console.log(`   💾 Kupon Adı: "${stepResult.couponName}" hesaba kaydedildi!`);
+            } else {
+                console.log(`   ⚠️ Kupon Adı: "${stepResult.couponName}" kaydedilemedi.`);
+            }
 
             await new Promise(r => setTimeout(r, 1500));
             const img = await win.capturePage();
@@ -391,7 +458,7 @@ app.whenReady().then(async () => {
                 name: nesineCouponName,
                 title: coupon.title,
                 picks: stepResult.selectedOdds,
-                savedInAccount: true,
+                savedInAccount: !!(stepResult && stepResult.nameSaved),
                 screenshot: path.join(ARTIFACT_DIR, screenshotFile),
                 timestamp: new Date().toISOString()
             });
