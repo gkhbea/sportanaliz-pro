@@ -18,14 +18,20 @@ const VirtualCouponManager = {
     // Kasa / Cüzdan Bilgisini Getir
     getWallet() {
         try {
-            const raw = localStorage.getItem(this.STORAGE_KEY_WALLET);
+            const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(this.STORAGE_KEY_WALLET) : null;
             if (raw) return JSON.parse(raw);
+            if (typeof require !== 'undefined') {
+                const fs = require('fs');
+                const path = require('path');
+                const p = path.join(__dirname, '..', '..', 'data_cache', 'user_wallet_state.json');
+                if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+            }
         } catch (e) {
             console.error('Sanal cüzdan okuma hatası:', e);
         }
         const defaultWallet = {
-            initialBalance: 10000,
-            currentBalance: 14547, // 09 - 19 Eylül tüm kümülatif kazançları dahil
+            initialBalance: 500,
+            currentBalance: 500, // Başlangıç kasası 500 TL
             createdAt: new Date().toISOString()
         };
         this.saveWallet(defaultWallet);
@@ -46,8 +52,8 @@ const VirtualCouponManager = {
         }
     },
 
-    resetWallet(newBalance = 10000) {
-        const val = Math.max(100, parseFloat(newBalance) || 10000);
+    resetWallet(newBalance = 500) {
+        const val = Math.max(0, parseFloat(newBalance) || 500);
         const wallet = {
             initialBalance: val,
             currentBalance: val,
@@ -345,6 +351,12 @@ const VirtualCouponManager = {
         try {
             const raw = localStorage.getItem(this.STORAGE_KEY_SLIP);
             if (raw) return JSON.parse(raw);
+            if (typeof require !== 'undefined') {
+                const fs = require('fs');
+                const path = require('path');
+                const p = path.join(__dirname, '..', '..', 'data_cache', 'user_wallet_state.json');
+                if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+            }
         } catch (e) {
             console.error('Sanal kupon sepeti okuma hatası:', e);
         }
@@ -1287,13 +1299,13 @@ const VirtualCouponPanel = {
                         Sanal kasanızı istediğiniz miktara ayarlayabilirsiniz.
                     </p>
                     <label style="font-size:0.8rem;color:#cbd5e1;display:block;margin-bottom:6px;">YENİ BAKİYE (TL):</label>
-                    <input type="number" id="input-vc-new-balance" value="${stats.currentBalance || 10000}" step="500" min="100" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.5);color:#fff;border-radius:8px;padding:10px;font-size:1.1rem;font-weight:800;margin-bottom:14px;">
+                    <input type="number" id="input-vc-new-balance" value="${stats.currentBalance || 500}" step="100" min="0" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.5);color:#fff;border-radius:8px;padding:10px;font-size:1.1rem;font-weight:800;margin-bottom:14px;">
 
                     <div style="display:flex;gap:8px;margin-bottom:18px;">
+                        <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="500" style="flex:1;background:rgba(255,255,255,0.05);">500 TL</button>
+                        <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="1000" style="flex:1;background:rgba(255,255,255,0.05);">1.000 TL</button>
+                        <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="2500" style="flex:1;background:rgba(255,255,255,0.05);">2.500 TL</button>
                         <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="5000" style="flex:1;background:rgba(255,255,255,0.05);">5.000 TL</button>
-                        <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="10000" style="flex:1;background:rgba(255,255,255,0.05);">10.000 TL</button>
-                        <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="25000" style="flex:1;background:rgba(255,255,255,0.05);">25.000 TL</button>
-                        <button class="btn btn-ghost btn-sm btn-vc-modal-preset" data-val="50000" style="flex:1;background:rgba(255,255,255,0.05);">50.000 TL</button>
                     </div>
 
                     <button class="btn btn-primary btn-block" id="btn-vc-confirm-reset" style="background:linear-gradient(135deg, #a855f7, #6366f1);color:#fff;font-weight:700;padding:10px;">

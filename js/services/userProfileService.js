@@ -25,10 +25,18 @@ const UserProfileService = {
      */
     getProfile() {
         try {
-            const raw = localStorage.getItem(this.STORAGE_KEY);
+            const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(this.STORAGE_KEY) : null;
             if (raw) {
                 const parsed = JSON.parse(raw);
                 return Object.assign({}, this.defaultProfile, parsed);
+            }
+            if (typeof require !== 'undefined') {
+                const fs = require('fs');
+                const path = require('path');
+                const p = path.join(__dirname, '..', '..', 'data_cache', 'user_profile_state.json');
+                if (fs.existsSync(p)) {
+                    return JSON.parse(fs.readFileSync(p, 'utf8'));
+                }
             }
         } catch (e) {
             console.error('UserProfileService getProfile hatası:', e);
