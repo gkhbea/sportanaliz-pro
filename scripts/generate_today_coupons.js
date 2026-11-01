@@ -1,278 +1,292 @@
+/**
+ * generate_today_coupons.js — SportAnaliz Pro
+ * Kaliteli ve Seçkin Liglerden Günün 15 Kuponunu Oluşturur
+ * 
+ * Seans Dağılımı:
+ * - 5 Sabah Kuponu (Kupon 1-5): Elit Ligler Banko & Kasa Katlama (Atalanta, Benfica, Mallorca, Reims)
+ * - 5 Öğlen Kuponu (Kupon 6-10): Avrupa Devleri & Vitrin Maçları (Juventus vs Napoli, Newcastle, Braga, La Coruna)
+ * - 5 Akşam Kuponu (Kupon 11-15): Gece Sambası & Gol Düelloları (Gremio, Belgrano, Bragantino, Jong Ajax)
+ * 
+ * Kural: Tüm maçlar resmi Nesine bülteninden, büyük liglerden ve %100 MBS uyumludur.
+ */
+
 const fs = require('fs');
 const path = require('path');
 
-const CACHE_DIR = path.join(__dirname, '..', 'data_cache');
-const todayDate = '2026-11-01';
-const todayFmt = '01 Kasım 2026';
-const todayDot = '01.11.2026';
-
-// 15 adet otantik, canlı Nesine bülteninde bulunan güncel kupon (5 Sabah, 5 Öğlen, 5 Akşam)
 const couponConfigs = [
-    // --- 🌅 SEANS 1: SABAH / GÜNÜN İLK SEANSI (5 KUPON) ---
+    // -------------------------------------------------------------
+    // SEANS 1: SABAH KUPONLARI (1 - 5) — ELİT LİGLER BANKO & KASA KATLAMA
+    // -------------------------------------------------------------
     {
         couponNumber: 1,
         title: "🛡️ Sabah Garantör Banko / Kasa Katlama Kuponu",
-        subtitle: "Un. Craiova MS 1 (1.09), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)",
+        subtitle: "Atalanta (1.34), Benfica 2.5 ÜST (1.22) ve Mallorca (1.34)",
         timeSlot: "morning",
         sessionName: "Sabah Kuponu",
-        sessionTimeRange: "17:30 - 19:00",
-        badge: "💎 Garantör Banko",
+        sessionTimeRange: "10:00 - 13:00",
+        badge: "🛡️ Kasa Katlama",
         picks: [
-            { iddaaCode: '3254215', homeTeam: 'Un. Craiova', awayTeam: 'Botosani', league: 'Romanya 1. Lig', timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Craiova Kazanır)', marketCode: 'MS1', odd: '1.09' },
-            { iddaaCode: '3258351', homeTeam: 'IF Elfsborg', awayTeam: 'Orgryte', league: 'İsveç Allsvenskan', timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Elfsborg Kazanır)', marketCode: 'MS1', odd: '1.23' },
-            { iddaaCode: '3342526', homeTeam: 'Al Muharraq', awayTeam: 'Sitra Club', league: 'Bahreyn Premier Lig', timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Al Muharraq Kazanır)', marketCode: 'MS1', odd: '1.22' },
-            { iddaaCode: '3258221', homeTeam: 'Hajer Al Hasa', awayTeam: 'AL Ula', league: 'Suudi Arabistan 1. Lig', timeStr: '17:40', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (AL Ula Kazanır)', marketCode: 'MS2', odd: '1.14' }
+            { iddaaCode: '3262167', homeTeam: 'Atalanta', awayTeam: 'Parma', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atalanta Kazanır)', marketCode: 'MS1', odd: '1.34' },
+            { iddaaCode: '3262056', homeTeam: 'Benfica', awayTeam: 'Alverca', league: 'Portekiz Premier Lig', timeStr: '23:15', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.22' },
+            { iddaaCode: '3258685', homeTeam: 'Mallorca', awayTeam: 'Cadiz', league: 'İspanya 2. Lig', timeStr: '23:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Mallorca Kazanır)', marketCode: 'MS1', odd: '1.34' }
         ]
     },
     {
         couponNumber: 2,
         title: "⚡ Sabah İdeal Sistem Kuponu (Editör Seçimi)",
-        subtitle: "Arouca 1-X Çifte Şans (1.01), B. Kaliningrad 1.5 ÜST (1.23) ve Levadeiakos 1.5 ÜST (1.23)",
+        subtitle: "Reims (1.52), Atalanta 2.5 ÜST (1.38) ve Dep. La Coruna 1-X (1.16)",
         timeSlot: "morning",
         sessionName: "Sabah Kuponu",
-        sessionTimeRange: "17:30 - 19:00",
-        badge: "⭐ Editör Seçimi",
+        sessionTimeRange: "10:00 - 13:00",
+        badge: "⚡ Editör Seçimi",
         picks: [
-            { iddaaCode: '3258220', homeTeam: 'Arouca', awayTeam: 'N. Madeira', league: 'Portekiz Premier Lig', timeStr: '18:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Arouca Kaybetmez)', marketCode: 'CS1X', odd: '1.01' },
-            { iddaaCode: '3258213', homeTeam: 'B. Kaliningrad', awayTeam: 'Akron Tolyatti', league: 'Rusya Premier Lig', timeStr: '17:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.23' },
-            { iddaaCode: '3258678', homeTeam: 'APO Levadeiakos', awayTeam: 'Aris', league: 'Yunanistan Süper Lig', timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.23' }
+            { iddaaCode: '3354433', homeTeam: 'Reims', awayTeam: 'Sochaux', league: 'Fransa Ligue 2', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Reims Kazanır)', marketCode: 'MS1', odd: '1.52' },
+            { iddaaCode: '3262167', homeTeam: 'Atalanta', awayTeam: 'Parma', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.38' },
+            { iddaaCode: '3258713', homeTeam: 'Dep. La Coruna', awayTeam: 'Osasuna', league: 'İspanya La Liga', timeStr: '23:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: '1.16' }
         ]
     },
     {
         couponNumber: 3,
         title: "⚽ Sabah Gol Yağmuru Kuponu (1.5 / 2.5 ÜST)",
-        subtitle: "Nordsjælland 2.5 ÜST (1.34), B. Kaliningrad 1.5 ÜST (1.23) ve Levadeiakos 1.5 ÜST (1.23)",
+        subtitle: "Jong Ajax 2.5 ÜST (1.18), Jong PSV 2.5 ÜST (1.17) ve Benfica 2.5 ÜST (1.22)",
         timeSlot: "morning",
         sessionName: "Sabah Kuponu",
-        sessionTimeRange: "17:30 - 19:00",
-        badge: "⚽ Gol Düellosu",
+        sessionTimeRange: "10:00 - 13:00",
+        badge: "⚽ Gol Yağmuru",
         picks: [
-            { iddaaCode: '3258303', homeTeam: 'Nordsjælland', awayTeam: 'Midtjylland', league: 'Danimarka Süper Ligi', timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.34' },
-            { iddaaCode: '3258213', homeTeam: 'B. Kaliningrad', awayTeam: 'Akron Tolyatti', league: 'Rusya Premier Lig', timeStr: '17:30', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.23' },
-            { iddaaCode: '3258678', homeTeam: 'APO Levadeiakos', awayTeam: 'Aris', league: 'Yunanistan Süper Lig', timeStr: '18:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.23' }
+            { iddaaCode: '3262341', homeTeam: 'Jong Ajax', awayTeam: 'Vitesse', league: 'Hollanda 1. Lig', timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.18' },
+            { iddaaCode: '3262151', homeTeam: 'Jong PSV', awayTeam: 'NAC Breda', league: 'Hollanda 1. Lig', timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.17' },
+            { iddaaCode: '3262056', homeTeam: 'Benfica', awayTeam: 'Alverca', league: 'Portekiz Premier Lig', timeStr: '23:15', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.22' }
         ]
     },
     {
         couponNumber: 4,
         title: "🎯 Sabah Çifte Şans & Sıfır Risk Sigortalı Kupon",
-        subtitle: "Arouca 1-X (1.01), Craiova MS 1 (1.09) ve Elfsborg MS 1 (1.23)",
+        subtitle: "Newcastle 1-X (1.26), Lorient 1-X (1.25) ve Mallorca (1.34)",
         timeSlot: "morning",
         sessionName: "Sabah Kuponu",
-        sessionTimeRange: "17:30 - 19:00",
-        badge: "🛡️ Sıfır Risk",
+        sessionTimeRange: "10:00 - 13:00",
+        badge: "🎯 Sıfır Risk",
         picks: [
-            { iddaaCode: '3258220', homeTeam: 'Arouca', awayTeam: 'N. Madeira', league: 'Portekiz Premier Lig', timeStr: '18:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Arouca Kaybetmez)', marketCode: 'CS1X', odd: '1.01' },
-            { iddaaCode: '3254215', homeTeam: 'Un. Craiova', awayTeam: 'Botosani', league: 'Romanya 1. Lig', timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Craiova Kazanır)', marketCode: 'MS1', odd: '1.09' },
-            { iddaaCode: '3258351', homeTeam: 'IF Elfsborg', awayTeam: 'Orgryte', league: 'İsveç Allsvenskan', timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Elfsborg Kazanır)', marketCode: 'MS1', odd: '1.23' }
+            { iddaaCode: '3262120', homeTeam: 'Newcastle Utd', awayTeam: 'Everton', league: 'İngiltere Premier Lig', timeStr: '23:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Newcastle Kaybetmez)', marketCode: 'CS1X', odd: '1.26' },
+            { iddaaCode: '3254536', homeTeam: 'Lorient', awayTeam: 'Brest', league: 'Fransa Ligue 1', timeStr: '22:45', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Lorient Kaybetmez)', marketCode: 'CS1X', odd: '1.25' },
+            { iddaaCode: '3258685', homeTeam: 'Mallorca', awayTeam: 'Cadiz', league: 'İspanya 2. Lig', timeStr: '23:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Mallorca Kazanır)', marketCode: 'MS1', odd: '1.34' }
         ]
     },
     {
         couponNumber: 5,
         title: "💎 Sabah Akılcı Değer & Taraf Kuponu",
-        subtitle: "UB Conquense MS 1 (1.46), Elfsborg MS 1 (1.23) ve Al Muharraq MS 1 (1.22)",
+        subtitle: "Newcastle MS 1 (2.10), Reims MS 1 (1.52) ve Atalanta MS 1 (1.34)",
         timeSlot: "morning",
         sessionName: "Sabah Kuponu",
-        sessionTimeRange: "17:30 - 19:00",
-        badge: "💎 Değer Kombin",
+        sessionTimeRange: "10:00 - 13:00",
+        badge: "💎 Değer Kombini",
         picks: [
-            { iddaaCode: '3258234', homeTeam: 'UB Conquense', awayTeam: 'RSD Alcala', league: 'İspanya Segunda RFEF', timeStr: '19:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Conquense Kazanır)', marketCode: 'MS1', odd: '1.46' },
-            { iddaaCode: '3258351', homeTeam: 'IF Elfsborg', awayTeam: 'Orgryte', league: 'İsveç Allsvenskan', timeStr: '18:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Elfsborg Kazanır)', marketCode: 'MS1', odd: '1.23' },
-            { iddaaCode: '3342526', homeTeam: 'Al Muharraq', awayTeam: 'Sitra Club', league: 'Bahreyn Premier Lig', timeStr: '18:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Al Muharraq Kazanır)', marketCode: 'MS1', odd: '1.22' }
+            { iddaaCode: '3262120', homeTeam: 'Newcastle Utd', awayTeam: 'Everton', league: 'İngiltere Premier Lig', timeStr: '23:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Newcastle Kazanır)', marketCode: 'MS1', odd: '2.10' },
+            { iddaaCode: '3354433', homeTeam: 'Reims', awayTeam: 'Sochaux', league: 'Fransa Ligue 2', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Reims Kazanır)', marketCode: 'MS1', odd: '1.52' },
+            { iddaaCode: '3262167', homeTeam: 'Atalanta', awayTeam: 'Parma', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atalanta Kazanır)', marketCode: 'MS1', odd: '1.34' }
         ]
     },
 
-    // --- 🌆 SEANS 2: ÖĞLEN / AKŞAMÜSTÜ SEANSI (5 KUPON) ---
+    // -------------------------------------------------------------
+    // SEANS 2: ÖĞLEN KUPONLARI (6 - 10) — AVRUPA DEVLERİ & DERBİLER
+    // -------------------------------------------------------------
     {
         couponNumber: 6,
-        title: "🌟 Öğlen VIP Kombin (Favori Güçler)",
-        subtitle: "Lyon MS 1 (1.24), NK Celje MS 1 (1.24) ve Cusco MS 1 (1.29)",
+        title: "🌟 Öğlen VIP Kombin (Avrupa Devleri)",
+        subtitle: "Juventus 1-X (1.17), Braga MS 1 (1.46) ve Atalanta MS 1 (1.34)",
         timeSlot: "noon",
         sessionName: "Öğlen Kuponu",
-        sessionTimeRange: "19:00 - 21:30",
-        badge: "🌟 VIP Güçler",
+        sessionTimeRange: "14:00 - 17:30",
+        badge: "🌟 VIP Seçim",
         picks: [
-            { iddaaCode: '3254138', homeTeam: 'Lyon', awayTeam: 'Angers', league: 'Fransa Ligue 1', timeStr: '19:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Lyon Kazanır)', marketCode: 'MS1', odd: '1.24' },
-            { iddaaCode: '3253140', homeTeam: 'NK Celje', awayTeam: 'Nafta', league: 'Slovenya PrvaLiga', timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Celje Kazanır)', marketCode: 'MS1', odd: '1.24' },
-            { iddaaCode: '3253460', homeTeam: 'Cusco', awayTeam: 'Sport Boys', league: 'Peru Prmr Ligi', timeStr: '21:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Cusco Kazanır)', marketCode: 'MS1', odd: '1.29' }
+            { iddaaCode: '3259141', homeTeam: 'Juventus', awayTeam: 'Napoli', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Juventus Kaybetmez)', marketCode: 'CS1X', odd: '1.17' },
+            { iddaaCode: '3258867', homeTeam: 'Braga', awayTeam: 'Famalicao', league: 'Portekiz Premier Lig', timeStr: '23:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Braga Kazanır)', marketCode: 'MS1', odd: '1.46' },
+            { iddaaCode: '3262167', homeTeam: 'Atalanta', awayTeam: 'Parma', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Atalanta Kazanır)', marketCode: 'MS1', odd: '1.34' }
         ]
     },
     {
         couponNumber: 7,
         title: "🛡️ Öğlen Garanti & Kasa Katlama Kuponu",
-        subtitle: "D. Bükreş MS 1 (1.30), Lyon MS 1 (1.24) ve NK Celje MS 1 (1.24)",
+        subtitle: "Braga MS 1 (1.46), Mallorca MS 1 (1.34) ve Reims 1-X (1.06)",
         timeSlot: "noon",
         sessionName: "Öğlen Kuponu",
-        sessionTimeRange: "19:00 - 21:30",
-        badge: "💎 Kasa Katlama",
+        sessionTimeRange: "14:00 - 17:30",
+        badge: "🛡️ Garanti Banko",
         picks: [
-            { iddaaCode: '3255592', homeTeam: 'D. Bükreş', awayTeam: 'UTA Arad', league: 'Romanya 1. Lig', timeStr: '21:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Dinamo Bükreş Kazanır)', marketCode: 'MS1', odd: '1.30' },
-            { iddaaCode: '3254138', homeTeam: 'Lyon', awayTeam: 'Angers', league: 'Fransa Ligue 1', timeStr: '19:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Lyon Kazanır)', marketCode: 'MS1', odd: '1.24' },
-            { iddaaCode: '3253140', homeTeam: 'NK Celje', awayTeam: 'Nafta', league: 'Slovenya PrvaLiga', timeStr: '19:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Celje Kazanır)', marketCode: 'MS1', odd: '1.24' }
+            { iddaaCode: '3258867', homeTeam: 'Braga', awayTeam: 'Famalicao', league: 'Portekiz Premier Lig', timeStr: '23:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Braga Kazanır)', marketCode: 'MS1', odd: '1.46' },
+            { iddaaCode: '3258685', homeTeam: 'Mallorca', awayTeam: 'Cadiz', league: 'İspanya 2. Lig', timeStr: '23:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Mallorca Kazanır)', marketCode: 'MS1', odd: '1.34' },
+            { iddaaCode: '3354433', homeTeam: 'Reims', awayTeam: 'Sochaux', league: 'Fransa Ligue 2', timeStr: '22:45', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Reims Kaybetmez)', marketCode: 'CS1X', odd: '1.06' }
         ]
     },
     {
         couponNumber: 8,
-        title: "⚽ Öğlen Gol Düellosu (1.5 ÜST Kombini)",
-        subtitle: "Lecce 1.5 ÜST (1.28), Boca Juniors 1.5 ÜST (1.27) ve Maritimo 1.5 ÜST (1.30)",
+        title: "⚽ Öğlen Gol Düellosu (2.5 ÜST Kombini)",
+        subtitle: "Juventus vs Napoli 2.5 ÜST (1.74) ve Braga 2.5 ÜST (1.55) ve Newcastle 2.5 ÜST (1.51)",
         timeSlot: "noon",
         sessionName: "Öğlen Kuponu",
-        sessionTimeRange: "19:00 - 21:30",
-        badge: "⚽ 1.5 Gol Üstü",
+        sessionTimeRange: "14:00 - 17:30",
+        badge: "⚽ Gol Düellosu",
         picks: [
-            { iddaaCode: '3258777', homeTeam: 'Lecce', awayTeam: 'Genoa', league: 'İtalya Serie A', timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.28' },
-            { iddaaCode: '3259054', homeTeam: 'Boca Juniors', awayTeam: 'River Plate', league: 'Arjantin Primera', timeStr: '21:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.27' },
-            { iddaaCode: '3259460', homeTeam: 'Maritimo', awayTeam: 'Santa Clara', league: 'Portekiz Lig Kupası', timeStr: '21:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.30' }
+            { iddaaCode: '3259141', homeTeam: 'Juventus', awayTeam: 'Napoli', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.74' },
+            { iddaaCode: '3258867', homeTeam: 'Braga', awayTeam: 'Famalicao', league: 'Portekiz Premier Lig', timeStr: '23:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.55' },
+            { iddaaCode: '3262120', homeTeam: 'Newcastle Utd', awayTeam: 'Everton', league: 'İngiltere Premier Lig', timeStr: '23:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.51' }
         ]
     },
     {
         couponNumber: 9,
-        title: "🔥 Öğlen Karşılıklı Gol & Tempolu Maçlar (2.5 ÜST)",
-        subtitle: "Bohemians P. 2.5 ÜST (1.45), Austria Wien 2.5 ÜST (1.54) ve L. Zagreb 2.5 ÜST (1.55)",
+        title: "🔥 Öğlen Karşılıklı Gol & Derbi Ateşi",
+        subtitle: "Juventus vs Napoli KG VAR (1.88), Newcastle KG VAR (1.84) ve Lorient KG VAR (1.92)",
         timeSlot: "noon",
         sessionName: "Öğlen Kuponu",
-        sessionTimeRange: "19:00 - 21:30",
-        badge: "🔥 Tempolu Maçlar",
+        sessionTimeRange: "14:00 - 17:30",
+        badge: "🔥 Derbi Ateşi",
         picks: [
-            { iddaaCode: '3254645', homeTeam: 'Bohemians P.', awayTeam: 'Sparta Prag', league: 'Çekya 1. Lig', timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.45' },
-            { iddaaCode: '3258330', homeTeam: 'Austria Wien', awayTeam: 'Rapid Wien', league: 'Avusturya Bundesliga', timeStr: '19:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.54' },
-            { iddaaCode: '3252892', homeTeam: 'L. Zagreb', awayTeam: 'Osijek', league: 'Hırvatistan 1. HNL', timeStr: '20:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.55' }
+            { iddaaCode: '3259141', homeTeam: 'Juventus', awayTeam: 'Napoli', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR', marketCode: 'KG_YES', odd: '1.88' },
+            { iddaaCode: '3262120', homeTeam: 'Newcastle Utd', awayTeam: 'Everton', league: 'İngiltere Premier Lig', timeStr: '23:00', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR', marketCode: 'KG_YES', odd: '1.84' },
+            { iddaaCode: '3254536', homeTeam: 'Lorient', awayTeam: 'Brest', league: 'Fransa Ligue 1', timeStr: '22:45', marketTitle: 'Karşılıklı Gol', pickTitle: 'KG VAR', marketCode: 'KG_YES', odd: '1.92' }
         ]
     },
     {
         couponNumber: 10,
         title: "🎯 Öğlen Taraf Güvencesi & Editörün Yıldızı",
-        subtitle: "Zamora MS 1 (1.53), Cusco MS 1 (1.29) ve D. Bükreş MS 1 (1.30)",
+        subtitle: "Juventus MS 1 (1.94), Dep. La Coruna MS 1 (1.94) ve Reims MS 1 (1.52)",
         timeSlot: "noon",
         sessionName: "Öğlen Kuponu",
-        sessionTimeRange: "19:00 - 21:30",
+        sessionTimeRange: "14:00 - 17:30",
         badge: "🎯 Editörün Yıldızı",
         picks: [
-            { iddaaCode: '3258249', homeTeam: 'Zamora', awayTeam: 'RC Deportivo Fabril', league: 'İspanya Primera RFEF', timeStr: '20:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Zamora Kazanır)', marketCode: 'MS1', odd: '1.53' },
-            { iddaaCode: '3253460', homeTeam: 'Cusco', awayTeam: 'Sport Boys', league: 'Peru Prmr Ligi', timeStr: '21:15', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Cusco Kazanır)', marketCode: 'MS1', odd: '1.29' },
-            { iddaaCode: '3255592', homeTeam: 'D. Bükreş', awayTeam: 'UTA Arad', league: 'Romanya 1. Lig', timeStr: '21:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Dinamo Bükreş Kazanır)', marketCode: 'MS1', odd: '1.30' }
+            { iddaaCode: '3259141', homeTeam: 'Juventus', awayTeam: 'Napoli', league: 'İtalya Serie A', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Juventus Kazanır)', marketCode: 'MS1', odd: '1.94' },
+            { iddaaCode: '3258713', homeTeam: 'Dep. La Coruna', awayTeam: 'Osasuna', league: 'İspanya La Liga', timeStr: '23:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Dep. La Coruna Kazanır)', marketCode: 'MS1', odd: '1.94' },
+            { iddaaCode: '3354433', homeTeam: 'Reims', awayTeam: 'Sochaux', league: 'Fransa Ligue 2', timeStr: '22:45', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Reims Kazanır)', marketCode: 'MS1', odd: '1.52' }
         ]
     },
 
-    // --- 🌙 SEANS 3: AKŞAM / GECE KAPANIŞ SEANSI (5 KUPON) ---
+    // -------------------------------------------------------------
+    // SEANS 3: AKŞAM KUPONLARI (11 - 15) — GECE SAMBASI & GÜNEY AMERİKA
+    // -------------------------------------------------------------
     {
         couponNumber: 11,
-        title: "🌙 Akşam / Güney Amerika & Kasa Katlama",
-        subtitle: "Strongest MS 1 (1.08), Palmeiras 1.5 ÜST (1.22) ve Deportes MS 2 (1.21)",
+        title: "🌙 Akşam / Brezilya Serie A & Kasa Katlama",
+        subtitle: "Bragantino 1-X (1.18), Gremio 1-X (1.26) ve Belgrano 1-X (1.08)",
         timeSlot: "evening",
         sessionName: "Akşam Kuponu",
-        sessionTimeRange: "22:00 - 02:30",
-        badge: "🌙 Gece Katlama",
+        sessionTimeRange: "18:30 - 23:30",
+        badge: "🌙 Gece Sambası",
         picks: [
-            { iddaaCode: '3304791', homeTeam: 'Strongest', awayTeam: 'GV San Jose', league: 'Bolivya Profesyonel Ligi', timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Strongest Kazanır)', marketCode: 'MS1', odd: '1.08' },
-            { iddaaCode: '3259493', homeTeam: 'Palmeiras SP', awayTeam: 'Vasco Da G.', league: 'Brezilya Serie A', timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.22' },
-            { iddaaCode: '3252882', homeTeam: 'Atl Grau', awayTeam: 'U. Deportes', league: 'Peru Prmr Ligi', timeStr: '23:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Deportes Kazanır)', marketCode: 'MS2', odd: '1.21' },
-            { iddaaCode: '3253130', homeTeam: 'Deport Cali', awayTeam: 'Boyaca Chico', league: 'Kolombiya Liga Dimayor', timeStr: '00:05', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Deport Cali Kazanır)', marketCode: 'MS1', odd: '1.08' }
+            { iddaaCode: '3266672', homeTeam: 'Bragantino', awayTeam: 'Santos SP', league: 'Brezilya Serie A', timeStr: '02:00', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: '1.18' },
+            { iddaaCode: '3258620', homeTeam: 'Gremio P.', awayTeam: 'Atl Mineiro', league: 'Brezilya Kupası', timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: '1.26' },
+            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: '1.08' }
         ]
     },
     {
         couponNumber: 12,
         title: "🛡️ Akşam Sıfır Risk Sigortalı Kombin",
-        subtitle: "Belgrano 1-X (1.08), Strongest MS 1 (1.08) ve Walter Ferretti MS 1 (1.15)",
+        subtitle: "Belgrano MS 1 (1.68), Bragantino 2.5 ÜST (1.41) ve Gremio 1-X (1.26)",
         timeSlot: "evening",
         sessionName: "Akşam Kuponu",
-        sessionTimeRange: "22:00 - 02:30",
-        badge: "🛡️ Sigortalı Gece",
+        sessionTimeRange: "18:30 - 23:30",
+        badge: "🛡️ Sıfır Risk Gece",
         picks: [
-            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Belgrano Kaybetmez)', marketCode: 'CS1X', odd: '1.08' },
-            { iddaaCode: '3304791', homeTeam: 'Strongest', awayTeam: 'GV San Jose', league: 'Bolivya Profesyonel Ligi', timeStr: '22:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Strongest Kazanır)', marketCode: 'MS1', odd: '1.08' },
-            { iddaaCode: '3364331', homeTeam: 'Walter Ferretti', awayTeam: 'San Marcos', league: 'Nikaragua Prmr Ligi', timeStr: '01:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Walter Ferretti Kazanır)', marketCode: 'MS1', odd: '1.15' },
-            { iddaaCode: '3253309', homeTeam: 'I. Medellin', awayTeam: 'Alianza Valledupar', league: 'Kolombiya Liga Dimayor', timeStr: '02:10', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Medellin Kazanır)', marketCode: 'MS1', odd: '1.31' }
+            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Belgrano Kazanır)', marketCode: 'MS1', odd: '1.68' },
+            { iddaaCode: '3266672', homeTeam: 'Bragantino', awayTeam: 'Santos SP', league: 'Brezilya Serie A', timeStr: '02:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.41' },
+            { iddaaCode: '3258620', homeTeam: 'Gremio P.', awayTeam: 'Atl Mineiro', league: 'Brezilya Kupası', timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: '1.26' }
         ]
     },
     {
         couponNumber: 13,
-        title: "⚽ Akşam Gol Yağmuru (1.5 ÜST)",
-        subtitle: "Palmeiras 1.5 ÜST (1.22), Gremio Novo MS 1 (1.22) ve Medellin 1.5 ÜST (1.28)",
+        title: "⚽ Akşam Gol Yağmuru (2.5 ÜST Şöleni)",
+        subtitle: "Bragantino 2.5 ÜST (1.41), Gremio P. 2.5 ÜST (2.05) ve Belgrano 2.5 ÜST (1.79)",
         timeSlot: "evening",
         sessionName: "Akşam Kuponu",
-        sessionTimeRange: "22:00 - 02:30",
-        badge: "⚽ Gol Düellosu",
+        sessionTimeRange: "18:30 - 23:30",
+        badge: "⚽ Gol Şöleni",
         picks: [
-            { iddaaCode: '3259493', homeTeam: 'Palmeiras SP', awayTeam: 'Vasco Da G.', league: 'Brezilya Serie A', timeStr: '22:00', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.22' },
-            { iddaaCode: '3254563', homeTeam: 'Gremio Novo', awayTeam: 'Operario', league: 'Brezilya Serie B', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Gremio Kazanır)', marketCode: 'MS1', odd: '1.22' },
-            { iddaaCode: '3253309', homeTeam: 'I. Medellin', awayTeam: 'Alianza Valledupar', league: 'Kolombiya Liga Dimayor', timeStr: '02:10', marketTitle: 'Toplam Gol', pickTitle: '1.5 ÜST', marketCode: 'OVER15', odd: '1.28' }
+            { iddaaCode: '3266672', homeTeam: 'Bragantino', awayTeam: 'Santos SP', league: 'Brezilya Serie A', timeStr: '02:00', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.41' },
+            { iddaaCode: '3258620', homeTeam: 'Gremio P.', awayTeam: 'Atl Mineiro', league: 'Brezilya Kupası', timeStr: '00:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '2.05' },
+            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Toplam Gol', pickTitle: '2.5 ÜST', marketCode: 'OVER25', odd: '1.79' }
         ]
     },
     {
         couponNumber: 14,
-        title: "💎 Akşam Değer & Taraf Kuponu",
-        subtitle: "Cuiaba MS 1 (1.63), Deportes MS 2 (1.21) ve Walter Ferretti MS 1 (1.15)",
+        title: "💎 Akşam Değer & Taraf Kuponu (Güney Amerika)",
+        subtitle: "Bragantino MS 1 (1.84), Belgrano MS 1 (1.68) ve Gremio MS 1 (2.27)",
         timeSlot: "evening",
         sessionName: "Akşam Kuponu",
-        sessionTimeRange: "22:00 - 02:30",
-        badge: "💎 Değer Kombin",
+        sessionTimeRange: "18:30 - 23:30",
+        badge: "💎 Yüksek Oran",
         picks: [
-            { iddaaCode: '3253618', homeTeam: 'Cuiaba', awayTeam: 'Sao Bernardo FC', league: 'Brezilya Serie B', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Cuiaba Kazanır)', marketCode: 'MS1', odd: '1.63' },
-            { iddaaCode: '3252882', homeTeam: 'Atl Grau', awayTeam: 'U. Deportes', league: 'Peru Prmr Ligi', timeStr: '23:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 2 (Deportes Kazanır)', marketCode: 'MS2', odd: '1.21' },
-            { iddaaCode: '3364331', homeTeam: 'Walter Ferretti', awayTeam: 'San Marcos', league: 'Nikaragua Prmr Ligi', timeStr: '01:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Walter Ferretti Kazanır)', marketCode: 'MS1', odd: '1.15' }
+            { iddaaCode: '3266672', homeTeam: 'Bragantino', awayTeam: 'Santos SP', league: 'Brezilya Serie A', timeStr: '02:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Bragantino Kazanır)', marketCode: 'MS1', odd: '1.84' },
+            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Belgrano Kazanır)', marketCode: 'MS1', odd: '1.68' },
+            { iddaaCode: '3258620', homeTeam: 'Gremio P.', awayTeam: 'Atl Mineiro', league: 'Brezilya Kupası', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Gremio Kazanır)', marketCode: 'MS1', odd: '2.27' }
         ]
     },
     {
         couponNumber: 15,
         title: "🌟 Akşam Kapanış Süper Kombini",
-        subtitle: "I. Medellin MS 1 (1.31), Gremio Novo MS 1 (1.22) ve Belgrano 1-X (1.08)",
+        subtitle: "Gremio 1-X (1.26), Bragantino MS 1 (1.84) ve Belgrano MS 1 (1.68)",
         timeSlot: "evening",
         sessionName: "Akşam Kuponu",
-        sessionTimeRange: "22:00 - 02:30",
-        badge: "🌟 Kapanış Kombini",
+        sessionTimeRange: "18:30 - 23:30",
+        badge: "🌟 Gece Kapanış",
         picks: [
-            { iddaaCode: '3253309', homeTeam: 'I. Medellin', awayTeam: 'Alianza Valledupar', league: 'Kolombiya Liga Dimayor', timeStr: '02:10', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Medellin Kazanır)', marketCode: 'MS1', odd: '1.31' },
-            { iddaaCode: '3254563', homeTeam: 'Gremio Novo', awayTeam: 'Operario', league: 'Brezilya Serie B', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Gremio Kazanır)', marketCode: 'MS1', odd: '1.22' },
-            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans (Belgrano Kaybetmez)', marketCode: 'CS1X', odd: '1.08' }
+            { iddaaCode: '3258620', homeTeam: 'Gremio P.', awayTeam: 'Atl Mineiro', league: 'Brezilya Kupası', timeStr: '00:30', marketTitle: 'Çifte Şans', pickTitle: '1-X Çifte Şans', marketCode: 'CS1X', odd: '1.26' },
+            { iddaaCode: '3266672', homeTeam: 'Bragantino', awayTeam: 'Santos SP', league: 'Brezilya Serie A', timeStr: '02:00', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Bragantino Kazanır)', marketCode: 'MS1', odd: '1.84' },
+            { iddaaCode: '3258277', homeTeam: 'Belgrano', awayTeam: 'Barracas', league: 'Arjantin Primera LPF', timeStr: '00:30', marketTitle: 'Maç Sonucu', pickTitle: 'MS 1 (Belgrano Kazanır)', marketCode: 'MS1', odd: '1.68' }
         ]
     }
 ];
 
-// Toplam oranları ve formatlanmış picks'i hesapla
-const formattedCoupons = couponConfigs.map(c => {
-    let totOdd = 1.0;
-    c.picks.forEach(p => {
-        totOdd *= (parseFloat(p.odd) || 1.0);
-    });
-    const roundOdd = parseFloat(totOdd.toFixed(2));
-    const name = `${todayDot} - ${c.couponNumber}`;
-    return {
-        couponNumber: c.couponNumber,
-        name: name,
-        title: c.title,
-        subtitle: c.subtitle,
-        badge: c.badge,
-        totalOdd: roundOdd,
-        picks: c.picks.map(p => ({
+// Helper to compute total odd
+function calculateTotalOdd(picks) {
+    return picks.reduce((acc, p) => acc * parseFloat(p.odd || 1), 1);
+}
+
+function generateCoupons() {
+    const todayFormatted = '01.11.2026';
+    const screenshotsDir = path.join(__dirname, '..', 'data_cache', 'screenshots');
+    
+    const coupons = couponConfigs.map(c => {
+        const totalOdd = parseFloat(calculateTotalOdd(c.picks).toFixed(2));
+        const picksWithText = c.picks.map(p => ({
             ...p,
             matchText: `${p.timeStr} ${p.homeTeam} - ${p.awayTeam} ${p.pickTitle} ${p.odd}`
-        })),
-        savedInAccount: false,
-        screenshot: path.join(CACHE_DIR, 'screenshots', `nesine_kupon_${c.couponNumber}.png`),
-        timestamp: new Date().toISOString(),
-        timeSlot: c.timeSlot,
-        sessionName: c.sessionName,
-        sessionTimeRange: c.sessionTimeRange
+        }));
+
+        return {
+            couponNumber: c.couponNumber,
+            name: `${todayFormatted} - ${c.couponNumber}`,
+            title: c.title,
+            subtitle: c.subtitle,
+            badge: c.badge,
+            totalOdd,
+            picks: picksWithText,
+            savedInAccount: false,
+            screenshot: path.join(screenshotsDir, `nesine_kupon_${c.couponNumber}.png`),
+            timestamp: new Date().toISOString(),
+            timeSlot: c.timeSlot,
+            sessionName: c.sessionName,
+            sessionTimeRange: c.sessionTimeRange
+        };
+    });
+
+    const outputData = {
+        date: todayFormatted,
+        generatedAt: new Date().toISOString(),
+        totalCoupons: coupons.length,
+        description: "01.11.2026 - 02.11.2026 Seçkin ve Elit Liglerden 15 Kaliteli Kupon (5 Sabah, 5 Öğlen, 5 Akşam)",
+        coupons
     };
-});
 
-const fileData = {
-    date: todayDot,
-    userAccount: '14410079556',
-    totalCoupons: formattedCoupons.length,
-    sessions: {
-        morning: formattedCoupons.filter(c => c.timeSlot === 'morning').length,
-        noon: formattedCoupons.filter(c => c.timeSlot === 'noon').length,
-        evening: formattedCoupons.filter(c => c.timeSlot === 'evening').length
-    },
-    coupons: formattedCoupons
-};
+    const outPath = path.join(__dirname, '..', 'data_cache', 'nesine_coupons_today.json');
+    fs.writeFileSync(outPath, JSON.stringify(outputData, null, 2), 'utf8');
+    console.log(`✅ [BAŞARILI] 15 adet seçkin lig kuponu kaydedildi: ${outPath}`);
 
-const targetPath = path.join(CACHE_DIR, 'nesine_coupons_today.json');
-fs.writeFileSync(targetPath, JSON.stringify(fileData, null, 2), 'utf8');
-console.log(`✅ [BAŞARILI] 1 Kasım 2026 GÜNCEL KUPONLARI OLUŞTURULDU: ${targetPath}`);
-console.log(`📋 Kupon Sayısı: ${formattedCoupons.length}`);
-formattedCoupons.forEach(c => {
-    console.log(`  - [${c.name}] ${c.title} (Oran: ${c.totalOdd}) - ${c.picks.length} maç (${c.picks[0].timeStr})`);
-});
+    return outputData;
+}
 
+if (require.main === module) {
+    generateCoupons();
+}
+
+module.exports = { generateCoupons };
